@@ -20,6 +20,7 @@ const Program = sequelize.define('Program', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  tableName: 'programs',
   underscored: false
 });
 

@@ -33,7 +33,7 @@ const PloModel = sequelize.define('PLO', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'PLOs'
+  tableName: 'plos'
 });
 
 module.exports = PloModel;

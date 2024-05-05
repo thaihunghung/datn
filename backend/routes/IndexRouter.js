@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const programRoutes = require('./PRORoutes');
 const ploRoutes = require('./PLORouter');
+const cloRoutes = require('./CloRouter');
 const poRoutes = require('./PORouter');
 const poPloRoutes = require('./Po_PloRouter');
 const pdfRouters = require('./PdfRouter');
@@ -10,6 +11,7 @@ const csvSaveRouters = require('./SaveCSVRouter');
 
 router.use('/api/admin', programRoutes);
 router.use('/api/admin', ploRoutes);
+router.use('/api/admin', cloRoutes);
 router.use('/api/admin', poRoutes);
 router.use('/api/admin', poPloRoutes);
 router.use('/api/admin', pdfRouters);

@@ -33,7 +33,7 @@ const PoModel = sequelize.define('PO', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'POs'
+  tableName: 'pos'
 });
 
 module.exports = PoModel;

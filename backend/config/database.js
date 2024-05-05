@@ -7,11 +7,10 @@ const { Sequelize } = require('sequelize');
 // });
 
 // kết nối localhost
-const sequelize = new Sequelize('tvu', 'root', '', {
-  host: 'localhost',
+const sequelize = new Sequelize('TVU', 'AdminTVU', 'CongNgheThongTin-DA20TTB', {
+  host: '103.200.20.110',
   dialect: 'mysql',
 });
-
 
 // Hàm kiểm tra kết nối
 async function testConnection() {
