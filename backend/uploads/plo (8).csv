@@ -1,0 +1,12 @@
+"plo_id","description","ploName","program_id","isDelete"
+"INT(10) UNSIGNED","VARCHAR(255)","VARCHAR(255)","INT(10) UNSIGNED","TINYINT(1)"
+1,"Mã VB PLO 1","PLO 1",1,1
+2,"Mã VB PLO 2","PLO 2",1,1
+3,"Mã VB PLO 3","PLO 3",1,1
+4,"Mã VB PLO 4","PLO 4",1,1
+5,"Mã VB PLO 5","PLO 5",1,1
+6,"Mã VB PLO 6","PLO 6",1,1
+7,"Mã VB PLO 7","PLO 7",1,0
+8,"Mã VB PLO 8","PLO 8",1,0
+9,"Mã VB PLO 9","PLO 9",1,0
+10,"Mã VB PLO 10","PLO 10",1,0

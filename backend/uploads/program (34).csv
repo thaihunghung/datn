@@ -1,0 +1,3 @@
+"program_id","programName","isDelete"
+"INT(10) UNSIGNED","TEXT","TINYINT(1)"
+1,"Chương trình A",1

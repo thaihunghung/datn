@@ -1,0 +1,34 @@
+{
+  "name": "scr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon --inspect app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tran Thai Hung",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "csvtojson": "^2.0.10",
+    "dotenv": "^16.3.1",
+    "express": "^4.19.2",
+    "fs": "^0.0.1-security",
+    "json2csv": "^6.0.0-alpha.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.9.7",
+    "nodemon": "^3.0.1",
+    "puppeteer": "^21.7.0",
+    "sequelize": "^6.37.3"
+  },
+  "devDependencies": {
+    "express-handlebars": "^7.1.2",
+    "morgan": "^1.10.0"
+  }
+}

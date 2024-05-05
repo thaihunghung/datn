@@ -1,0 +1,38 @@
+.table-bordered {
+
+
+  }
+  
+  .table-bordered th,
+  .table-bordered td {
+
+    padding: 8px;
+  }
+  
+  .table-bordered th {
+    
+  }
+  tfoot {
+    border: none;
+
+  }
+
+  @media print {
+    table { page-break-inside:auto }
+    tr,td    { page-break-inside:avoid; page-break-after:auto }
+    thead { display:table-header-group }
+    tfoot { display:table-footer-group }
+
+    .hung {
+      background-color: black !important;
+      page-break-inside:avoid !important; page-break-after:auto 
+    }
+
+    thead {
+        display: table-header-group; 
+    }
+    tfoot {
+        display: table-footer-group; 
+    }
+}
+
