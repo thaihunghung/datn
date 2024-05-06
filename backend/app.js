@@ -16,39 +16,17 @@ const morgan = require('morgan');
 const cors = require('cors');
 app.use(express.static("public"))
 const swaggerUi = require('swagger-ui-express');
-const swaggerJsdoc = require('swagger-jsdoc');
 
 const indexRouter = require('./routes/IndexRouter');
+const swaggerSpec = require('./utils/swagger');
 
 app.use(cors({
   origin: 'http://localhost:3000',
   credentials: true,
 }));
 
-// Swagger definition
-const swaggerOptions = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'API',
-      version: '1.0.0',
-      description: 'API for project',
-    },
-    servers: [
-      {
-        url: 'http://localhost:1509',
-      },
-    ],
-  },
-  apis: ['./routes/*.js'], // Path to the API docs
-};
-
-// Initialize swagger-jsdoc
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
-
 // Use swagger-ui-express for your app documentation endpoint
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/', indexRouter);
 
