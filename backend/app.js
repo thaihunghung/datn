@@ -16,14 +16,17 @@ const morgan = require('morgan');
 const cors = require('cors');
 app.use(express.static("public");
 const swaggerUi = require('swagger-ui-express');
-const swaggerJsdoc = require('swagger-jsdoc');
 
 const indexRouter = require('./routes/IndexRouter');
+const swaggerSpec = require('./utils/swagger');
 
 app.use(cors({
   origin: 'http://localhost:3000',
   credentials: true,
 }));
+
+// Use swagger-ui-express for your app documentation endpoint
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/', indexRouter);
 morgan('combined')
