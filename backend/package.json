@@ -25,7 +25,9 @@
     "mysql2": "^3.9.7",
     "nodemon": "^3.0.1",
     "puppeteer": "^21.7.0",
-    "sequelize": "^6.37.3"
+    "sequelize": "^6.37.3",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0"
   },
   "devDependencies": {
     "express-handlebars": "^7.1.2",
