@@ -38,7 +38,6 @@ const CourseModel = sequelize.define('Course', {
   tableName: 'courses',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'courses',
 });
 
 module.exports = CourseModel;

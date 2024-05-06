@@ -10,122 +10,33 @@ const CDR = [
 ];
 var demoTong = 1;
 
-const Tieuchuan = [
-  { MaTieuChuan: 'MTC0', TenTieuChuan: '' },
-  { MaTieuChuan: 'MTC1', TenTieuChuan: '' },
-  { MaTieuChuan: 'MTC2', TenTieuChuan: '' },
-  { MaTieuChuan: 'MTC3', TenTieuChuan: '' },
-  { MaTieuChuan: 'MTC4', TenTieuChuan: '' }
-];
-
-const MucDo_CL = [
-  { MaMD_CL: 'MucDo_CL_0', TenMucDo_CL: 'Yếu' },
-  { MaMD_CL: 'MucDo_CL_1', TenMucDo_CL: 'Kém' },
-  { MaMD_CL: 'MucDo_CL_2', TenMucDo_CL: 'TB' },
-  { MaMD_CL: 'MucDo_CL_3', TenMucDo_CL: 'Khá' },
-  { MaMD_CL: 'MucDo_CL_4', TenMucDo_CL: 'Giỏi' }
-];
-
-
-const Tieuchuan1 = [
-  { MaTieuChuan: 'MTC0', TenTieuChuan: 'Tieu chuan 0' },
-  { MaTieuChuan: 'MTC1', TenTieuChuan: 'Tieu chuan 1' },
-  { MaTieuChuan: 'MTC2', TenTieuChuan: 'Tieu chuan 2' },
-];
-
-const MucDo_CL1 = [
-  { MaMD_CL: 'MucDo_CL_0', TenMucDo_CL: 'Yếu' },
-  { MaMD_CL: 'MucDo_CL_2', TenMucDo_CL: 'TB' },
-  { MaMD_CL: 'MucDo_CL_4', TenMucDo_CL: 'Giỏi' }
-];
-
-
-
-
-
-
-const items = [
-  {
-    key: '1',
-    label: <p className="text-justify text-lg">Tiêu chí 1</p>,
-    children: (
-      <div className="text-justify p-2 px-5 sm:p-2 sm:px-5 lg:p-5 xl:p-5">
-        {Tieuchuan.map((tc, index) => (
-          <div key={index} className="text-lg">{tc.TenTieuChuan}</div>
-        ))}
-      </div>
-    )
-  }
-];
-
-const items1 = [
-  {
-    key: '1',
-    label: <p className="text-justify text-lg">Tiêu chí 2</p>,
-    children: (
-      <div className="text-justify p-2 px-5 sm:p-2 sm:px-5 lg:p-5 xl:p-5">
-        {Tieuchuan1.map((tc, index) => (
-          <div key={index} className="text-lg">{tc.TenTieuChuan}</div>
-        ))}
-      </div>
-    )
-  }
-];
 const rubics = [
-  {
+{
     CLO: { id_clos: 1, CLO: 'CLO1', CONTENT: 'chuẩn đầu ra 1' },
     TieuChi: {
       id_Tieu_Chi: 1,
+      Noidung: <div><div>"Tiêu chi 1"</div><div>"Tiêu chi 2"</div><div>"Tiêu chi 3"</div></div>,
       ten_Tieu_Chi: "Tiêu chí 1",
       DiemSo: 1,
-      Tieuchuan: [
-        { MaTieuChuan: 'MTC0', TenTieuChuan: '' },
-        { MaTieuChuan: 'MTC1', TenTieuChuan: '' },
-        { MaTieuChuan: 'MTC2', TenTieuChuan: '' },
-        { MaTieuChuan: 'MTC3', TenTieuChuan: '' },
-        { MaTieuChuan: 'MTC4', TenTieuChuan: '' }
-      ],
-      MucDo_CL: [
-        { MaMD_CL: 'MucDo_CL_0', TenMucDo_CL: 'Yếu' },
-        { MaMD_CL: 'MucDo_CL_1', TenMucDo_CL: 'Kém' },
-        { MaMD_CL: 'MucDo_CL_2', TenMucDo_CL: 'TB' },
-        { MaMD_CL: 'MucDo_CL_3', TenMucDo_CL: 'Khá' },
-        { MaMD_CL: 'MucDo_CL_4', TenMucDo_CL: 'Giỏi' }
-      ]
     }
   },
   {
     CLO: { id_clos: 2, CLO: 'CLO2', CONTENT: 'chuẩn đầu ra 2' },
     TieuChi: {
       id_Tieu_Chi: 2,
+      Noidung: <div><div>"Tiêu chi 1"</div><div>"Tiêu chi 2"</div><div>"Tiêu chi 3"</div></div>,
       ten_Tieu_Chi: "Tiêu chí 2",
       DiemSo: 1,
-      Tieuchuan: [
-        
-      ],
-      MucDo_CL: [
-        { MaMD_CL: 'MucDo_CL_0', TenMucDo_CL: 'Yếu' },
-        { MaMD_CL: 'MucDo_CL_2', TenMucDo_CL: 'TB' },
-        { MaMD_CL: 'MucDo_CL_4', TenMucDo_CL: 'Giỏi' }
-      ]
     }
   },
   {
     CLO: { id_clos: 3, CLO: 'CLO3', CONTENT: 'chuẩn đầu ra 3' },
     TieuChi: {
       id_Tieu_Chi: 3,
+      Noidung: <div><div>"Tiêu chi 1"</div><div>"Tiêu chi 2"</div><div>"Tiêu chi 3"</div></div>,
       ten_Tieu_Chi: "Tiêu chí 3",
       DiemSo: 5,
-      Tieuchuan: [
-        { MaTieuChuan: 'MTC0', TenTieuChuan: '' },
-        { MaTieuChuan: 'MTC1', TenTieuChuan: '' },
-        { MaTieuChuan: 'MTC2', TenTieuChuan: '' },
-      ],
-      MucDo_CL: [
-        { MaMD_CL: 'MucDo_CL_0', TenMucDo_CL: 'Yếu' },
-        { MaMD_CL: 'MucDo_CL_2', TenMucDo_CL: 'TB' },
-        { MaMD_CL: 'MucDo_CL_4', TenMucDo_CL: 'Giỏi' }
-      ]
+
     }
   }
 ]
@@ -222,13 +133,13 @@ const FormPoint = (nav) => {
               <div className="w-full">
                 <div className="hidden sm:hidden lg:block xl:block text-justify leading-8 p-4">
                   <p>{item.TieuChi.ten_Tieu_Chi}</p>
-                  {item.TieuChi.Tieuchuan.map((tieuchuan, index) => (
+                  {/* {item.TieuChi.map((tieuchuan, index) => (
                     <div key={index} className="text-justify leading-8">
 
-                      <p>{tieuchuan.TenTieuChuan}</p>
+                      <p>{tieuchuan.Noidung}</p>
 
                     </div>
-                  ))}
+                  ))} */}
                 </div>
 
                 <div className="block sm:block lg:hidden xl:hidden">
@@ -240,9 +151,9 @@ const FormPoint = (nav) => {
                           label: <p className="text-justify text-lg">{item.TieuChi.ten_Tieu_Chi}</p>,
                           children: (
                             <div className="text-justify p-2 px-5 sm:p-2 sm:px-5 lg:p-5 xl:p-5">
-                              {item.TieuChi.Tieuchuan.map((tc, index) => (
-                                <div key={index} className="text-lg">{tc.TenTieuChuan}</div>
-                              ))}
+                              {/* {item.TieuChi.map((tc, index) => (
+                                <div key={index} className="text-lg">{tc.Noidung}</div>
+                              ))} */}
                             </div>
                           )
                         }
@@ -262,7 +173,7 @@ const FormPoint = (nav) => {
                   <table className="w-full border-collapse border border-black">
                     <tbody>
                       <tr>
-                        {item.TieuChi.Tieuchuan.map((tc, index) => (
+                        {/* {item.TieuChi.map((tc, index) => (
                           <td key={index} className="p-2 text-center border border-black">
                             <div className="flex flex-col items-center gap-2">
                               <span>{`Đạt ${index}`}</span>
@@ -275,29 +186,20 @@ const FormPoint = (nav) => {
                               </Radio>
                             </div>
                           </td>
-                        ))}
+                        ))} */}
                       </tr>
                       <tr>
-                        {item.TieuChi.MucDo_CL.map((MDCL, index) => (
+                        {/* {item.TieuChi.map((tc, index) => (
                           <td key={index} className="p-2 text-center border border-black">
                             <div className="flex flex-col items-center gap-2">
-                              {MDCL.TenMucDo_CL}
+                              <span>{demoTong * 0}</span>
+                              <span>{demoTong * 0.25}</span>
+                              <span>{demoTong * 0.5}</span>
+                              <span>{demoTong * 0.75}</span>
+                              <span>{demoTong}</span>
                             </div>
                           </td>
-                        ))}
-                      </tr>
-                      <tr>
-                        {item.TieuChi.Tieuchuan.map((tc, index) => (
-                          <td key={index} className="p-2 text-center border border-black">
-                            <div className="flex flex-col items-center gap-2">
-                              {index === 0 && <span>{demoTong * 0}</span>}
-                              {index === 1 && <span>{demoTong * 0.25}</span>}
-                              {index === 2 && <span>{demoTong * 0.5}</span>}
-                              {index === 3 && <span>{demoTong * 0.75}</span>}
-                              {index === 4 && <span>{demoTong}</span>}
-                            </div>
-                          </td>
-                        ))}
+                        ))} */}
                       </tr>
                     </tbody>
                   </table>
