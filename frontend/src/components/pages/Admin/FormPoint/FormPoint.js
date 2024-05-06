@@ -1,382 +1,499 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { RadioGroup, Radio } from "@nextui-org/react";
-import { Tooltip } from "@nextui-org/react";
+import { Tooltip, Button } from "@nextui-org/react";
 import { Collapse } from 'antd';
+
 import "./FormPoint.css"
 
-import { message } from 'antd';
-import CustomUpload from "../Utils/CustomUpload/CustomUpload";
-
-const props = {
-  name: 'file',
-  action: 'http://localhost:1509/api/upload',
-  headers: {
-    authorization: 'authorization-text',
-  },
-  onChange(info) {
-    if (info.file.status !== 'uploading') {
-      console.log(info.file, info.fileList);
-    }
-    if (info.file.status === 'done') {
-      message.success(`${info.file.name} file uploaded successfully`);
-    } else if (info.file.status === 'error') {
-      message.error(`${info.file.name} file upload failed.`);
-    }
-  },
-};
 const CDR = [
-  { CDR: 'CDR1', CONTENT: 'chuẩn đầu ra 1' }
+  { CDR: 'CLO1', CONTENT: 'chuẩn đầu ra 1' }
 ];
 var demoTong = 1;
+
+const Tieuchuan = [
+  { MaTieuChuan: 'MTC0', TenTieuChuan: 'Tieu chuan 0' },
+  { MaTieuChuan: 'MTC1', TenTieuChuan: 'Tieu chuan 1' },
+  { MaTieuChuan: 'MTC2', TenTieuChuan: 'Tieu chuan 2' },
+  { MaTieuChuan: 'MTC3', TenTieuChuan: 'Tieu chuan 3' },
+  { MaTieuChuan: 'MTC4', TenTieuChuan: 'Tieu chuan 4' }
+];
+
+const MucDo_CL = [
+  { MaMD_CL: 'MucDo_CL_0', TenMucDo_CL: 'Yếu' },
+  { MaMD_CL: 'MucDo_CL_1', TenMucDo_CL: 'Kém' },
+  { MaMD_CL: 'MucDo_CL_2', TenMucDo_CL: 'TB' },
+  { MaMD_CL: 'MucDo_CL_3', TenMucDo_CL: 'Khá' },
+  { MaMD_CL: 'MucDo_CL_4', TenMucDo_CL: 'Giỏi' }
+];
+
+
+const Tieuchuan1 = [
+  { MaTieuChuan: 'MTC0', TenTieuChuan: 'Tieu chuan 0' },
+  { MaTieuChuan: 'MTC1', TenTieuChuan: 'Tieu chuan 1' },
+  { MaTieuChuan: 'MTC2', TenTieuChuan: 'Tieu chuan 2' },
+];
+
+const MucDo_CL1 = [
+  { MaMD_CL: 'MucDo_CL_0', TenMucDo_CL: 'Yếu' },
+  { MaMD_CL: 'MucDo_CL_2', TenMucDo_CL: 'TB' },
+  { MaMD_CL: 'MucDo_CL_4', TenMucDo_CL: 'Giỏi' }
+];
+
+
+
+
+
+
 const items = [
   {
     key: '1',
-    label: <p className="font-bold text-justify leading-8">Tiêu chí</p>,
-    children: <p className="text-justify leading-8">
-      1.1. Hình thức
-      <br />
-      1. Định dạng văn bản đúng quy định (font, size, khổ giấy, canh lề, văn bản, định dạng đoạn…)
-      <br />
-      2. Có danh mục hình, bảng (nếu có), mục lục, tài liệu tham khảo, danh mục từ viết tắt (nếu có)
-      <br />
-      3. Văn phong rõ ràng, mạch lạc, không lỗi chính tả
-      <br />
-      4. Mục lục, tài liệu tham khảo đúng quy định, kết luận
-    </p>,
+    label: <p className="text-justify text-lg">Tiêu chí 1</p>,
+    children: (
+      <div className="text-justify p-2 px-5 sm:p-2 sm:px-5 lg:p-5 xl:p-5">
+        {Tieuchuan.map((tc, index) => (
+          <div key={index} className="text-lg">{tc.TenTieuChuan}</div>
+        ))}
+      </div>
+    )
   }
 ];
-const FormPoint = () => {
-  return ( 
-    <div className="w-full p-2 py-0 flex flex-col lg:p-6 lg:py-0 xl:p-10 xl:py-0 leading-6 mt-10">
-      <CustomUpload props={props}/>
-      <div className="w-full flex flex-col p-2 py-0 mb-5  sm:p-5 sm:mb-5 sm:py-0 sm:flex-col lg:flex-row lg:mb-0 xl:flex-row xl:mb-0">
-        <div className="w-full rounded-lg sm:rounded-lg lg:rounded-none xl:rounded-none text-justify lg:w-[48%] xl:w-[60%] border-[1px] border-black flex flex-col sm:flex-col lg:flex-row xl:flex-row">
+
+const items1 = [
+  {
+    key: '1',
+    label: <p className="text-justify text-lg">Tiêu chí 2</p>,
+    children: (
+      <div className="text-justify p-2 px-5 sm:p-2 sm:px-5 lg:p-5 xl:p-5">
+        {Tieuchuan1.map((tc, index) => (
+          <div key={index} className="text-lg">{tc.TenTieuChuan}</div>
+        ))}
+      </div>
+    )
+  }
+];
+const rubics = [
+  {
+    CLO: { id_clos: 1, CLO: 'CLO1', CONTENT: 'chuẩn đầu ra 1' },
+    TieuChi: {
+      id_Tieu_Chi: 1,
+      ten_Tieu_Chi: "Tiêu chí 1",
+      DiemSo: 1,
+      Tieuchuan: [
+        { MaTieuChuan: 'MTC0', TenTieuChuan: 'Tieu chuan 0' },
+        { MaTieuChuan: 'MTC1', TenTieuChuan: 'Tieu chuan 1' },
+        { MaTieuChuan: 'MTC2', TenTieuChuan: 'Tieu chuan 2' },
+        { MaTieuChuan: 'MTC3', TenTieuChuan: 'Tieu chuan 3' },
+        { MaTieuChuan: 'MTC4', TenTieuChuan: 'Tieu chuan 4' }
+      ],
+      MucDo_CL: [
+        { MaMD_CL: 'MucDo_CL_0', TenMucDo_CL: 'Yếu' },
+        { MaMD_CL: 'MucDo_CL_1', TenMucDo_CL: 'Kém' },
+        { MaMD_CL: 'MucDo_CL_2', TenMucDo_CL: 'TB' },
+        { MaMD_CL: 'MucDo_CL_3', TenMucDo_CL: 'Khá' },
+        { MaMD_CL: 'MucDo_CL_4', TenMucDo_CL: 'Giỏi' }
+      ]
+    }
+  },
+  {
+    CLO: { id_clos: 2, CLO: 'CLO2', CONTENT: 'chuẩn đầu ra 2' },
+    TieuChi: {
+      id_Tieu_Chi: 2,
+      ten_Tieu_Chi: "Tiêu chí 2",
+      DiemSo: 1,
+      Tieuchuan: [
+        { MaTieuChuan: 'MTC0', TenTieuChuan: 'Tieu chuan 0' },
+        { MaTieuChuan: 'MTC1', TenTieuChuan: 'Tieu chuan 1' },
+        { MaTieuChuan: 'MTC2', TenTieuChuan: 'Tieu chuan 2' },
+      ],
+      MucDo_CL: [
+        { MaMD_CL: 'MucDo_CL_0', TenMucDo_CL: 'Yếu' },
+        { MaMD_CL: 'MucDo_CL_2', TenMucDo_CL: 'TB' },
+        { MaMD_CL: 'MucDo_CL_4', TenMucDo_CL: 'Giỏi' }
+      ]
+    }
+  },
+  {
+    CLO: { id_clos: 3, CLO: 'CLO3', CONTENT: 'chuẩn đầu ra 3' },
+    TieuChi: {
+      id_Tieu_Chi: 3,
+      ten_Tieu_Chi: "Tiêu chí 3",
+      DiemSo: 5,
+      Tieuchuan: [
+        { MaTieuChuan: 'MTC0', TenTieuChuan: 'Tieu chuan 0' },
+        { MaTieuChuan: 'MTC1', TenTieuChuan: 'Tieu chuan 1' },
+        { MaTieuChuan: 'MTC2', TenTieuChuan: 'Tieu chuan 2' },
+      ],
+      MucDo_CL: [
+        { MaMD_CL: 'MucDo_CL_0', TenMucDo_CL: 'Yếu' },
+        { MaMD_CL: 'MucDo_CL_2', TenMucDo_CL: 'TB' },
+        { MaMD_CL: 'MucDo_CL_4', TenMucDo_CL: 'Giỏi' }
+      ]
+    }
+  }
+]
+
+
+
+
+
+const FormPoint = (nav) => {
+  const { setCollapsedNav } = nav;
+  const [selectedValues, setSelectedValues] = useState([]);
+  const handleRadioChange = (index, cloId, tieuChiId, maTieuChuan) => {
+    setSelectedValues(prevValues => {
+      // Create a copy of the previous values
+      const updatedValues = [...prevValues];
+      
+      // Update the value at the specified index
+      updatedValues[index] = {
+        cloId: cloId,
+        tieuChiId: tieuChiId,
+        maTieuChuan: maTieuChuan
+      };
+  
+      // Return the updated values
+      return updatedValues;
+    });
+  };
+  const handleSubmit = () => {
+    console.log('Submit button clicked');
+    console.log('Selected values:', selectedValues);
+  };
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1200) {
+        setCollapsedNav(true);
+      } else {
+        setCollapsedNav(false);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+  return (
+    <div className="w-full p-2 py-0 flex flex-col leading-6 mt-10">
+      <button 
+        onClick={handleSubmit} 
+        className="px-4 py-2 mt-4 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+      >
+        Submit
+      </button>
+      <div className="w-full flex flex-col p-2 py-0 mb-2  sm:p-5 sm:mb-2 sm:py-0 sm:flex-col lg:flex-row lg:mb-0 xl:flex-row xl:mb-0">
+        <div className="w-full text-justify lg:w-[55%] xl:w-[60%] border-[1px] border-black flex flex-col sm:flex-col lg:flex-row xl:flex-row">
           <div className="w-full hidden p-2 bg-[#008000] sm:hidden lg:w-[20%] lg:block xl:w-[20%] xl:block border-r-0 sm:border-r-0 sm:px-0 lg:border-r-[1px] xl:border-r-[1px]  border-black">
-            <p className="text-center font-bold  text-white">CĐR</p>
+            <p className="text-center font-bold px-5 lg:w-[100px] xl:w-[100px] text-white">CĐR</p>
           </div>
-          <div className="w-full p-0 sm:p-0 lg:p-2 xl:p-2 bg-white sm:bg-white lg:bg-[#008000] xl:bg-[#008000] border-black rounded-lg sm:rounded-lg lg:rounded-none xl:rounded-none">
-            <p className="text-center font-bold  text-[#008000] sm:text-[#008000] lg:text-white xl:text-white">Tiêu chí</p>
+
+
+          <div className="w-full p-0 sm:p-0 lg:p-2 xl:p-2 bg-[#008000]  border-black">
+            <p className="text-center font-bold hidden sm:hidden lg:block xl:block text-white p-5 sm:p-5 lg:p-0 xl:p-0">Tiêu chí</p>
+            <p className="text-center font-bold block sm:block lg:hidden xl:hidden text-white p-5 sm:p-5 lg:p-0 xl:p-0">Chấm điểm</p>
           </div>
         </div>
-        <div className="hidden w-full bg-[#008000] sm:hidden lg:w-[52%] border-[1px] border-l-0  border-black lg:block xl:block xl:w-[40%] text-justify p-5 pb-0 pt-2">
-          <p className="text-center font-bold  text-white">Điểm</p>
+        <div className="hidden w-full bg-[#008000] sm:hidden lg:w-[45%] border-[1px] border-l-0  border-black lg:block xl:block xl:w-[40%] text-justify p-5 pb-0 pt-2">
+          <p className="text-center font-bold  text-white">Mức độ chất lượng</p>
         </div>
       </div>
-      <div className="w-full flex flex-col p-2 py-0 sm:p-5 sm:py-0 sm:flex-col lg:flex-row xl:flex-row">
-        <div className="w-full rounded-lg sm:rounded-lg lg:rounded-none xl:rounded-none text-justify lg:w-[48%] xl:w-[60%] border-[1px] sm:border-t-[1px] lg:border-t-0 xl:border-t-0 border-black flex flex-col sm:flex-col lg:flex-row xl:flex-row">
-          <div className="w-full p-2 lg:w-[20%] xl:w-[20%] border-b-1 sm:border-b-1 border-r-0 sm:border-r-0 sm:px-0 lg:border-r-[1px] lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-black">
-            <div className="hidden sm:block lg:block xl:block">
-              <div className="px-2 font-bold sm:font-bold lg:font-normal xl:font-normal text-[#008000] sm:text-[#008000] lg:text-black xl:text-black">{CDR[0].CDR + '. ' + CDR[0].CONTENT}</div>
+
+      {
+        rubics.map((item, i) => (
+          <div className="w-full flex flex-col p-2 py-0 sm:p-5 sm:py-0 sm:flex-col lg:flex-row xl:flex-row">
+            <div className="w-full rounded-b-lg sm:rounded-b-lg lg:rounded-none xl:rounded-none text-justify lg:w-[55%] xl:w-[60%] border-[1px] sm:border-t-[1px] lg:border-t-0 xl:border-t-0 border-black flex flex-col sm:flex-col lg:flex-row xl:flex-row">
+              <div className="w-full p-2 lg:w-[20%] xl:w-[20%] border-b-1 sm:border-b-1 border-r-0 sm:border-r-0 sm:px-0 lg:border-r-[1px] lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-black">
+                <div className="hidden sm:block lg:block xl:block ">
+                  <div className="px-5 py-3 lg:w-[100px] xl:w-[100px] font-bold sm:font-bold lg:font-normal xl:font-normal text-[#008000] sm:text-[#008000] lg:text-black xl:text-black">
+                    {item.CLO.CLO + '. ' + item.CLO.CONTENT}
+                  </div>
+                </div>
+
+                <div className="block w-full h-fit sm:hidden sm:border-b-[1px] lg:hidden xl:hidden text-[#008000]">
+                  <div className="w-fit ">
+                    <Tooltip content={item.CLO.CONTENT}>
+                      <div className="flex items-center justify-center gap-2 font-bold sm:font-bold lg:font-normal xl:font-normal ">
+                        <span className="border-[1px] rounded px-2 border-black">
+                          + </span>{item.CLO.CLO}
+                      </div>
+                    </Tooltip>
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-full">
+                <div className="hidden sm:hidden lg:block xl:block text-justify leading-8 p-4">
+                  <p>{item.TieuChi.ten_Tieu_Chi}</p>
+                  {item.TieuChi.Tieuchuan.map((tieuchuan, index) => (
+                    <div key={index} className="text-justify leading-8">
+
+                      <p>{tieuchuan.TenTieuChuan}</p>
+
+                    </div>
+                  ))}
+                </div>
+
+                <div className="block sm:block lg:hidden xl:hidden">
+                  <Collapse items=
+                    {
+                      [
+                        {
+                          key: '1',
+                          label: <p className="text-justify text-lg">{item.TieuChi.ten_Tieu_Chi}</p>,
+                          children: (
+                            <div className="text-justify p-2 px-5 sm:p-2 sm:px-5 lg:p-5 xl:p-5">
+                              {item.TieuChi.Tieuchuan.map((tc, index) => (
+                                <div key={index} className="text-lg">{tc.TenTieuChuan}</div>
+                              ))}
+                            </div>
+                          )
+                        }
+                      ]
+                    } 
+                    colorBorder="#FFD700" 
+                    className="Collapse"
+                    defaultActiveKey={['1']} 
+                   />
+                </div>
+              </div>
             </div>
+            <div className="w-full sm:w-full lg:w-[45%] xl:w-[40%] text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-black">
+
+              <div className="pb-10 sm:pb-10 lg:pb-0 xl:pb-0">
+                <RadioGroup label={`Tổng điểm là: ${item.TieuChi.DiemSo}`} orientation="horizontal">
+                  <table className="w-full border-collapse border border-black">
+                    <tbody>
+                      <tr>
+                        {item.TieuChi.Tieuchuan.map((tc, index) => (
+                          <td key={index} className="p-2 text-center border border-black">
+                            <div className="flex flex-col items-center gap-2">
+                              <span>{`Đạt ${index}`}</span>
+                              <Radio 
+                                size="lg"
+                                value={index}
+                                onChange={() => handleRadioChange(i, item.CLO.id_clos, index, item.TieuChi.id_Tieu_Chi)}
+                              >
+
+                              </Radio>
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                      <tr>
+                        {item.TieuChi.MucDo_CL.map((MDCL, index) => (
+                          <td key={index} className="p-2 text-center border border-black">
+                            <div className="flex flex-col items-center gap-2">
+                              {MDCL.TenMucDo_CL}
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                      <tr>
+                        {item.TieuChi.Tieuchuan.map((tc, index) => (
+                          <td key={index} className="p-2 text-center border border-black">
+                            <div className="flex flex-col items-center gap-2">
+                              {index === 0 && <span>{demoTong * 0}</span>}
+                              {index === 1 && <span>{demoTong * 0.25}</span>}
+                              {index === 2 && <span>{demoTong * 0.5}</span>}
+                              {index === 3 && <span>{demoTong * 0.75}</span>}
+                              {index === 4 && <span>{demoTong}</span>}
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                    </tbody>
+                  </table>
+                </RadioGroup>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {/* <div className="w-full flex flex-col p-2 py-0 sm:p-5 sm:py-0 sm:flex-col lg:flex-row xl:flex-row">
+        <div className="w-full rounded-b-lg sm:rounded-b-lg lg:rounded-none xl:rounded-none text-justify lg:w-[55%] xl:w-[60%] border-[1px] sm:border-t-[1px] lg:border-t-0 xl:border-t-0 border-black flex flex-col sm:flex-col lg:flex-row xl:flex-row">
+          <div className="w-full p-2 lg:w-[20%] xl:w-[20%] border-b-1 sm:border-b-1 border-r-0 sm:border-r-0 sm:px-0 lg:border-r-[1px] lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-black">
+            <div className="hidden sm:block lg:block xl:block ">
+              <div className="px-5 py-3 lg:w-[100px] xl:w-[100px] font-bold sm:font-bold lg:font-normal xl:font-normal text-[#008000] sm:text-[#008000] lg:text-black xl:text-black">
+                {CDR[0].CDR + '. ' + CDR[0].CONTENT}
+              </div>
+            </div>
+
             <div className="block w-full h-fit sm:hidden sm:border-b-[1px] lg:hidden xl:hidden text-[#008000]">
               <div className="w-fit ">
                 <Tooltip content={CDR[0].CONTENT}>
-                  <div className="flex items-center justify-center gap-2 font-bold sm:font-bold lg:font-normal xl:font-normal "><span className="border-[1px] rounded px-2 border-black">+</span>{CDR[0].CDR}</div>
+                  <div className="flex items-center justify-center gap-2 font-bold sm:font-bold lg:font-normal xl:font-normal ">
+                    <span className="border-[1px] rounded px-2 border-black">
+                      + </span>{CDR[0].CDR}
+                  </div>
                 </Tooltip>
               </div>
             </div>
           </div>
-          <div className="w-full p-0 sm:p-0 lg:p-2 xl:p-2">
-            <div className="hidden sm:hidden lg:block xl:block text-justify leading-8">
-              <p>
-                1.1. Hình thức
-                <br />
-                1.Định dạng văn bản đúng quy định (font, size, khổ giấy, canh lề, văn bản, định dạng đoạn…)
-                <br />
-                2. Có danh mục hình, bảng (nếu có), mục lục, tài liệu tham khảo, danh mục từ viết tắt (nếu có)
-                <br />
-                3. Văn phong rõ ràng, mạch lạc, không lỗi chính tả
-                <br />
-                4. Mục lục, tài liệu tham khảo đúng quy định, kết luận
-              </p>
+
+          <div className="w-full">
+            <div className="hidden sm:hidden lg:block xl:block text-justify leading-8 p-4">
+              <p>tieu chi 1</p>
+              {Tieuchuan.map((tieuchuan, index) => (
+                <div key={index} className="text-justify leading-8">
+
+                  <p>{tieuchuan.TenTieuChuan}</p>
+
+                </div>
+              ))}
             </div>
+
             <div className="block sm:block lg:hidden xl:hidden">
               <Collapse items={items} colorBorder="#FFD700" className="Collapse" defaultActiveKey={['1']} />
             </div>
           </div>
         </div>
-        <div className="w-full sm:w-full lg:w-[52%] xl:w-[40%] text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-black">
-          <div className="hidden pb-10  sm:pb-10 sm:block lg:pb-0 lg:block xl:block xl:pb-0">
-            <RadioGroup
-              label={`Tổng điểm là: ${demoTong}`}
-              orientation="horizontal"
-            >
-              <div className="border-black border-1 rounded-lg w-full">
-                <table className="w-full">
-                  <tr>
-                    <td className="w-[100px] align-middle text-left items-center p-2 border-black border-1 border-l-0 border-t-0"><Radio value="1">Đạt 0</Radio></td>
-                    <td className="w-[100px] align-middle text-left items-center p-2 border-black border-1 border-t-0"><Radio value="2">Đạt 1</Radio></td>
-                    <td className="w-[100px] align-middle text-left items-center p-2 border-black border-1 border-t-0"><Radio value="3">Đạt 2</Radio></td>
-                    <td className="w-[100px] align-middle text-left items-center p-2 border-black border-1 border-t-0"><Radio value="4">Đạt 3</Radio></td>
-                    <td className="w-[100px] align-middle text-left items-center p-2 border-black border-1 border-t-0 border-r-0"> <Radio value="5">Đạt 4</Radio></td>
-                  </tr>
-                  <tr>
-                    <td className="w-[100px] p-2 border-black border-1 border-l-0 text-center">
-                      Yếu
-                    </td>
-                    <td className="w-[100px] p-2 border-black border-1 text-center">
-                      Kém
-                    </td>
-                    <td className="w-[100px] p-2 border-black border-1 text-center">
-                      TB
-                    </td>
-                    <td className="w-[100px] p-2 border-black border-1 text-center">
-                      Khá
-                    </td>
-                    <td className="w-[100px] p-2 border-black border-1 border-r-0 text-center">
-                      Giỏi
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="w-[100px] p-2 border-black border-1 border-l-0 border-b-0 text-center">
-                      {`${demoTong * 0}`}
-                    </td>
-                    <td className="w-[100px] p-2 border-black border-1 border-b-0 text-center">
-                      {`${demoTong * 25 / 100}`}
-                    </td>
-                    <td className="w-[100px] p-2 border-black border-1 border-b-0 text-center">
-                      {`${demoTong * 50 / 100}`}
-                    </td>
-                    <td className="w-[100px] p-2 border-black border-1 border-b-0 text-center">
-                      {`${demoTong * 75 / 100}`}
-                    </td>
-                    <td className="w-[100px] p-2 border-black border-1 border-b-0 border-r-0 text-center">
-                      {`${demoTong * 100 / 100}`}
-                    </td>
-                  </tr>
-                </table>
-              </div>
-            </RadioGroup>
-          </div>
-          <div className="block sm:hidden pb-10 sm:pb-10  lg:pb-0 xl:pb-0">
-            <RadioGroup
-              label={`Tổng điểm là: ${demoTong}`}
-              color="warning"
-            >
-              <div className="border-black border-1 rounded-lg	">
-                <table className="w-full">
-                  <tr>
-                    <td className="w-[100px] align-middle text-center border-black border-1 border-t-0  border-l-0 p-2">
-                      <Radio value="0">Đạt 0</Radio>
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2 border-t-0">
-                      Yếu
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2 border-r-0 border-t-0">
-                      {`${demoTong * 0}`}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="w-[100px] align-middle text-center border-black border-1 border-l-0 p-2">
-                      <Radio value="1">Đạt 1</Radio>
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2">
-                      Kém
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2 border-r-0">
-                      {`${demoTong * 25 / 100}`}
-                    </td>
-                  </tr>
+        <div className="w-full sm:w-full lg:w-[45%] xl:w-[40%] text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-black">
 
+          <div className="pb-10 sm:pb-10 lg:pb-0 xl:pb-0">
+            <RadioGroup label={`Tổng điểm là: ${demoTong}`} orientation="horizontal">
+              <table className="w-full border-collapse border border-black">
+                <tbody>
                   <tr>
-                    <td className="w-[100px] align-middle text-center border-black border-1 border-l-0 p-2">
-                      <Radio value="2">Đạt 2</Radio>
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2">
-                      TB
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2 border-r-0">
-                      {`${demoTong * 50 / 100}`}
-                    </td>
+                    {Tieuchuan.map((tc, index) => (
+                      <td key={index} className="p-2 text-center border border-black">
+                        <div className="flex flex-col items-center gap-2">
+                          <span>{`Đạt ${index}`}</span>
+                          <Radio value={tc.MaTieuChuan} size="lg"></Radio>
+                        </div>
+                      </td>
+                    ))}
                   </tr>
-
                   <tr>
-                    <td className="w-[100px] align-middle text-center border-black border-1 border-l-0 p-2">
-                      <Radio value="3">Đạt 3</Radio>
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2">
-                      Khá
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2 border-r-0">
-                      {`${demoTong * 75 / 100}`}
-                    </td>
+                    {MucDo_CL.map((MDCL, index) => (
+                      <td key={index} className="p-2 text-center border border-black">
+                        <div className="flex flex-col items-center gap-2">
+                          {MDCL.TenMucDo_CL}
+                        </div>
+                      </td>
+                    ))}
                   </tr>
-
                   <tr>
-                    <td className="w-[100px] align-middle text-center border-black border-1 border-l-0 border-b-0 p-2">
-                      <Radio value="4">Đạt 4</Radio>
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2 border-b-0">
-                      Giỏi
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2 border-b-0 border-r-0">
-                      {`${demoTong}`}
-                    </td>
+                    {Tieuchuan.map((tc, index) => (
+                      <td key={index} className="p-2 text-center border border-black">
+                        <div className="flex flex-col items-center gap-2">
+                          {index === 0 && <span>{demoTong * 0}</span>}
+                          {index === 1 && <span>{demoTong * 0.25}</span>}
+                          {index === 2 && <span>{demoTong * 0.5}</span>}
+                          {index === 3 && <span>{demoTong * 0.75}</span>}
+                          {index === 4 && <span>{demoTong}</span>}
+                        </div>
+                      </td>
+                    ))}
                   </tr>
-                </table>
-              </div>
+                </tbody>
+              </table>
             </RadioGroup>
           </div>
         </div>
       </div>
-
       <div className="w-full flex flex-col p-2 py-0 sm:p-5 sm:py-0 sm:flex-col lg:flex-row xl:flex-row">
-        <div className="w-full rounded-lg sm:rounded-lg lg:rounded-none xl:rounded-none text-justify lg:w-[48%] xl:w-[60%] border-[1px] sm:border-t-[1px] lg:border-t-0 xl:border-t-0 border-black flex flex-col sm:flex-col lg:flex-row xl:flex-row">
+        <div className="w-full rounded-b-lg sm:rounded-b-lg lg:rounded-none xl:rounded-none text-justify lg:w-[55%] xl:w-[60%] border-[1px] sm:border-t-[1px] lg:border-t-0 xl:border-t-0 border-black flex flex-col sm:flex-col lg:flex-row xl:flex-row">
           <div className="w-full p-2 lg:w-[20%] xl:w-[20%] border-b-1 sm:border-b-1 border-r-0 sm:border-r-0 sm:px-0 lg:border-r-[1px] lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-black">
             <div className="hidden sm:block lg:block xl:block">
-              <div className="px-2 font-bold sm:font-bold lg:font-normal xl:font-normal text-[#008000] sm:text-[#008000] lg:text-black xl:text-black">{CDR[0].CDR + '. ' + CDR[0].CONTENT}</div>
+              <div className="px-5 py-3 lg:w-[100px] xl:w-[100px] font-bold sm:font-bold lg:font-normal xl:font-normal text-[#008000] sm:text-[#008000] lg:text-black xl:text-black">
+                {CDR[0].CDR + '. ' + CDR[0].CONTENT}
+              </div>
             </div>
+
             <div className="block w-full h-fit sm:hidden sm:border-b-[1px] lg:hidden xl:hidden text-[#008000]">
               <div className="w-fit ">
                 <Tooltip content={CDR[0].CONTENT}>
-                  <div className="flex items-center justify-center gap-2 font-bold sm:font-bold lg:font-normal xl:font-normal "><span className="border-[1px] rounded px-2 border-black">+</span>{CDR[0].CDR}</div>
+                  <div className="flex items-center justify-center gap-2 font-bold sm:font-bold lg:font-normal xl:font-normal ">
+                    <span className="border-[1px] rounded px-2 border-black">
+                      + </span>{CDR[0].CDR}
+                  </div>
                 </Tooltip>
               </div>
             </div>
           </div>
-          <div className="w-full p-0 sm:p-0 lg:p-2 xl:p-2">
-            <div className="hidden sm:hidden lg:block xl:block text-justify leading-8">
-              <p>
-                1.1. Hình thức
-                <br />
-                1.Định dạng văn bản đúng quy định (font, size, khổ giấy, canh lề, văn bản, định dạng đoạn…)
-                <br />
-                2. Có danh mục hình, bảng (nếu có), mục lục, tài liệu tham khảo, danh mục từ viết tắt (nếu có)
-                <br />
-                3. Văn phong rõ ràng, mạch lạc, không lỗi chính tả
-                <br />
-                4. Mục lục, tài liệu tham khảo đúng quy định, kết luận
-              </p>
+
+          <div className="w-full">
+            <div className="hidden sm:hidden lg:block xl:block text-justify leading-8 p-4">
+              <p>tieu chi 2</p>
+              {Tieuchuan1.map((tieuchuan, index) => (
+                <div key={index} className="text-justify leading-8">
+
+
+                  <p>{tieuchuan.TenTieuChuan}</p>
+
+                </div>
+              ))}
             </div>
+
             <div className="block sm:block lg:hidden xl:hidden">
-              <Collapse items={items} colorBorder="#FFD700" className="Collapse" defaultActiveKey={['1']} />
+              <Collapse items={items1} colorBorder="#FFD700" className="Collapse" defaultActiveKey={['1']} />
             </div>
           </div>
         </div>
-        <div className="w-full sm:w-full lg:w-[52%] xl:w-[40%] text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-black">
-          <div className="hidden pb-10  sm:pb-10 sm:block lg:pb-0 lg:block xl:block xl:pb-0">
-            <RadioGroup
-              label={`Tổng điểm là: ${demoTong}`}
-              orientation="horizontal"
-            >
-              <div className="border-black border-1 rounded-lg w-full">
-                <table className="w-full">
-                  <tr>
-                    <td className="w-[100px] align-middle text-left items-center p-2 border-black border-1 border-l-0 border-t-0"><Radio value="1">Đạt 0</Radio></td>
-                    <td className="w-[100px] align-middle text-left items-center p-2 border-black border-1 border-t-0"><Radio value="2">Đạt 1</Radio></td>
-                    <td className="w-[100px] align-middle text-left items-center p-2 border-black border-1 border-t-0"><Radio value="3">Đạt 2</Radio></td>
-                    <td className="w-[100px] align-middle text-left items-center p-2 border-black border-1 border-t-0"><Radio value="4">Đạt 3</Radio></td>
-                    <td className="w-[100px] align-middle text-left items-center p-2 border-black border-1 border-t-0 border-r-0"> <Radio value="5">Đạt 4</Radio></td>
-                  </tr>
-                  <tr>
-                    <td className="w-[100px] p-2 border-black border-1 border-l-0 text-center">
-                      Yếu
-                    </td>
-                    <td className="w-[100px] p-2 border-black border-1 text-center">
-                      Kém
-                    </td>
-                    <td className="w-[100px] p-2 border-black border-1 text-center">
-                      TB
-                    </td>
-                    <td className="w-[100px] p-2 border-black border-1 text-center">
-                      Khá
-                    </td>
-                    <td className="w-[100px] p-2 border-black border-1 border-r-0 text-center">
-                      Giỏi
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="w-[100px] p-2 border-black border-1 border-l-0 border-b-0 text-center">
-                      {`${demoTong * 0}`}
-                    </td>
-                    <td className="w-[100px] p-2 border-black border-1 border-b-0 text-center">
-                      {`${demoTong * 25 / 100}`}
-                    </td>
-                    <td className="w-[100px] p-2 border-black border-1 border-b-0 text-center">
-                      {`${demoTong * 50 / 100}`}
-                    </td>
-                    <td className="w-[100px] p-2 border-black border-1 border-b-0 text-center">
-                      {`${demoTong * 75 / 100}`}
-                    </td>
-                    <td className="w-[100px] p-2 border-black border-1 border-b-0 border-r-0 text-center">
-                      {`${demoTong * 100 / 100}`}
-                    </td>
-                  </tr>
-                </table>
-              </div>
-            </RadioGroup>
-          </div>
-          <div className="block sm:hidden pb-10 sm:pb-10  lg:pb-0 xl:pb-0">
-            <RadioGroup
-              label={`Tổng điểm là: ${demoTong}`}
-              color="warning"
-            >
-              <div className="border-black border-1 rounded-lg	">
-                <table className="w-full">
-                  <tr>
-                    <td className="w-[100px] align-middle text-center border-black border-1 border-t-0  border-l-0 p-2">
-                      <Radio value="0">Đạt 0</Radio>
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2 border-t-0">
-                      Yếu
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2 border-r-0 border-t-0">
-                      {`${demoTong * 0}`}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="w-[100px] align-middle text-center border-black border-1 border-l-0 p-2">
-                      <Radio value="1">Đạt 1</Radio>
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2">
-                      Kém
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2 border-r-0">
-                      {`${demoTong * 25 / 100}`}
-                    </td>
-                  </tr>
+        <div className="w-full sm:w-full lg:w-[45%] xl:w-[40%] text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-black">
 
+          <div className="pb-10 sm:pb-10 lg:pb-0 xl:pb-0">
+            <RadioGroup label={`Tổng điểm là: ${demoTong}`} orientation="horizontal">
+              <table className="w-full border-collapse border border-black">
+                <tbody>
                   <tr>
-                    <td className="w-[100px] align-middle text-center border-black border-1 border-l-0 p-2">
-                      <Radio value="2">Đạt 2</Radio>
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2">
-                      TB
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2 border-r-0">
-                      {`${demoTong * 50 / 100}`}
-                    </td>
+                    {Tieuchuan1.map((tc, index) => (
+                      <td key={index} className="p-2 text-center border border-black">
+                        <div className="flex flex-col items-center gap-2">
+                          <span>{`Đạt ${index}`}</span>
+                          <Radio value={tc.MaTieuChuan} size="lg"></Radio>
+                        </div>
+                      </td>
+                    ))}
                   </tr>
+                  <tr>
+                    {MucDo_CL1.map((MDCL, index) => (
+                      <td key={index} className="p-2 text-center border border-black">
+                        <div className="flex flex-col items-center gap-2">
+                          {MDCL.TenMucDo_CL}
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    {Tieuchuan1.map((tc, index) => (
+                      <td key={index} className="p-2 text-center border border-black">
+                        <div className="flex flex-col items-center gap-2">
+                          {Tieuchuan1.length === 5 && index === 0 && <span>{demoTong * 0}</span>}
+                          {Tieuchuan1.length === 5 && index === 1 && <span>{demoTong * 0.25}</span>}
+                          {Tieuchuan1.length === 5 && index === 2 && <span>{demoTong * 0.5}</span>}
+                          {Tieuchuan1.length === 5 && index === 3 && <span>{demoTong * 0.75}</span>}
+                          {Tieuchuan1.length === 5 && index === 4 && <span>{demoTong}</span>}
 
-                  <tr>
-                    <td className="w-[100px] align-middle text-center border-black border-1 border-l-0 p-2">
-                      <Radio value="3">Đạt 3</Radio>
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2">
-                      Khá
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2 border-r-0">
-                      {`${demoTong * 75 / 100}`}
-                    </td>
+                          {Tieuchuan1.length === 3 && index === 0 && <span>{demoTong * 0}</span>}
+                          {Tieuchuan1.length === 3 && index === 1 && <span>{demoTong * 0.5}</span>}
+                          {Tieuchuan1.length === 3 && index === 2 && <span>{demoTong}</span>}
+                        </div>
+                      </td>
+                    ))}
                   </tr>
-
-                  <tr>
-                    <td className="w-[100px] align-middle text-center border-black border-1 border-l-0 border-b-0 p-2">
-                      <Radio value="4">Đạt 4</Radio>
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2 border-b-0">
-                      Giỏi
-                    </td>
-                    <td className="w-[100px] align-middle text-center border-black border-1 p-2 border-b-0 border-r-0">
-                      {`${demoTong}`}
-                    </td>
-                  </tr>
-                </table>
-              </div>
+                </tbody>
+              </table>
             </RadioGroup>
           </div>
         </div>
-      </div>
+      </div> */}
+
     </div>
   )
 }

@@ -1,5 +1,5 @@
 # Sử dụng một image có sẵn của Node.js với phiên bản bạn muốn
-FROM node:14
+FROM node:18.18.0
 
 # Thiết lập thư mục làm việc trong container
 WORKDIR /usr/src/app

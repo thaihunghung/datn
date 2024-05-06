@@ -66,7 +66,7 @@ function Nav(props) {
             ),
         },
         {
-            text: "Quản lý chương trình",
+            text: "Chương trình",
             icon: (
                 <i
                     className={`fa-solid fa-pen-clip mr-${collapsedNav ? "0" : "3"} w-4`}
@@ -112,22 +112,6 @@ function Nav(props) {
         onAuthStateChanged(auth, async (user) => {
             setCurrentUser(auth)
             console.log(auth)
-            // if (user) {
-            //     const response = await postToken(
-            //         user.email,
-            //         user.uid,
-            //         user.photoURL,
-            //         user.displayName
-            //     );
-            //     if (response.data.email === user.email) {
-            //         setCurrentUser(response.data);
-            //     }
-            // } else {
-            //     alert("Bạn không có quyền vô trang này");
-            //     await signOut(auth);
-            //     setCurrentUser(null);
-            //     navigate("/");
-            // }
         });
     }, []);
 
@@ -215,13 +199,11 @@ function Nav(props) {
 
             </div>
             <div className="hidden sm:block lg:block xl:block text-[white]">
-
-
                 <motion.div
-                    className={`Admin-Navbar flex flex-col w-["270px"] ${collapsedNav ? "w-[87px]" : ""
-                        } h-[100vh] bg-slate-800 p-3  justify-between`}
+                    className={`Admin-Navbar flex flex-col w-["200px"] ${collapsedNav ? "w-[87px]" : ""
+                        } h-[100vh] bg-slate-600 p-3  justify-between`}
                     initial={{ width: "270px" }}
-                    animate={{ width: collapsedNav ? "87px" : "270px" }}
+                    animate={{ width: collapsedNav ? "87px" : "200px" }}
                     transition={{ duration: 0.4 }}
                 >
                     <div className="grid grid-rows-[auto,auto] h-[100vh] flex-1">
@@ -350,7 +332,7 @@ function Nav(props) {
                                         </div>
                                         {/* </Tooltip> */}
                                         {submenuVisible[tab.text] && tab.submenu && (
-                                            <div className={`pl-3 ${collapsedNav ? "hidden" : "block"}`}>
+                                            <div className={`${collapsedNav ? "hidden" : "block"}`}>
                                                 {tab.submenu.map((subitem) => (
                                                     <Link
                                                         key={subitem.text}

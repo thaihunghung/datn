@@ -23,9 +23,7 @@ app.use(cors({
   credentials: true,
 }));
 
-
 app.use('/', indexRouter);
-
 morgan('combined')
 
 app.use((err, req, res, next) => {

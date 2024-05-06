@@ -34,7 +34,7 @@ const MapPoPloModel = sequelize.define('Map_PO_PLO', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'Map_PO_PLOs'
+  tableName: 'map_po_plos'
 });
 
 module.exports = MapPoPloModel;
