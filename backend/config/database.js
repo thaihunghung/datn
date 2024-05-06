@@ -12,7 +12,6 @@ const sequelize = new Sequelize('TVU', 'AdminTVU', 'CongNgheThongTin-DA20TTB', {
   dialect: 'mysql',
 });
 
-
 // Hàm kiểm tra kết nối
 async function testConnection() {
   try {
