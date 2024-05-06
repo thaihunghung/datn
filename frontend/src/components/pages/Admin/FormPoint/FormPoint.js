@@ -11,11 +11,11 @@ const CDR = [
 var demoTong = 1;
 
 const Tieuchuan = [
-  { MaTieuChuan: 'MTC0', TenTieuChuan: 'Tieu chuan 0' },
-  { MaTieuChuan: 'MTC1', TenTieuChuan: 'Tieu chuan 1' },
-  { MaTieuChuan: 'MTC2', TenTieuChuan: 'Tieu chuan 2' },
-  { MaTieuChuan: 'MTC3', TenTieuChuan: 'Tieu chuan 3' },
-  { MaTieuChuan: 'MTC4', TenTieuChuan: 'Tieu chuan 4' }
+  { MaTieuChuan: 'MTC0', TenTieuChuan: '' },
+  { MaTieuChuan: 'MTC1', TenTieuChuan: '' },
+  { MaTieuChuan: 'MTC2', TenTieuChuan: '' },
+  { MaTieuChuan: 'MTC3', TenTieuChuan: '' },
+  { MaTieuChuan: 'MTC4', TenTieuChuan: '' }
 ];
 
 const MucDo_CL = [
@@ -79,11 +79,11 @@ const rubics = [
       ten_Tieu_Chi: "Tiêu chí 1",
       DiemSo: 1,
       Tieuchuan: [
-        { MaTieuChuan: 'MTC0', TenTieuChuan: 'Tieu chuan 0' },
-        { MaTieuChuan: 'MTC1', TenTieuChuan: 'Tieu chuan 1' },
-        { MaTieuChuan: 'MTC2', TenTieuChuan: 'Tieu chuan 2' },
-        { MaTieuChuan: 'MTC3', TenTieuChuan: 'Tieu chuan 3' },
-        { MaTieuChuan: 'MTC4', TenTieuChuan: 'Tieu chuan 4' }
+        { MaTieuChuan: 'MTC0', TenTieuChuan: '' },
+        { MaTieuChuan: 'MTC1', TenTieuChuan: '' },
+        { MaTieuChuan: 'MTC2', TenTieuChuan: '' },
+        { MaTieuChuan: 'MTC3', TenTieuChuan: '' },
+        { MaTieuChuan: 'MTC4', TenTieuChuan: '' }
       ],
       MucDo_CL: [
         { MaMD_CL: 'MucDo_CL_0', TenMucDo_CL: 'Yếu' },
@@ -101,9 +101,7 @@ const rubics = [
       ten_Tieu_Chi: "Tiêu chí 2",
       DiemSo: 1,
       Tieuchuan: [
-        { MaTieuChuan: 'MTC0', TenTieuChuan: 'Tieu chuan 0' },
-        { MaTieuChuan: 'MTC1', TenTieuChuan: 'Tieu chuan 1' },
-        { MaTieuChuan: 'MTC2', TenTieuChuan: 'Tieu chuan 2' },
+        
       ],
       MucDo_CL: [
         { MaMD_CL: 'MucDo_CL_0', TenMucDo_CL: 'Yếu' },
@@ -119,9 +117,9 @@ const rubics = [
       ten_Tieu_Chi: "Tiêu chí 3",
       DiemSo: 5,
       Tieuchuan: [
-        { MaTieuChuan: 'MTC0', TenTieuChuan: 'Tieu chuan 0' },
-        { MaTieuChuan: 'MTC1', TenTieuChuan: 'Tieu chuan 1' },
-        { MaTieuChuan: 'MTC2', TenTieuChuan: 'Tieu chuan 2' },
+        { MaTieuChuan: 'MTC0', TenTieuChuan: '' },
+        { MaTieuChuan: 'MTC1', TenTieuChuan: '' },
+        { MaTieuChuan: 'MTC2', TenTieuChuan: '' },
       ],
       MucDo_CL: [
         { MaMD_CL: 'MucDo_CL_0', TenMucDo_CL: 'Yếu' },
