@@ -2,26 +2,27 @@
 import { Link, Route, Routes } from 'react-router-dom';
 import { useState } from "react";
 import { message, Spin } from 'antd';
-import StoreProgram from '../components/pages/Admin/Manage/ManageProgram/StoreProgram';
-import CreateProgram from '../components/pages/Admin/Manage/ManageProgram/CreateProgram';
-import PoPlo from '../components/pages/Admin/Manage/ManageProgram/PoPlo';
-import StorePo from '../components/pages/Admin/Manage/ManagePo/StorePo';
-import CreatePo from '../components/pages/Admin/Manage/ManagePo/CreatePo';
-import CreatePlo from '../components/pages/Admin/Manage/ManagePlo/CreatePlo';
-import StorePlo from '../components/pages/Admin/Manage/ManagePlo/StorePlo';
-import UpdateProgram from '../components/pages/Admin/Manage/ManageProgram/UpdateProgram';
-import UpdateProgramById from '../components/pages/Admin/Manage/ManageProgram/UpdateProgramById';
-import Nav from '../components/pages/Admin/Utils/Navbar/Navbar';
-import Program from '../components/pages/Client/Program/Program';
-import UpdatePoById from '../components/pages/Admin/Manage/ManagePo/UpdatePoById';
-import UpdatePloById from '../components/pages/Admin/Manage/ManagePlo/UpdatePloById';
-import UpdatePo from '../components/pages/Admin/Manage/ManagePo/UpdatePo';
-import UpdatePlo from '../components/pages/Admin/Manage/ManagePlo/UpdatePlo';
-import ManageProgram from '../components/pages/Admin/Manage/ManageProgram/ManageProgram';
-import ManagePo from '../components/pages/Admin/Manage/ManagePo/ManagePo';
-import ManagePlo from '../components/pages/Admin/Manage/ManagePlo/ManagePlo';
+import ManageProgram from '../components/pages/Admin/Management/ManageProgram/ManageProgram';
+import StoreProgram from '../components/pages/Admin/Management/ManageProgram/StoreProgram';
+import CreateProgram from '../components/pages/Admin/Management/ManageProgram/CreateProgram';
+import PoPlo from '../components/pages/Admin/Management/ManageProgram/PoPlo';
+import UpdateProgram from '../components/pages/Admin/Management/ManageProgram/UpdateProgram';
+import UpdateProgramById from '../components/pages/Admin/Management/ManageProgram/UpdateProgramById';
+import ManagePo from '../components/pages/Admin/Management/ManagementPo/ManagePo';
+import StorePo from '../components/pages/Admin/Management/ManagementPo/StorePo';
+import CreatePo from '../components/pages/Admin/Management/ManagementPo/CreatePo';
+import UpdatePo from '../components/pages/Admin/Management/ManagementPo/UpdatePo';
+import UpdatePoById from '../components/pages/Admin/Management/ManagementPo/UpdatePoById';
+import ManagePlo from '../components/pages/Admin/Management/ManagementPlo/ManagePlo';
+import StorePlo from '../components/pages/Admin/Management/ManagementPlo/StorePlo';
+import CreatePlo from '../components/pages/Admin/Management/ManagementPlo/CreatePlo';
+import UpdatePlo from '../components/pages/Admin/Management/ManagementPlo/UpdatePlo';
+import UpdatePloById from '../components/pages/Admin/Management/ManagementPlo/UpdatePloById';
+import PloClo from '../components/pages/Admin/Management/ManagementClo/PloClo';
 import FormPoint from '../components/pages/Admin/FormPoint/FormPoint';
-import PloClo from '../components/pages/Admin/Manage/ManageClo/PloClo';
+import Program from '../components/pages/Client/Program/Program';
+import Nav from '../components/pages/Admin/Utils/Navbar/Navbar';
+import Rubic from '../components/pages/Admin/Management/ManageRubric/Rubic';
 
 function Admin(props) {
 
@@ -71,6 +72,7 @@ function Admin(props) {
           <Route path="/manage-plo/update" element={<UpdatePlo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/manage-plo/update/:id" element={<UpdatePloById collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
         
+          <Route path="/manage-rubric" element={<Rubic collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
           <Route path="/manage-clo/plo-clo" element={<PloClo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
