@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const ProgramModel = require('./ProgramModel');
 
-const SubjectModel = sequelize.define('Subject', {
+const SubjectModel = sequelize.define('subject', {
   subject_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -32,17 +32,17 @@ const SubjectModel = sequelize.define('Subject', {
     type: DataTypes.ENUM('Đại cương', 'Cơ sở ngành', 'Chuyên ngành', 'Thực tập và Đồ án'),
     allowNull: false
   },
-  isDelete: {
-    type: DataTypes.TINYINT,
-    defaultValue: 0
-  },
-  program_id: {
+  program_id: { 
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
       model: ProgramModel,
-      key: 'program_id'
+      key: 'program_id' 
     }
+  },
+  isDelete: {
+    type: DataTypes.TINYINT,
+    defaultValue: 0
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -58,7 +58,7 @@ const SubjectModel = sequelize.define('Subject', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'subjects'
+  tableName: 'subjects',
 });
 
 module.exports = SubjectModel;

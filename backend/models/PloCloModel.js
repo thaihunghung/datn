@@ -1,16 +1,16 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const PloModel = require('./PloModel');
 const CloModel = require('./CloModel');
+const PloModel = require('./PloModel');
 
-const MapPloCloModel = sequelize.define('MapPloClo', {
+const PloCloModel = sequelize.define('map_plo_clo', {
   id_plo_clo: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.INTEGER.UNSIGNED,
     primaryKey: true,
     autoIncrement: true
   },
   plo_id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
     references: {
       model: PloModel,
@@ -18,7 +18,7 @@ const MapPloCloModel = sequelize.define('MapPloClo', {
     }
   },
   clo_id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
     references: {
       model: CloModel,
@@ -26,19 +26,9 @@ const MapPloCloModel = sequelize.define('MapPloClo', {
     }
   },
   isDelete: {
-    type: DataTypes.TINYINT,
+    type: DataTypes.TINYINT(1),
     allowNull: false,
     defaultValue: 0
-  },
-  createdAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
-  },
-  updatedAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
   }
 }, {
   timestamps: true,
@@ -47,4 +37,4 @@ const MapPloCloModel = sequelize.define('MapPloClo', {
   tableName: 'map_plo_clos'
 });
 
-module.exports = MapPloCloModel;
+module.exports = PloCloModel;

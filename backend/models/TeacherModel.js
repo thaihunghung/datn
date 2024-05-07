@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const UserModel = require('./UserModel');
 
-const TeacherModel = sequelize.define('Teacher', {
+const TeacherModel = sequelize.define('teacher', {
   teacher_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -18,20 +18,19 @@ const TeacherModel = sequelize.define('Teacher', {
   },
   name: {
     type: DataTypes.STRING(255),
-    allowNull: true
+    allowNull: false
   },
   email: {
     type: DataTypes.STRING(255),
     allowNull: false
   },
-  password: {
+  passwork: {
     type: DataTypes.STRING(15),
     allowNull: false
   },
   typeTeacher: {
     type: DataTypes.ENUM('GVCV', 'GVGD'),
-    allowNull: false,
-    defaultValue: 'GVGD'
+    allowNull: false
   },
   isDelete: {
     type: DataTypes.TINYINT,
@@ -51,7 +50,7 @@ const TeacherModel = sequelize.define('Teacher', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'teachers'
+  tableName: 'teachers',
 });
 
 module.exports = TeacherModel;

@@ -1,27 +1,27 @@
-const PoPloModel = require('../models/PoPloModel'); 
+const PloCloModel = require('../models/PloCloModel'); 
 
-const Po_PloController = {
+const Plo_CloController = {
 
-  // Get all PoPlo
+  // Get all PloClo
   getAll: async (req, res) => {
     try {
-      const PoPlo = await PoPloModel.findAll();
+      const PoPlo = await PloCloModel.findAll();
       res.json(PoPlo);
     } catch (error) {
-      console.error('Error getting all PoPlo:', error);
+      console.error('Error getting all PloClo:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
   },
   SaveOrDelete: async (req, res) => {
     try {
       const { dataSave, dataDelete } = req.body;
-
+      console.log(dataSave);
       if (dataSave && dataSave.length > 0) {
-          await PoPloModel.bulkCreate(dataSave);
+          await PloCloModel.bulkCreate(dataSave);
       }
-      console.log(dataDelete);
+
       if (dataDelete && dataDelete.length > 0) {
-          await PoPloModel.destroy({ where: { id_po_plo: dataDelete.map(item => item.id_po_plo) } });
+          await PloCloModel.destroy({ where: { id_plo_clo: dataDelete.map(item => item.id_plo_clo) } });
       }
 
       res.json({ message: 'Data saved and/or deleted successfully' });
@@ -32,4 +32,4 @@ const Po_PloController = {
   },
 };
 
-module.exports = Po_PloController;
+module.exports = Plo_CloController;

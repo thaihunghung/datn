@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Program = sequelize.define('Program', {
+const ProgramModel = sequelize.define('Program', {
   program_id: {
     type: DataTypes.INTEGER.UNSIGNED,
     primaryKey: true,
@@ -19,6 +19,16 @@ const Program = sequelize.define('Program', {
   isDelete: {
     type: DataTypes.TINYINT(1),
     defaultValue: 0
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
   }
 }, {
   timestamps: true,
@@ -28,4 +38,4 @@ const Program = sequelize.define('Program', {
   underscored: false
 });
 
-module.exports = Program;
+module.exports = ProgramModel;

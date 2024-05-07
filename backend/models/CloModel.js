@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const PloModel = require('./PloModel');
-
+const CourseModel = require('./CourseModel');
 const CloModel = sequelize.define('CLO', {
   clo_id: {
     type: DataTypes.INTEGER,
@@ -20,12 +20,12 @@ const CloModel = sequelize.define('CLO', {
     type: DataTypes.TINYINT,
     defaultValue: 0
   },
-  plo_id: {
+  course_id : {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: PloModel,
-      key: 'plo_id'
+      model: CourseModel,
+      key: 'course_id '
     }
   },
   createdAt: {

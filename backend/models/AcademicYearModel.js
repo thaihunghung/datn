@@ -1,27 +1,29 @@
-const { DataTypes } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const AcademicYearModel = sequelize.define('AcademicYear', {
-  academic_year_id: {
+const AcademicYearModel = sequelize.define('academic_year', {
+  acdemic_year_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
   startDate: {
     type: DataTypes.DATE,
-    allowNull: true
+    allowNull: false
   },
   endDate: {
     type: DataTypes.DATE,
-    allowNull: true
+    allowNull: false
   },
   description: {
     type: DataTypes.TEXT,
-    defaultValue: null
+    allowNull: false
   }
 }, {
-  timestamps: false, // Không sử dụng cột createdAt và updatedAt
-  tableName: 'academic_years'
+  timestamps: true,
+  tableName: 'academic_years',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
 });
 
 module.exports = AcademicYearModel;

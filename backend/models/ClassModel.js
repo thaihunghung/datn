@@ -1,31 +1,32 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+const PloModel = require('./PloModel');
 
-const UserModel = sequelize.define('user', {
-  user_id: {
+const ClassModel = sequelize.define('Class', {
+  class_id : {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  email: {
-    type: DataTypes.TEXT,
+  className: {
+    type: DataTypes.STRING(255),
     allowNull: false
   },
-  password: {
-    type: DataTypes.TEXT,
+  classCode: {
+    type: DataTypes.STRING(10),
     allowNull: false
-  },
-  permission: {
-    type: DataTypes.TINYINT,
-    allowNull: false
-  },
-  isBlock: {
-    type: DataTypes.TINYINT,
-    defaultValue: 0
   },
   isDelete: {
     type: DataTypes.TINYINT,
     defaultValue: 0
+  },
+  teacher_id  : {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: PloModel,
+      key: 'teacher_id'
+    }
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -41,7 +42,7 @@ const UserModel = sequelize.define('user', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'users',
+  tableName: 'classes',
 });
 
-module.exports = UserModel;
+module.exports = ClassModel;

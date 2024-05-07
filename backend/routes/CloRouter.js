@@ -72,7 +72,7 @@ router.get('/clo/:id', CloController.getByID);
 
 /**
  * @openapi
- * /clo/{id}:
+ *  /api/admin/clo/{id}:
  *   put:
  *     summary: Cập nhật thông tin của một CLO
  *     description: Cập nhật thông tin của CLO dựa trên ID.
@@ -101,7 +101,7 @@ router.put('/clo/:id', CloController.update);
 
 /**
  * @openapi
- * /clo/{id}:
+ *  /api/admin/clo/{id}:
  *   delete:
  *     summary: Xóa một CLO
  *     description: Xóa CLO dựa trên ID.
@@ -124,7 +124,7 @@ router.delete('/clo/:id', CloController.delete);
 
 /**
  * @openapi
- * /clo/isDelete/true:
+ *  /api/admin/clo/isDelete/true:
  *   get:
  *     summary: Lấy danh sách các CLO đã bị xóa
  *     description: Trả về các CLO có trạng thái isDelete là true.
@@ -140,7 +140,7 @@ router.get('/clo/isDelete/true', CloController.isDeleteTotrue);
 
 /**
  * @openapi
- * /clo/isDelete/false:
+ *  /api/admin/clo/isDelete/false:
  *   get:
  *     summary: Lấy danh sách các CLO chưa bị xóa
  *     description: Trả về các CLO có trạng thái isDelete là false.
@@ -156,7 +156,7 @@ router.get('/clo/isDelete/false', CloController.isDeleteTofalse);
 
 /**
  * @openapi
- * /clo/isDelete/{id}:
+ *  /api/admin/clo/isDelete/{id}:
  *   put:
  *     summary: Đảo ngược trạng thái isDelete của một CLO
  *     description: Cập nhật trạng thái isDelete cho CLO dựa trên ID.
