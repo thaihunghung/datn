@@ -2,6 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const ChapterModel = require('./ChapterModel');
 const CloModel = require('./CloModel');
+const RubricModel = require('./RubricModel');
 
 const RubricsItemModel = sequelize.define('RubricsItem', {
   rubricsItem_id: {
@@ -23,6 +24,14 @@ const RubricsItemModel = sequelize.define('RubricsItem', {
     references: {
       model: CloModel,
       key: 'clo_id'
+    }
+  },
+  rubric_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: RubricModel,
+      key: 'rubric_id'
     }
   },
   description: {
