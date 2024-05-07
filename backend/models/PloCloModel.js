@@ -1,28 +1,34 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const ChapterModel = require('./ChapterModel');
+const PloModel = require('./PloModel');
+const CloModel = require('./CloModel');
 
-const QuestionModel = sequelize.define('Question', {
-  question_id: {
+const MapPloCloModel = sequelize.define('MapPloClo', {
+  id_plo_clo: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  questionText: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  isDelete: {
-    type: DataTypes.TINYINT,
-    defaultValue: 0
-  },
-  chapter_id: {
+  plo_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: ChapterModel,
-      key: 'chapter_id'
+      model: PloModel,
+      key: 'plo_id'
     }
+  },
+  clo_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: CloModel,
+      key: 'clo_id'
+    }
+  },
+  isDelete: {
+    type: DataTypes.TINYINT,
+    allowNull: false,
+    defaultValue: 0
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -38,7 +44,7 @@ const QuestionModel = sequelize.define('Question', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'questions'
+  tableName: 'map_plo_clos'
 });
 
-module.exports = QuestionModel;
+module.exports = MapPloCloModel;

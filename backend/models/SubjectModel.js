@@ -1,31 +1,47 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const SubjectModel = require('./SubjectModel');
+const ProgramModel = require('./ProgramModel');
 
-const ChapterModel = sequelize.define('Chapter', {
-  chapter_id: {
+const SubjectModel = sequelize.define('Subject', {
+  subject_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  chapterName: {
-    type: DataTypes.STRING(100),
+  subjectName: {
+    type: DataTypes.TEXT,
     allowNull: false
   },
   description: {
     type: DataTypes.TEXT,
-    defaultValue: null
+    allowNull: false
+  },
+  numberCredits: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  numberCreditsTheory: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  numberCreditsPractice: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  typesubject: {
+    type: DataTypes.ENUM('Đại cương', 'Cơ sở ngành', 'Chuyên ngành', 'Thực tập và Đồ án'),
+    allowNull: false
   },
   isDelete: {
     type: DataTypes.TINYINT,
     defaultValue: 0
   },
-  subject_id: {
+  program_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: SubjectModel,
-      key: 'subject_id'
+      model: ProgramModel,
+      key: 'program_id'
     }
   },
   createdAt: {
@@ -42,7 +58,7 @@ const ChapterModel = sequelize.define('Chapter', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'chapters'
+  tableName: 'subjects'
 });
 
-module.exports = ChapterModel;
+module.exports = SubjectModel;

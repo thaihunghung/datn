@@ -1,31 +1,13 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const ClassModel = require('./ClassModel');
-const TeacherModel = require('./TeacherModel');
 const SubjectModel = require('./SubjectModel');
-const SemesterModel = require('./SemesterModel');
+const AssessmentModel = require('./AssessmentModel');
 
-const CourseModel = sequelize.define('Course', {
-  course_id: {
+const RubricModel = sequelize.define('Rubric', {
+  rubric_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
-  },
-  class_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: ClassModel,
-      key: 'class_id'
-    }
-  },
-  teacher_id: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    references: {
-      model: TeacherModel,
-      key: 'teacher_id'
-    }
   },
   subject_id: {
     type: DataTypes.INTEGER,
@@ -35,13 +17,25 @@ const CourseModel = sequelize.define('Course', {
       key: 'subject_id'
     }
   },
-  semester_id: {
+  assessment_id: {
     type: DataTypes.INTEGER,
     allowNull: true,
     references: {
-      model: SemesterModel,
-      key: 'semester_id'
+      model: AssessmentModel,
+      key: 'assessment_id'
     }
+  },
+  rubricName: {
+    type: DataTypes.STRING(255),
+    allowNull: false
+  },
+  comment: {
+    type: DataTypes.TEXT,
+    defaultValue: null
+  },
+  score: {
+    type: DataTypes.DOUBLE(8, 2),
+    defaultValue: 0
   },
   isDelete: {
     type: DataTypes.TINYINT,
@@ -61,7 +55,7 @@ const CourseModel = sequelize.define('Course', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'courses'
+  tableName: 'rubrics'
 });
 
-module.exports = CourseModel;
+module.exports = RubricModel;

@@ -1,27 +1,28 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const ChapterModel = require('./ChapterModel');
+const RubricModel = require('./RubricModel');
+const QuestionModel = require('./QuestionModel');
 
-const QuestionModel = sequelize.define('Question', {
-  question_id: {
+const MapRubricQuestionModel = sequelize.define('MapRubricQuestion', {
+  id_rubric_question: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  questionText: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  isDelete: {
-    type: DataTypes.TINYINT,
-    defaultValue: 0
-  },
-  chapter_id: {
+  rubric_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: ChapterModel,
-      key: 'chapter_id'
+      model: RubricModel,
+      key: 'rubric_id'
+    }
+  },
+  question_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: QuestionModel,
+      key: 'question_id'
     }
   },
   createdAt: {
@@ -38,7 +39,7 @@ const QuestionModel = sequelize.define('Question', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'questions'
+  tableName: 'map_rubric_questions'
 });
 
-module.exports = QuestionModel;
+module.exports = MapRubricQuestionModel;

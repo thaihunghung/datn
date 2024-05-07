@@ -12,6 +12,10 @@ const Program = sequelize.define('Program', {
     type: DataTypes.TEXT,
     allowNull: false
   },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
   isDelete: {
     type: DataTypes.TINYINT(1),
     defaultValue: 0

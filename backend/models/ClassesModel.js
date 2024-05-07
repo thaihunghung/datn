@@ -1,27 +1,31 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const ChapterModel = require('./ChapterModel');
+const TeacherModel = require('./TeacherModel');
 
-const QuestionModel = sequelize.define('Question', {
-  question_id: {
+const ClassModel = sequelize.define('Class', {
+  class_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  questionText: {
-    type: DataTypes.TEXT,
+  className: {
+    type: DataTypes.STRING(255),
+    allowNull: false
+  },
+  classCode: {
+    type: DataTypes.STRING(10),
     allowNull: false
   },
   isDelete: {
     type: DataTypes.TINYINT,
     defaultValue: 0
   },
-  chapter_id: {
+  teacher_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: ChapterModel,
-      key: 'chapter_id'
+      model: TeacherModel,
+      key: 'teacher_id'
     }
   },
   createdAt: {
@@ -38,7 +42,7 @@ const QuestionModel = sequelize.define('Question', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'questions'
+  tableName: 'classes'
 });
 
-module.exports = QuestionModel;
+module.exports = ClassModel;

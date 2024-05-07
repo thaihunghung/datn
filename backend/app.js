@@ -14,7 +14,7 @@ app.use(cookieParser());
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 const cors = require('cors');
-app.use(express.static("public");
+app.use(express.static("public"));
 const swaggerUi = require('swagger-ui-express');
 
 const indexRouter = require('./routes/IndexRouter');
