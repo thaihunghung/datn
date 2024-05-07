@@ -14,6 +14,12 @@ const questionRoutes = require('./QuestionRouter');
 const poRoutes = require('./PoRouter');
 const poPloRoutes = require('./Po_PloRouter');
 const ploCloRoutes = require('./Plo_CloRouter');
+const rubricRoutes = require('./RubricRouter');
+const rubricItemRoutes = require('./RubricItemRouter');
+const cloChapterRoutes = require('./Clo_ChapterRouter');
+const rubricQuestionRoutes = require('./Rubric_QuestionRouter');
+
+
 const pdfRouters = require('./PdfRouter');
 const csvRouters = require('./CsvRouter');
 const csvSaveRouters = require('./SaveCSVRouter');
@@ -28,6 +34,11 @@ router.use('/api/admin', courseRoute);
 router.use('/api/admin', questionRoutes);
 router.use('/api/admin', chapterRoutes);
 router.use('/api/admin', poRoutes);
+router.use('/api/admin', cloChapterRoutes);
+router.use('/api/admin', rubricRoutes);
+router.use('/api/admin', rubricItemRoutes);
+router.use('/api/admin', rubricQuestionRoutes);
+
 router.use('/api/admin', poPloRoutes);
 router.use('/api/admin', ploCloRoutes);
 router.use('/api/admin', pdfRouters);
