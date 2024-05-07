@@ -1,16 +1,25 @@
 const express = require('express');
 const router = express.Router();
-const programRoutes = require('./PRORoutes');
-const ploRoutes = require('./PLORouter');
+
+const swaggerUi = require('swagger-ui-express');
+
+const swaggerSpec = require('../utils/swagger');
+
+const programRoutes = require('./ProRoutes');
+const ploRoutes = require('./PloRouter');
 const cloRoutes = require('./CloRouter');
 const courseRoute = require('./CourseRouter');
 const chapterRoutes = require('./ChapterRouter');
 const questionRoutes = require('./QuestionRouter');
-const poRoutes = require('./PORouter');
+const poRoutes = require('./PoRouter');
 const poPloRoutes = require('./Po_PloRouter');
+const ploCloRoutes = require('./Plo_CloRouter');
 const pdfRouters = require('./PdfRouter');
-const csvRouters = require('./CSVRouter');
+const csvRouters = require('./CsvRouter');
 const csvSaveRouters = require('./SaveCSVRouter');
+
+//doc
+router.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 router.use('/api/admin', programRoutes);
 router.use('/api/admin', ploRoutes);
@@ -20,6 +29,7 @@ router.use('/api/admin', questionRoutes);
 router.use('/api/admin', chapterRoutes);
 router.use('/api/admin', poRoutes);
 router.use('/api/admin', poPloRoutes);
+router.use('/api/admin', ploCloRoutes);
 router.use('/api/admin', pdfRouters);
 router.use('/api/admin/csv',csvRouters);
 router.use('/api/admin/csv-save',csvSaveRouters);

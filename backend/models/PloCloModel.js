@@ -1,27 +1,28 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const ProgramModel = require('./ProgramModel');
+const CloModel = require('./CloModel');
+const PloModel = require('./PloModel');
 
-const PloModel = sequelize.define('PLO', {
-  plo_id: {
+const PloCloModel = sequelize.define('map_plo_clo', {
+  id_plo_clo: {
     type: DataTypes.INTEGER.UNSIGNED,
     primaryKey: true,
     autoIncrement: true
   },
-  description: {
-    type: DataTypes.STRING(255),
-    allowNull: false
-  },
-  ploName: {
-    type: DataTypes.STRING(255),
-    allowNull: false
-  },
-  program_id: {
+  plo_id: {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
     references: {
-      model: ProgramModel,
-      key: 'program_id'
+      model: PloModel,
+      key: 'plo_id'
+    }
+  },
+  clo_id: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
+    references: {
+      model: CloModel,
+      key: 'clo_id'
     }
   },
   isDelete: {
@@ -33,7 +34,7 @@ const PloModel = sequelize.define('PLO', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'plos'
+  tableName: 'map_plo_clos'
 });
 
-module.exports = PloModel;
+module.exports = PloCloModel;

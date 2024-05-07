@@ -1,32 +1,40 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const PloModel = require('./PloModel');
-const CourseModel = require('./CourseModel');
-const CloModel = sequelize.define('CLO', {
-  clo_id: {
+const UserModel = require('./UserModel');
+
+const TeacherModel = sequelize.define('teacher', {
+  teacher_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  cloName: {
-    type: DataTypes.STRING(20),
+  user_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: UserModel,
+      key: 'user_id'
+    }
+  },
+  name: {
+    type: DataTypes.STRING(255),
     allowNull: false
   },
-  description: {
-    type: DataTypes.TEXT,
+  email: {
+    type: DataTypes.STRING(255),
+    allowNull: false
+  },
+  passwork: {
+    type: DataTypes.STRING(15),
+    allowNull: false
+  },
+  typeTeacher: {
+    type: DataTypes.ENUM('GVCV', 'GVGD'),
     allowNull: false
   },
   isDelete: {
     type: DataTypes.TINYINT,
     defaultValue: 0
-  },
-  course_id : {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: CourseModel,
-      key: 'course_id '
-    }
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -42,7 +50,7 @@ const CloModel = sequelize.define('CLO', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'clos',
+  tableName: 'teachers',
 });
 
-module.exports = CloModel;
+module.exports = TeacherModel;

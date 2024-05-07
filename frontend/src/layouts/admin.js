@@ -21,6 +21,7 @@ import ManageProgram from '../components/pages/Admin/Manage/ManageProgram/Manage
 import ManagePo from '../components/pages/Admin/Manage/ManagePo/ManagePo';
 import ManagePlo from '../components/pages/Admin/Manage/ManagePlo/ManagePlo';
 import FormPoint from '../components/pages/Admin/FormPoint/FormPoint';
+import PloClo from '../components/pages/Admin/Manage/ManageClo/PloClo';
 
 function Admin(props) {
 
@@ -70,6 +71,9 @@ function Admin(props) {
           <Route path="/manage-plo/update" element={<UpdatePlo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/manage-plo/update/:id" element={<UpdatePloById collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
         
+
+          <Route path="/manage-clo/plo-clo" element={<PloClo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+
           <Route path="/manage-point" element={<FormPoint collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
           

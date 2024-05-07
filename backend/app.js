@@ -13,23 +13,17 @@ const jwt = require('jsonwebtoken');
 app.use(cookieParser());
 const dotenv = require('dotenv');
 const morgan = require('morgan');
+morgan('combined')
 const cors = require('cors');
-app.use(express.static("public");
-const swaggerUi = require('swagger-ui-express');
-
 const indexRouter = require('./routes/IndexRouter');
-const swaggerSpec = require('./utils/swagger');
 
+app.use(express.static("public"));
 app.use(cors({
   origin: 'http://localhost:3000',
   credentials: true,
 }));
 
-// Use swagger-ui-express for your app documentation endpoint
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
 app.use('/', indexRouter);
-morgan('combined')
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

@@ -1,31 +1,31 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const PloModel = require('./PloModel');
-const CourseModel = require('./CourseModel');
-const CloModel = sequelize.define('CLO', {
-  clo_id: {
+
+const ClassModel = sequelize.define('Class', {
+  class_id : {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  cloName: {
-    type: DataTypes.STRING(20),
+  className: {
+    type: DataTypes.STRING(255),
     allowNull: false
   },
-  description: {
-    type: DataTypes.TEXT,
+  classCode: {
+    type: DataTypes.STRING(10),
     allowNull: false
   },
   isDelete: {
     type: DataTypes.TINYINT,
     defaultValue: 0
   },
-  course_id : {
+  teacher_id  : {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: CourseModel,
-      key: 'course_id '
+      model: PloModel,
+      key: 'teacher_id'
     }
   },
   createdAt: {
@@ -42,7 +42,7 @@ const CloModel = sequelize.define('CLO', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'clos',
+  tableName: 'classes',
 });
 
-module.exports = CloModel;
+module.exports = ClassModel;

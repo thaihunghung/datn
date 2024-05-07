@@ -1,32 +1,31 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const PloModel = require('./PloModel');
-const CourseModel = require('./CourseModel');
-const CloModel = sequelize.define('CLO', {
-  clo_id: {
+
+const UserModel = sequelize.define('user', {
+  user_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  cloName: {
-    type: DataTypes.STRING(20),
-    allowNull: false
-  },
-  description: {
+  email: {
     type: DataTypes.TEXT,
     allowNull: false
+  },
+  password: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  permission: {
+    type: DataTypes.TINYINT,
+    allowNull: false
+  },
+  isBlock: {
+    type: DataTypes.TINYINT,
+    defaultValue: 0
   },
   isDelete: {
     type: DataTypes.TINYINT,
     defaultValue: 0
-  },
-  course_id : {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: CourseModel,
-      key: 'course_id '
-    }
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -42,7 +41,7 @@ const CloModel = sequelize.define('CLO', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'clos',
+  tableName: 'users',
 });
 
-module.exports = CloModel;
+module.exports = UserModel;

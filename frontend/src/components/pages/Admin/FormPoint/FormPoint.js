@@ -5,10 +5,6 @@ import { Collapse } from 'antd';
 
 import "./FormPoint.css"
 
-const CDR = [
-  { CDR: 'CLO1', CONTENT: 'chuẩn đầu ra 1' }
-];
-var demoTong = 1;
 
 const rubics = [
 {
@@ -132,14 +128,7 @@ const FormPoint = (nav) => {
 
               <div className="w-full">
                 <div className="hidden sm:hidden lg:block xl:block text-justify leading-8 p-4">
-                  <p>{item.TieuChi.ten_Tieu_Chi}</p>
-                  {/* {item.TieuChi.map((tieuchuan, index) => (
-                    <div key={index} className="text-justify leading-8">
-
-                      <p>{tieuchuan.Noidung}</p>
-
-                    </div>
-                  ))} */}
+                  {item.TieuChi.Noidung}
                 </div>
 
                 <div className="block sm:block lg:hidden xl:hidden">
@@ -151,9 +140,7 @@ const FormPoint = (nav) => {
                           label: <p className="text-justify text-lg">{item.TieuChi.ten_Tieu_Chi}</p>,
                           children: (
                             <div className="text-justify p-2 px-5 sm:p-2 sm:px-5 lg:p-5 xl:p-5">
-                              {/* {item.TieuChi.map((tc, index) => (
-                                <div key={index} className="text-lg">{tc.Noidung}</div>
-                              ))} */}
+                               {item.TieuChi.Noidung}
                             </div>
                           )
                         }
@@ -173,8 +160,8 @@ const FormPoint = (nav) => {
                   <table className="w-full border-collapse border border-black">
                     <tbody>
                       <tr>
-                        {/* {item.TieuChi.map((tc, index) => (
-                          <td key={index} className="p-2 text-center border border-black">
+
+                          {/* <td className="p-2 text-center border border-black">
                             <div className="flex flex-col items-center gap-2">
                               <span>{`Đạt ${index}`}</span>
                               <Radio 
@@ -185,8 +172,8 @@ const FormPoint = (nav) => {
 
                               </Radio>
                             </div>
-                          </td>
-                        ))} */}
+                          </td> */}
+
                       </tr>
                       <tr>
                         {/* {item.TieuChi.map((tc, index) => (

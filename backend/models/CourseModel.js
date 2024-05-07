@@ -1,28 +1,51 @@
-const { DataTypes } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const CloModel = require('./CloModel');
+const ClassModel = require('./ClassModel');
+const TeacherModel = require('./TeacherModel');
+const SemesterModel = require('./SemesterModel');
+const SubjectModel = require('./SubjectModel');
 
-const CourseModel = sequelize.define('Course', {
+const CourseModel = sequelize.define('course', {
   course_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  courseName: {
-    type: DataTypes.TEXT,
-    allowNull: false
+  class_id: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
+    references: {
+      model: ClassModel,
+      key: 'class_id'
+    }
+  },
+  teacher_id: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
+    references: {
+      model: TeacherModel,
+      key: 'teacher_id'
+    }
+  },
+  subject_id: { 
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: SubjectModel,
+      key: 'subject_id' 
+    }
+  },
+  semester_id: { 
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: SemesterModel,
+      key: 'semester_id' 
+    }
   },
   isDelete: {
     type: DataTypes.TINYINT,
     defaultValue: 0
-  },
-  clo_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: CloModel,
-      key: 'clo_id'
-    }
   },
   createdAt: {
     type: DataTypes.DATE,

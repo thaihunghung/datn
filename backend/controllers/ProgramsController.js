@@ -1,9 +1,9 @@
-const Program = require('../models/ProgramModel');
+const ProgramModel = require('../models/ProgramModel');
 
 const programController = {
   index: async (req, res) => {
     try {
-      Program.findAll()
+      ProgramModel.findAll()
         .then(programs => {
           return res.json(programs);
         })
@@ -22,7 +22,7 @@ const programController = {
     try {
       const { data } = req.body;
       console.log(data);
-      const newProgram = await Program.create(data);
+      const newProgram = await ProgramModel.create(data);
       res.json(newProgram);
     } catch (error) {
       console.error('Lỗi tạo chương trình:', error);
@@ -32,7 +32,7 @@ const programController = {
   getByID: async (req, res) => {
     try {
       const { id } = req.params;
-      const program = await Program.findOne({ program_id: id});
+      const program = await ProgramModel.findOne({ program_id: id});
       res.json(program);
     } catch (error) {
       console.error('Lỗi tìm kiếm chương trình:', error);
@@ -43,7 +43,7 @@ const programController = {
     try {
       const { id } = req.params;
       const { data } = req.body;
-      const updatedProgram = await Program.update(data , { where: { program_id: id } });
+      const updatedProgram = await ProgramModel.update(data , { where: { program_id: id } });
       if (updatedProgram[0] === 0) {
         return res.status(404).json({ message: 'Program not found' });
       }
@@ -56,7 +56,7 @@ const programController = {
   delete: async (req, res) => {
     try {
       const { id } = req.params;
-      await Program.destroy({ where: { program_id: id } });
+      await ProgramModel.destroy({ where: { program_id: id } });
       res.json({ message: 'Xóa chương trình thành công' });
     } catch (error) {
       console.error('Lỗi xóa chương trình:', error);
@@ -65,7 +65,7 @@ const programController = {
   },
   isDeleteTotrue: async (req, res) => {
     try {
-      const program = await Program.findAll({ where: { isDelete: true } });
+      const program = await ProgramModel.findAll({ where: { isDelete: true } });
 
       if (!program) {
         return res.status(404).json({ message: 'Không tìm thấy chương trình' });
@@ -79,7 +79,7 @@ const programController = {
   },
   isDeleteTofalse: async(req, res) => {
     try {
-      const program = await Program.findAll({ where: { isDelete: false } });
+      const program = await ProgramModel.findAll({ where: { isDelete: false } });
       if (!program) {
         return res.status(404).json({ message: 'Không tìm thấy chương trình' });
       }
@@ -92,14 +92,14 @@ const programController = {
   isdelete: async (req, res) => {
     try {
       const { id } = req.params;
-      const program = await Program.findOne({ where: { program_id: id } });
+      const program = await ProgramModel.findOne({ where: { program_id: id } });
 
       if (!program) {
         return res.status(404).json({ message: 'Không tìm thấy chương trình' });
       }
       const updatedIsDeleted = !program.isDelete;
       console.log(updatedIsDeleted);
-      Program.update({ isDelete: updatedIsDeleted }, { where: { program_id: id } })
+      ProgramModel.update({ isDelete: updatedIsDeleted }, { where: { program_id: id } })
         .then(programs => {
           console.log(programs);
         })
