@@ -2,7 +2,7 @@ const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const AcademicYearModel = sequelize.define('academic_year', {
-  acdemic_year_id: {
+  academic_year_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true

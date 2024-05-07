@@ -25,7 +25,7 @@ const SemesterModel = sequelize.define('semester', {
     allowNull: false,
     references: {
       model: AcademicYearModel,
-      key: 'acdemic_year_id' 
+      key: 'academic_year_id' 
     }
   },
 }, {
