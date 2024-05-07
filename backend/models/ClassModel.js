@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const PloModel = require('./PloModel');
+const TeacherModel = require('./TeacherModel');
 
 const ClassModel = sequelize.define('Class', {
   class_id : {
@@ -24,7 +24,7 @@ const ClassModel = sequelize.define('Class', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: PloModel,
+      model: TeacherModel,
       key: 'teacher_id'
     }
   },
