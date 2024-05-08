@@ -1,4 +1,4 @@
-// Rubic.js
+// CreateRubic.js
 
 import { useEffect, useState } from "react";
 import { Tabs, Tab, Card, CardBody } from "@nextui-org/react";
@@ -16,10 +16,11 @@ import {
     ModalHeader,
     ModalBody,
     ModalFooter,
-    useDisclosure
+    useDisclosure,
+    Input
 } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-const Rubic = (nav) => {
+const CreateRubic = (nav) => {
     const { id } = useParams();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -27,8 +28,10 @@ const Rubic = (nav) => {
     const [disableRowLayout, setDisableRowLayout] = useState(false);
     const [name, setName] = useState("");
     const [isDelete, setisDelete] = useState(false);
-    const [program_id, setProgram_id] = useState();
-
+    const [subject_id, setSubject_id] = useState();
+    const [rubricName, setRubricName] = useState("");
+    const [comment, setComment] = useState("");
+      
     const navigate = useNavigate();
     const [scrollBehavior, setScrollBehavior] = useState("inside");
     const [SubjectData, setSubject] = useState([]);
@@ -40,17 +43,31 @@ const Rubic = (nav) => {
         }
     ]
 
-    const getSubject = async () => {
+    const UpdatePrograms = async () => {
         try {
             //await axiosAdmin.get(`/Subject`);
-            setSubject(dataDemo)
+            
+        } catch (error) {
+            console.error("lỗi", error);
+        }
+    }
+    const CreateRubic = async () => {
+        try {
+            const data = {
+                subject_id: subject_id,
+                rubricName: rubricName,
+                comment:comment
+            }
+            console.log(data);
+            await axiosAdmin.post(`/rubric`, {data: data});
+            navigate("/admin/manage-rubric/")
         } catch (error) {
             console.error("lỗi", error);
         }
     }
     useEffect(() => {
         onOpen()
-        getSubject()
+        setSubject(dataDemo)
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setLayout("col");
@@ -68,17 +85,17 @@ const Rubic = (nav) => {
             window.removeEventListener("resize", handleResize);
         };
     }, []);
-
+    // onClose={() => navigate("/admin/manage-rubric/")}
     return (
         <div className="flex w-full flex-col justify-center items-start leading-8 p-2 bg-[#f5f5f5]-500">
-            <Modal isOpen={isOpen} onClose={() => navigate("/admin/manage-program/")} scrollBehavior={scrollBehavior}>
+            <Modal isOpen={isOpen} scrollBehavior={scrollBehavior}>
                 <ModalContent className="m-auto">
                     <ModalHeader className="flex flex-col gap-1">Cập nhật</ModalHeader>
                     <ModalBody>
                         <Select
-                            defaultValue={"Chọn chương trình"}
-                            value={program_id}
-                            onChange={setProgram_id}
+                            defaultValue={"Chọn học phần"}
+                            value={subject_id}
+                            onChange={setSubject_id}
                             size="large"
                             className="w-full"
                         >
@@ -91,20 +108,33 @@ const Rubic = (nav) => {
                                 </Select.Option>
                             ))}
                         </Select>
-     
+                        <span>rubric</span>
+
+                        <Input
+                            value={rubricName}
+                            onValueChange={setRubricName}
+                            className="max-w-xs"
+                        />
+                        <span>comment</span>
+                        <Input
+                            value={comment}
+                            onValueChange={setComment}
+                            className="max-w-xs"
+                        />
+                        
                     </ModalBody>
                     <ModalFooter>
                         <Button
                             color="danger"
                             radius="sm"
                             as={Link}
-                            to="/admin/manage-program/"
+                            to="/admin/manage-rubric/"
                             onClick={onClose}
                         >
                             Close
                         </Button>
 
-                        <Button onClick={UpdatePrograms} color="primary" radius="sm">
+                        <Button onClick={CreateRubic} color="primary" radius="sm">
                             <span className="font-medium">Cập nhật</span>
                         </Button>
                     </ModalFooter>
@@ -144,4 +174,4 @@ const Rubic = (nav) => {
     );
 }
 
-export default Rubic;
+export default CreateRubic;

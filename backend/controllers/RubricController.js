@@ -1,4 +1,10 @@
+const { Sequelize, DataTypes } = require('sequelize');
+
 const RubricModel = require('../models/RubricModel');
+const RubricItemModel = require('../models/RubricItemModel');
+const SubjectModel = require('../models/SubjectModel');
+const CloModel = require('../models/CloModel');
+const ChapterModel = require('../models/ChapterModel');
 
 const RubricController = {
   // Get all rubrics
@@ -104,6 +110,78 @@ const RubricController = {
     } catch (error) {
       console.error('Error updating isDelete status:', error);
       res.status(500).json({ message: 'Server error' });
+    }
+  },
+  // const RubricModel = require('../models/RubricModel');
+  // const RubricItemModel = require('../models/RubricItemModel');
+  GetByUserAndCheckScore: async (req, res) => {
+    try {
+
+      const rubrics = await RubricModel.findAll();
+      const rubricIds = rubrics.map(rubric => rubric.rubric_id);
+
+      const results = await RubricItemModel.findAll({
+        attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('score')), 'total_score']],
+        where: { rubric_id: rubricIds },
+        group: ['rubric_id']
+      });
+      const rubricScores = results.map(result => ({
+        rubric_id: result.rubric_id,
+        total_score: result.dataValues.total_score
+      }));
+
+      const rubricsWithScores = await Promise.all(rubricScores.map(async rubricScore => {
+        const rubric = await RubricModel.findByPk(rubricScore.rubric_id);
+        let checkScore10 = 'no';
+        if (rubricScore.total_score === 10) {
+          checkScore10 = 'yes';
+        }
+        return {
+          rubric_id: rubric.rubric_id,
+          rubric_name: rubric.rubricName,
+          total_itemRubric_score: rubricScore.total_score,
+          checkScore10: checkScore10
+        };
+      }));
+
+      res.json(rubricsWithScores);
+    } catch (error) {
+      console.error('Error getting all rubrics:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+  GetItemsRubricsByIdRubrics: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const rubric = await RubricModel.findOne({
+        where: { rubric_id: id },
+        include: [{
+          model: SubjectModel,
+          attributes: ['subject_id', 'subjectName']
+        }]
+      });
+      if (rubric) {
+        const rubricItems = await RubricItemModel.findAll({ 
+          where: { rubric_id: rubric.rubric_id }, 
+          include: [{
+            model: CloModel,
+            attributes: ['clo_id', 'cloName']
+          },{
+            model: ChapterModel,
+            attributes: ['chapter_id', 'chapterName']
+          }
+        ]
+        });
+        
+        //muôn gắn đối tượng vào thì dataValues
+        rubric.dataValues.rubricItems = rubricItems;
+        res.json({ rubric: rubric });
+      } else {
+        console.log('Rubric not found');
+      }
+    } catch (error) {
+      console.error('Error getting all rubrics:', error);
+      res.status(500).json({ message: 'Internal server error' });
     }
   },
 };

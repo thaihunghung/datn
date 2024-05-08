@@ -1,7 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const SubjectModel = require('./SubjectModel');
-const AssessmentModel = require('./AssessmentModel');
 
 const RubricModel = sequelize.define('Rubric', {
   rubric_id: {
@@ -49,5 +48,6 @@ const RubricModel = sequelize.define('Rubric', {
   updatedAt: 'updatedAt',
   tableName: 'rubrics'
 });
+RubricModel.belongsTo(SubjectModel, { foreignKey: 'subject_id' });
 
 module.exports = RubricModel;
