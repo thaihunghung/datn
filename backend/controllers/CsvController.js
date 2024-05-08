@@ -1,4 +1,4 @@
-const Program = require('../models/ProgramModel');
+const ProgramModel = require('../models/ProgramModel');
 const PoModel = require('../models/PoModel');
 const PloModel = require('../models/PloModel');
 

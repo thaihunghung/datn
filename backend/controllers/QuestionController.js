@@ -93,6 +93,7 @@ const QuestionController = {
   isdelete: async (req, res) => {
     try {
       const { id } = req.params;
+      console.log('isDelete', id);
       const question = await QuestionModel.findOne({ where: { question_id: id } });
       if (!question) {
         return res.status(404).json({ message: 'Question not found' });

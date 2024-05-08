@@ -17,14 +17,6 @@ const RubricModel = sequelize.define('Rubric', {
       key: 'subject_id'
     }
   },
-  assessment_id: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    references: {
-      model: AssessmentModel,
-      key: 'assessment_id'
-    }
-  },
   rubricName: {
     type: DataTypes.STRING(255),
     allowNull: false
