@@ -1,16 +1,18 @@
-// Rubic.js
+// UpdateStudentById.js
 
 import { useEffect, useState } from "react";
 import { Tabs, Tab, Card, CardBody } from "@nextui-org/react";
 import { Divider, Steps } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { Switch } from "@nextui-org/react";
-import { Select } from "antd";
+
 import { Link } from "react-router-dom";
 import moment from "moment";
 import { useLocation, useNavigate, useParams } from "react-router-dom"; // Import useHistory from react-router-dom
 import {
     Button,
+    Avatar,
+    Input,
     Modal,
     ModalContent,
     ModalHeader,
@@ -19,7 +21,7 @@ import {
     useDisclosure
 } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-const Rubic = (nav) => {
+const UpdateStudentById = (nav) => {
     const { id } = useParams();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -27,30 +29,40 @@ const Rubic = (nav) => {
     const [disableRowLayout, setDisableRowLayout] = useState(false);
     const [name, setName] = useState("");
     const [isDelete, setisDelete] = useState(false);
-    const [program_id, setProgram_id] = useState();
 
     const navigate = useNavigate();
     const [scrollBehavior, setScrollBehavior] = useState("inside");
-    const [SubjectData, setSubject] = useState([]);
 
-    const dataDemo = [
-        {
-            "subject_id": 13,
-            "subjectName": "Thống kê và phân tích dữ liệu"
-        }
-    ]
 
-    const getSubject = async () => {
+    const getProgramByID = async () => {
         try {
-            //await axiosAdmin.get(`/Subject`);
-            setSubject(dataDemo)
+            const response = await axiosAdmin.get(`/program/${id}`);
+            if (response.data) {
+                setName(response.data.program_name)
+                setisDelete(response.data.isDeleted)
+            }
+            console.log(response);
+
+        } catch (error) {
+            console.error("lỗi", error);
+        }
+    }
+
+    const UpdatePrograms = async () => {
+        try {
+            const data = {
+                program_name: name,
+                isDeleted: isDelete
+            }
+            const response = await axiosAdmin.put(`/program/${id}`, { data });
+            onClose(navigate("/admin/manage-program/"))
         } catch (error) {
             console.error("lỗi", error);
         }
     }
     useEffect(() => {
         onOpen()
-        getSubject()
+        getProgramByID()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setLayout("col");
@@ -75,23 +87,16 @@ const Rubic = (nav) => {
                 <ModalContent className="m-auto">
                     <ModalHeader className="flex flex-col gap-1">Cập nhật</ModalHeader>
                     <ModalBody>
-                        <Select
-                            defaultValue={"Chọn chương trình"}
-                            value={program_id}
-                            onChange={setProgram_id}
-                            size="large"
-                            className="w-full"
-                        >
-                            {SubjectData.map((Subject) => (
-                                <Select.Option
-                                    key={Subject.subject_id}
-                                    value={Subject.subject_id}
-                                >
-                                    {Subject.subjectName}
-                                </Select.Option>
-                            ))}
-                        </Select>
-     
+
+                        <Input
+                            value={name}
+                            onValueChange={setName}
+                            className="max-w-xs"
+                        />
+
+                        <Switch isSelected={isDelete} onValueChange={setisDelete}>
+                            Airplane mode
+                        </Switch>
                     </ModalBody>
                     <ModalFooter>
                         <Button
@@ -104,9 +109,9 @@ const Rubic = (nav) => {
                             Close
                         </Button>
 
-                        {/* <Button onClick={UpdatePrograms} color="primary" radius="sm">
+                        <Button onClick={UpdatePrograms} color="primary" radius="sm">
                             <span className="font-medium">Cập nhật</span>
-                        </Button> */}
+                        </Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>
@@ -144,4 +149,4 @@ const Rubic = (nav) => {
     );
 }
 
-export default Rubic;
+export default UpdateStudentById;

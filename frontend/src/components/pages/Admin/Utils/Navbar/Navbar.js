@@ -103,6 +103,15 @@ function Nav(props) {
 
             ],
         },
+        {
+            text: "Sinh viên",
+            link: "/admin/student",
+            icon: (
+                <i
+                    className={`fa-solid fa-bolt mr-${collapsedNav ? "0" : "3"} w-4`}
+                ></i>
+            ),
+        },
 
     ];
 
