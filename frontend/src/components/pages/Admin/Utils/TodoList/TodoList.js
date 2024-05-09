@@ -59,9 +59,10 @@ const TodoList = ({ data, Chapter, Clo, rubric_id, successNoti, setSpinning }) =
           <button onClick={addEditor}>Thêm</button>
         </div>
       </div>
-      <div className='w-full mx-auto flex flex-wrap gap-10 p-5'>
+      <div className='w-full flex flex-col sm:flex-col lg:flex-row xl:flex-row gap-10 p-5'>
         {editors.map((editor, index) => (
           !editor.isDelete && (
+            
             <div key={index} className='flex flex-row border flex-1 sm:flex-1 lg:flex-1 xl:w-[55%]'>
               <div className='w-full'>
                 <div className='flex justify-end w-full'>
@@ -72,10 +73,8 @@ const TodoList = ({ data, Chapter, Clo, rubric_id, successNoti, setSpinning }) =
                     }
                   }}>Xóa</button>
                 </div>
-
-                {editor.component}
+                  {editor.component}
               </div>
-
             </div>
           )
         ))}

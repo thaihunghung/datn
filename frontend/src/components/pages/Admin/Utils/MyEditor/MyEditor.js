@@ -14,7 +14,7 @@ const MyEditor = ({ htmlContent, SaveData, Chapter, Clo, id, rubric_id, chapter_
   const { Option } = Select;
   const [selectedChapter, setSelectedChapter] = useState("");
   const [selectedClo, setSelectedClo] = useState("");
-  
+
 
   const [SaveLoad, setSaveLoad] = useState(SaveData);
   const [score, setScore] = useState();
@@ -25,10 +25,10 @@ const MyEditor = ({ htmlContent, SaveData, Chapter, Clo, id, rubric_id, chapter_
 
   const handleChapterSelectChange = (value, option) => {
     setSelectedChapter(value);
-};
-const handleCloSelectChange = (value, option) => {
-  setSelectedClo(value);
-};
+  };
+  const handleCloSelectChange = (value, option) => {
+    setSelectedClo(value);
+  };
 
 
   const [editorState, setEditorState] = useState(
@@ -86,61 +86,56 @@ const handleCloSelectChange = (value, option) => {
   };
 
   return (
-    <div className='flex  w-full'>
-      <div className='w-full p-5'>
+    <div className='flex'>
+      <div className='w-[400px] sm:w-full lg:w-full xl:w-full p-5'>
         <div className='flex flex-col sm:flex-row lg:flex-row xl:flex-row w-full mb-5 gap-5 justify-start items-center'>
           <div className='w-full items-center  justify-center flex flex-row gap-2 sm:flex-col lg:flex-col xl:flex-col'>
             <div className='text-left w-full font-bold'>Chọn Clo:</div>
             <Select
               defaultValue="Chọn loại"
-              className="w-full sm:min-w-[200px] lg:min-w-[250px] xl:min-w-[250px]"
+              className="min-w-[250px] sm:min-w-[250px] lg:min-w-[250px] xl:min-w-[250px]"
               onChange={handleCloSelectChange}
               value={selectedClo}
             >
               {Clo.map((items) => (
-                  <Option
-                    key={items.clo_id}
-                    value={items.clo_id}
-                  >
-                   ({items.cloName})
-                  </Option>
-                ))}
+                <Option
+                  key={items.clo_id}
+                  value={items.clo_id}
+                  textValue={items.cloName}
+                >
+                  <Tooltip content={items.description} className='font-bold'>
+                    {items.cloName}
+                  </Tooltip>
+                </Option>
+              ))}
             </Select>
           </div>
           <div className='w-full items-center justify-center flex flex-row gap-2 sm:flex-col lg:flex-col xl:flex-col'>
             <div className='text-left w-full font-bold'>Chọn Chapter:</div>
-
-            
-
-            <div>
-
-              <Select
-                defaultValue="Chọn loại"
-                value={selectedChapter}
-                onChange={handleChapterSelectChange}
-                size="large"
-                className="w-full"
-              >    
-                {Chapter.map((items) => (
-                  <Option
-                    key={items.chapter_id}
-                    value={items.chapter_id}
-                  >
-                   ({items.chapterName})
-                  </Option>
-                ))}
-              </Select>
-            </div>
+            <Select
+              defaultValue="Chọn loại"
+              value={selectedChapter}
+              onChange={handleChapterSelectChange}
+              size="large"
+              className="min-w-[250px] sm:min-w-[250px] lg:min-w-[250px] xl:min-w-[250px]"
+            >
+              {Chapter.map((items) => (
+                <Option
+                  key={items.chapter_id}
+                  value={items.chapter_id}
+                  textValue={items.chapterName}
+                ><Tooltip content={items.description} className='font-bold'>
+                    {items.chapterName}
+                  </Tooltip>
+                </Option>
+              ))}
+            </Select>
 
           </div>
-
         </div>
-
         <div>
           <div className='w-full mb-5 items-center justify-center flex flex-row gap-2 sm:flex-col lg:flex-col xl:flex-col'>
             <div className='text-left w-full font-bold'>Nhập điểm:</div>
-
-
             <Input
               label="Nhập điểm"
               variant="bordered"
@@ -176,7 +171,6 @@ const handleCloSelectChange = (value, option) => {
           </div>
         </div>
       </div>
-
     </div>
   );
 };
