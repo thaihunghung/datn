@@ -161,20 +161,28 @@ const RubricController = {
         }]
       });
       if (rubric) {
-        const rubricItems = await RubricItemModel.findAll({ 
-          where: { rubric_id: rubric.rubric_id }, 
-          include: [{
-            model: CloModel,
-            attributes: ['clo_id', 'cloName']
-          },{
-            model: ChapterModel,
-            attributes: ['chapter_id', 'chapterName']
-          }
-        ]
-        });
-        
-        //muôn gắn đối tượng vào thì dataValues
+        const [rubricItems, Clos, Chapters] = await Promise.all([
+          RubricItemModel.findAll({
+            where: { 
+              rubric_id: rubric.rubric_id,
+            },
+            include: [{
+              model: CloModel,
+              attributes: ['clo_id', 'cloName']
+            }, {
+              model: ChapterModel,
+              attributes: ['chapter_id', 'chapterName']
+            }]
+          }),
+          CloModel.findAll({ where: { subject_id: rubric.subject_id } }),
+          ChapterModel.findAll({ where: { subject_id: rubric.subject_id } })
+        ]);
+
+        // Gán kết quả cho các thuộc tính của rubric
         rubric.dataValues.rubricItems = rubricItems;
+        rubric.dataValues.CloData = Clos;
+        rubric.dataValues.ChapterData = Chapters;
+
         res.json({ rubric: rubric });
       } else {
         console.log('Rubric not found');

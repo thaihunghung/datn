@@ -19,6 +19,6 @@ router.put('/rubric/isDelete/:id', RubricController.isdelete);
 router.get('/rubric/:id/items', RubricController.GetItemsRubricsByIdRubrics);
 
 // /rubrics/get-by-user/:userId/checkscore  vậy mới đúng
-router.get('/rubrics/get-by-user/checkscore', RubricController.GetByUserAndCheckScore);
+router.get('/rubric/get-by-user/checkscore', RubricController.GetByUserAndCheckScore);
 
 module.exports = router;

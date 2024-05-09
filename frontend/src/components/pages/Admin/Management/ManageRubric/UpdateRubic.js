@@ -1,101 +1,29 @@
 // UpdateRubic.js
 
 import { useEffect, useState } from "react";
-import { Input } from "@nextui-org/react";
-import { UploadOutlined } from '@ant-design/icons';
-import { Upload, Divider, Steps, Button } from 'antd';
 import { Link, useParams } from "react-router-dom";
-
-import {
-  Modal, Chip,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter
-} from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import MyEditor from "../../Utils/MyEditor/MyEditor";
+
+import TodoList from "../../Utils/TodoList/TodoList";
 
 
 
 const UpdateRubic = (nav) => {
   const { id } = useParams();
-  const { setCollapsedNav, successNoti } = nav;
+  const { setCollapsedNav, successNoti, errorNoti, setSpinning } = nav;
   const [RubicData, setRubicData] = useState([]);
-  const [activeTab, setActiveTab] = useState(0);
-  const [editorData, setEditorData] = useState('');
-
-  const handleEditorChange = (event, editor) => {
-    const data = editor.getData();
-    setEditorData(data);
-  };
-
-  const [nameP, setNameP] = useState("");
-
-  const handleSave = async () => {
-    try {
-      if (nameP === "") {
-        alert("dữ liệu lỗi")
-        document.getElementById("name-program").focus();
-        return;
-      }
-      const data = {
-        programName: nameP
-      }
-      await axiosAdmin.post('/program', { data: data });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
+  const [data, setData] = useState([]);
+  const [CloData, setCloData] = useState([]);
+  const [ChapterData, setChapterData] = useState([]);
   const GetRubicAndItemsById = async () => {
     const response = await axiosAdmin.get(`/rubric/${id}/items`)
     console.log(response.data.rubric.rubricItems);
     setRubicData(response.data.rubric.rubricItems)
+    setData(response.data.rubric.rubricItems)
+    setCloData(response.data.rubric.CloData)
+    setChapterData(response.data.rubric.ChapterData)
   }
-  const [current, setCurrent] = useState(0);
-  const onChangexxx = (nameP) => {
-
-    setCurrent(nameP);
-  };
-
-  const [fileList, setFileList] = useState([]);
-
-  const handleDownloadProgram = async () => {
-    try {
-      const response = await axiosAdmin.get('csv/program', {
-        responseType: 'blob'
-      });
-
-      if (response && response.data) {
-        const url = window.URL.createObjectURL(response.data);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'program.csv';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        setCurrent(1);
-      }
-    } catch (error) {
-      console.error('Error downloading file:', error);
-    }
-  };
-  const props = {
-    onRemove: (file) => {
-      const index = fileList.indexOf(file);
-      const newFileList = fileList.slice();
-      newFileList.splice(index, 1);
-      setFileList(newFileList);
-    },
-    beforeUpload: (file) => {
-      setFileList([...fileList, file]);
-      return false;
-    },
-    fileList,
-  };
-
-  const description = 'This is a description.';
+  
   useEffect(() => {
     GetRubicAndItemsById()
     //allProgramIsDelete()
@@ -146,20 +74,22 @@ const UpdateRubic = (nav) => {
         </div>
       </div>
       <div className="w-full mt-5 rounded-lg">
-      
+      <TodoList data={data} rubric_id={id}  Clo={CloData} Chapter={ChapterData} successNoti={successNoti} setSpinning={setSpinning}/>
       {RubicData.map((rubricItem) => (
-  <div className="w-full flex justify-center" key={rubricItem.rubric_id}>
-    <div>
-      {/* Content for the first div */}
-    </div>
-    <div className="w-[60%]">
-    <MyEditor />
-    </div>
-    <div>
-      {/* Content for the third div */}
-    </div>
-  </div>
-))}
+      <div className="w-full flex justify-center" key={rubricItem.rubric_id}>
+        <div>
+          {/* Content for the first div */}
+        </div>
+        <div className="w-full">
+        
+       
+
+        </div>  
+        <div>
+          {/* Content for the third div */}
+        </div>
+      </div>
+    ))}
 
       </div>
     </div>
