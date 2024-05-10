@@ -75,7 +75,7 @@ const CreateStudent = (nav) => {
 
     const handleDownloadProgram = async () => {
         try {
-            const response = await axiosAdmin.get('csv/program', {
+            const response = await axiosAdmin.get('csv/student', {
                 responseType: 'blob'
             });
 
@@ -83,7 +83,7 @@ const CreateStudent = (nav) => {
                 const url = window.URL.createObjectURL(response.data);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'program.csv';
+                a.download = 'student.csv';
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
@@ -278,7 +278,7 @@ const CreateStudent = (nav) => {
                                                 <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
                                                     <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
                                                         <div><p className='w-full text-center'>Lưu Dữ liệu</p></div>
-                                                        <CustomUpload endpoint={'program'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
+                                                        <CustomUpload endpoint={'student'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
                                                     </div>
                                                 </div>
                                             </div>

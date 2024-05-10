@@ -1,4 +1,8 @@
 const StudentModel = require("../models/StudentModel");
+const { filterDescription, filterDescriptionHaveid } = require('../utils/filter');
+const json2csv = require('json2csv').parse;
+const fs = require('fs');
+const xlsx = require('xlsx');
 
 const StudentController = {
   // Lấy tất cả sinh viên
@@ -107,6 +111,55 @@ const StudentController = {
     } catch (error) {
       console.error('Lỗi khi đảo ngược trạng thái isDelete của students:', error);
       res.status(500).json({ message: 'Lỗi máy chủ' });
+    }
+  },
+  getFormStudent: async (req, res) => {
+    try {
+      const Description = await StudentModel.describe();
+
+      console.log(Description);
+      const filteredStudent = filterDescription(Description, "Student")
+      if (!Description) {
+        return res.status(404).json({ message: 'Không tìm thấy mô tả Student' });
+      }
+
+      const csvData = json2csv(filteredStudent);
+      fs.writeFileSync('student.csv', csvData, 'utf8');
+      res.download('student.csv', 'student.csv', (err) => {
+        if (err) {
+          console.error('Lỗi khi gửi tệp:', err);
+          res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
+        } else {
+          fs.unlinkSync('student.csv');
+        }
+      });
+    } catch (error) {
+      console.error('Error get form Student:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+  saveStudentCSV: async (req, res) => {
+    if (!req.file) {
+      return res.status(400).send('No file uploaded.');
+    }
+
+    try {
+      const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const data = xlsx.utils.sheet_to_json(sheet);
+
+      const connection = await mysql.createConnection(dbConfig);
+      const [rows, fields] = await Promise.all(data.map(student =>
+        connection.execute(
+          `INSERT INTO students (class_id, studentCode, email, name) VALUES (?, ?, ?, ?)`,
+          [student.class_id, student.studentCode, student.email, student.name]
+        )
+      ));
+
+      res.send('Data uploaded successfully');
+    } catch (error) {
+      res.status(500).send('Failed to upload data: ' + error.message);
     }
   }
 };
