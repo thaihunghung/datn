@@ -43,5 +43,6 @@ const CloModel = sequelize.define('CLO', {
   updatedAt: 'updatedAt',
   tableName: 'clos',
 });
+CloModel.belongsTo(SubjectModel, { foreignKey: 'subject_id' });
 
 module.exports = CloModel;
