@@ -3,6 +3,8 @@ import { EditorState } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import { convertToHTML, convertFromHTML } from 'draft-convert';
 import { Button } from "@nextui-org/react";
+import { message } from 'antd';
+
 import { Tooltip, Input } from "@nextui-org/react";
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import './MyEditor.css';
@@ -60,6 +62,40 @@ const MyEditor = ({ htmlContent, SaveData, Chapter, Clo, id, rubric_id, chapter_
   const handleSave = async () => {
     setSpinning(true);
     try {
+
+        const data = {
+          "score": parseFloat(score),
+          "data": {
+            chapter_id: selectedChapter,
+            clo_id: selectedClo,
+            rubric_id: parseInt(rubric_id),
+            description: convertedContent,
+            score: parseFloat(score)
+          }
+      }
+ console.log(data);
+        const response = await axiosAdmin.post(`/rubric-item/${rubric_id}/check-score`, { data });
+        if (response.status === 201) {
+            setSaveLoad(false)
+            message.success('Rubric item created successfully');
+        } else {
+            message.error(response.data.message);
+        }
+
+    } catch (error) {
+        // If an error occurred during the request (e.g., network error), display a generic error message
+        console.error('Error saving rubric item:', error);
+        message.error('Failed to save: An error occurred');
+    } finally {
+        // Regardless of the outcome, stop the spinner
+        setSpinning(false);
+    }
+};
+
+
+  const handleUpdate = async () => {
+    setSpinning(true);
+    try {
       const data = {
         chapter_id: selectedChapter,
         clo_id: selectedClo,
@@ -68,8 +104,7 @@ const MyEditor = ({ htmlContent, SaveData, Chapter, Clo, id, rubric_id, chapter_
         score: score
       };
 
-
-      const response = await axiosAdmin.post('/rubric-item', { data: data });
+      const response = await axiosAdmin.put(`/rubric-item/${id}`, { data: data });
       setSaveLoad(false)
       console.log(response.data);
       successNoti("lưu thành công")
@@ -81,19 +116,15 @@ const MyEditor = ({ htmlContent, SaveData, Chapter, Clo, id, rubric_id, chapter_
     }
   };
 
-  const handleUpdate = () => {
-    console.log(convertedContent);
-  };
-
   return (
-    <div className='flex'>
-      <div className='w-[400px] sm:w-full lg:w-full xl:w-full p-5'>
+    <div className='flex w-full'>
+      <div className='p-5 w-full'>
         <div className='flex flex-col sm:flex-row lg:flex-row xl:flex-row w-full mb-5 gap-5 justify-start items-center'>
           <div className='w-full items-center  justify-center flex flex-row gap-2 sm:flex-col lg:flex-col xl:flex-col'>
             <div className='text-left w-full font-bold'>Chọn Clo:</div>
             <Select
               defaultValue="Chọn loại"
-              className="min-w-[250px] sm:min-w-[250px] lg:min-w-[250px] xl:min-w-[250px]"
+              className="min-w-[250px] sm:min-w-[200px] lg:min-w-[250px] xl:min-w-[250px]"
               onChange={handleCloSelectChange}
               value={selectedClo}
             >
@@ -110,6 +141,7 @@ const MyEditor = ({ htmlContent, SaveData, Chapter, Clo, id, rubric_id, chapter_
               ))}
             </Select>
           </div>
+        
           <div className='w-full items-center justify-center flex flex-row gap-2 sm:flex-col lg:flex-col xl:flex-col'>
             <div className='text-left w-full font-bold'>Chọn Chapter:</div>
             <Select
@@ -117,7 +149,7 @@ const MyEditor = ({ htmlContent, SaveData, Chapter, Clo, id, rubric_id, chapter_
               value={selectedChapter}
               onChange={handleChapterSelectChange}
               size="large"
-              className="min-w-[250px] sm:min-w-[250px] lg:min-w-[250px] xl:min-w-[250px]"
+              className="min-w-[250px] sm:min-w-[200px] lg:min-w-[250px] xl:min-w-[250px]"
             >
               {Chapter.map((items) => (
                 <Option
@@ -133,7 +165,7 @@ const MyEditor = ({ htmlContent, SaveData, Chapter, Clo, id, rubric_id, chapter_
 
           </div>
         </div>
-        <div>
+        <div className='w-full min-w-[250px] sm:min-w-[200px] lg:min-w-[250px] xl:min-w-[250px]'>
           <div className='w-full mb-5 items-center justify-center flex flex-row gap-2 sm:flex-col lg:flex-col xl:flex-col'>
             <div className='text-left w-full font-bold'>Nhập điểm:</div>
             <Input

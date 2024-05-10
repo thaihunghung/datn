@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import MyEditor from '../MyEditor/MyEditor';
 import { axiosAdmin } from '../../../../../service/AxiosAdmin';
+import { Button } from "@nextui-org/react";
 
 const TodoList = ({ data, Chapter, Clo, rubric_id, successNoti, setSpinning }) => {
   const [todos, setTodos] = useState([]);
@@ -51,15 +52,17 @@ const TodoList = ({ data, Chapter, Clo, rubric_id, successNoti, setSpinning }) =
 
   return (
     <div className="todo-list w-full">
-      <div className='flex flex-row border mb-5 w-full bg-slate-300 p-5'>
+      <div className="flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 shadow-lg rounded-md border-1 border-slate-300">
         <div className='w-[80%]'>
           <h1>Danh sách các Items rubric</h1>
         </div>
         <div className='w-[20%]'>
-          <button onClick={addEditor}>Thêm</button>
+          <Button  onClick={addEditor}>Thêm</Button>
         </div>
       </div>
-      <div className='w-full flex flex-col sm:flex-col lg:flex-row xl:flex-row gap-10 p-5'>
+
+
+      <div className='w-full flex flex-1 flex-col sm:flex-col lg:flex-row lg:flex-wrap xl:flex-row xl:flex-wrap gap-10 p-5'>
         {editors.map((editor, index) => (
           !editor.isDelete && (
             

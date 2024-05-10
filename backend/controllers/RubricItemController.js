@@ -1,4 +1,6 @@
 const RubricItemModel = require('../models/RubricItemModel');
+const { Sequelize, DataTypes } = require('sequelize');
+const RubricModel = require('../models/RubricModel');
 
 const RubricItemController = {
   // Get all RubricsItem
@@ -22,6 +24,36 @@ const RubricItemController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+  checkScore: async (req, res) => {
+    try {
+      const { rubric_id } = req.params;
+      const { data } = req.body;
+
+      const RubricsItem = await RubricItemModel.findAll({ where: { rubric_id: rubric_id } });
+      const results = await RubricItemModel.findAll({
+        attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('score')), 'total_score']],
+        where: { rubric_id: rubric_id }
+      });
+
+      const rubricScores =await results.map(result => ({
+        total_score: result.dataValues.total_score
+      }));
+      console.log("rubricScores",data)
+      const totalScore = parseFloat(rubricScores[0].total_score) + parseFloat(data.score);
+      console.log('newValue',totalScore);
+      if (totalScore <= 10) {
+        const newRubric = await RubricItemModel.create(data.data);
+        res.status(201).json({ success: true, message: "Rubric item created successfully", data: newRubric });
+      } else {
+        res.status(400).json({ success: false, message: "Failed to save: Total score exceeds 10" });
+      }
+    } catch (error) {
+      console.error('Error creating rubrics_item:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  },
+
+
   // Get rubrics_item by ID
   getByID: async (req, res) => {
     try {

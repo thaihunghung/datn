@@ -168,7 +168,7 @@ const CsvSaveController = {
             const filename = req.files[0].filename;
             const filePath = path.join(uploadDirectory, filename);
 
-            await saveDataFromCSV(Program, filteredProgram, filePath, res);
+            await saveDataFromCSV(ProgramModel, filteredProgram, filePath, res);
         } catch (err) {
             console.error("Lỗi khi lưu dữ liệu vào cơ sở dữ liệu:", err);
             res.status(500).json({ error: "Lỗi khi lưu dữ liệu vào cơ sở dữ liệu." });
