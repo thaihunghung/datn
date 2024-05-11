@@ -27,6 +27,7 @@ const CreateStudent = (nav) => {
     const MAX_COUNT = 1;
     const [classOptions, setClassOptions] = useState([]);
     const [selectedClass, setSelectedClass] = useState('');
+    
     const handleSave = async () => {
         try {
             if (name === "") {
@@ -83,7 +84,7 @@ const CreateStudent = (nav) => {
                 const url = window.URL.createObjectURL(response.data);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'student.csv';
+                a.download = 'student.xlsx';
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);

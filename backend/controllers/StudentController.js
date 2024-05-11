@@ -2,7 +2,9 @@ const StudentModel = require("../models/StudentModel");
 const { filterDescription, filterDescriptionHaveid } = require('../utils/filter');
 const json2csv = require('json2csv').parse;
 const fs = require('fs');
-
+const sequelize = require("../config/database");
+const ExcelJS = require('exceljs');
+const path = require('path');
 
 const StudentController = {
   // Lấy tất cả sinh viên
@@ -136,6 +138,66 @@ const StudentController = {
     } catch (error) {
       console.error('Error get form Student:', error);
       res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+
+  getFormStudent: async (req, res) => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Students Form');
+
+    worksheet.columns = [
+      { header: 'Mã lớp', key: 'classCode', width: 15 },
+      { header: 'Tên SV', key: 'name', width: 32 },
+      { header: 'MSSV', key: 'studentCode', width: 20 },
+      { header: 'Email', key: 'email', width: 30 },
+    ];
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="StudentsForm.xlsx"');
+    await workbook.xlsx.write(res);
+    res.end();
+  },
+
+  saveStudent: async (req, res) => {
+    console.log("dc");
+    if (req.files) {
+      console.log("dc1");
+      const uploadDirectory = path.join(__dirname, '../uploads');
+
+      const filename = req.files[0].filename;
+      const filePath = path.join(uploadDirectory, filename);
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.readFile(filePath);
+      const worksheet = workbook.getWorksheet(1);
+
+      const insertPromises = [];
+      worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+        if (rowNumber !== 1) { // bỏ hàng đầu
+          const emailCell = row.getCell(4);
+          let email = emailCell.value;
+          if (email && typeof email === 'object' && email.hasOwnProperty('text')) {
+            email = email.text; 
+          }
+
+          const sql = `INSERT INTO students (class_id, name, studentCode, email)
+                       VALUES ((SELECT class_id FROM classes WHERE classCode = ?), ?, ?, ?)`;
+          const values = [
+            row.getCell(1).value,
+            row.getCell(2).value,
+            row.getCell(3).value,
+            email, 
+          ];
+          insertPromises.push(sequelize.query(sql, { replacements: values }));
+        }
+      });
+
+      await Promise.all(insertPromises);
+      console.log('All data has been inserted into the database!');
+      fs.unlinkSync(filePath);  // Remove the uploaded file after processing
+      // res.send('Excel file has been processed and data inserted.');
+      res.status(200).json({ message: "Dữ liệu đã được lưu thành công vào cơ sở dữ liệu." });
+    } else {
+      res.status(400).send('No file uploaded.');
     }
   }
 };
