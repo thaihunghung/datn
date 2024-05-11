@@ -10,7 +10,7 @@ import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
 
 const UpdateStudent = (nav) => {
-    const { setCollapsedNav, successNoti} = nav;
+    const { setCollapsedNav, successNoti } = nav;
     const { onOpen } = useDisclosure();
     const [activeTab, setActiveTab] = useState(0);
     const [selectedRow, setSelectedRow] = useState([]);
@@ -45,7 +45,7 @@ const UpdateStudent = (nav) => {
                     <p className="font-medium">{record}</p>
                 </div>
             ),
-        },{
+        }, {
             title: (
                 <div className="flex items-center justify-center w-full">
                     <span>Form</span>
@@ -133,7 +133,7 @@ const UpdateStudent = (nav) => {
             const data = {
                 id: selectedRowKeys
             }
-            const response = await axiosAdmin.post('csv/program/',{data: data},{
+            const response = await axiosAdmin.post('csv/program/', { data: data }, {
                 responseType: 'blob'
             });
 
@@ -146,7 +146,7 @@ const UpdateStudent = (nav) => {
                 a.click();
                 window.URL.revokeObjectURL(url);
                 setCurrent(1);
-            } 
+            }
         } catch (error) {
             console.error('Error downloading file:', error);
         }
@@ -188,179 +188,180 @@ const UpdateStudent = (nav) => {
         <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/manage-program"}>
+                    <Link to={"/admin/student"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS Chương trình
+                            DS Sinh viên
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/store"}>
+                    <Link to={"/admin/student/store"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Kho lưu trữ
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/create"}>
+                    <Link to={"/admin/student/create"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Tạo chương trình
+                            Thêm sinh viên
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/update"}>
+                    <Link to={"/admin/student/update"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
-                        update
+                            Cập nhật
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/po-plo"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            PO-PLO
-                        </div>
-                    </Link>
-                </div> 
+                    {/* <Link to={"/admin/student/po-plo"}>
+            <div className="p-5 hover:bg-slate-600 hover:text-white">
+              PO-PLO
+            </div>
+          </Link> */}
+                </div>
             </div>
             <div className="w-full my-5">
-            <Collapse
-                colorBorder="#FFD700"
-                items = {[{ key: '1', label: <span className="text-base font-bold">Danh sách</span>, 
-                    children: <div> 
-                        {selectedRowKeys.length !== 0 && (
-                            <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 shadow-lg rounded-md border-1 border-slate-300">
-                                <p className="text-sm font-medium">
-                                    <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
-                                    Đã chọn {selectedRow.length} bài viết
-                                </p>
-                                <div className="flex items-center gap-2">
-                            
-                                    <Tooltip
-                                        title={`Xoá ${selectedRowKeys.length} bài viết`}
-                                        getPopupContainer={() =>
-                                            document.querySelector(".Quick__Option")
-                                        }
-                                    >
-                                        <Button isIconOnly variant="light" radius="full" onClick={onOpen}>
-                                            <i className="fa-solid fa-trash-can"></i>
-                                        </Button>
-                                    </Tooltip>
-                                    <Tooltip
-                                        title="Bỏ chọn"
-                                        getPopupContainer={() =>
-                                            document.querySelector(".Quick__Option")
-                                        }
-                                    >
-                                        <Button
-                                            isIconOnly
-                                            variant="light"
-                                            radius="full"
-                                            onClick={() => {
-                                                handleUnSelect();
-                                            }}
+                <Collapse
+                    colorBorder="#FFD700"
+                    items={[{
+                        key: '1', label: <span className="text-base font-bold">Danh sách</span>,
+                        children: <div>
+                            {selectedRowKeys.length !== 0 && (
+                                <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 shadow-lg rounded-md border-1 border-slate-300">
+                                    <p className="text-sm font-medium">
+                                        <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
+                                        Đã chọn {selectedRow.length} bài viết
+                                    </p>
+                                    <div className="flex items-center gap-2">
+
+                                        <Tooltip
+                                            title={`Xoá ${selectedRowKeys.length} bài viết`}
+                                            getPopupContainer={() =>
+                                                document.querySelector(".Quick__Option")
+                                            }
                                         >
-                                            <i className="fa-solid fa-xmark text-[18px]"></i>
-                                        </Button>
-                                    </Tooltip>
+                                            <Button isIconOnly variant="light" radius="full" onClick={onOpen}>
+                                                <i className="fa-solid fa-trash-can"></i>
+                                            </Button>
+                                        </Tooltip>
+                                        <Tooltip
+                                            title="Bỏ chọn"
+                                            getPopupContainer={() =>
+                                                document.querySelector(".Quick__Option")
+                                            }
+                                        >
+                                            <Button
+                                                isIconOnly
+                                                variant="light"
+                                                radius="full"
+                                                onClick={() => {
+                                                    handleUnSelect();
+                                                }}
+                                            >
+                                                <i className="fa-solid fa-xmark text-[18px]"></i>
+                                            </Button>
+                                        </Tooltip>
+                                    </div>
                                 </div>
+                            )}
+                            <div className="ListNews w-full">
+                                <Table className="p-0"
+                                    bordered
+                                    loading={loading}
+                                    rowSelection={{
+                                        type: "checkbox",
+                                        ...rowSelection,
+                                    }}
+                                    columns={columns}
+                                    dataSource={programListData}
+                                />
                             </div>
-                        )}
-                        <div className="ListNews w-full">
-                            <Table className="p-0"
-                                bordered
-                                loading={loading}
-                                rowSelection={{
-                                    type: "checkbox",
-                                    ...rowSelection,
-                                }}
-                                columns={columns}
-                                dataSource={programListData}
-                            />
                         </div>
-                    </div>
-                }]}
-            />
-           
+                    }]}
+                />
+
 
             </div>
-            <Tabs  tabs=
-                    {[
-                        {
-                            title: 'Cập nhật bằng CSV',
-                            content:
-                                <div className="w-full h-[1000px] rounded-lg">
-                                    <div className=' w-full flex justify-center items-center'>
-                                        <div className='w-full  flex flex-col px-2  sm:gap-5 sm:justify-center h-fix sm:px-5 lg:px-5 xl:px-5 sm:flex-row  lg:flex-col  xl:flex-col  gap-[20px]'>
-                                            <div className='px-10 hidden sm:hidden lg:block xl:block'>
-                                                <Divider />
-                                                <Steps
-                                                    current={current}
-                                                    onChange={onChangexxx}
-                                                    items={[
-                                                        {
-                                                            title: 'Bước 1',
-                                                            description,
-                                                        },
-                                                        {
-                                                            title: 'bước 2',
-                                                            description,
-                                                        },
-                                                        {
-                                                            title: 'bước 3',
-                                                            description,
-                                                        },
-                                                    ]}
-                                                />
-                                            </div>
-                                            <div className='hidden sm:block lg:hidden xl:hidden w-[50%]'>
-                                                <Divider />
-                                                <Steps
-                                                    current={current}
-                                                    onChange={onChangexxx}
-                                                    direction="vertical"
+            <Tabs tabs=
+                {[
+                    {
+                        title: 'Cập nhật bằng CSV',
+                        content:
+                            <div className="w-full h-[1000px] rounded-lg">
+                                <div className=' w-full flex justify-center items-center'>
+                                    <div className='w-full  flex flex-col px-2  sm:gap-5 sm:justify-center h-fix sm:px-5 lg:px-5 xl:px-5 sm:flex-row  lg:flex-col  xl:flex-col  gap-[20px]'>
+                                        <div className='px-10 hidden sm:hidden lg:block xl:block'>
+                                            <Divider />
+                                            <Steps
+                                                current={current}
+                                                onChange={onChangexxx}
+                                                items={[
+                                                    {
+                                                        title: 'Bước 1',
+                                                        description,
+                                                    },
+                                                    {
+                                                        title: 'bước 2',
+                                                        description,
+                                                    },
+                                                    {
+                                                        title: 'bước 3',
+                                                        description,
+                                                    },
+                                                ]}
+                                            />
+                                        </div>
+                                        <div className='hidden sm:block lg:hidden xl:hidden w-[50%]'>
+                                            <Divider />
+                                            <Steps
+                                                current={current}
+                                                onChange={onChangexxx}
+                                                direction="vertical"
 
-                                                    items={[
-                                                        {
-                                                            title: 'Bước 1',
-                                                            description,
-                                                        },
-                                                        {
-                                                            title: 'bước 2',
-                                                            description,
-                                                        },
-                                                        {
-                                                            title: 'bước 3',
-                                                            description,
-                                                        },
-                                                    ]}
-                                                />
-                                            </div>
+                                                items={[
+                                                    {
+                                                        title: 'Bước 1',
+                                                        description,
+                                                    },
+                                                    {
+                                                        title: 'bước 2',
+                                                        description,
+                                                    },
+                                                    {
+                                                        title: 'bước 3',
+                                                        description,
+                                                    },
+                                                ]}
+                                            />
+                                        </div>
 
-                                            <div className='flex flex-col w-full  sm:flex-col sm:w-full lg:flex-row xl:flex-row justify-around'>
-                                                <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%]  flex justify-start items-center'>
-                                                    <div className='p-10 w-full mt-10 h-fix sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center  gap-5 rounded-lg'>
-                                                        <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
-                                                        <Button className='w-full bg-primary flex items-center justify-center  p-5 rounded-lg' onClick={handleDownloadProgram}>
-                                                            <scan>Tải xuống mẫu </scan>
-                                                        </Button>
-                                                        
-                                                    </div>
+                                        <div className='flex flex-col w-full  sm:flex-col sm:w-full lg:flex-row xl:flex-row justify-around'>
+                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%]  flex justify-start items-center'>
+                                                <div className='p-10 w-full mt-10 h-fix sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center  gap-5 rounded-lg'>
+                                                    <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
+                                                    <Button className='w-full bg-primary flex items-center justify-center  p-5 rounded-lg' onClick={handleDownloadProgram}>
+                                                        <scan>Tải xuống mẫu </scan>
+                                                    </Button>
+
                                                 </div>
-                                                <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-center items-center'>
-                                                    <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
-                                                        <div><p className='w-full text-center'>Gửi lại mẫu</p></div>
-                                                        <Upload {...props} >
-                                                            <Button icon={<UploadOutlined />} className='text-center items-center rounded-lg px-10 h-[40px]'>Select File</Button>
-                                                        </Upload>
-                                                    </div>
+                                            </div>
+                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-center items-center'>
+                                                <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
+                                                    <div><p className='w-full text-center'>Gửi lại mẫu</p></div>
+                                                    <Upload {...props} >
+                                                        <Button icon={<UploadOutlined />} className='text-center items-center rounded-lg px-10 h-[40px]'>Select File</Button>
+                                                    </Upload>
                                                 </div>
-                                                <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
-                                                    <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
-                                                        <div><p className='w-full text-center'>Cập nhật Dữ liệu</p></div>
-                                                        <CustomUpload endpoint={'program/getByID'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
-                                                    </div>
+                                            </div>
+                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
+                                                <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
+                                                    <div><p className='w-full text-center'>Cập nhật Dữ liệu</p></div>
+                                                    <CustomUpload endpoint={'program/getByID'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                        }
-                    ]}
-                    activeTab={activeTab} setActiveTab={setActiveTab}
-                />
+                            </div>
+                    }
+                ]}
+                activeTab={activeTab} setActiveTab={setActiveTab}
+            />
         </div>
     );
 }

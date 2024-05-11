@@ -27,7 +27,7 @@ const CreateStudent = (nav) => {
     const MAX_COUNT = 1;
     const [classOptions, setClassOptions] = useState([]);
     const [selectedClass, setSelectedClass] = useState('');
-    
+
     const handleSave = async () => {
         try {
             if (name === "") {
@@ -51,7 +51,7 @@ const CreateStudent = (nav) => {
 
     const handleGetAllCodeClass = async () => {
         try {
-            const response = await axiosAdmin.get('/class'); // use axios or your axiosAdmin instance
+            const response = await axiosAdmin.get('/class');
             const options = response.data.map(classItem => ({
                 value: `${classItem.class_id.toString()}-${classItem.classCode}`,
                 label: classItem.classCode
@@ -74,7 +74,7 @@ const CreateStudent = (nav) => {
 
     const [fileList, setFileList] = useState([]);
 
-    const handleDownloadProgram = async () => {
+    const handleDownloadStudent = async () => {
         try {
             const response = await axiosAdmin.get('csv/student', {
                 responseType: 'blob'
@@ -133,31 +133,31 @@ const CreateStudent = (nav) => {
         <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/manage-program"}>
+                    <Link to={"/admin/student"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS Chương trình
+                            DS Sinh viên
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/store"}>
+                    <Link to={"/admin/student/store"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Kho lưu trữ
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/create"}>
+                    <Link to={"/admin/student/create"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Tạo chương trình
+                            Thêm sinh viên
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/update"}>
+                    <Link to={"/admin/student/update"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            update
+                            Cập nhật
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/po-plo"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            PO-PLO
-                        </div>
-                    </Link>
+                    {/* <Link to={"/admin/student/po-plo"}>
+            <div className="p-5 hover:bg-slate-600 hover:text-white">
+              PO-PLO
+            </div>
+          </Link> */}
                 </div>
             </div>
             <div className="w-full mt-5 rounded-lg">
@@ -263,7 +263,7 @@ const CreateStudent = (nav) => {
                                                 <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%]  flex justify-start items-center'>
                                                     <div className='p-10 w-full mt-10 h-fix sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center  gap-5 rounded-lg'>
                                                         <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
-                                                        <Button className='w-full bg-primary flex items-center justify-center  p-5 rounded-lg' onClick={handleDownloadProgram}>
+                                                        <Button className='w-full bg-primary flex items-center justify-center  p-5 rounded-lg' onClick={handleDownloadStudent}>
                                                             <scan>Tải xuống mẫu </scan>
                                                         </Button>
                                                     </div>

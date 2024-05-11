@@ -106,31 +106,31 @@ const StoreStudent = (nav) => {
             />
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/manage-program"}>
+                    <Link to={"/admin/student"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS Chương trình
+                            DS Sinh viên
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/store"}>
+                    <Link to={"/admin/student/store"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Kho lưu trữ
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/create"}>
+                    <Link to={"/admin/student/create"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Tạo chương trình
+                            Thêm sinh viên
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/update"}>
+                    <Link to={"/admin/student/update"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
-                        update
+                            Cập nhật
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/po-plo"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            PO-PLO
-                        </div>
-                    </Link>
+                    {/* <Link to={"/admin/student/po-plo"}>
+            <div className="p-5 hover:bg-slate-600 hover:text-white">
+              PO-PLO
+            </div>
+          </Link> */}
                 </div>
             </div>
             <div className="w-full border mt-5 rounded-lg">

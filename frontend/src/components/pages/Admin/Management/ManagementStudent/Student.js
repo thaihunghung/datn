@@ -1,7 +1,7 @@
 // Student.js
 
 import { useEffect, useState } from "react";
-import { Button } from 'antd';
+import { Button, Select } from 'antd';
 import { Link } from "react-router-dom";
 
 import {
@@ -19,19 +19,58 @@ const Student = (nav) => {
 
   const [studentData, setStudentData] = useState([]);
   const [deleteId, setDeleteId] = useState(null);
-  const allProgramNotIsDelete = async () => {
+  const [classOptions, setClassOptions] = useState([]);
+  const [selectedClass, setSelectedClass] = useState('');
+
+  const getAllStudent = async () => {
     try {
-      const program = await axiosAdmin.get('/student/isDelete/false');
-      setStudentData(program.data)
-      console.log(program.data);
+      const student = await axiosAdmin.get('/student/isDelete/false');
+      setStudentData(student.data)
+      console.log(student.data);
     } catch (err) {
       console.log("Error: " + err.message);
     };
   }
 
+  const getAllStudentByClass = async () => {
+    try {
+      const student = await axiosAdmin.get(`/student/class/${selectedClass}`);
+      setStudentData(student.data)
+      console.log(student.data);
+    } catch (err) {
+      console.log("Error: " + err.message);
+    };
+  }
+
+  const GetAllCodeClass = async () => {
+    try {
+      const response = await axiosAdmin.get('/class'); // use axios or your axiosAdmin instance
+      const options = response.data.map(classItem => ({
+        value: `${classItem.class_id.toString()}-${classItem.classCode}`,
+        label: classItem.classCode
+      }));
+      setClassOptions(options);
+      console.log(classOptions);
+    } catch (error) {
+      console.error('Lỗi khi get dữ liệu:', error);
+    }
+  };
+
+  const handleClassChange = (value) => {
+    const classId = parseInt(value.toString().charAt(0));
+    if (!isNaN(classId)) {
+      setSelectedClass(classId);
+      console.log("select:", classId);
+      console.log("okoko2");
+    } else {
+      console.log("okoko");
+      getAllStudent();
+    }
+  };
+
   const hangleChangeidDelete = async (id) => {
     try {
-      const response = await axiosAdmin.put(`/program/isDelete/${id}`);
+      const response = await axiosAdmin.put(`/student/isDelete/${id}`);
       if (response) {
         console.log(response.data);
 
@@ -43,7 +82,12 @@ const Student = (nav) => {
   }
 
   useEffect(() => {
-    allProgramNotIsDelete()
+    getAllStudentByClass();
+  }, [selectedClass])
+
+  useEffect(() => {
+    getAllStudent();
+    GetAllCodeClass();
     const handleResize = () => {
       if (window.innerWidth < 1024) {
         setCollapsedNav(true);
@@ -92,13 +136,21 @@ const Student = (nav) => {
               Cập nhật
             </div>
           </Link>
-          <Link to={"/admin/student/po-plo"}>
+          {/* <Link to={"/admin/student/po-plo"}>
             <div className="p-5 hover:bg-slate-600 hover:text-white">
               PO-PLO
             </div>
-          </Link>
+          </Link> */}
         </div>
       </div>
+      <Select
+        mode="multiple"
+        maxCount={1}
+        style={{ width: '100%' }}
+        placeholder="Chọn mã lớp"
+        onChange={(e) => handleClassChange(e)}
+        options={classOptions}
+      />
       <div className="w-full border mt-5 rounded-lg">
         <table className="table-auto border-collapse border w-full">
           <tr>

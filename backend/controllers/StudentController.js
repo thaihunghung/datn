@@ -17,6 +17,19 @@ const StudentController = {
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
+  getAllByClassId: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const students = await StudentModel.findAll({ where: { class_id: id, isDelete: false} });
+      if (!students) {
+        return res.status(404).json({ message: 'Không tìm thấy students' });
+      }
+      res.json(students);
+    } catch (error) {
+      console.error('Lỗi tìm kiếm students:', error);
+      res.status(500).json({ message: 'Lỗi server' });
+    }
+  },
 
   // Tạo một sinh viên mới
   create: async (req, res) => {
