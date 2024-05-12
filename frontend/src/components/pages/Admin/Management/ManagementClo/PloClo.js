@@ -118,27 +118,27 @@ const PloClo = (nav) => {
         <div className="flex w-full flex-col justify-center leading-8 p-5 sm:p-5 lg:p-10 xl:p-10 bg-[#f5f5f5]-500">
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/manage-program"}>
+                    <Link to={"/admin/management-program"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             DS Chương trình
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/store"}>
+                    <Link to={"/admin/management-program/store"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Kho lưu trữ
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/create"}>
+                    <Link to={"/admin/management-program/create"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Tạo chương trình
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/update"}>
+                    <Link to={"/admin/management-program/update"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                         update
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/po-plo"}>
+                    <Link to={"/admin/management-program/po-plo"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             PO-PLO
                         </div>

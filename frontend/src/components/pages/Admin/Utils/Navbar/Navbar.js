@@ -61,55 +61,81 @@ function Nav(props) {
             link: "/admin",
             icon: (
                 <i
-                    className={`fa-solid fa-bolt mr-${collapsedNav ? "0" : "3"} w-4`}
+                    className={`fa-solid fa-house mr-${collapsedNav ? "0" : "3"} w-4`}
                 ></i>
             ),
         },
         {
-            text: "Chương trình",
+            text: "Chấm điểm",
+            link: "/admin/management-point",
             icon: (
-                <i
-                    className={`fa-solid fa-pen-clip mr-${collapsedNav ? "0" : "3"} w-4`}
-                ></i>
+                <>{!collapsedNav && (
+                    <i className={`fa-solid fa-feather-pointed mr-${collapsedNav ? "0" : "3"} w-4`}></i>
+                )}
+                {collapsedNav && (
+                   <i className="text-center">Score</i>
+                )}</>
             ),
-            submenu: [
-                {
-                    text: "Program",
-                    link: "/admin/manage-program",
-                    icon: (
-                        <i
-                            className={`fa-regular fa-user mr-${collapsedNav ? "0" : "3"} w-4`}
-                        ></i>
-                    ),
-                },
-                {
-                    text: "Plo",
-                    link: "/admin/manage-plo",
-                    icon: (
-                        <i
-                            className={`fa-regular fa-user mr-${collapsedNav ? "0" : "3"} w-4`}
-                        ></i>
-                    ),
-                },
-                {
-                    text: "po",
-                    link: "/admin/manage-po",
-                    icon: (
-                        <i
-                            className={`fa-regular fa-user mr-${collapsedNav ? "0" : "3"} w-4`}
-                        ></i>
-                    ),
-                },
-
-            ],
+        },   
+        {
+            text: "Chương trình",
+            link: "/admin/management-program",
+            icon: (
+                <>{!collapsedNav && (
+                    <i className={`fa-solid fa-gear mr-${collapsedNav ? "0" : "3"} w-4`}></i>
+                )}
+                {collapsedNav && (
+                   <i className="text-center">Pro</i>
+                )}</>
+            ),
         },
+        {
+            text: "PLO",
+            link: "/admin/management-po",
+            icon: (
+                <>{!collapsedNav && (
+                    <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i>
+                )}
+                {collapsedNav && (
+                   <i className="text-center">Po</i>
+                )}</>
+            ),
+        },
+        {
+            text: "PO",
+            link: "/admin/management-plo",
+            icon: (
+                <>{!collapsedNav && (
+                    <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i>
+                )}
+                {collapsedNav && (
+                   <i className="text-center">Plo</i>
+                )}</>
+            ),
+        },
+        {
+            text: "Rubric",
+            link: "/admin/management-rubric",
+            icon: (
+                <>{!collapsedNav && (
+                    <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i>
+                )}
+                {collapsedNav && (
+                   <i className="text-center">Rubric</i>
+                )}</>
+            ),
+        },
+
         {
             text: "Sinh viên",
             link: "/admin/student",
             icon: (
-                <i
-                    className={`fa-solid fa-bolt mr-${collapsedNav ? "0" : "3"} w-4`}
-                ></i>
+                <>{!collapsedNav && (
+                    <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i>
+                )}
+                {collapsedNav && (
+                   <i className="text-center">Stu</i>
+                )}</>
             ),
         },
 
@@ -210,9 +236,9 @@ function Nav(props) {
             <div className="hidden sm:block lg:block xl:block text-[white]">
                 <motion.div
                     className={`Admin-Navbar flex flex-col w-["200px"] ${collapsedNav ? "w-[87px]" : ""
-                        } h-[100vh] bg-slate-600 p-3  justify-between`}
+                        } h-[100vh] bg-[#ff8077] p-3  justify-between`}
                     initial={{ width: "270px" }}
-                    animate={{ width: collapsedNav ? "87px" : "200px" }}
+                    animate={{ width: collapsedNav ? "100px" : "200px" }}
                     transition={{ duration: 0.4 }}
                 >
                     <div className="grid grid-rows-[auto,auto] h-[100vh] flex-1">
@@ -232,7 +258,7 @@ function Nav(props) {
                                 {!collapsedNav ? (
                                     <>
                                         <img width={20} alt="" />
-                                        <span className="font-bold mt-[1px]">SET</span>
+                                        <span className="font-bold text-xl mt-[1px]">SET</span>
                                     </>
                                 ) : (
                                     ""
@@ -265,15 +291,16 @@ function Nav(props) {
                                 <hr className="opacity-10 m-auto w-[30px] px-2 mb-2 border-[1.5px]" />
                                 {navTab.map((tab) => (
                                     <div key={tab.text}>
-                                        {/* <Tooltip
-                                    //title={collapsedNav ? tab.text : ""}
-                                    placement="right"
-                                > */}
+                                    <Tooltip
+                                        color={"#FF9908"}
+                                        title={collapsedNav ? <span className="text-[#FEFEFE]">{tab.text}</span>  : ""}
+                                        placement="right"
+                                    >
                                         <div onClick={() => toggleSubmenu(tab.text)}>
                                             {tab.link ? (
                                                 <Link
                                                     to={tab.link}
-                                                    className={`text-[14px] w-full h-[37px] hover:bg-slate-600 p-3 py-2 rounded-lg flex justify-${collapsedNav ? "center" : "between"
+                                                    className={`text-base w-full h-[37px]  p-3 py-2 rounded-lg flex justify-${collapsedNav ? "center" : "between"
                                                         } items-center group/tab ${setActive(tab.link)}`}
                                                 >
                                                     <p className="flex items-center">
@@ -297,7 +324,7 @@ function Nav(props) {
                                                     )}
                                                 </Link>
                                             ) : (
-                                                <div className={`text-[14px] w-full h-[37px] hover:bg-slate-600 p-3 py-2 rounded-lg flex   justify-${collapsedNav ? "center" : "between"} items-center group/tab ${setActive(tab.text)}`}>
+                                                <div className={`text-base w-full  h-[37px] hover:bg-[#ff8077] p-3 py-2 rounded-lg flex   justify-${collapsedNav ? "center" : "between"} items-center group/tab ${setActive(tab.text)}`}>
                                                     <p className="flex items-center">
                                                         {tab.icon}
                                                         <motion.span
@@ -309,61 +336,14 @@ function Nav(props) {
                                                             {!collapsedNav && tab.text}
                                                         </motion.span>
                                                     </p>
-                                                    {!collapsedNav && <i className="fa-solid fa-chevron-right text-[10px] ow hidden group-hover/tab:block"></i>}
-                                                    {submenuVisible[tab.text] && tab.submenu && (
-                                                        <div className={`${collapsedNav ? "block" : "hidden"}  w-fit absolute flex flex-col left-20  z-10 bg-slate-400 rounded-lg`}>
-                                                            {tab.submenu.map((subitem) => (
-                                                                <Link
-                                                                    key={subitem.text}
-                                                                    to={subitem.link}
-                                                                    className={`text-[14px] p-5  h-[30px]  hover:bg-slate-600 flex  justify-${collapsedNav ? "center" : "between"} items-center group/tab ${setActive(subitem.link)}`}
-                                                                >
-                                                                    <p className="flex items-center">
-
-                                                                        <motion.span
-                                                                            initial={{ opacity: 1 }}
-                                                                            animate={{ opacity: collapsedNav ? 1 : 1 }}
-                                                                            transition={{ duration: collapsedNav ? 0.4 : 0.4, delay: collapsedNav ? 0.4 : 0.4 }}
-                                                                            style={{ whiteSpace: "nowrap" }}
-                                                                        >
-                                                                            @ {collapsedNav && subitem.text}
-                                                                        </motion.span>
-                                                                    </p>
-                                                                    {!collapsedNav && <i className="fa-solid fa-chevron-bottom text-[11px] hidden group-hover/tab:block"></i>}
-                                                                </Link>
-                                                            ))}
-                                                        </div>
-                                                    )}
-
+                                                {!collapsedNav && <i className="fa-solid fa-chevron-right text-[10px] ow hidden group-hover/tab:block"></i>} 
+                                                  
                                                 </div>
                                             )}
 
                                         </div>
-                                        {/* </Tooltip> */}
-                                        {submenuVisible[tab.text] && tab.submenu && (
-                                            <div className={`${collapsedNav ? "hidden" : "block"}`}>
-                                                {tab.submenu.map((subitem) => (
-                                                    <Link
-                                                        key={subitem.text}
-                                                        to={subitem.link}
-                                                        className={`text-[14px] w-full h-[37px] hover:bg-slate-600 p-3 py-2 rounded-lg flex justify-${collapsedNav ? "center" : "between"} items-center group/tab ${setActive(subitem.link)}`}
-                                                    >
-                                                        <p className="flex items-center ml-10">
-                                                            <motion.span
-                                                                initial={{ opacity: 1 }}
-                                                                animate={{ opacity: collapsedNav ? 0 : 1 }}
-                                                                transition={{ duration: collapsedNav ? 0 : 0.4, delay: collapsedNav ? 0 : 0.4 }}
-                                                                style={{ whiteSpace: "nowrap" }}
-                                                            >
-                                                                @ {!collapsedNav && subitem.text}
-                                                            </motion.span>
-                                                        </p>
-                                                        {!collapsedNav && <i className="fa-solid fa-chevron-bottom text-[11px] hidden group-hover/tab:block"></i>}
-                                                    </Link>
-                                                ))}
-                                            </div>
-                                        )}
-
+                                        </Tooltip>
+                                
                                     </div>
                                 ))}
                             </div>
@@ -373,7 +353,7 @@ function Nav(props) {
                         {currentUser ? (
                             <Dropdown placement="bottom-start">
                                 <DropdownTrigger>
-                                    <div className="flex items-center w-full justify-between hover:bg-slate-600 p-3 py-2 rounded-lg">
+                                    <div className="flex items-center w-full justify-between hover:bg-[#ff8077] p-3 py-2 rounded-lg">
                                         <User
                                             name={
                                                 !collapsedNav ? (

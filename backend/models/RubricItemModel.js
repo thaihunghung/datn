@@ -3,8 +3,9 @@ const sequelize = require('../config/database');
 const ChapterModel = require('./ChapterModel');
 const CloModel = require('./CloModel');
 const RubricModel = require('./RubricModel');
+const QualityLevelsModel = require('./QualityLevelsModel');
 
-const RubricsItemModel = sequelize.define('RubricsItem', {
+const RubricsItemModel = sequelize.define('rubricsItem', {
   rubricsItem_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -57,6 +58,7 @@ const RubricsItemModel = sequelize.define('RubricsItem', {
     defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
   }
 }, {
+  modelName: 'RubricItemModel',
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',

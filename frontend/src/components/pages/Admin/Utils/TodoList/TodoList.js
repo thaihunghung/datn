@@ -7,6 +7,8 @@ const TodoList = ({ data, Chapter, Clo, rubric_id, successNoti, setSpinning }) =
   const [todos, setTodos] = useState([]);
   const [editors, setEditors] = useState([]);
 
+
+
   const handleChangeisDelete = async (id) => {
     try {
       const response = await axiosAdmin.put(`/rubric-item/isDelete/${id}`);
@@ -59,6 +61,7 @@ const TodoList = ({ data, Chapter, Clo, rubric_id, successNoti, setSpinning }) =
         <div className='w-[20%]'>
           <Button  onClick={addEditor}>Thêm</Button>
         </div>
+
       </div>
 
 

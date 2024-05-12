@@ -22,6 +22,7 @@ import {
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 const CreateRubic = (nav) => {
     const { id } = useParams();
+    const location = useLocation();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [layout, setLayout] = useState("col");
@@ -60,7 +61,7 @@ const CreateRubic = (nav) => {
             }
             console.log(data);
             await axiosAdmin.post(`/rubric`, {data: data});
-            navigate("/admin/manage-rubric/")
+            navigate("/admin/management-rubric/")
         } catch (error) {
             console.error("lỗi", error);
         }
@@ -85,12 +86,12 @@ const CreateRubic = (nav) => {
             window.removeEventListener("resize", handleResize);
         };
     }, []);
-    // onClose={() => navigate("/admin/manage-rubric/")}
+    // onClose={() => navigate("/admin/management-rubric/")}
     return (
         <div className="flex w-full flex-col justify-center items-start leading-8 p-2 bg-[#f5f5f5]-500">
             <Modal isOpen={isOpen} scrollBehavior={scrollBehavior}>
                 <ModalContent className="m-auto">
-                    <ModalHeader className="flex flex-col gap-1">Cập nhật</ModalHeader>
+                    <ModalHeader className="flex flex-col gap-1 text-[#FF9908] font-bold text-lg">Cập nhật</ModalHeader>
                     <ModalBody>
                         <Select
                             defaultValue={"Chọn học phần"}
@@ -108,14 +109,14 @@ const CreateRubic = (nav) => {
                                 </Select.Option>
                             ))}
                         </Select>
-                        <span>rubric</span>
+                        <span className="text-[#020401]">rubric</span>
 
                         <Input
                             value={rubricName}
                             onValueChange={setRubricName}
                             className="max-w-xs"
                         />
-                        <span>comment</span>
+                       <span className="text-[#020401]">comment</span>
                         <Input
                             value={comment}
                             onValueChange={setComment}
@@ -125,16 +126,16 @@ const CreateRubic = (nav) => {
                     </ModalBody>
                     <ModalFooter>
                         <Button
-                            color="danger"
+                            className="bg-[#FF8077] text-[#FEFEFE]"
                             radius="sm"
                             as={Link}
-                            to="/admin/manage-rubric/"
+                            to="/admin/management-rubric/"
                             onClick={onClose}
                         >
                             Close
                         </Button>
 
-                        <Button onClick={CreateRubic} color="primary" radius="sm">
+                        <Button onClick={CreateRubic} className="text-[#FEFEFE] bg-[#475569]" radius="sm">
                             <span className="font-medium">Cập nhật</span>
                         </Button>
                     </ModalFooter>
@@ -142,33 +143,37 @@ const CreateRubic = (nav) => {
             </Modal>
 
             <div>
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/manage-program"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS Chương trình
-                        </div>
-                    </Link>
-                    <Link to={"/admin/manage-program/store"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Kho lưu trữ
-                        </div>
-                    </Link>
-                    <Link to={"/admin/manage-program/create"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Tạo chương trình
-                        </div>
-                    </Link>
-                    <Link to={"/admin/manage-program/update"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            update
-                        </div>
-                    </Link>
-                    <Link to={"/admin/manage-program/po-plo"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            PO-PLO
-                        </div>
-                    </Link>
-                </div>
+            <div className="w-fit flex  justify-start text-base font-bold rounded-lg border-1 border-[#FF8077]">
+          <Link to={"/admin/management-rubric"}
+            className={location.pathname.startsWith('/admin/management-rubric') ? "bg-[#475569] text-[#FEFEFE]" : ""}
+          >
+            
+            <div className="p-5  hover:bg-slate-600 hover:text-white">
+              DS rubric
+            </div>
+          </Link>
+          <Link to={"/admin/management-rubric/store"}
+            className={location.pathname.startsWith('/admin/management-rubric/store') ? "bg-[#475569] text-[#FEFEFE]" : ""}
+          >
+            <div className="p-5  hover:bg-slate-600 hover:text-white">
+              Kho lưu trữ
+            </div>
+          </Link>
+          <Link to={"/admin/management-rubric/create"}
+            className={location.pathname.startsWith('/admin/management-rubric/create') ? "bg-[#475569] text-[#FEFEFE]" : ""}
+          >
+            <div className="p-5  hover:bg-slate-600 hover:text-white">
+              Tạo rubric
+            </div>
+          </Link>
+          <Link to={"/admin/management-rubric/update"}
+            className={location.pathname.startsWith('/admin/management-rubric/update') ? "bg-[#475569] text-[#FEFEFE]" : ""}
+          >
+            <div className="p-5  hover:bg-slate-600 hover:text-white">
+              update
+            </div>
+          </Link>
+        </div>
             </div>
         </div>
     );

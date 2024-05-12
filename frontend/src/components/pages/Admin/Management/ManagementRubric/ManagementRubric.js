@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from 'antd';
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import {
     Modal, Chip,
@@ -14,6 +14,7 @@ import {
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 
 const ManagementRubric = (nav) => {
+    const location = useLocation();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -23,7 +24,7 @@ const ManagementRubric = (nav) => {
         try {
             const rubric = await axiosAdmin.get('/rubric/get-by-user/checkscore');
             setRubicData(rubric.data)
-            console.log(rubric.data);
+            console.table(rubric.data);
         } catch (err) {
             console.log("Error: " + err.message);
         };
@@ -71,33 +72,37 @@ const ManagementRubric = (nav) => {
                 }}
             />
             <div>
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/manage-rubric"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS Chương trình
-                        </div>
-                    </Link>
-                    <Link to={"/admin/manage-rubric/store"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Kho lưu trữ
-                        </div>
-                    </Link>
-                    <Link to={"/admin/manage-rubric/create"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Tạo chương trình
-                        </div>
-                    </Link>
-                    <Link to={"/admin/manage-rubric/update"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            update
-                        </div>
-                    </Link>
-                    <Link to={"/admin/manage-rubric/po-plo"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            PO-PLO
-                        </div>
-                    </Link>
-                </div>
+            <div className="w-fit flex  justify-start text-base font-bold rounded-lg border-1 border-[#FF8077]">
+          <Link to={"/admin/management-rubric"}
+            className={location.pathname.startsWith('/admin/management-rubric') ? "bg-[#475569] text-[#FEFEFE]" : ""}
+          >
+            
+            <div className="p-5  hover:bg-slate-600 hover:text-white">
+              DS rubric
+            </div>
+          </Link>
+          <Link to={"/admin/management-rubric/store"}
+            className={location.pathname.startsWith('/admin/management-rubric/store') ? "bg-[#475569] text-[#FEFEFE]" : ""}
+          >
+            <div className="p-5  hover:bg-slate-600 hover:text-white">
+              Kho lưu trữ
+            </div>
+          </Link>
+          <Link to={"/admin/management-rubric/create"}
+            className={location.pathname.startsWith('/admin/management-rubric/create') ? "bg-[#475569] text-[#FEFEFE]" : ""}
+          >
+            <div className="p-5  hover:bg-slate-600 hover:text-white">
+              Tạo rubric
+            </div>
+          </Link>
+          <Link to={"/admin/management-rubric/update"}
+            className={location.pathname.startsWith('/admin/management-rubric/update') ? "bg-[#475569] text-[#FEFEFE]" : ""}
+          >
+            <div className="p-5  hover:bg-slate-600 hover:text-white">
+              update
+            </div>
+          </Link>
+        </div>
             </div>
             <div className="w-full border mt-5 rounded-lg">
                 <table className="table-auto border-collapse border w-full">

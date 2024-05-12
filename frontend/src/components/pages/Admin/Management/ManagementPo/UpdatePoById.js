@@ -74,7 +74,7 @@ const UpdatePoById = (nav) => {
             }
             console.log(data);
             const response = await axiosAdmin.put(`/po/${id}`, { data: data });
-            onClose(navigate("/admin/manage-po/"))
+            onClose(navigate("/admin/management-po/"))
         } catch (error) {
             console.error("lỗi", error);
         }
@@ -103,7 +103,7 @@ const UpdatePoById = (nav) => {
 
     return (
         <div className="flex w-full flex-col justify-center items-start leading-8 p-2 bg-[#f5f5f5]-500">
-            <Modal isOpen={isOpen} onClose={() => navigate("/admin/manage-po/")} scrollBehavior={scrollBehavior}>
+            <Modal isOpen={isOpen} onClose={() => navigate("/admin/management-po/")} scrollBehavior={scrollBehavior}>
                 <ModalContent className="m-auto">
                     <ModalHeader className="flex flex-col gap-1">Cập nhật</ModalHeader>
                     <ModalBody>
@@ -142,7 +142,7 @@ const UpdatePoById = (nav) => {
                             color="danger"
                             radius="sm"
                             as={Link}
-                            to="/admin/manage-po/"
+                            to="/admin/management-po/"
                             onClick={onClose}
                         >
                             Close
@@ -155,22 +155,22 @@ const UpdatePoById = (nav) => {
             </Modal>
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/manage-po"}>
+                    <Link to={"/admin/management-po"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             DS PO
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-po/store"}>
+                    <Link to={"/admin/management-po/store"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Kho lưu trữ
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-po/update"}>
+                    <Link to={"/admin/management-po/update"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             update
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-po/create"}>
+                    <Link to={"/admin/management-po/create"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Tạo PO
                         </div>
