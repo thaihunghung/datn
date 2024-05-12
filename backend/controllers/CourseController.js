@@ -1,57 +1,61 @@
-const CourseModel = require('../models/CourseModel');
+const CourseModel = require("../models/CourseModel");
 
 const CourseController = {
-  // Get all courses
+  // Lấy tất cả các khóa học
   index: async (req, res) => {
     try {
       const courses = await CourseModel.findAll();
       res.json(courses);
     } catch (error) {
-      console.error('Error getting all courses:', error);
-      res.status(500).json({ message: 'Internal server error' });
+      console.error('Lỗi khi lấy tất cả các khóa học:', error);
+      res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
     }
   },
-  // Create a new course
+
+  // Tạo một khóa học mới
   create: async (req, res) => {
     try {
       const { data } = req.body;
       const newCourse = await CourseModel.create(data);
       res.json(newCourse);
     } catch (error) {
-      console.error('Error creating course:', error);
-      res.status(500).json({ message: 'Server error' });
+      console.error('Lỗi khi tạo khóa học:', error);
+      res.status(500).json({ message: 'Lỗi máy chủ' });
     }
   },
-  // Get course by ID
+
+  // Lấy một khóa học theo ID
   getByID: async (req, res) => {
     try {
       const { id } = req.params;
       const course = await CourseModel.findOne({ where: { course_id: id } });
       if (!course) {
-        return res.status(404).json({ message: 'Course not found' });
+        return res.status(404).json({ message: 'Không tìm thấy khóa học' });
       }
       res.json(course);
     } catch (error) {
-      console.error('Error finding course:', error);
-      res.status(500).json({ message: 'Server error' });
+      console.error('Lỗi khi tìm kiếm khóa học:', error);
+      res.status(500).json({ message: 'Lỗi máy chủ' });
     }
   },
-  // Update course
+
+  // Cập nhật một khóa học
   update: async (req, res) => {
     try {
       const { id } = req.params;
       const { data } = req.body;
       const course = await CourseModel.findOne({ where: { course_id: id } });
       if (!course) {
-        return res.status(404).json({ message: 'Course not found' });
+        return res.status(404).json({ message: 'Không tìm thấy khóa học' });
       }
-      const updatedCourse = await CourseModel.update(data, { where: { course_id: id } });
-      res.json({ message: `Successfully updated course with ID: ${id}` });
+      await CourseModel.update(data, { where: { course_id: id } });
+      res.json({ message: `Cập nhật thành công khóa học có id: ${id}` });
     } catch (error) {
-      console.error('Error updating course:', error);
-      res.status(500).json({ message: 'Server error' });
+      console.error('Lỗi khi cập nhật khóa học:', error);
+      res.status(500).json({ message: 'Lỗi máy chủ' });
     }
   },
+
   // Delete course
   delete: async (req, res) => {
     try {
