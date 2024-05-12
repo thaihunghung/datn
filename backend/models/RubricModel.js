@@ -24,10 +24,6 @@ const RubricModel = sequelize.define('Rubric', {
     type: DataTypes.TEXT,
     defaultValue: null
   },
-  score: {
-    type: DataTypes.DOUBLE(8, 2),
-    defaultValue: 0
-  },
   isDelete: {
     type: DataTypes.TINYINT,
     defaultValue: 0

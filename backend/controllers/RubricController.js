@@ -168,17 +168,17 @@ const RubricController = {
             },
             include: [{
               model: CloModel,
-              attributes: ['clo_id', 'cloName']
+              attributes: ['clo_id', 'cloName', 'description']
             }, {
               model: ChapterModel,
-              attributes: ['chapter_id', 'chapterName']
+              attributes: ['chapter_id', 'chapterName', 'description']
             }]
           }),
           CloModel.findAll({ where: { subject_id: rubric.subject_id } }),
           ChapterModel.findAll({ where: { subject_id: rubric.subject_id } })
         ]);
-
         // Gán kết quả cho các thuộc tính của rubric
+
         rubric.dataValues.rubricItems = rubricItems;
         rubric.dataValues.CloData = Clos;
         rubric.dataValues.ChapterData = Chapters;

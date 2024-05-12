@@ -83,7 +83,6 @@ const UpdateRubic = (nav) => {
         <div className="w-full">
         
        
-
         </div>  
         <div>
           {/* Content for the third div */}
