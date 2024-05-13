@@ -49,4 +49,8 @@ const StudentModel = sequelize.define('Student', {
   tableName: 'students'
 });
 
+StudentModel.belongsTo(ClassModel, {
+  foreignKey: 'class_id' // Định nghĩa khóa ngoại
+});
+
 module.exports = StudentModel;

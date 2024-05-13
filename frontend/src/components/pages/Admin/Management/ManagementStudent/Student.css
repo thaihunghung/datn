@@ -2,3 +2,12 @@
   padding: 0 !important;
 
 }
+
+.ant-table-thead .ant-table-cell {
+  background-color: rgb(225, 73, 73) !important;
+}
+
+svg {
+  font-size: 20px !important;
+  color: aliceblue !important;
+}
