@@ -35,6 +35,7 @@ import PoPlo from '../components/pages/Admin/Management/ManagementProgram/PoPlo'
 import ManagementRubric from '../components/pages/Admin/Management/ManagementRubric/ManagementRubric';
 import CreateRubic from '../components/pages/Admin/Management/ManagementRubric/CreateRubic';
 import UpdateRubic from '../components/pages/Admin/Management/ManagementRubric/UpdateRubic';
+import Template from '../components/pages/Client/Template/Template';
 
 function Admin(props) {
 
@@ -71,7 +72,8 @@ function Admin(props) {
           <Route path="/management-program/update/:id" element={<UpdateProgramById collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
           <Route path="/Program" element={<Program collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />          
-          
+          <Route path="/hung" element={<Template collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />          
+
           <Route path="/management-po" element={<ManagePo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-po/store" element={<StorePo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-po/create" element={<CreatePo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />

@@ -12,7 +12,7 @@ import { axiosAdmin } from '../../../../../service/AxiosAdmin';
 
 import { Select } from "antd";
 
-const MyEditor = ({key, htmlContent, Point, SaveData, Chapter, Clo, id, rubric_id, chapter_id, clo_id, successNoti, setSpinning }) => {
+const MyEditor = ({ key, htmlContent, Point, SaveData, Chapter, Clo, id, rubric_id, chapter_id, clo_id, successNoti, setSpinning }) => {
   const { Option } = Select;
   const [selectedChapter, setSelectedChapter] = useState("");
   const [selectedClo, setSelectedClo] = useState("");
@@ -180,14 +180,14 @@ const MyEditor = ({key, htmlContent, Point, SaveData, Chapter, Clo, id, rubric_i
   };
 
   return (
-    <div className='flex w-full'>
-      <div className='p-5 w-full'>
-        <div className='flex flex-col sm:flex-row lg:flex-row xl:flex-row w-full mb-5 gap-5 justify-start items-center'>
-          <div className='w-full items-center  justify-center flex flex-row gap-2 sm:flex-col lg:flex-col xl:flex-col'>
+    <div className='flex w-full h-full'>
+      <div className='w-full h-full text-[#020401]'>
+        <div className='w-full h-full flex flex-col sm:flex-col sm:items-start lg:flex-row  xl:flex-row  justify-center items-center gap-2'>
+          <div className='flex-1 w-full sm:w-full items-center p-5 pb-0 sm:pb-0 lg:pb-5 xl:pb-5  justify-center flex flex-col gap-2 sm:flex-col lg:flex-col xl:flex-col'>
             <div className='text-left w-full font-bold'>Chọn Clo:</div>
             <Select
               defaultValue="Chọn loại"
-              className="min-w-[250px] sm:min-w-[200px] lg:min-w-[250px] xl:min-w-[250px]"
+              className="w-full"
               onChange={handleCloSelectChange}
               value={selectedClo}
             >
@@ -203,15 +203,13 @@ const MyEditor = ({key, htmlContent, Point, SaveData, Chapter, Clo, id, rubric_i
                 </Option>
               ))}
             </Select>
-          </div>
-          <div className='w-full items-center justify-center flex flex-row gap-2 sm:flex-col lg:flex-col xl:flex-col'>
             <div className='text-left w-full font-bold'>Chọn Chapter:</div>
             <Select
               defaultValue="Chọn loại"
               value={selectedChapter}
               onChange={handleChapterSelectChange}
               size="large"
-              className="min-w-[250px] sm:min-w-[200px] lg:min-w-[250px] xl:min-w-[250px]"
+              className="w-full"
             >
               {Chapter.map((items) => (
                 <Option
@@ -224,18 +222,13 @@ const MyEditor = ({key, htmlContent, Point, SaveData, Chapter, Clo, id, rubric_i
                 </Option>
               ))}
             </Select>
-
-          </div>
-        </div>
-        <div className='w-full min-w-[250px] sm:min-w-[200px] lg:min-w-[250px] xl:min-w-[250px]'>
-          <div className='w-full mb-5 items-center justify-center flex flex-row gap-2 sm:flex-col lg:flex-col xl:flex-col'>
             <div className='text-left w-full font-bold'>Nhập điểm:</div>
             <Select
               defaultValue="Chọn điểm"
               value={score}
               onChange={handleScoreChange}
               size="large"
-              className="min-w-[250px] sm:min-w-[200px] lg:min-w-[250px] xl:min-w-[250px]"
+              className="w-full"
             >
               {options}
             </Select>
@@ -246,7 +239,7 @@ const MyEditor = ({key, htmlContent, Point, SaveData, Chapter, Clo, id, rubric_i
               value={selectedQualityLevel}
               onChange={handleQualityLevelChange}
               size="large"
-              className="min-w-[250px] sm:min-w-[200px] lg:min-w-[250px] xl:min-w-[250px]"
+              className="w-full"
             >
               <Option value={1}>1 tiêu chí</Option>
               <Option value={2}>2 tiêu chí</Option>
@@ -255,176 +248,171 @@ const MyEditor = ({key, htmlContent, Point, SaveData, Chapter, Clo, id, rubric_i
               <Option value={6}>6 tiêu chí</Option>
               <Option value={8}>8 tiêu chí</Option>
             </Select>
-
-
-
+            <div className='w-full overflow-x-auto P-5'>
+              Mức độ chất lượng:
+              {selectedQualityLevel === 1 && (
+                <div className={`qualityLevel${key} border border-gray-300 rounded w-full min-w-[200px] P-2`}>
+                  <div className={`flex gap-5 level${key}`}>
+                    <div className='flex-1'>Tốt</div>
+                    <div className='flex-1'>Yếu</div>
+                  </div>
+                  <div className={`flex gap-5 name${key}`}>
+                    <div className='flex-1'>Đạt</div>
+                    <div className='flex-1'>Chưa Đạt</div>
+                  </div>
+                  <div className={`flex gap-5 keyNumber${key}`}>
+                    <div className='flex-1'>{score}</div>
+                    <div className='flex-1'>0.00</div>
+                  </div>
+                </div>
+              )}
+              {selectedQualityLevel === 2 && (
+                <div className={`qualityLevel${key} border border-gray-300 rounded w-full min-w-[200px] P-2`}>
+                  <div className={`flex gap-5 level${key}`}>
+                    <div className='flex-1'>Tốt</div>
+                    <div className='flex-1'>TB</div>
+                    <div className='flex-1'>Yếu</div>
+                  </div>
+                  <div className={`flex gap-5 name${key}`}>
+                    <div className='flex-1'>Đạt 2</div>
+                    <div className='flex-1'>Đạt 1</div>
+                    <div className='flex-1'>Đạt 0</div>
+                  </div>
+                  <div className={`flex gap-5 keyNumber${key}`}>
+                    <div className='flex-1'>{score}</div>
+                    <div className='flex-1'>{score * 50 / 100}</div>
+                    <div className='flex-1'>0.00</div>
+                  </div>
+                </div>
+              )}
+              {selectedQualityLevel === 3 && (
+                <div className={`qualityLevel${key} border border-gray-300 rounded w-full min-w-[300px] P-2`}>
+                  <div className={`flex gap-5 level${key}`}>
+                    <div className='flex-1'>Tốt</div>
+                    <div className='flex-1'>TB</div>
+                    <div className='flex-1'>Yếu</div>
+                    <div className='flex-1'>Kém</div>
+                  </div>
+                  <div className={`flex gap-5 name${key}`}>
+                    <div className='flex-1'>Đạt 3</div>
+                    <div className='flex-1'>Đạt 2</div>
+                    <div className='flex-1'>Đạt 1</div>
+                    <div className='flex-1'>Đạt 0</div>
+                  </div>
+                  <div className={`flex gap-5 keyNumber${key}`}>
+                    <div className='flex-1'>{0.75}</div>
+                    <div className='flex-1'>{(0.75 * 66.66666666666667 / 100).toFixed(2)}</div>
+                    <div className='flex-1'>{(0.75 * 33.33333333333333 / 100).toFixed(2)}</div>
+                    <div className='flex-1'>0.00</div>
+                  </div>
+                </div>
+              )}
+              {selectedQualityLevel === 4 && (
+                <div className={`qualityLevel${key} border border-gray-300 rounded w-full min-w-[400px] P-2`}>
+                  <div className={`flex gap-5 level${key}`}>
+                    <div className='flex-1'>Tốt</div>
+                    <div className='flex-1'>Khá</div>
+                    <div className='flex-1'>TB</div>
+                    <div className='flex-1'>Yếu</div>
+                    <div className='flex-1'>Kém</div>
+                  </div>
+                  <div className={`flex gap-5 name${key}`}>
+                    <div className='flex-1'>Đạt 4</div>
+                    <div className='flex-1'>Đạt 3</div>
+                    <div className='flex-1'>Đạt 2</div>
+                    <div className='flex-1'>Đạt 1</div>
+                    <div className='flex-1'>Đạt 0</div>
+                  </div>
+                  <div className={`flex gap-5 keyNumber${key}`}>
+                    <div className='flex-1'>{score}</div>
+                    <div className='flex-1'>{score * 75 / 100}</div>
+                    <div className='flex-1'>{score * 50 / 100}</div>
+                    <div className='flex-1'>{score * 25 / 100}</div>
+                    <div className='flex-1'>0.00</div>
+                  </div>
+                </div>
+              )}
+              {selectedQualityLevel === 6 && (
+                <div className={`qualityLevel${key} border border-gray-300 rounded w-full min-w-[400px] P-2`}>
+                  <div className={`flex gap-5 level${key}`}>
+                    <div className='flex-1'>Tốt</div>
+                    <div className='flex-1'>TB</div>
+                    <div className='flex-1'>Yếu</div>
+                    <div className='flex-1'>Kém</div>
+                  </div>
+                  <div className={`flex gap-5 name${key}`}>
+                    <div className='flex-1'>Đạt 5-6</div>
+                    <div className='flex-1'>Đạt 3-4</div>
+                    <div className='flex-1'>Đạt 1-2</div>
+                    <div className='flex-1'>Đạt 0</div>
+                  </div>
+                  <div className={`flex gap-5 keyNumber${key}`}>
+                    <div className='flex-1'>{0.75}</div>
+                    <div className='flex-1'>{(0.75 * 66.66666666666667 / 100).toFixed(2)}</div>
+                    <div className='flex-1'>{(0.75 * 33.33333333333333 / 100).toFixed(2)}</div>
+                    <div className='flex-1'>0.00</div>
+                  </div>
+                </div>
+              )}
+              {selectedQualityLevel === 8 && (
+                <div className={`qualityLevel${key} border border-gray-300 rounded w-full min-w-[450px] lg:min-w-[370px] xl:min-w-[370px] p-2`}>
+                  <div className={`flex gap-5 level${key}`}>
+                    <div className='flex-1'>Tốt</div>
+                    <div className='flex-1'>Khá</div>
+                    <div className='flex-1'>TB</div>
+                    <div className='flex-1'>Yếu</div>
+                    <div className='flex-1'>Kém</div>
+                  </div>
+                  <div className={`flex gap-5 name${key}`}>
+                    <div className='flex-1'>Đạt 7-8</div>
+                    <div className='flex-1'>Đạt 5-6</div>
+                    <div className='flex-1'>Đạt 3-4</div>
+                    <div className='flex-1'>Đạt 1-2</div>
+                    <div className='flex-1'>CD</div>
+                  </div>
+                  <div className={`flex gap-5 keyNumber${key}`}>
+                    <div className='flex-1'>{score}</div>
+                    <div className='flex-1'>{score * 75 / 100}</div>
+                    <div className='flex-1'>{score * 50 / 100}</div>
+                    <div className='flex-1'>{score * 25 / 100}</div>
+                    <div className='flex-1'>0.00</div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-          <div className='py-5'>
-            Mức độ chất lượng:
-            {selectedQualityLevel === 1 && (
-              <div className={`qualityLevel${key}`}>
-                <div className={`flex gap-10 level${key}`}>
-                  <div>Tốt</div>
-                  <div>Yếu</div>
-                </div>
-                <div className={`flex gap-10 name${key}`}>
-                  <div>Đạt</div>
-                  <div>Chưa Đạt</div>
-                </div>
-                <div className={`flex gap-10 keyNumber${key}`}>
-                  <div>{score}</div>
-                  <div>0.00</div>
-                </div>
-              </div>
-            )}
-            {selectedQualityLevel === 2 && (
-              <div className={`qualityLevel${key}`}>
-                <div className={`flex gap-10 level${key}`}>
-                  <div>Tốt</div>
-                  <div>TB</div>
-                  <div>Yếu</div>
-                </div>
+          <div className='flex flex-1 flex-col w-full sm:w-full items-start p-5 pb-[60px]'>
+            <span className='text-justify font-bold'>
+              Tiều chí:
+            </span>
+            <Editor
+              editorState={editorState}
+              onEditorStateChange={setEditorState}
+              wrapperClassName="wrapper-class w-full"
+              editorClassName="editor-class px-5 border w-full"
+              toolbarClassName="toolbar-class"
+            />
+            <div className='w-full min-w-[250px] sm:min-w-[200px] lg:min-w-[250px] xl:min-w-[250px]'>
+              <div className='w-full mt-5'>
+                {SaveLoad ? (
+                  <div>
+                    <Button color="primary" className='w-[200px]' onClick={handleSave}>
+                      <span className='font-bold'>Lưu</span>
+                    </Button>
+                  </div>
+                ) : (
+                  <div>
+                    <button className='w-[200px] rounded-lg hover:bg-[#FF8077] hover:text-[#FEFEFE] bg-[#FF9908]' onClick={handleUpdate}>
+                      <span className='font-bold'>cập nhật</span>
+                    </button>
 
-                <div className={`flex gap-10 name${key}`}>
-                  <div>Đạt 2</div>
-                  <div>Đạt 1</div>
-                  <div>Chưa Đạt</div>
-                </div>
-                <div className={`flex gap-10 keyNumber${key}`}>
-                  <div>{score}</div>
-                  <div>{score * 50 / 100}</div>
-                  <div>0.00</div>
-                </div>
+                  </div>
+                )}
               </div>
-            )}
-            {selectedQualityLevel === 3 && (
-              <div className={`qualityLevel${key}`}>
-                <div className={`flex gap-10 level${key}`}>
-                  <div>Tốt</div>
-                  <div>TB</div>
-                  <div>Yếu</div>
-                  <div>Chưa Đạt</div>
-                </div>
-
-                <div className={`flex gap-10 name${key}`}>
-                  <div>Đạt 3</div>
-                  <div>Đạt 2</div>
-                  <div>Đạt 1</div>
-                  <div>Chưa Đạt</div>
-                </div>
-                <div className={`flex gap-10 keyNumber${key}`}>
-
-                  <div>{0.75}</div>
-                  <div>{(0.75 * 66.66666666666667 / 100).toFixed(2)}</div>
-                  <div>{(0.75 * 33.33333333333333 / 100).toFixed(2)}</div>
-
-                  <div>0.00</div>
-                </div>
-              </div>
-            )}
-            {selectedQualityLevel === 4 && (
-              <div className={`qualityLevel${key}`}>
-                <div className={`flex gap-10 level${key}`}>
-                  <div>Tốt</div>
-                  <div>Khá</div>
-                  <div>TB</div>
-                  <div>Yếu</div>
-                  <div>Kém</div>
-                </div>
-                <div className={`flex gap-10 name${key}`}>
-                  <div>Đạt 4</div>
-                  <div>Đạt 3</div>
-                  <div>Đạt 2</div>
-                  <div>Đạt 1</div>
-                  <div>Chưa đạt</div>
-                </div>
-                <div className={`flex gap-10 keyNumber${key}`}>
-                  <div>{score}</div>
-                  <div>{score * 75 / 100}</div>
-                  <div>{score * 50 / 100}</div>
-                  <div>{score * 25 / 100}</div>
-                  <div>{0.00}</div>
-                </div>
-              </div>
-            )}
-            {selectedQualityLevel === 6 && (
-              <div className={`qualityLevel${key}`}>
-                <div className={`flex gap-10 level${key}`}>
-                  <div>Tốt</div>
-                  <div>TB</div>
-                  <div>Yếu</div>
-                  <div>Chưa Đạt</div>
-                </div>
-
-                <div className={`flex gap-10 name${key}`}>
-                  <div>Đạt 5-6</div>
-                  <div>Đạt 3-4</div>
-                  <div>Đạt 1-2</div>
-                  <div>Chưa Đạt</div>
-                </div>
-                <div className={`flex gap-10 keyNumber${key}`}>
-
-                  <div>{0.75}</div>
-                  <div>{(0.75 * 66.66666666666667 / 100).toFixed(2)}</div>
-                  <div>{(0.75 * 33.33333333333333 / 100).toFixed(2)}</div>
-                  <div>0.00</div>
-                </div>
-              </div>
-            )}
-            {selectedQualityLevel === 8 && (
-              <div className={`qualityLevel${key}`}>
-                <div className={`flex gap-10 level${key}`}>
-                  <div>Tốt</div>
-                  <div>Khá</div>
-                  <div>TB</div>
-                  <div>Yếu</div>
-                  <div>Kém</div>
-                </div>
-                <div className={`flex gap-10 name${key}`}>
-                  <div>Đạt 7-8</div>
-                  <div>Đạt 5-6</div>
-                  <div>Đạt 3-4</div>
-                  <div>Đạt 1-2</div>
-                  <div>Chưa đạt</div>
-                </div>
-                <div className={`flex gap-10 keyNumber${key}`}>
-                  <div>{score}</div>
-                  <div>{score * 75 / 100}</div>
-                  <div>{score * 50 / 100}</div>
-                  <div>{score * 25 / 100}</div>
-
-                  <div>{0.00}</div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className='text-justify font-bold'>
-            Tiều chí:
-          </div>
-          <Editor
-            editorState={editorState}
-            onEditorStateChange={setEditorState}
-            wrapperClassName="wrapper-class"
-            editorClassName="editor-class px-5 border"
-            toolbarClassName="toolbar-class"
-          />
-          <div className='w-full mt-5'>
-            {SaveLoad ? (
-              <div>
-                <Button color="primary" className='w-[200px]' onClick={handleSave}>
-                  <span className='font-bold'>Lưu</span>
-                </Button>
-              </div>
-            ) : (
-              <div>
-                <Button color="warning" className='w-[200px]' onClick={handleUpdate}>
-                  <span className='font-bold'>cập nhật</span>
-                </Button>
-              </div>
-            )}
+            </div>
           </div>
         </div>
+
       </div>
     </div>
   );

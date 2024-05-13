@@ -1,8 +1,19 @@
-import React from 'react';
+import React, { useEffect, useState } from "react";
 import { Button } from "@nextui-org/react";
 import { AxiosClient } from '../../../../service/AxiosClient';
 
+
+import { RadioGroup, Radio } from "@nextui-org/react";
+import { Tooltip } from "@nextui-org/react";
+import { Collapse } from 'antd';
+
+
+import { axiosAdmin } from "../../../../service/AxiosAdmin";
+
+import "./css.css"
+
 const DownloadDiv = () => {
+
     const handleDownload = async () => {
         const divContent = document.getElementById('downloadDiv').innerHTML;
         const htmlString = `
@@ -31,7 +42,7 @@ const DownloadDiv = () => {
             </html>
         `;
         try {
-            const response = await AxiosClient.post('pdf', {
+            const response = await axiosAdmin.post('pdf', {
                 html: htmlString
             }, { responseType: 'blob', withCredentials: true });
 
@@ -56,91 +67,140 @@ const DownloadDiv = () => {
 };
 
 const Template = () => {
-    const CDR = [
-        { CDR: 'CDR1' },
-        { CDR: 'CDR2' },
-        { CDR: 'CDR3' },
-    ];
 
-    const tieuchi = [
-        { CDR: 'CDR1', tieuchi: 'TC1', point: 1.0 },
-        { CDR: 'CDR2', tieuchi: 'TC3', point: 1.5 },
-        { CDR: 'CDR2', tieuchi: 'TC4', point: 1.0 },
-        { CDR: 'CDR2', tieuchi: 'TC5', point: 1.0 },
-        { CDR: 'CDR3', tieuchi: 'TC6', point: 1.0 },
-        { CDR: 'CDR2', tieuchi: 'TC7', point: 1.0 },
-    ];
-    let counter = 0;
+    const [selectedValues, setSelectedValues] = useState([]);
+    const [RubicData, setRubicData] = useState([]);
+    const [RubicItemsData, setRubicItemsData] = useState([]);
 
-    const tableRows = CDR.map((cdrItem, index) => {
-        const criteria = tieuchi.filter(item => item.CDR === cdrItem.CDR);
-        return (
-            <React.Fragment key={index}>
-                {criteria.map((criteriaItem, idx) => {
-                    counter++;
-                    return (
-                        <tr key={`${index}-${idx}`}>
-                            <td className='p-5 align-top border-black border-[1px]'>{counter}</td>
-                            {idx === 0 && <td rowSpan={criteria.length} className='border-black border-[1px] p-2'>{cdrItem.CDR}</td>}
-                            <td className='text-justify w-[352px]  border-black border-[1px] test p-4'>
-                                <p> 1.1. Hình thức
-                                    <br />
-                                    1.Định dạng văn bản đúng quy định (font, size, khổ giấy, canh lề, văn bản, định dạng đoạn…)
-                                    <br />
-                                    2. Có danh mục hình, bảng (nếu có), mục lục, tài liệu tham khảo, danh mục từ viết tắt (nếu có)
-                                    <br />
-                                    3. Văn phong rõ ràng, mạch lạc, không lỗi chính tả
-                                    <br />
-                                    4. Mục lục, tài liệu tham khảo đúng quy định, kết luận
-                                </p>
-                            </td>
-                            <td className='flex flex-col items-start w-full '>
-                                <p className='text-left leading-6 ml-2'>Tổng điểm: {criteriaItem.point}</p>
-                                <div className='flex flex-col gap-[20px] ml-2  border-black border-[1px] pb-2'>
-                                    <div>
-                                        <h1 className='font-bold'>{criteriaItem.tieuchi}</h1>
-                                    </div>
-                                    <div className="w-[262px] flex gap-2 text-xs items-center justify-center font-bold">
-                                        {[...Array(5)].map((_, i) => (
-                                            <div key={i} className="border-black border-[1px] p-5 w-[20px] h-[20px] flex items-center justify-center rounded-full">
-                                                {counter + i}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    );
-                })}
-            </React.Fragment>
-        );
-    });
+    const totalKeyNumber = selectedValues.reduce((total, value) => total + value.keyNumber, 0);
+
+    const handleRadioChange = (index, qualityLevel_id, clo_id, keyNumber) => {
+        setSelectedValues(prevValues => {
+            const updatedValues = [...prevValues];
+            updatedValues[index] = {
+                qualityLevel_id: qualityLevel_id,
+                clo_id: clo_id,
+                keyNumber: keyNumber,
+            };
+            return updatedValues
+        });
+    };
+
+    const handleSubmit = () => {
+        console.log('Submit button clicked');
+        console.log('Selected values:', selectedValues);
+    };
+
+    const GetRubricData = async () => {
+        try {
+            const response = await axiosAdmin.get(`/rubric/${1}/items`);
+            setRubicData(response.data.rubric);
+            setRubicItemsData(response.data.rubric.rubricItems);
+            console.log(response.data.rubric.rubricItems.qualityLevel);
+        } catch (error) {
+            console.error('Error fetching rubric data:', error);
+            throw error;
+        }
+    };
+
+    useEffect(() => {
+        GetRubricData();
+    }, []);
 
     return (
         <div>
             <DownloadDiv />
-            <div className='flex justify-center text-base' id="downloadDiv">
-                <table className="table-bordered w-[720px]" style={{ fontFamily: 'Tahoma, sans-serif' }}>
-                    <thead>
-                        <tr className='border-black border-[1px]'>
-                            <th className='p-2'>STT</th>
-                            <th className='p-2'>CDR</th>
-                            <th className='p-2'>Tieuchi</th>
-                            <th className='p-2'></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {tableRows}
-                    </tbody>
-                    <tfoot>
-                        <tr className=' border-black border-[1px]'>
-                            <th colSpan={4} className='border-black border-[1px] p-4'></th>
-                        </tr>
-                    </tfoot>
-                </table>
+            <div className='w-full text-base' id="downloadDiv">
+            <div class="container">
+                <div class="header">
+                    <div>CĐR</div>
+                    <div>Tiêu chí</div>
+                    <div>Tổng điểm</div>
+                    <div>Mức độ chất lượng</div>
+                </div>
+                <div class="content">
+                    Content Here
+                </div>
+                <div class="footer">
+                    Footer Content
+                </div>
+            </div>
+
+
+              
             </div>
         </div>
     );
 };
 
 export default Template;
+{/* <div>Trường đại học trà vinh</div>
+                <div>Khoa kỹ thuật công nghệ</div>
+                <div className="text-2xl font-bold">PHIẾU ĐÁNH GIÁ THỰC TẬP ĐỒ ÁN CHUYÊN NGÀNH</div>
+                <div>họ và tên</div>
+                <div>họ và tên</div>
+                <div>họ và tên</div>
+                <div>họ và tên</div>
+                <div>họ và tên</div>
+                <div>họ và tên</div>
+                <div>họ và tên</div>
+                <div>họ và tên</div>
+                <div>họ và tên</div>
+                <div>họ và tên</div>
+                <div>họ và tên</div>
+                <table className='border-collapse border border-[#ff8077] w-full h-full'>
+                    <thead>
+                        <tr className="border border-b-0 border-[#ff8077] h-[20px]">
+                            <th className="border border-b-0 border-[#ff8077]">CĐR</th>
+                            <th className="border border-b-0 border-[#ff8077]">Tiêu chí</th>
+                            <th className="border border-b-0 border-[#ff8077]">Tổng điểm</th>
+                            <th className="border border-b-0 border-[#ff8077]">Mức độ chất lượng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {RubicItemsData.map((item, i) => (
+                            <>
+                                <tr key={item.rubricsItem_id} className="border border-b-0 border-[#ff8077] p-5">
+                                    <td rowSpan={2} className="border border-b-0 border-[#ff8077] text-center">{item.CLO.cloName}</td>
+                                    <td rowSpan={2} className="border border-b-0 border-[#ff8077] ">
+                                        <span dangerouslySetInnerHTML={{ __html: item.description }} />
+                                    </td>
+                                    <td rowSpan={2} className="border border-b-0 border-[#ff8077]">
+                                        {item.score}
+                                    </td>
+
+                                    <td className="h-fit test">
+                                        <div className="w-full flex justify-center items-center">
+                                            {
+                                                item.qualityLevel.map((quality, index) => (
+                                                    <span className="flex-1 h-full text-center p-1">{quality.name}</span>
+                                                ))
+                                            }
+                                        </div>
+                                    </td>
+
+                                </tr>
+                                <tr className="border border-b-0 border-[#ff8077] p-5">
+                                    <td className="h-fit test">
+                                        <div className="w-full flex justify-center items-center">
+                                            {
+                                                item.qualityLevel.map((quality, index) => (
+                                                    <span className="flex-1 h-full text-center p-1">{quality.keyNumber}</span>
+                                                ))
+                                            }
+                                        </div></td>
+
+                                </tr>
+
+                            </>
+                        ))}
+                    </tbody>
+                    <tfoot className="border border-t-0 border-[#ff8077] p-5">
+                        <tr className="h-[20px]">
+                            <td className="p-5"></td>
+                            <td className="border-x border-[#ff8077] p-5"></td>
+                            <td className="border-r border-[#ff8077] p-5"></td>
+                            <td className="p-5"></td>
+                        </tr>
+                    </tfoot>
+                </table> */}
