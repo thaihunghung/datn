@@ -70,6 +70,8 @@ router.post('/clo', CloController.create);
  */
 router.get('/clo/:id', CloController.getByID);
 
+router.get('/clo/subject/:subject_id', CloController.GetCloBySubjectId);
+
 /**
  * @openapi
  *  /api/admin/clo/{id}:

@@ -6,6 +6,7 @@ const SubjectModel = require('../models/SubjectModel');
 const CloModel = require('../models/CloModel');
 const ChapterModel = require('../models/ChapterModel');
 const qualityLevelsModel = require('../models/QualityLevelsModel');
+const PloCloModel = require('../models/PloCloModel');
 
 const RubricController = {
   // Get all rubrics
@@ -138,7 +139,7 @@ const RubricController = {
         rubric.dataValues.RubricItem = rubricsItemsForRubricItem;
       }
 
-      res.json({rubric: rubrics});
+      res.json({ rubric: rubrics });
     } catch (error) {
       console.error('Error getting all rubrics:', error);
       res.status(500).json({ message: 'Internal server error' });
@@ -155,7 +156,8 @@ const RubricController = {
         }]
       });
       if (rubric) {
-        const [rubricItems, Clos, Chapters] = await Promise.all([
+
+        const [rubricItems, Clos, Chapters, PloClo] = await Promise.all([
           RubricItemModel.findAll({
             where: {
               rubric_id: rubric.rubric_id,
@@ -168,6 +170,7 @@ const RubricController = {
               attributes: ['chapter_id', 'chapterName', 'description']
             }]
           }),
+         // PloCloModel.findAll({ where: { clo_id: rubric.clo_id } }),
           CloModel.findAll({ where: { subject_id: rubric.subject_id } }),
           ChapterModel.findAll({ where: { subject_id: rubric.subject_id } })
         ]);
@@ -182,8 +185,9 @@ const RubricController = {
         }
         rubric.dataValues.rubricItems = rubricItems;
         rubric.dataValues.CloData = Clos;
+        //rubric.dataValues.PloCloData = PloClo;
         rubric.dataValues.ChapterData = Chapters;
-
+        
         res.json({ rubric: rubric });
       } else {
         console.log('Rubric not found');

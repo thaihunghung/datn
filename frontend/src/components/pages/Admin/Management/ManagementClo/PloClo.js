@@ -32,7 +32,7 @@ const PloClo = (nav) => {
     };
     const GetAllClo = async () => {
         try {
-            const response = await axiosAdmin.get('/clo');
+            const response = await axiosAdmin.get('/clo/subject/1');
             setClos(response.data);
         } catch (error) {
             console.error('Error fetching clos:', error);

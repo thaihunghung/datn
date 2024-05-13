@@ -135,7 +135,7 @@ const Template = () => {
                     <div className="w-full flex justify-start items-center gap-7"><span>6. Chuyên ngành:</span><span className="flex-1">Khóa:</span></div>
                     <div className="w-full text-left">7. Địa điểm:</div>
                     <div className="w-full text-left">8. Ý kiến đánh giá của thành viên Chấm Thực tập Đồ án Chuyên Ngành theo tín chỉ:</div>
-                    <div className="w-full text-left italic">(Thành viên Chấm khoanh tròn vào ô điểm số tương ứng với cột mức chất lượng mà SV đạt được theo từng tiêu chí)</div>
+                    <div className="w-full text-left italic mb-5">(Thành viên Chấm khoanh tròn vào ô điểm số tương ứng với cột mức chất lượng mà SV đạt được theo từng tiêu chí)</div>
                 </div>
                 <table className='border-collapse border border-[#ff8077] w-full h-full'>
                     <thead>
@@ -204,36 +204,33 @@ const Template = () => {
                         </tr>
                     </tfoot>
                 </table>
-                <div className="w-full pl-[2cm] pr-[1cm]">
+
+                <div className="w-full pl-[2cm] pr-[1cm]" style={{ pageBreakInside: 'avoid' }}>
                     <div className="w-full text-left mt-2">
                         <span className="font-bold">9. Kết luận của thành viên Chấm đồ án: </span>
-                        <span className="italic">{' '}(Lưu ý: Tổng điểm bài thi và điểm thưởng không quá 10 điểm)</span>
-
+                        <span className="italic">(Lưu ý: Tổng điểm bài thi và điểm thưởng không quá 10 điểm)</span>
                     </div>
-
                     <div className="w-full text-left my-2">
                         <span className="pl-[50px]">Tổng điểm:..................(Bằng chữ:........................................................................) </span>
                     </div>
-
                     <div className="w-full text-left font-bold">
                         10. Ý kiến góp ý, bổ sung:
                     </div>
-                </div>
-                <div className="w-full flex mt-[50px] justify-end pl-[2cm] pr-[1cm] ">
-                    <div className="w-[50%] mr-[20px] test">
-                        <div className="w-full text-center test">
-                            Trà Vinh,<span className="italic"> ngày     tháng     năm 2024</span>
-                        </div>
-
-                        <div className="w-full text-center font-bold test">
-                            Thành viên Chấm báo cáo
-                        </div>
-
-                        <div className="w-full text-center test">
-                            <span className="italic">(Ký & ghi rõ họ tên)</span>
+                    <div className="w-full flex mt-[50px] justify-end pl-[2cm] pr-[1cm] ">
+                        <div className="w-[50%] mr-[20px] test">
+                            <div className="w-full text-center test">
+                                Trà Vinh,<span className="italic"> ngày     tháng     năm 2024</span>
+                            </div>
+                            <div className="w-full text-center font-bold test">
+                                Thành viên Chấm báo cáo
+                            </div>
+                            <div className="w-full text-center test">
+                                <span className="italic">(Ký & ghi rõ họ tên)</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     );

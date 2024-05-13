@@ -11,6 +11,16 @@ const CloController = {
       res.status(500).json({ message: 'Internal server error' });
     }
   },
+  GetCloBySubjectId: async (req, res) => {
+    try {
+      const {subject_id} = req.params
+      const clos = await CloModel.findAll({where: {subject_id: subject_id}});
+      res.json(clos);
+    } catch (error) {
+      console.error('Error getting all clos:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
   // Create a new Clo
   create: async (req, res) => {
     try {

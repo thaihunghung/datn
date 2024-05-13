@@ -3,6 +3,8 @@ const sequelize = require('../config/database');
 const ChapterModel = require('./ChapterModel');
 const CloModel = require('./CloModel');
 const RubricModel = require('./RubricModel');
+const PloModel = require('./PloModel');
+
 const QualityLevelsModel = require('./QualityLevelsModel');
 
 const RubricsItemModel = sequelize.define('rubricsItem', {
@@ -33,6 +35,14 @@ const RubricsItemModel = sequelize.define('rubricsItem', {
     references: {
       model: RubricModel,
       key: 'rubric_id'
+    }
+  },
+  plo_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: PloModel,
+      key: 'plo_id'
     }
   },
   description: {

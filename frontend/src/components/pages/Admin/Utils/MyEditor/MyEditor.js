@@ -15,6 +15,9 @@ import { Select } from "antd";
 const MyEditor = ({ key, htmlContent, Point, SaveData, Chapter, Clo, id, rubric_id, chapter_id, clo_id, successNoti, setSpinning }) => {
   const { Option } = Select;
   const [selectedChapter, setSelectedChapter] = useState("");
+  const [selectedPlo, setSelectedPlo] = useState("");
+  const [DataPlo, setDataPlo] = useState([]);
+
   const [selectedClo, setSelectedClo] = useState("");
   const [SaveLoad, setSaveLoad] = useState(SaveData);
   const [score, setSelectedScore] = useState();
@@ -26,7 +29,9 @@ const MyEditor = ({ key, htmlContent, Point, SaveData, Chapter, Clo, id, rubric_
   const handleQualityLevelChange = (value, option) => {
     setSelectedQualityLevel(value);
   };
-
+  const handlePloSelectChange = (value, option) => {
+    setSelectedPlo(value);
+  };
   const handleChapterSelectChange = (value, option) => {
     setSelectedChapter(value);
   };
@@ -199,6 +204,25 @@ const MyEditor = ({ key, htmlContent, Point, SaveData, Chapter, Clo, id, rubric_
                 >
                   <Tooltip content={items.description} className='font-bold'>
                     {items.cloName}
+                  </Tooltip>
+                </Option>
+              ))}
+            </Select>
+            <div className='text-left w-full font-bold'>Chọn Plo:</div>
+            <Select
+              defaultValue="Chọn loại"
+              className="w-full"
+              onChange={handlePloSelectChange}
+              value={selectedPlo}
+            >
+              {DataPlo.map((items) => (
+                <Option
+                  key={items.plo_id}
+                  value={items.plo_id}
+                  textValue={items.ploName}
+                >
+                  <Tooltip content={items.description} className='font-bold'>
+                    {items.ploName}
                   </Tooltip>
                 </Option>
               ))}
