@@ -5,6 +5,7 @@ const fs = require('fs');
 const sequelize = require("../config/database");
 const ExcelJS = require('exceljs');
 const path = require('path');
+const ClassModel = require("../models/ClassModel");
 
 const StudentController = {
   // Lấy tất cả sinh viên
@@ -20,7 +21,7 @@ const StudentController = {
   getAllByClassId: async (req, res) => {
     try {
       const { id } = req.params;
-      const students = await StudentModel.findAll({ where: { class_id: id, isDelete: false} });
+      const students = await StudentModel.findAll({ where: { class_id: id, isDelete: false } });
       if (!students) {
         return res.status(404).json({ message: 'Không tìm thấy students' });
       }
@@ -42,7 +43,24 @@ const StudentController = {
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
+  getAllWithClass: async (req, res) => {
+    try {
+      // Lấy thông tin sinh viên
+      const students = await StudentModel.findAll({
+        include: [{
+          model: ClassModel,
+          attributes: ['classCode'] // Chỉ lấy trường classCode từ bảng lớp
+        }],
+        attributes: ['student_id','class_id', 'studentCode', 'email', 'name'],// Lọc ra các trường cần lấy
+        where: { isDelete: false }
+      });
 
+      res.json(students);
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  },
   // Lấy thông tin của một sinh viên dựa trên ID
   getByID: async (req, res) => {
     try {
@@ -128,6 +146,7 @@ const StudentController = {
       res.status(500).json({ message: 'Lỗi máy chủ' });
     }
   },
+
   getFormStudent: async (req, res) => {
     try {
       const Description = await StudentModel.describe();
@@ -158,12 +177,37 @@ const StudentController = {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Students Form');
 
+
+    const CodeClass = await ClassModel.findAll({ attributes: ['classCode'] }, { where: { isDelete: true } });
+
     worksheet.columns = [
       { header: 'Mã lớp', key: 'classCode', width: 15 },
       { header: 'Tên SV', key: 'name', width: 32 },
       { header: 'MSSV', key: 'studentCode', width: 20 },
       { header: 'Email', key: 'email', width: 30 },
     ];
+
+    // const cellA19 = worksheet.getCell('G1');
+    // cellA19.value = 'Các mã lớp';
+    // for (let row = 2; row <= CodeClass.length; row++) {
+    //   for (let col = 1; col <= 1; col++) {
+    //     const cell = worksheet.getCell(row, 7);
+    //     cell.value = CodeClass[row-2].classCode;
+    //   }
+    // }
+
+    const worksheetData = workbook.addWorksheet('Description');
+
+    worksheetData.columns = [
+      { header: 'Mã lớp', key: 'classCode', width: 15 }
+    ];
+
+    for (let row = 2; row <= CodeClass.length; row++) {
+      for (let col = 1; col <= 1; col++) {
+        const cell = worksheetData.getCell(row, 1);
+        cell.value = CodeClass[row - 2].classCode;
+      }
+    }
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename="StudentsForm.xlsx"');
@@ -189,7 +233,7 @@ const StudentController = {
           const emailCell = row.getCell(4);
           let email = emailCell.value;
           if (email && typeof email === 'object' && email.hasOwnProperty('text')) {
-            email = email.text; 
+            email = email.text;
           }
 
           const sql = `INSERT INTO students (class_id, name, studentCode, email)
@@ -198,7 +242,7 @@ const StudentController = {
             row.getCell(1).value,
             row.getCell(2).value,
             row.getCell(3).value,
-            email, 
+            email,
           ];
           insertPromises.push(sequelize.query(sql, { replacements: values }));
         }

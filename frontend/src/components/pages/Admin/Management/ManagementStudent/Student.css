@@ -2,3 +2,22 @@
   padding: 0 !important;
 
 }
+
+.ant-table-thead .ant-table-cell {
+  background-color: rgb(225, 73, 73) !important;
+}
+
+/* .Header-active {
+  background-color: #ffde17;
+  color: #21409A;
+  ;
+  font-weight: 600;
+} */
+
+svg{
+  font-size: medium;
+}
+
+.ant-table-column-title{
+  font-size: 16px !important;
+}

@@ -96,7 +96,7 @@ const router = express.Router();
  *       500:
  *         description: Lỗi server
 /**
- * @openapi
+ * 
  * /api/admin/rubric/isDelete/true:
  *   get:
  *     summary: Lấy danh sách các Rubrics đã bị xóa

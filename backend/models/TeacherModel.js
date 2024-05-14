@@ -24,7 +24,7 @@ const TeacherModel = sequelize.define('teacher', {
     type: DataTypes.STRING(255),
     allowNull: false
   },
-  passwork: {
+  password: {
     type: DataTypes.STRING(15),
     allowNull: false
   },
