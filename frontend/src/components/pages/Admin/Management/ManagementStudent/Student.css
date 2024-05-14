@@ -7,7 +7,17 @@
   background-color: rgb(225, 73, 73) !important;
 }
 
-svg {
-  font-size: 20px !important;
-  color: aliceblue !important;
+/* .Header-active {
+  background-color: #ffde17;
+  color: #21409A;
+  ;
+  font-weight: 600;
+} */
+
+svg{
+  font-size: medium;
+}
+
+.ant-table-column-title{
+  font-size: 16px !important;
 }
