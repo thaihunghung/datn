@@ -21,8 +21,7 @@ const router = express.Router();
  *       required: true
  *       content:
  *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/AcademicYear'
+ *           
  *     responses:
  *       200:
  *         description: Năm học được tạo thành công.
@@ -45,8 +44,7 @@ const router = express.Router();
  *         description: Thông tin chi tiết của năm học.
  *         content:
  *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/AcademicYear'
+ *             
  *       404:
  *         description: Không tìm thấy năm học
  *       500:
@@ -66,8 +64,7 @@ const router = express.Router();
  *       required: true
  *       content:
  *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/AcademicYear'
+ *           
  *     responses:
  *       200:
  *         description: Cập nhật thành công cho năm học.

@@ -229,9 +229,9 @@ const Student = (nav) => {
           value: 'DA21',
         },
       ],
-      // onFilter: (value, record) => record.classCode.startsWith(value),
-      // filterSearch: true,
-      ...getColumnSearchProps('classCode'), //search và filter chỉ ton tai 1 
+      onFilter: (value, record) => record.classCode.startsWith(value),
+      filterSearch: true,
+      // ...getColumnSearchProps('classCode'), 
       width: '30%',
       // sorter: (a, b) => a.classCode - b.classCode,
       // sortDirections: ['descend', 'ascend'],

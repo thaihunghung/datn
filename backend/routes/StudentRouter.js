@@ -2,28 +2,58 @@ const express = require('express');
 const StudentController = require('../controllers/StudentController');
 const router = express.Router();
 
+/**
+ * @openapi
+ * tags:
+ *   - name: Students
+ *     description: Operations related to students
+ */
 
 /**
  * @openapi
+ * 
  * /api/admin/student:
  *   get:
  *     summary: Lấy danh sách tất cả sinh viên
  *     description: Trả về danh sách tất cả sinh viên.
+ *     tags: [Students]
  *     responses:
  *       200:
- *         description: Danh sách sinh viên.
- *       500:
- *         description: Lỗi server
+ *         description: A list of users.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: The user ID.
+ *                         example: 1
+ *                       name:
+ *                         type: string
+ *                         description: The user's name.
+ *                         example: Leanne Graham
  *   
  *   post:
  *     summary: Tạo một sinh viên mới
  *     description: Thêm một sinh viên mới vào cơ sở dữ liệu.
+ *     tags: [Students]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Student'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The user's name.
+ *                 example: Leanne Graham
  *     responses:
  *       200:
  *         description: Sinh viên được tạo thành công.
@@ -34,6 +64,7 @@ const router = express.Router();
  *   get:
  *     summary: Lấy thông tin một sinh viên theo ID
  *     description: Trả về thông tin chi tiết của một sinh viên.
+ *     tags: [Students]
  *     parameters:
  *       - in: path
  *         name: id
@@ -57,6 +88,7 @@ const router = express.Router();
  *   get:
  *     summary: Lấy danh sách sinh viên theo lớp học
  *     description: Trả về danh sách sinh viên dựa trên ID của lớp học.
+ *     tags: [Students]
  *     parameters:
  *       - in: path
  *         name: id
@@ -75,6 +107,7 @@ const router = express.Router();
  *   put:
  *     summary: Cập nhật thông tin của một sinh viên
  *     description: Cập nhật thông tin của sinh viên dựa trên ID.
+ *     tags: [Students]
  *     parameters:
  *       - in: path
  *         name: id
@@ -99,6 +132,7 @@ const router = express.Router();
  *   delete:
  *     summary: Xóa một sinh viên
  *     description: Xóa sinh viên dựa trên ID.
+ *     tags: [Students]
  *     parameters:
  *       - in: path
  *         name: id
@@ -117,6 +151,7 @@ const router = express.Router();
  *   get:
  *     summary: Lấy danh sách các sinh viên đã bị xóa
  *     description: Trả về danh sách các sinh viên có trạng thái isDelete là true.
+ *     tags: [Students]
  *     responses:
  *       200:
  *         description: Danh sách sinh viên đã bị xóa.
@@ -129,6 +164,7 @@ const router = express.Router();
  *   get:
  *     summary: Lấy danh sách các sinh viên chưa bị xóa
  *     description: Trả về danh sách các sinh viên có trạng thái isDelete là false.
+ *     tags: [Students]
  *     responses:
  *       200:
  *         description: Danh sách sinh viên chưa bị xóa.
@@ -141,6 +177,7 @@ const router = express.Router();
  *   put:
  *     summary: Đảo ngược trạng thái isDelete của một sinh viên
  *     description: Cập nhật trạng thái isDelete cho sinh viên dựa trên ID.
+ *     tags: [Students]
  *     parameters:
  *       - in: path
  *         name: id

@@ -1,8 +1,8 @@
 // StoreStudent.js
-
-import { useEffect, useState } from "react";
-import { Button } from 'antd';
+import React, { useEffect, useState, useRef } from "react";
+import { Button, Select, Tooltip, Input, Space, Table } from 'antd';
 import { Link } from "react-router-dom";
+import { SearchOutlined } from '@ant-design/icons';
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import {
     Modal,
@@ -11,18 +11,19 @@ import {
     ModalBody,
     ModalFooter, useDisclosure
 } from "@nextui-org/react";
+import './Student.css'
 const StoreStudent = (nav) => {
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [programData, setProgramData] = useState([]);
+    const [studentData, setStudentData] = useState([]);
 
 
     const [deleteId, setDeleteId] = useState(null);
-    const allProgramIsDelete = async () => {
+    const allStudentIsDelete = async () => {
         try {
-            const program = await axiosAdmin.get('/program/isDelete/true');
-            setProgramData(program.data)
-            console.log(program.data);
+            const student = await axiosAdmin.get('/student/isDelete/true');
+            setStudentData(student.data)
+            console.log(student.data);
         } catch (err) {
             console.log("Error: " + err.message);
         };
@@ -49,7 +50,7 @@ const StoreStudent = (nav) => {
     }
 
     useEffect(() => {
-        allProgramIsDelete()
+        allStudentIsDelete()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -64,101 +65,180 @@ const StoreStudent = (nav) => {
             window.removeEventListener("resize", handleResize);
         };
     }, []);
-
+    const searchInput = useRef(null);
+    const handleSearch = (selectedKeys, confirm, dataIndex) => {
+      confirm();
+    };
+    const handleReset = (clearFilters) => {
+      clearFilters();
+    };
+    const getColumnSearchProps = (dataIndex) => ({
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+        <div
+          style={{
+            padding: 8,
+          }}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          <Input
+            ref={searchInput}
+            placeholder={`Search ${dataIndex}`}
+            value={selectedKeys[0]}
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            style={{
+              marginBottom: 8,
+              display: 'block',
+            }}
+          />
+          <Space>
+            <Button
+              type="primary"
+              onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+              icon={<SearchOutlined />}
+              size="small"
+              style={{
+                width: 90,
+              }}
+            >
+              Search
+            </Button>
+            <Button
+              onClick={() => clearFilters && handleReset(clearFilters)}
+              size="small"
+              style={{
+                width: 90,
+              }}
+            >
+              Reset
+            </Button>
+          </Space>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <SearchOutlined
+          style={{
+            color: filtered ? '#1677ff' : undefined,
+          }}
+        />
+      ),
+      onFilter: (value, record) =>
+        record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+      onFilterDropdownOpenChange: (visible) => {
+        if (visible) {
+          setTimeout(() => searchInput.current?.select(), 100);
+        }
+      },
+      render: (text) =>
+        text
+    });
+  
+    const columns = [
+      {
+        title: (
+          <Tooltip title="Thông tin chi tiết về sinh viên">
+            Tên sinh viên
+          </Tooltip>
+        ),
+        dataIndex: 'name',
+        key: 'name',
+        width: '40%',
+        ...getColumnSearchProps('name'),
+        // render: (text) => (              //tooltip từng dòng của cột
+        //   <Tooltip title="Thông tin chi tiết">
+        //     {text}
+        //   </Tooltip>
+        // ),
+      },
+      {
+        title: 'Mã số sinh viên',
+        dataIndex: 'studentCode',
+        key: 'studentCode',
+        width: '30%',
+        ...getColumnSearchProps('studentCode'),
+        sorter: (a, b) => parseInt(a.studentCode) - parseInt(b.studentCode),// cần quan tâm kiểu dữ liệu
+        sortDirections: ['descend', 'ascend'],
+      },
+      {
+        title: 'Mã lớp',
+        dataIndex: 'classCode',
+        key: 'classCode',
+        filters: [
+          {
+            text: '2020',
+            value: "DA20",
+          },
+          {
+            text: '2021',
+            value: 'DA21',
+          },
+        ],
+        // onFilter: (value, record) => record.classCode.startsWith(value),
+        // filterSearch: true,
+        ...getColumnSearchProps('classCode'), //search và filter chỉ ton tai 1 
+        width: '30%',
+        // sorter: (a, b) => a.classCode - b.classCode,
+        // sortDirections: ['descend', 'ascend'],
+      },
+    ];
+  
+    const onChange = (pagination, filters, sorter, extra) => {
+      console.log('params', pagination, filters, sorter, extra);
+    };
     return (
-        <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
-            {/* <div className="flex gap-2">
-                <Tooltip title="Chế độ 1 cột">
-                    <Button
-                        isIconOnly
-                        variant={layout === "col" ? "solid" : "light"}
-                        radius="full"
-                        onClick={() => {
-                            handleToggleLayout("col");
-                        }}
-                    >
-                        <i className="fa-solid fa-table-list"></i>
-                    </Button>
-                </Tooltip>
-                <Tooltip title="Chế độ song song">
-                    <Button
-                        isIconOnly
-                        variant={layout === "row" ? "solid" : "light"}
-                        radius="full"
-                        onClick={() => {
-                            handleToggleLayout("row");
-                        }}
-                        isDisabled={disableRowLayout}
-                    >
-                        <i className="fa-solid fa-table-columns"></i>
-                    </Button>
-                </Tooltip>
-            </div> */}
-            <ConfirmAction
-                onOpenChange={onOpenChange}
-                isOpen={isOpen}
-                onConfirm={() => {
-                    if (deleteId) {
-                        handleDeleteProgram(deleteId);
-                        setDeleteId(null);
-                    }
-                }}
-            />
-            <div>
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/student"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS Sinh viên
-                        </div>
-                    </Link>
-                    <Link to={"/admin/student/store"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Kho lưu trữ
-                        </div>
-                    </Link>
-                    <Link to={"/admin/student/create"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Thêm sinh viên
-                        </div>
-                    </Link>
-                    <Link to={"/admin/student/update"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Cập nhật
-                        </div>
-                    </Link>
-                    {/* <Link to={"/admin/student/po-plo"}>
+        <>
+            <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
+                <ConfirmAction
+                    onOpenChange={onOpenChange}
+                    isOpen={isOpen}
+                    onConfirm={() => {
+                        if (deleteId) {
+                            hangleChangeidDelete(deleteId);
+                            setDeleteId(null);
+                        }
+                    }}
+                />
+                <div>
+                    <div className="w-fit flex justify-start text-base font-bold rounded-lg mb-5">
+                        <Link to={"/admin/student"} className="rounded-lg bg-blue-600">
+                            <div className="p-5 text-white rounded-lg">
+                                DS Sinh viên
+                            </div>
+                        </Link>
+                        <Link to={"/admin/student/store"}>
+                            <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
+                                Kho lưu trữ
+                            </div>
+                        </Link>
+                        <Link to={"/admin/student/create"}>
+                            <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
+                                Thêm sinh viên
+                            </div>
+                        </Link>
+                        <Link to={"/admin/student/update"}>
+                            <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
+                                Cập nhật
+                            </div>
+                        </Link>
+                        {/* <Link to={"/admin/student/po-plo"}>
             <div className="p-5 hover:bg-slate-600 hover:text-white">
               PO-PLO
             </div>
           </Link> */}
+                    </div>
                 </div>
             </div>
-            <div className="w-full border mt-5 rounded-lg">
-                <table className="table-auto border-collapse border w-full">
-                    <tr>
-                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-gray-800 text-white text-center">STT</td>
-                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-gray-800 text-white text-center">Tên chương trình tiếng việt</td>
-                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-gray-800 text-white text-center">Thao tác</td>
-                    </tr>
-                    {programData.map((data, i) => (
-                        <tr key={i}>
-                            <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">{i + 1}</td>
-                            <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">{data.programName}</td>
-                            <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 flex justify-center">
-                                <div className="flex gap-1 flex-col sm:flex-col lg:flex-row xl:flex-row">
-                                    <div className="bg-lime-800 w-[120px] hover:bg-lime-600 text-white text-center font-bold p-1 rounded">
-                                        <button onClick={() => { hangleChangeidDelete(data.program_id); }} className="w-full h-full">Khôi phục</button>
-                                    </div>
-                                    <div className="bg-red-500 w-[120px] hover:bg-red-700 text-white text-center font-bold p-1 rounded">
-                                        <button onClick={() => { onOpen(); setDeleteId(data.program_id); }} className="w-full h-full">Xóa</button>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
-                </table>
-            </div>
-        </div>
+            <Table
+                columns={columns}
+                dataSource={studentData}
+                onChange={onChange}
+                pagination={{
+                    defaultPageSize: 10,
+                    responsive: true,
+                    style: { justifyContent: "center" }
+                }}
+            />
+        </>
     );
 }
 
