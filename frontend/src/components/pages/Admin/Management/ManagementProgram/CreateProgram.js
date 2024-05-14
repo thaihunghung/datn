@@ -100,18 +100,38 @@ const CreateProgram = (nav) => {
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
             <div>
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
+                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg bg-[#ff8077]">
                     <Link to={"/admin/management-program"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS Chương trình
+                        <div className="p-5 min-w-[100px] hover:bg-slate-600 hover:text-white">
+                            Chương trình
                         </div>
                     </Link>
-                    <Link to={"/admin/management-program/store"}>
+                    <Link to={"/admin/management-po"}>
+                        <div className="p-5 min-w-[100px] hover:bg-slate-600 hover:text-white">
+                            PO
+                        </div>
+                    </Link>
+                    <Link to={"/admin/management-plo"}>
+                        <div className="p-5 min-w-[100px] hover:bg-slate-600 hover:text-white">
+                            PLO
+                        </div>
+                    </Link>
+                    <Link to={"/admin/management-program/po-plo"}>
+                        <div className="p-5 min-w-[100px] hover:bg-slate-600 hover:text-white">
+                            PO-PLO
+                        </div>
+                    </Link>
+
+
+                    {/* <Link to={"/admin/management-program/store"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Kho lưu trữ
                         </div>
-                    </Link>
-                    <Link to={"/admin/management-program/create"}>
+                    </Link> */}
+
+
+
+                    {/* <Link to={"/admin/management-program/create"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Tạo chương trình
                         </div>
@@ -121,20 +141,16 @@ const CreateProgram = (nav) => {
                         update
                         </div>
                     </Link>
-                    <Link to={"/admin/management-program/po-plo"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            PO-PLO
-                        </div>
-                    </Link>
+                     */}
                 </div>
             </div>
             <div className="w-full mt-5 rounded-lg">
                 <Tabs tabs=
                     {[
                         {
-                            title: 'Nhập liệu bằng form',
+                            title: 'DS Chương trình',
                             content:
-                                <div className="w-full h-[1000px] rounded-lg border">
+                                <div className="w-full rounded-lg">
                                     <div className="w-full flex flex-col gap-2 max-w-[240px]">
                                         <Input
                                             label="Name"
@@ -151,9 +167,9 @@ const CreateProgram = (nav) => {
                                 </div>
                         },
                         {
-                            title: 'Nhập liệu CSV',
+                            title: 'Nhập liệu form',
                             content:
-                                <div className="w-full h-[1000px] rounded-lg">
+                                <div className="w-full rounded-lg">
                                     <div className=' w-full flex justify-center items-center'>
                                         <div className='w-full  flex flex-col px-2  sm:gap-5 sm:justify-center h-fix sm:px-5 lg:px-5 xl:px-5 sm:flex-row  lg:flex-col  xl:flex-col  gap-[20px]'>
                                             <div className='px-10 hidden sm:hidden lg:block xl:block'>
@@ -227,6 +243,99 @@ const CreateProgram = (nav) => {
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                        },
+                        {
+                            title: 'Nhập liệu EXCELs',
+                            content:
+                                <div className="w-full rounded-lg">
+                                    <div className=' w-full flex justify-center items-center'>
+                                        <div className='w-full  flex flex-col px-2  sm:gap-5 sm:justify-center h-fix sm:px-5 lg:px-5 xl:px-5 sm:flex-row  lg:flex-col  xl:flex-col  gap-[20px]'>
+                                            <div className='px-10 hidden sm:hidden lg:block xl:block'>
+                                                <Divider />
+                                                <Steps
+                                                    current={current}
+                                                    onChange={onChangexxx}
+                                                    items={[
+                                                        {
+                                                            title: 'Bước 1',
+                                                            description,
+                                                        },
+                                                        {
+                                                            title: 'bước 2',
+                                                            description,
+                                                        },
+                                                        {
+                                                            title: 'bước 3',
+                                                            description,
+                                                        },
+                                                    ]}
+                                                />
+                                            </div>
+                                            <div className='hidden sm:block lg:hidden xl:hidden w-[50%]'>
+                                                <Divider />
+                                                <Steps
+                                                    current={current}
+                                                    onChange={onChangexxx}
+                                                    direction="vertical"
+
+                                                    items={[
+                                                        {
+                                                            title: 'Bước 1',
+                                                            description,
+                                                        },
+                                                        {
+                                                            title: 'bước 2',
+                                                            description,
+                                                        },
+                                                        {
+                                                            title: 'bước 3',
+                                                            description,
+                                                        },
+                                                    ]}
+                                                />
+                                            </div>
+
+                                            <div className='flex flex-col w-full  sm:flex-col sm:w-full lg:flex-row xl:flex-row justify-around'>
+                                                <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%]  flex justify-start items-center'>
+                                                    <div className='p-10 w-full mt-10 h-fix sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center  gap-5 rounded-lg'>
+                                                        <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
+                                                        <Button className='w-full bg-primary flex items-center justify-center  p-5 rounded-lg' onClick={handleDownloadProgram}>
+                                                            <scan>Tải xuống mẫu </scan>
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                                <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-center items-center'>
+                                                    <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
+                                                        <div><p className='w-full text-center'>Gửi lại mẫu</p></div>
+                                                        <Upload {...props} >
+                                                            <Button icon={<UploadOutlined />} className='text-center items-center rounded-lg px-10 h-[40px]'>Select File</Button>
+                                                        </Upload>
+                                                    </div>
+                                                </div>
+                                                <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
+                                                    <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
+                                                        <div><p className='w-full text-center'>Lưu Dữ liệu</p></div>
+                                                        <CustomUpload endpoint={'program'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                        },
+                        {
+                            title: 'Cập nhật',
+                            content:
+                                <div className="w-full rounded-lg">
+                                   
+                                </div>
+                        },
+                        {
+                            title: 'Kho lưu trữ',
+                            content:
+                                <div className="w-full rounded-lg">
+                                   
                                 </div>
                         }
                     ]}

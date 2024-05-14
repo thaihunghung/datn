@@ -73,16 +73,32 @@ const ManageProgram = (nav) => {
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
                     <Link to={"/admin/management-program"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS Chương trình
+                        <div className="p-5 min-w-[100px] hover:bg-slate-600 hover:text-white">
+                            Chương trình
                         </div>
                     </Link>
-                    <Link to={"/admin/management-program/store"}>
+                    <Link to={"/admin/management-po"}>
+                        <div className="p-5 min-w-[100px] hover:bg-slate-600 hover:text-white">
+                            PO
+                        </div>
+                    </Link>
+                    <Link to={"/admin/management-plo"}>
+                        <div className="p-5 min-w-[100px] hover:bg-slate-600 hover:text-white">
+                            PLO
+                        </div>
+                    </Link>
+
+
+
+                    {/* <Link to={"/admin/management-program/store"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Kho lưu trữ
                         </div>
-                    </Link>
-                    <Link to={"/admin/management-program/create"}>
+                    </Link> */}
+
+
+
+                    {/* <Link to={"/admin/management-program/create"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Tạo chương trình
                         </div>
@@ -96,7 +112,7 @@ const ManageProgram = (nav) => {
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             PO-PLO
                         </div>
-                    </Link>
+                    </Link> */}
                 </div>
             </div>
             <div className="w-full border mt-5 rounded-lg">
