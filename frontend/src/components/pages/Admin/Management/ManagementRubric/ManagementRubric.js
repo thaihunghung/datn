@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from 'antd';
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import {
     Modal, Chip,
@@ -14,6 +14,7 @@ import {
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 
 const ManagementRubric = (nav) => {
+    const location = useLocation();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -22,8 +23,8 @@ const ManagementRubric = (nav) => {
     const allRubricByUser = async () => {
         try {
             const rubric = await axiosAdmin.get('/rubric/get-by-user/checkscore');
-            setRubicData(rubric.data)
-            console.log(rubric.data);
+            setRubicData(rubric.data.rubric)
+            console.log(rubric.data.rubric);
         } catch (err) {
             console.log("Error: " + err.message);
         };
@@ -71,30 +72,34 @@ const ManagementRubric = (nav) => {
                 }}
             />
             <div>
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/manage-rubric"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS Chương trình
+                <div className="w-fit flex  justify-start text-base font-bold rounded-lg border-1 border-[#FF8077]">
+                    <Link to={"/admin/management-rubric"}
+                        className={location.pathname.startsWith('/admin/management-rubric') ? "bg-[#475569] text-[#FEFEFE]" : ""}
+                    >
+
+                        <div className="p-5  hover:bg-slate-600 hover:text-white">
+                            DS rubric
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-rubric/store"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
+                    <Link to={"/admin/management-rubric/store"}
+                        className={location.pathname.startsWith('/admin/management-rubric/store') ? "bg-[#475569] text-[#FEFEFE]" : ""}
+                    >
+                        <div className="p-5  hover:bg-slate-600 hover:text-white">
                             Kho lưu trữ
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-rubric/create"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Tạo chương trình
+                    <Link to={"/admin/management-rubric/create"}
+                        className={location.pathname.startsWith('/admin/management-rubric/create') ? "bg-[#475569] text-[#FEFEFE]" : ""}
+                    >
+                        <div className="p-5  hover:bg-slate-600 hover:text-white">
+                            Tạo rubric
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-rubric/update"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
+                    <Link to={"/admin/management-rubric/update"}
+                        className={location.pathname.startsWith('/admin/management-rubric/update') ? "bg-[#475569] text-[#FEFEFE]" : ""}
+                    >
+                        <div className="p-5  hover:bg-slate-600 hover:text-white">
                             update
-                        </div>
-                    </Link>
-                    <Link to={"/admin/manage-rubric/po-plo"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            PO-PLO
                         </div>
                     </Link>
                 </div>
@@ -111,15 +116,18 @@ const ManagementRubric = (nav) => {
                     {rubicData.map((data, i) => (
                         <tr key={i}>
                             <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">{i + 1}</td>
-                            <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">{data.rubric_name}</td>
-
-
-                            {data.checkScore10 === "no" ? (
-                                <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">Chưa đủ điểm</td>
-                            ) : (
-                                <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">Đủ điểm</td>
-                            )}
-
+                            <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">{data.rubricName}</td>
+                            {
+                                (data.RubricItem === null || data.RubricItem.length === 0) ? (
+                                    <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">Chưa có items rubric</td>
+                                ) : (
+                                    data.RubricItem[0].total_score === 10 ? (
+                                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">Đủ điểm</td>
+                                    ) : (
+                                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">Chưa đủ điểm</td>
+                                    )
+                                )
+                            }
                             <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 flex justify-center">
                                 <div className="flex gap-1 flex-col sm:flex-col lg:flex-row xl:flex-row">
                                     <div className="bg-blue-500 w-[120px] hover:bg-blue-700 text-white  text-center font-bold p-1 rounded">

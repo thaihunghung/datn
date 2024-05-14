@@ -1,38 +1,23 @@
-.table-bordered {
-
-
-  }
-  
-  .table-bordered th,
-  .table-bordered td {
-
-    padding: 8px;
-  }
-  
-  .table-bordered th {
-    
-  }
-  tfoot {
-    border: none;
-
-  }
-
-  @media print {
-    table { page-break-inside:auto }
-    tr,td    { page-break-inside:avoid; page-break-after:auto }
-    thead { display:table-header-group }
-    tfoot { display:table-footer-group }
-
-    .hung {
-      background-color: black !important;
-      page-break-inside:avoid !important; page-break-after:auto 
-    }
-
-    thead {
-        display: table-header-group; 
-    }
-    tfoot {
-        display: table-footer-group; 
-    }
+.container {
+  page-break-inside: auto;
+  border: 1px solid #ccc;
 }
 
+/* CSS cho phần tử header */
+.header {
+  background-color: #f0f0f0;
+  padding: 10px;
+  font-weight: bold;
+}
+
+/* CSS cho phần tử content */
+.content {
+  padding: 10px;
+}
+
+/* CSS cho phần tử footer */
+.footer {
+  background-color: #f0f0f0;
+  padding: 10px;
+  font-style: italic;
+}

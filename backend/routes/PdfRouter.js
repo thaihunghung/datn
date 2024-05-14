@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const puppeteer = require('puppeteer');
+const path = require('path');
 
 router.post('/pdf', async (req, res) => {
     const { html } = req.body;
@@ -18,6 +20,8 @@ router.post('/pdf', async (req, res) => {
         margin: {
           top: '2cm',
           bottom: '2cm',
+          left: '1cm',
+          right: '1cm'
         },
       };
       await page.pdf(pdfOptions);

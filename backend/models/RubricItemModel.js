@@ -3,8 +3,11 @@ const sequelize = require('../config/database');
 const ChapterModel = require('./ChapterModel');
 const CloModel = require('./CloModel');
 const RubricModel = require('./RubricModel');
+const PloModel = require('./PloModel');
 
-const RubricsItemModel = sequelize.define('RubricsItem', {
+const QualityLevelsModel = require('./QualityLevelsModel');
+
+const RubricsItemModel = sequelize.define('rubricsItem', {
   rubricsItem_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -34,6 +37,14 @@ const RubricsItemModel = sequelize.define('RubricsItem', {
       key: 'rubric_id'
     }
   },
+  plo_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: PloModel,
+      key: 'plo_id'
+    }
+  },
   description: {
     type: DataTypes.TEXT,
     defaultValue: null
@@ -57,6 +68,7 @@ const RubricsItemModel = sequelize.define('RubricsItem', {
     defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
   }
 }, {
+  modelName: 'RubricItemModel',
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -64,6 +76,7 @@ const RubricsItemModel = sequelize.define('RubricsItem', {
 });
 RubricsItemModel.belongsTo(RubricModel, { foreignKey: 'rubric_id' });
 RubricsItemModel.belongsTo(CloModel, { foreignKey: 'clo_id' });
+RubricsItemModel.belongsTo(PloModel, { foreignKey: 'plo_id' });
 RubricsItemModel.belongsTo(ChapterModel, { foreignKey: 'chapter_id' });
 
 module.exports = RubricsItemModel;

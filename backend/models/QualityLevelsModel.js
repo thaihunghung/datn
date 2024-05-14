@@ -1,32 +1,36 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const SubjectModel = require('./SubjectModel');
+const RubricItemModel = require('./RubricItemModel');
 
-const RubricModel = sequelize.define('Rubric', {
-  rubric_id: {
+const qualityLevelsModel = sequelize.define('quality_level', {
+  qualityLevel_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  subject_id: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    references: {
-      model: SubjectModel,
-      key: 'subject_id'
-    }
-  },
-  rubricName: {
-    type: DataTypes.STRING(255),
+  name: {
+    type: DataTypes.TEXT,
     allowNull: false
   },
-  comment: {
+  level: {
     type: DataTypes.TEXT,
-    defaultValue: null
+    allowNull: false
+  },
+  keyNumber: {
+    type: DataTypes.DOUBLE(8, 2),
+    defaultValue: 0
   },
   isDelete: {
     type: DataTypes.TINYINT,
     defaultValue: 0
+  },
+  rubricsItem_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: RubricItemModel,
+      key: 'rubricsItem_id'
+    }
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -39,11 +43,11 @@ const RubricModel = sequelize.define('Rubric', {
     defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
   }
 }, {
+  modelName: 'QualityLevelsModel',
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'rubrics'
+  tableName: 'quality_levels'
 });
-RubricModel.belongsTo(SubjectModel, { foreignKey: 'subject_id' });
 
-module.exports = RubricModel;
+module.exports = qualityLevelsModel;

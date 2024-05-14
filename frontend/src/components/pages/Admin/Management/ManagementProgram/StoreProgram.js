@@ -1,29 +1,37 @@
-// ManageProgram.js
+// StoreProgram.js
 
 import { useEffect, useState } from "react";
 import { Button } from 'antd';
 import { Link } from "react-router-dom";
-
+import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import {
-    Modal, Chip,
+    Modal,
     ModalContent,
     ModalHeader,
     ModalBody,
     ModalFooter, useDisclosure
 } from "@nextui-org/react";
-import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-
-const ManageProgram = (nav) => {
+const StoreProgram = (nav) => {
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
     const [programData, setProgramData] = useState([]);
+
+
     const [deleteId, setDeleteId] = useState(null);
-    const allProgramNotIsDelete = async () => {
+    const allProgramIsDelete = async () => {
         try {
-            const program = await axiosAdmin.get('/program/isDelete/false');
+            const program = await axiosAdmin.get('/program/isDelete/true');
             setProgramData(program.data)
             console.log(program.data);
+        } catch (err) {
+            console.log("Error: " + err.message);
+        };
+    }
+
+    const handleDeleteProgram = async (id) => {
+        try {
+            await axiosAdmin.delete(`/program/${id}`);
+
         } catch (err) {
             console.log("Error: " + err.message);
         };
@@ -33,8 +41,6 @@ const ManageProgram = (nav) => {
         try {
             const response = await axiosAdmin.put(`/program/isDelete/${id}`);
             if (response) {
-                console.log(response.data);
-
                 console.log(response.data.message);
             }
         } catch (err) {
@@ -43,13 +49,14 @@ const ManageProgram = (nav) => {
     }
 
     useEffect(() => {
-        allProgramNotIsDelete()
+        allProgramIsDelete()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
             } else {
                 setCollapsedNav(false);
             }
+            //console.log(window.innerWidth);
         };
         handleResize();
         window.addEventListener("resize", handleResize);
@@ -60,39 +67,66 @@ const ManageProgram = (nav) => {
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
+            {/* <div className="flex gap-2">
+                <Tooltip title="Chế độ 1 cột">
+                    <Button
+                        isIconOnly
+                        variant={layout === "col" ? "solid" : "light"}
+                        radius="full"
+                        onClick={() => {
+                            handleToggleLayout("col");
+                        }}
+                    >
+                        <i className="fa-solid fa-table-list"></i>
+                    </Button>
+                </Tooltip>
+                <Tooltip title="Chế độ song song">
+                    <Button
+                        isIconOnly
+                        variant={layout === "row" ? "solid" : "light"}
+                        radius="full"
+                        onClick={() => {
+                            handleToggleLayout("row");
+                        }}
+                        isDisabled={disableRowLayout}
+                    >
+                        <i className="fa-solid fa-table-columns"></i>
+                    </Button>
+                </Tooltip>
+            </div> */}
             <ConfirmAction
                 onOpenChange={onOpenChange}
                 isOpen={isOpen}
                 onConfirm={() => {
                     if (deleteId) {
-                        hangleChangeidDelete(deleteId);
+                        handleDeleteProgram(deleteId);
                         setDeleteId(null);
                     }
                 }}
             />
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/manage-program"}>
+                    <Link to={"/admin/management-program"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             DS Chương trình
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/store"}>
+                    <Link to={"/admin/management-program/store"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Kho lưu trữ
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/create"}>
+                    <Link to={"/admin/management-program/create"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Tạo chương trình
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/update"}>
+                    <Link to={"/admin/management-program/update"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                         update
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/po-plo"}>
+                    <Link to={"/admin/management-program/po-plo"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             PO-PLO
                         </div>
@@ -112,8 +146,9 @@ const ManageProgram = (nav) => {
                             <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">{data.programName}</td>
                             <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 flex justify-center">
                                 <div className="flex gap-1 flex-col sm:flex-col lg:flex-row xl:flex-row">
-                                    <div className="bg-blue-500 w-[120px] hover:bg-blue-700 text-white  text-center font-bold p-1 rounded">
-                                        <Link to={`update/${data.program_id}`} className="w-full h-full">Cập nhật</Link></div>
+                                    <div className="bg-lime-800 w-[120px] hover:bg-lime-600 text-white text-center font-bold p-1 rounded">
+                                        <button onClick={() => { hangleChangeidDelete(data.program_id); }} className="w-full h-full">Khôi phục</button>
+                                    </div>
                                     <div className="bg-red-500 w-[120px] hover:bg-red-700 text-white text-center font-bold p-1 rounded">
                                         <button onClick={() => { onOpen(); setDeleteId(data.program_id); }} className="w-full h-full">Xóa</button>
                                     </div>
@@ -127,13 +162,12 @@ const ManageProgram = (nav) => {
     );
 }
 
-export default ManageProgram;
 
+export default StoreProgram;
 function ConfirmAction(props) {
     const { isOpen, onOpenChange, onConfirm } = props;
     const handleOnOKClick = (onClose) => {
         onClose();
-        console.log('thanđ');
         if (typeof onConfirm === 'function') {
             onConfirm();
         }
@@ -169,7 +203,7 @@ function ConfirmAction(props) {
                         <ModalHeader>Cảnh báo</ModalHeader>
                         <ModalBody>
                             <p className="text-[16px]">
-                                Chương trình sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
+                                Chương trình sẽ được và không thể khôi phục lại, tiếp tục thao tác?
                             </p>
                         </ModalBody>
                         <ModalFooter>

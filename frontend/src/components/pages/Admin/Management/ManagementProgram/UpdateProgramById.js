@@ -55,7 +55,7 @@ const UpdateProgramById = (nav) => {
                 isDeleted: isDelete
             }
             const response = await axiosAdmin.put(`/program/${id}`, { data });
-            onClose(navigate("/admin/manage-program/"))
+            onClose(navigate("/admin/management-program/"))
         } catch (error) {
             console.error("lỗi", error);
         }
@@ -83,7 +83,7 @@ const UpdateProgramById = (nav) => {
 
     return (
         <div className="flex w-full flex-col justify-center items-start leading-8 p-2 bg-[#f5f5f5]-500">
-            <Modal isOpen={isOpen} onClose={() => navigate("/admin/manage-program/")} scrollBehavior={scrollBehavior}>
+            <Modal isOpen={isOpen} onClose={() => navigate("/admin/management-program/")} scrollBehavior={scrollBehavior}>
                 <ModalContent className="m-auto">
                     <ModalHeader className="flex flex-col gap-1">Cập nhật</ModalHeader>
                     <ModalBody>
@@ -103,7 +103,7 @@ const UpdateProgramById = (nav) => {
                             color="danger"
                             radius="sm"
                             as={Link}
-                            to="/admin/manage-program/"
+                            to="/admin/management-program/"
                             onClick={onClose}
                         >
                             Close
@@ -118,27 +118,27 @@ const UpdateProgramById = (nav) => {
 
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/manage-program"}>
+                    <Link to={"/admin/management-program"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             DS Chương trình
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/store"}>
+                    <Link to={"/admin/management-program/store"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Kho lưu trữ
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/create"}>
+                    <Link to={"/admin/management-program/create"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Tạo chương trình
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/update"}>
+                    <Link to={"/admin/management-program/update"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             update
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-program/po-plo"}>
+                    <Link to={"/admin/management-program/po-plo"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             PO-PLO
                         </div>

@@ -7,6 +7,8 @@ const TodoList = ({ data, Chapter, Clo, rubric_id, successNoti, setSpinning }) =
   const [todos, setTodos] = useState([]);
   const [editors, setEditors] = useState([]);
 
+
+
   const handleChangeisDelete = async (id) => {
     try {
       const response = await axiosAdmin.put(`/rubric-item/isDelete/${id}`);
@@ -20,7 +22,7 @@ const TodoList = ({ data, Chapter, Clo, rubric_id, successNoti, setSpinning }) =
 
   useEffect(() => { 
     const newEditors = data.map((item, index) => ({ 
-        component: <MyEditor key={index} rubric_id={rubric_id} chapter_id={item.chapter_id} clo_id={item.clo_id} successNoti={successNoti} setSpinning={setSpinning} id={item.rubricsItem_id} htmlContent={item.description} SaveData={false} Chapter={Chapter} Clo={Clo}/>,
+        component: <MyEditor key={index} Point={item.score} rubric_id={rubric_id} plo_id={item.plo_id} chapter_id={item.chapter_id} clo_id={item.clo_id} successNoti={successNoti} setSpinning={setSpinning} id={item.rubricsItem_id} htmlContent={item.description} SaveData={false} Chapter={Chapter} Clo={Clo}/>,
         isDelete: item.isDelete? true: false,
         rubricsItem_id: item.rubricsItem_id
     }));
@@ -51,25 +53,23 @@ const TodoList = ({ data, Chapter, Clo, rubric_id, successNoti, setSpinning }) =
   };
 
   return (
-    <div className="todo-list w-full">
+    <div className="todo-list w-full text-[#020401]">
       <div className="flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 shadow-lg rounded-md border-1 border-slate-300">
         <div className='w-[80%]'>
-          <h1>Danh sách các Items rubric</h1>
+          <p className='font-bold text-[#020401]'>Danh sách các Items rubric</p>
         </div>
-        <div className='w-[20%]'>
-          <Button  onClick={addEditor}>Thêm</Button>
+        <div>
+          <button className='w-[100px] bg-[#AF84DD] font-bold' onClick={addEditor}>Thêm</button>
         </div>
       </div>
-
-
-      <div className='w-full flex flex-1 flex-col sm:flex-col lg:flex-row lg:flex-wrap xl:flex-row xl:flex-wrap gap-10 p-5'>
+      <div className='w-full flex flex-1 flex-col sm:flex-col lg:flex-col xl:flex-col gap-10 p-5'>
         {editors.map((editor, index) => (
           !editor.isDelete && (
             
-            <div key={index} className='flex flex-row border flex-1 sm:flex-1 lg:flex-1 xl:w-[55%]'>
+            <div key={index} className='flex flex-row border-1 border-[#FF8077] flex-1 sm:flex-1 lg:flex-1 xl:flex-1'>
               <div className='w-full'>
                 <div className='flex justify-end w-full'>
-                  <button className='bg-red-200 font-bold px-2 rounded-sm' onClick={() => {
+                  <button className='bg-[#FF8077] font-bold px-2 mr-5 mt-5  rounded-lg' onClick={() => {
                     removeEditor(index);
                     if (editor.rubricsItem_id) {
                       handleChangeisDelete(editor.rubricsItem_id);

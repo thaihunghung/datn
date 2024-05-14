@@ -1,4 +1,5 @@
 const PloCloModel = require('../models/PloCloModel'); 
+const PloModel = require('../models/PloModel'); 
 
 const Plo_CloController = {
 
@@ -7,6 +8,22 @@ const Plo_CloController = {
     try {
       const PoPlo = await PloCloModel.findAll();
       res.json(PoPlo);
+    } catch (error) {
+      console.error('Error getting all PloClo:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+  GetPloCloByCloId: async (req, res) => {
+    try {
+      const {clo_id} = req.params
+      const PoPlo = await PloCloModel.findAll({
+        where: {clo_id: clo_id},
+      });
+      const plo_ids = PoPlo.map((item) => item.plo_id)
+      const Plo = await PloModel.findAll({
+        where: {plo_id: plo_ids},
+      });
+      res.json(Plo);
     } catch (error) {
       console.error('Error getting all PloClo:', error);
       res.status(500).json({ message: 'Internal server error' });

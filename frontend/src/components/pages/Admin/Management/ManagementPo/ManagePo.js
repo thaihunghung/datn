@@ -70,22 +70,22 @@ const ManagePo = (nav) => {
             />
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/manage-po"}>
+                    <Link to={"/admin/management-po"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             DS PO
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-po/store"}>
+                    <Link to={"/admin/management-po/store"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Kho lưu trữ
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-po/update"}>
+                    <Link to={"/admin/management-po/update"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             update
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-po/create"}>
+                    <Link to={"/admin/management-po/create"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Tạo PO
                         </div>

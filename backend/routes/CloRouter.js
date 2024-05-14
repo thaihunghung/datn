@@ -69,6 +69,34 @@ router.post('/clo', CloController.create);
  *         description: Lỗi server
  */
 router.get('/clo/:id', CloController.getByID);
+/**
+ * @openapi
+ * /api/admin/clo/subject/{subject_id}:
+ *   get:
+ *     summary: Lấy danh sách CLO theo subject ID
+ *     description: Trả về một mảng các CLO theo subject ID.
+ *     parameters:
+ *       - in: path
+ *         name: subject_id
+ *         required: true
+ *         description: ID của subject.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Danh sách các CLO theo subject ID.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Clo'
+ *       404:
+ *         description: Không tìm thấy CLO nào
+ *       500:
+ *         description: Lỗi server
+ */
+router.get('/clo/subject/:subject_id', CloController.GetCloBySubjectId);
 
 /**
  * @openapi

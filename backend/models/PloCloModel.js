@@ -36,5 +36,7 @@ const PloCloModel = sequelize.define('map_plo_clo', {
   updatedAt: 'updatedAt',
   tableName: 'map_plo_clos'
 });
+PloCloModel.belongsTo(PloModel, { foreignKey: 'plo_id'});
+PloCloModel.belongsTo(CloModel, { foreignKey: 'clo_id'});
 
 module.exports = PloCloModel;

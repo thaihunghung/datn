@@ -1,4 +1,5 @@
 const CloChapterModel = require('../models/CloChapterModel'); 
+const ChapterModel = require('../models/ChapterModel'); 
 
 const Clo_ChapterController = {
 
@@ -9,6 +10,23 @@ const Clo_ChapterController = {
       res.json(PoPlo);
     } catch (error) {
       console.error('Error getting all CloChapter:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+  GetChapterCloByCloId: async (req, res) => {
+    try {
+      const {clo_id} = req.params
+      const CloChap = await CloChapterModel.findAll({
+        where: {clo_id: clo_id},
+      });
+      const chap_ids = CloChap.map((item) => item.chapter_id)
+
+      const Chapter = await ChapterModel.findAll({
+        where: {chapter_id: chap_ids},
+      });
+      res.json(Chapter);
+    } catch (error) {
+      console.error('Error getting all CloChap:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
   },

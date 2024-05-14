@@ -1,4 +1,4 @@
-// PloClo.js
+// CloChapter.js
 import { useEffect, useState } from "react";
 import { Tooltip } from 'antd';
 import { Link } from "react-router-dom";
@@ -14,20 +14,20 @@ import {
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 
 import "./modify_h_full.css"
-const PloClo = (nav) => {
+const CloChapter = (nav) => {
     const { setCollapsedNav } = nav;  
     const [clos, setClos] = useState([]);
-    const [plos, setPlos] = useState([]);
-    const [PloClos, setPloClos] = useState([]);
-    const [comparePloClos, setComparePloClos] = useState([]);
+    const [chapters, setChapters] = useState([]);
+    const [CloChapters, setCloChapters] = useState([]);
+    const [compareCloChapters, setCompareCloChapters] = useState([]);
     const [hidden, setHidden] = useState(false);
 
     const GetAllPlo = async () => {
         try {
-            const response = await axiosAdmin.get('/plo');
-            setPlos(response.data)
+            const response = await axiosAdmin.get('/chapter/subject/1');
+            setChapters(response.data)
         } catch (error) {
-            console.error('Error fetching PLOs:', error);
+            console.error('Error fetching chapter:', error);
         }
     };
     const GetAllClo = async () => {
@@ -43,20 +43,20 @@ const PloClo = (nav) => {
     const handleSaveOrDelete = async () => {
         let luu = [];
         let xoa = [];
-        // Lọc các phần tử trong setComparePloClos mà không có trong setPloClos để lưu
-        luu = comparePloClos.filter(compareItem => {
-            return !PloClos.some(PloCloItem => PloCloItem.clo_id === compareItem.clo_id && PloCloItem.plo_id === compareItem.plo_id);
+        // Lọc các phần tử trong setCompareCloChapters mà không có trong setCloChapters để lưu
+        luu = compareCloChapters.filter(compareItem => {
+            return !CloChapters.some(CloChapterItem => CloChapterItem.clo_id === compareItem.clo_id && CloChapterItem.chapter_id === compareItem.chapter_id);
         });
     
-        // Lọc các phần tử trong setPloClos mà không có trong setComparePloClos để xóa
-        xoa = PloClos.filter(PloCloItem => {
-            return !comparePloClos.some(compareItem => compareItem.clo_id === PloCloItem.clo_id && compareItem.plo_id === PloCloItem.plo_id);
+        // Lọc các phần tử trong setCloChapters mà không có trong setCompareCloChapters để xóa
+        xoa = CloChapters.filter(CloChapterItem => {
+            return !compareCloChapters.some(compareItem => compareItem.clo_id === CloChapterItem.clo_id && compareItem.chapter_id === CloChapterItem.chapter_id);
         });
     
         if (luu.length > 0) {
             console.log("Save:", luu);
             try {
-                const response = await axiosAdmin.post('/plo-clo/SaveOrDelete', { dataSave: luu });
+                const response = await axiosAdmin.post('/clo-chapter/SaveOrDelete', { dataSave: luu });
                 console.log(response.data);
             } catch (error) {
                 console.log("Error:", error);
@@ -65,7 +65,7 @@ const PloClo = (nav) => {
         if (xoa.length > 0) {
             console.log("Delete:", xoa);
             try {
-                const response = await axiosAdmin.post('/plo-clo/SaveOrDelete', { dataDelete: xoa });
+                const response = await axiosAdmin.post('/clo-chapter/SaveOrDelete', { dataDelete: xoa });
                 console.log(response.data);
             } catch (error) {
                 console.log("Error:", error);
@@ -73,14 +73,14 @@ const PloClo = (nav) => {
         }
     }
     
-    const GetAllPloClo = async () => {
+    const GetAllCloChapter = async () => {
         try {
-            const response = await axiosAdmin.get('/plo-clo');
-            const id_plo_clos = response.data.map(item => ({ clo_id: item.clo_id, plo_id: item.plo_id }));
+            const response = await axiosAdmin.get('/clo-chapter');
+            const id_plo_clos = response.data.map(item => ({ clo_id: item.clo_id, chapter_id: item.chapter_id }));
             console.log(id_plo_clos);
 
-            setPloClos(response.data.map(item => ({id_plo_clo: item.id_plo_clo, clo_id: item.clo_id, plo_id: item.plo_id })));
-            setComparePloClos(response.data.map(item => ({ clo_id: item.clo_id, plo_id: item.plo_id })))
+            setCloChapters(response.data.map(item => ({id_plo_clo: item.id_plo_clo, clo_id: item.clo_id, chapter_id: item.chapter_id })));
+            setCompareCloChapters(response.data.map(item => ({ clo_id: item.clo_id, chapter_id: item.chapter_id })))
             //console.log(response.data)
         } catch (error) {
             console.error('Error fetching PO-PLO mappings:', error);
@@ -88,18 +88,18 @@ const PloClo = (nav) => {
     };
 
     // Hàm xử lý thay đổi trạng thái của checkbox
-    const handleCheckboxChange = (plo_id, clo_id, checked) => {
+    const handleCheckboxChange = (chapter_id, clo_id, checked) => {
         if (checked) {
-            setComparePloClos([...comparePloClos, { plo_id, clo_id }]);
+            setCompareCloChapters([...compareCloChapters, { chapter_id, clo_id }]);
         } else {
-            setComparePloClos(comparePloClos.filter(item => !(item.plo_id === plo_id && item.clo_id === clo_id)));
+            setCompareCloChapters(compareCloChapters.filter(item => !(item.chapter_id === chapter_id && item.clo_id === clo_id)));
         }
     };
 
     useEffect(() => {
         GetAllClo();
         GetAllPlo();
-        GetAllPloClo();
+        GetAllCloChapter();
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -164,27 +164,27 @@ const PloClo = (nav) => {
                         </tr>
                     </thead>
                     <tbody>
-                            {plos.map((plo_item, index) => (
+                            {chapters.map((plo_item, index) => (
                                 <tr key={index} className="w-full h-full">
                                     {/* p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 */}
                                 <td className="border p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">
                                 {index + 1}
                                 </td>
                                     <td className="border p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">
-                                        <span className="hidden sm:hidden lg:block xl:block">{plo_item.ploName}</span>
+                                        <span className="hidden sm:hidden lg:block xl:block">{plo_item.chapterName}</span>
                                         <Tooltip title={plo_item.description} 
                                             color={'yellow'}
                                             className="block sm:block lg:hidden xl:hidden"
                                         >
-                                            <span>{plo_item.ploName}</span>
+                                            <span>{plo_item.chapterName}</span>
                                         </Tooltip>
                                     </td>
                                     <td className="border p-2 text-left sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 hidden sm:hidden lg:block xl:block">
                                         <span className="w-[100px]">{plo_item.description}</span>
                                     </td>
                                     {clos.map((clo_item) => {
-                                        const isFound = comparePloClos.some(
-                                            (item) => item.plo_id === plo_item.plo_id && item.clo_id === clo_item.clo_id
+                                        const isFound = compareCloChapters.some(
+                                            (item) => item.chapter_id === plo_item.chapter_id && item.clo_id === clo_item.clo_id
                                         );
                                         const found = isFound ? true : false;
                                         return (
@@ -194,7 +194,7 @@ const PloClo = (nav) => {
                                                     checked={found}
                                                     onChange={(e) => {
                                                         const isChecked = e.target.checked;
-                                                        handleCheckboxChange(plo_item.plo_id, clo_item.clo_id, isChecked);
+                                                        handleCheckboxChange(plo_item.chapter_id, clo_item.clo_id, isChecked);
                                                     }}
                                                     className="form-checkbox h-5 w-5 text-blue-600"
                                                 />
@@ -214,4 +214,4 @@ const PloClo = (nav) => {
 }
 
 
-export default PloClo;
+export default CloChapter;

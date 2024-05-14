@@ -78,22 +78,22 @@ const StorePlo = (nav) => {
             />
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/manage-plo"}>
+                    <Link to={"/admin/management-plo"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             DS PLO
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-plo/store"}>
+                    <Link to={"/admin/management-plo/store"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Kho lưu trữ
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-plo/update"}>
+                    <Link to={"/admin/management-plo/update"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             update
                         </div>
                     </Link>
-                    <Link to={"/admin/manage-plo/create"}>
+                    <Link to={"/admin/management-plo/create"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Tạo PLO
                         </div>
