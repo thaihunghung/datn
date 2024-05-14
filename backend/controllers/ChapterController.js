@@ -36,6 +36,20 @@ const ChapterController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+  GetChapterBySubjectId: async (req, res) => {
+    try {
+
+      const { subject_id } = req.params;
+      const chapter = await ChapterModel.findAll({ where: { subject_id: subject_id } });
+      if (!chapter) {
+        return res.status(404).json({ message: 'Chapter not found' });
+      }
+      res.json(chapter);
+    } catch (error) {
+      console.error('Error finding chapter:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  }, 
   // Update chapter
   update: async (req, res) => {
     try {

@@ -37,4 +37,5 @@ const MapPoPloModel = sequelize.define('Map_PO_PLO', {
   tableName: 'map_po_plos'
 });
 
+
 module.exports = MapPoPloModel;

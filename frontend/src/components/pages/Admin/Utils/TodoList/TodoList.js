@@ -22,7 +22,7 @@ const TodoList = ({ data, Chapter, Clo, rubric_id, successNoti, setSpinning }) =
 
   useEffect(() => { 
     const newEditors = data.map((item, index) => ({ 
-        component: <MyEditor key={index} Point={item.score} rubric_id={rubric_id} chapter_id={item.chapter_id} clo_id={item.clo_id} successNoti={successNoti} setSpinning={setSpinning} id={item.rubricsItem_id} htmlContent={item.description} SaveData={false} Chapter={Chapter} Clo={Clo}/>,
+        component: <MyEditor key={index} Point={item.score} rubric_id={rubric_id} plo_id={item.plo_id} chapter_id={item.chapter_id} clo_id={item.clo_id} successNoti={successNoti} setSpinning={setSpinning} id={item.rubricsItem_id} htmlContent={item.description} SaveData={false} Chapter={Chapter} Clo={Clo}/>,
         isDelete: item.isDelete? true: false,
         rubricsItem_id: item.rubricsItem_id
     }));

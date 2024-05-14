@@ -7,6 +7,8 @@ router.get('/chapter', ChapterController.index);
 router.post('/chapter', ChapterController.create);
 router.get('/chapter/:id', ChapterController.getByID);
 
+router.get('/chapter/subject/:subject_id', ChapterController.GetChapterBySubjectId);
+
 router.put('/chapter/:id', ChapterController.update);
 router.delete('/chapter/:id', ChapterController.delete);
 

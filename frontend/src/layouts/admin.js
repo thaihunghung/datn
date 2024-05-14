@@ -36,6 +36,7 @@ import ManagementRubric from '../components/pages/Admin/Management/ManagementRub
 import CreateRubic from '../components/pages/Admin/Management/ManagementRubric/CreateRubic';
 import UpdateRubic from '../components/pages/Admin/Management/ManagementRubric/UpdateRubic';
 import Template from '../components/pages/Client/Template/Template';
+import CloChapter from '../components/pages/Admin/Management/ManagementClo/CloChapter';
 
 function Admin(props) {
 
@@ -89,6 +90,7 @@ function Admin(props) {
           {/* <Route path="/management-rubric" element={<Rubic collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} /> */}
 
           <Route path="/management-clo/plo-clo" element={<PloClo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/management-clo/clo-chapter" element={<CloChapter collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
           <Route path="/management-point" element={<FormPoint collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-rubric" element={<ManagementRubric collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />

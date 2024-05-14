@@ -6,7 +6,7 @@ const SubjectModel = require('../models/SubjectModel');
 const CloModel = require('../models/CloModel');
 const ChapterModel = require('../models/ChapterModel');
 const qualityLevelsModel = require('../models/QualityLevelsModel');
-const PloCloModel = require('../models/PloCloModel');
+const PloModel = require('../models/PloModel');
 
 const RubricController = {
   // Get all rubrics
@@ -168,11 +168,16 @@ const RubricController = {
             }, {
               model: ChapterModel,
               attributes: ['chapter_id', 'chapterName', 'description']
+            },  {
+              model: PloModel,
+              attributes: ['plo_id', 'ploName', 'description']
             }]
           }),
+
+          
          // PloCloModel.findAll({ where: { clo_id: rubric.clo_id } }),
           CloModel.findAll({ where: { subject_id: rubric.subject_id } }),
-          ChapterModel.findAll({ where: { subject_id: rubric.subject_id } })
+          // ChapterModel.findAll({ where: { subject_id: rubric.subject_id } })
         ]);
         // Gán kết quả cho các thuộc tính của rubric
         const rubricIds = rubricItems.map(rubric => rubric.rubricsItem_id);
@@ -186,7 +191,7 @@ const RubricController = {
         rubric.dataValues.rubricItems = rubricItems;
         rubric.dataValues.CloData = Clos;
         //rubric.dataValues.PloCloData = PloClo;
-        rubric.dataValues.ChapterData = Chapters;
+        //rubric.dataValues.ChapterData = Chapters;
         
         res.json({ rubric: rubric });
       } else {

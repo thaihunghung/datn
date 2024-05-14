@@ -75,9 +75,6 @@ const FormPoint = (nav) => {
           <i className="fa-solid fa-circle-check mr-3 text-emerald-500 "></i>{" "}
           <span className="mr-2">Tổng điểm: {totalKeyNumber ? totalKeyNumber : ''}</span>
           <span>Tiêu chí: {selectedValues.length + '/' + RubicItemsData.length}</span>
-
-
-
         </p>
         <div className="flex items-center gap-2">
 

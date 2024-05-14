@@ -12,11 +12,12 @@ import { axiosAdmin } from '../../../../../service/AxiosAdmin';
 
 import { Select } from "antd";
 
-const MyEditor = ({ key, htmlContent, Point, SaveData, Chapter, Clo, id, rubric_id, chapter_id, clo_id, successNoti, setSpinning }) => {
+const MyEditor = ({ key, htmlContent, Point, SaveData, plo_id, Clo, id, rubric_id, chapter_id, clo_id, successNoti, setSpinning }) => {
   const { Option } = Select;
   const [selectedChapter, setSelectedChapter] = useState("");
   const [selectedPlo, setSelectedPlo] = useState("");
   const [DataPlo, setDataPlo] = useState([]);
+  const [Chapter, setDataChapter] = useState([]);
 
   const [selectedClo, setSelectedClo] = useState("");
   const [SaveLoad, setSaveLoad] = useState(SaveData);
@@ -39,7 +40,6 @@ const MyEditor = ({ key, htmlContent, Point, SaveData, Chapter, Clo, id, rubric_
     setSelectedClo(value);
   };
 
-
   const [editorState, setEditorState] = useState(
     () => {
       if (htmlContent) {
@@ -57,7 +57,47 @@ const MyEditor = ({ key, htmlContent, Point, SaveData, Chapter, Clo, id, rubric_
     setSelectedScore(Point)
     setSelectedChapter(chapter_id)
     setSelectedClo(clo_id)
+    setSelectedPlo(plo_id)
   }, []);
+
+  useEffect(() => {
+    if (selectedClo) {
+      const GetChapterByCloID = async (cloId) => {
+        try {
+          const response = await axiosAdmin.get(`/clo-chapter/clo/${cloId}/getChapter`);
+          console.log("Chapter ID", cloId);
+          console.log(response.data);
+          setDataChapter(response.data);
+        } catch (error) {
+          console.error('Error fetching Chapter by CLO ID:', error);
+          throw error;
+        }
+      };
+
+      const GetPloByCloID = async (cloId) => {
+        try {
+          const response = await axiosAdmin.get(`/plo-clo/clo/${cloId}/getPlo`);
+          console.log("PLO ID", cloId);
+          console.log(response.data);
+          setDataPlo(response.data);
+        } catch (error) {
+          console.error('Error fetching PLO by CLO ID:', error);
+          throw error;
+        }
+      };
+
+      const timer = setTimeout(() => {
+        GetChapterByCloID(selectedClo);
+        GetPloByCloID(selectedClo);
+      }, 1000); // 1-second delay
+
+      return () => clearTimeout(timer);
+    }
+  }, [selectedClo]);
+
+
+
+
   useEffect(() => {
     let html = convertToHTML(editorState.getCurrentContent());
     setConvertedContent(html);
@@ -75,6 +115,7 @@ const MyEditor = ({ key, htmlContent, Point, SaveData, Chapter, Clo, id, rubric_
         "data": {
           chapter_id: selectedChapter,
           clo_id: selectedClo,
+          plo_id: selectedPlo,
           rubric_id: parseInt(rubric_id),
           description: convertedContent,
           score: parseFloat(score)
@@ -142,6 +183,7 @@ const MyEditor = ({ key, htmlContent, Point, SaveData, Chapter, Clo, id, rubric_
       const data = {
         chapter_id: selectedChapter,
         clo_id: selectedClo,
+        plo_id: selectedPlo,
         rubric_id: rubric_id,
         description: convertedContent,
         score: score
@@ -219,9 +261,9 @@ const MyEditor = ({ key, htmlContent, Point, SaveData, Chapter, Clo, id, rubric_
                 <Option
                   key={items.plo_id}
                   value={items.plo_id}
-                  textValue={items.ploName}
+                  textValue={items.ploName} // Assuming PLO is nested inside items
                 >
-                  <Tooltip content={items.description} className='font-bold'>
+                  <Tooltip content={items.description} className="font-bold">
                     {items.ploName}
                   </Tooltip>
                 </Option>

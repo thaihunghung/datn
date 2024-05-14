@@ -76,6 +76,7 @@ const RubricsItemModel = sequelize.define('rubricsItem', {
 });
 RubricsItemModel.belongsTo(RubricModel, { foreignKey: 'rubric_id' });
 RubricsItemModel.belongsTo(CloModel, { foreignKey: 'clo_id' });
+RubricsItemModel.belongsTo(PloModel, { foreignKey: 'plo_id' });
 RubricsItemModel.belongsTo(ChapterModel, { foreignKey: 'chapter_id' });
 
 module.exports = RubricsItemModel;

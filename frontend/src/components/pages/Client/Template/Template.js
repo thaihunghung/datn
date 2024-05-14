@@ -131,8 +131,8 @@ const Template = () => {
                     <div className="w-full text-left">3. Đơn vị công tác:</div>
                     <div className="w-full text-left">4. Tên đề tài:</div>
                     <div className="w-full py-5"></div>
-                    <div className="w-full flex justify-start items-center"><span>5. Họ và tên sinh viên:</span><span className="flex-1">MSSV:</span></div>
-                    <div className="w-full flex justify-start items-center gap-7"><span>6. Chuyên ngành:</span><span className="flex-1">Khóa:</span></div>
+                    <div className="w-full flex justify-start items-center"><span className="flex-1 text-left">5. Họ và tên sinh viên:</span><span className="flex-1 text-left">MSSV:</span></div>
+                    <div className="w-full flex justify-start items-center"><span className="flex-1 text-left">6. Chuyên ngành:</span><span className="flex-1 text-left">Khóa:</span></div>
                     <div className="w-full text-left">7. Địa điểm:</div>
                     <div className="w-full text-left">8. Ý kiến đánh giá của thành viên Chấm Thực tập Đồ án Chuyên Ngành theo tín chỉ:</div>
                     <div className="w-full text-left italic mb-5">(Thành viên Chấm khoanh tròn vào ô điểm số tương ứng với cột mức chất lượng mà SV đạt được theo từng tiêu chí)</div>
@@ -140,7 +140,8 @@ const Template = () => {
                 <table className='border-collapse border border-[#ff8077] w-full h-full'>
                     <thead>
                         <tr className="border border-b-0 border-[#ff8077] h-[20px]">
-                            <th className="border border-b-0 border-[#ff8077]">CĐR</th>
+                            <th className="border border-b-0 border-[#ff8077]">CĐR_HP</th>
+                            <th className="border border-b-0 border-[#ff8077]">CĐR_CT</th>
                             <th className="border border-b-0 border-[#ff8077]">Tiêu chí</th>
                             <th className="border border-b-0 border-r-0 border-[#ff8077]">Tổng điểm</th>
 
@@ -153,6 +154,7 @@ const Template = () => {
 
                             <tr key={item.rubricsItem_id} className="border border-b-0 border-[#ff8077] p-5">
                                 <td className="border  border-[#ff8077] text-center px-2">{item.CLO.cloName}</td>
+                                <td className="border  border-[#ff8077] text-center px-2">{item.PLO.ploName}</td>
                                 <td className="border border-[#ff8077] test text-justify px-2">
                                     <span dangerouslySetInnerHTML={{ __html: item.description }} />
                                 </td>
@@ -197,6 +199,7 @@ const Template = () => {
                     </tbody>
                     <tfoot className="border border-[#ff8077] p-5">
                         <tr className="h-[20px]">
+                            <td className="p-5"></td>
                             <td className="p-5"></td>
                             <td className="p-5"></td>
                             <td className="p-5"></td>
