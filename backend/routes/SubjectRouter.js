@@ -13,5 +13,7 @@ router.delete('/subject/:id', SubjectController.delete);
 
 router.get('/subject/isDelete/true', SubjectController.isDeleteTotrue);
 router.get('/subject/isDelete/false', SubjectController.isDeleteTofalse);
+
+
 router.put('/subject/isDelete/:id', SubjectController.isDelete);
 module.exports = router;
