@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Button, Select, Tooltip, Input, Space, Table } from 'antd';
 import { Link, useLocation } from "react-router-dom";
-import { SearchOutlined } from '@ant-design/icons';
+import { DeleteFilled, EditFilled, SearchOutlined } from '@ant-design/icons';
 import './Student.css'
 
 import {
@@ -232,10 +232,30 @@ const Student = (nav) => {
       onFilter: (value, record) => record.classCode.startsWith(value),
       filterSearch: true,
       // ...getColumnSearchProps('classCode'), 
-      width: '30%',
+      width: '20%',
       // sorter: (a, b) => a.classCode - b.classCode,
       // sortDirections: ['descend', 'ascend'],
     },
+    {
+      title: 'Hành động',
+      dataIndex: 'action',
+      key: 'action',
+      render: (value, record) => (
+        <Space>
+          <Tooltip title="Cập nhật thông tin sinh viên">
+            <Button icon={<EditFilled />} href="#" />
+          </Tooltip>
+          <Tooltip title="Chuyển vào thùng rác">
+            <Button onClick={() => {
+              onOpen();
+              setDeleteId(record.key);
+              console.log("delete", record.key);
+            }} icon={<DeleteFilled />} />
+          </Tooltip>
+        </Space>
+      ),
+      width: '10%',
+    }
   ];
 
   const onChange = (pagination, filters, sorter, extra) => {
@@ -343,7 +363,11 @@ function ConfirmAction(props) {
             <ModalHeader>Cảnh báo</ModalHeader>
             <ModalBody>
               <p className="text-[16px]">
-                Chương trình sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
+                Chương trình sẽ được chuyển vào
+                <Chip radius="sm" className="bg-zinc-200">
+                  <i class="fa-solid fa-trash-can-arrow-up mr-2"></i>
+                  Kho lưu trữ
+                </Chip> và có thể khôi phục lại, tiếp tục thao tác?
               </p>
             </ModalBody>
             <ModalFooter>
@@ -351,7 +375,7 @@ function ConfirmAction(props) {
                 Huỷ
               </Button>
               <Button color="danger" className="font-medium" onClick={() => handleOnOKClick(onClose)}>
-                Xoá
+                Chuyển
               </Button>
             </ModalFooter>
           </>

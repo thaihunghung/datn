@@ -51,7 +51,7 @@ const StudentController = {
           model: ClassModel,
           attributes: ['classCode'] // Chỉ lấy trường classCode từ bảng lớp
         }],
-        attributes: ['student_id','class_id', 'studentCode', 'email', 'name'],// Lọc ra các trường cần lấy
+        attributes: ['student_id', 'class_id', 'studentCode', 'email', 'name', 'isDelete'],// Lọc ra các trường cần lấy
         where: { isDelete: false }
       });
 
@@ -106,7 +106,14 @@ const StudentController = {
   },
   isDeleteTotrue: async (req, res) => {
     try {
-      const students = await StudentModel.findAll({ where: { isDelete: true } });
+      const students = await StudentModel.findAll(
+        {
+          include: [{
+            model: ClassModel,
+            attributes: ['classCode']
+          }],
+          where: { isDelete: true }
+        });
       if (!students) {
         return res.status(404).json({ message: 'Không tìm thấy students' });
       }
@@ -134,12 +141,12 @@ const StudentController = {
   isDelete: async (req, res) => {
     try {
       const { id } = req.params;
-      const students = await StudentModel.findOne({ where: { class_id: id } });
+      const students = await StudentModel.findOne({ where: { student_id: id } });
       if (!students) {
         return res.status(404).json({ message: 'Không tìm thấy students' });
       }
       const updatedIsDeleted = !students.isDelete;
-      await StudentModel.update({ isDelete: updatedIsDeleted }, { where: { class_id: id } });
+      await StudentModel.update({ isDelete: updatedIsDeleted }, { where: { student_id: id } });
       res.json({ message: `Đã đảo ngược trạng thái isDelete thành ${updatedIsDeleted}` });
     } catch (error) {
       console.error('Lỗi khi đảo ngược trạng thái isDelete của students:', error);
