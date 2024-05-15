@@ -70,7 +70,7 @@ const FormPoint = (nav) => {
   return (
     <div className="w-full p-2 py-0 flex flex-col leading-6 mt-10">
 
-      <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 shadow-lg rounded-md border-1 border-slate-300">
+      <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-1 w-full p-4 py-3 shadow-lg rounded-md border-1 border-slate-300">
         <p className="text-sm font-medium">
           <i className="fa-solid fa-circle-check mr-3 text-emerald-500 "></i>{" "}
           <span className="mr-2">Tổng điểm: {totalKeyNumber ? totalKeyNumber : ''}</span>
