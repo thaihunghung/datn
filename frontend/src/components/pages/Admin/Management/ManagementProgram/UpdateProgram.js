@@ -3,13 +3,15 @@
 import { useEffect, useState } from "react";
 import { UploadOutlined } from '@ant-design/icons';
 import { Table, Upload, Tooltip, Divider, Steps, Button, Collapse } from 'antd';
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "./Program.css"
 import { useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
 
 const UpdateProgram = (nav) => {
+    const location = useLocation();
+    const isActive = (path) => location.pathname.startsWith(path);
     const { setCollapsedNav, successNoti} = nav;
     const { onOpen } = useDisclosure();
     const [activeTab, setActiveTab] = useState(0);
@@ -188,29 +190,21 @@ const UpdateProgram = (nav) => {
         <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/management-program"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS Chương trình
+                <Link to="/admin/management-program/description">
+                        <div className={`p-5 min-w-[100px] ${isActive("/admin/management-program/description") ? "bg-slate-600 text-white" : "hover:bg-slate-600 hover:text-white"}`}>
+                            Chương trình
                         </div>
                     </Link>
-                    <Link to={"/admin/management-program/store"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Kho lưu trữ
-                        </div>
-                    </Link>
-                    <Link to={"/admin/management-program/create"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
+
+                    <Link to="/admin/management-program/create">
+                        <div className={`p-5 ${isActive("/admin/management-program/create") ? "bg-slate-600 text-white" : "hover:bg-slate-600 hover:text-white"}`}>
                             Tạo chương trình
                         </div>
                     </Link>
-                    <Link to={"/admin/management-program/update"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                        update
-                        </div>
-                    </Link>
-                    <Link to={"/admin/management-program/po-plo"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            PO-PLO
+
+                    <Link to="/admin/management-program/update">
+                        <div className={`p-5 ${isActive("/admin/management-program/update") ? "bg-slate-600 text-white" : "hover:bg-slate-600 hover:text-white"}`}>
+                            Chỉnh sửa
                         </div>
                     </Link>
                 </div> 
@@ -377,13 +371,13 @@ function Tabs({ tabs, activeTab, setActiveTab }) {
     return (
         <div>
             <table className="mb-2">
-                <tr className="tab-buttons border-collapse border">
+                <tr className="tab-buttons border-collapse border bg-[#ff8077]">
                     {tabs.map((tab, index) => (
                         <td>
                             <button
                                 key={index}
                                 onClick={() => handleTabClick(index)}
-                                className={`${index === activeTab ? 'active ' : ''} ${index === activeTab ? 'bg-gray-800 text-white ' : ''} border p-2 px-7`}
+                                className={`${index === activeTab ? 'active ' : ''} ${index === activeTab ? 'bg-slate-600 text-white ' : ''} border p-2 px-7`}
                             >
                                 {tab.title}
                             </button>

@@ -138,15 +138,15 @@ const PoPlo = (nav) => {
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
                     <Link to={"/admin/management-program"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS Chương trình
+                        <div className="p-5 min-w-[100px] hover:bg-slate-600 hover:text-white">
+                            Chương trình
                         </div>
                     </Link>
                     <Link to={"/admin/management-program/store"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Kho lưu trữ
                         </div>
-                    </Link>
+                    </Link> 
                     <Link to={"/admin/management-program/create"}>
                         <div className="p-5 hover:bg-slate-600 hover:text-white">
                             Tạo chương trình
@@ -162,7 +162,6 @@ const PoPlo = (nav) => {
                             PO-PLO
                         </div>
                     </Link>
-                    
                 </div>
             </div>
 

@@ -3,7 +3,7 @@ const ProgramModel = require('../models/ProgramModel');
 const programController = {
   index: async (req, res) => {
     try {
-      ProgramModel.findAll()
+      ProgramModel.findOne()
         .then(programs => {
           return res.json(programs);
         })
@@ -65,7 +65,7 @@ const programController = {
   },
   isDeleteTotrue: async (req, res) => {
     try {
-      const program = await ProgramModel.findAll({ where: { isDelete: true } });
+      const program = await ProgramModel.findOne({ where: { isDelete: true } });
 
       if (!program) {
         return res.status(404).json({ message: 'Không tìm thấy chương trình' });
@@ -79,7 +79,7 @@ const programController = {
   },
   isDeleteTofalse: async(req, res) => {
     try {
-      const program = await ProgramModel.findAll({ where: { isDelete: false } });
+      const program = await ProgramModel.findOne({ where: { isDelete: false } });
       if (!program) {
         return res.status(404).json({ message: 'Không tìm thấy chương trình' });
       }
@@ -107,6 +107,16 @@ const programController = {
           console.error(error);
         });
       res.json({ message: `Đã đảo ngược trạng thái isDelete thành ${updatedIsDeleted}` });
+    } catch (error) {
+      console.error('Lỗi cập nhật trạng thái isDelete:', error);
+      res.status(500).json({ message: 'Lỗi server' });
+    }
+  },
+  getFormExels: async (req, res) => {
+    try {
+      const program = await ProgramModel.describe()
+console.log(program)
+      res.json({ program });
     } catch (error) {
       console.error('Lỗi cập nhật trạng thái isDelete:', error);
       res.status(500).json({ message: 'Lỗi server' });

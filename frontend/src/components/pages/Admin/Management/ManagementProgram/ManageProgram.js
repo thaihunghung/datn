@@ -1,8 +1,6 @@
-// ManageProgram.js
-
 import { useEffect, useState } from "react";
 import { Button } from 'antd';
-import { Link } from "react-router-dom";
+import { Link, useLocation } from 'react-router-dom';
 
 import {
     Modal, Chip,
@@ -14,6 +12,9 @@ import {
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 
 const ManageProgram = (nav) => {
+    const location = useLocation();
+    const isActive = (path) => location.pathname.startsWith(path);
+
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -72,72 +73,37 @@ const ManageProgram = (nav) => {
             />
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/management-program"}>
-                        <div className="p-5 min-w-[100px] hover:bg-slate-600 hover:text-white">
+                    <Link to="/admin/management-program">
+                        <div className={`p-5 min-w-[100px] ${isActive("/admin/management-program/description") ? "bg-[#475569] text-white" : "hover:bg-[#475569] hover:text-white"}`}>
                             Chương trình
                         </div>
                     </Link>
-                    <Link to={"/admin/management-po"}>
-                        <div className="p-5 min-w-[100px] hover:bg-slate-600 hover:text-white">
-                            PO
-                        </div>
-                    </Link>
-                    <Link to={"/admin/management-plo"}>
-                        <div className="p-5 min-w-[100px] hover:bg-slate-600 hover:text-white">
-                            PLO
-                        </div>
-                    </Link>
 
-
-
-                    {/* <Link to={"/admin/management-program/store"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Kho lưu trữ
-                        </div>
-                    </Link> */}
-
-
-
-                    {/* <Link to={"/admin/management-program/create"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
+                    <Link to="/admin/management-program/create">
+                        <div className={`p-5 ${isActive("/admin/management-program/create") ? "bg-[#475569] text-white" : "hover:bg-[#475569] hover:text-white"}`}>
                             Tạo chương trình
                         </div>
                     </Link>
-                    <Link to={"/admin/management-program/update"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                        update
+
+                    <Link to="/admin/management-program/update">
+                        <div className={`p-5 ${isActive("/admin/management-program/update") ? "bg-[#475569] text-white" : "hover:bg-[#475569] hover:text-white"}`}>
+                            Chỉnh sửa
                         </div>
                     </Link>
-                    <Link to={"/admin/management-program/po-plo"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            PO-PLO
-                        </div>
-                    </Link> */}
                 </div>
             </div>
             <div className="w-full border mt-5 rounded-lg">
-                <table className="table-auto border-collapse border w-full">
-                    <tr>
-                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-gray-800 text-white text-center">STT</td>
-                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-gray-800 text-white text-center">Tên chương trình tiếng việt</td>
-                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-gray-800 text-white text-center">Thao tác</td>
-                    </tr>
-                    {programData.map((data, i) => (
-                        <tr key={i}>
-                            <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">{i + 1}</td>
-                            <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">{data.programName}</td>
-                            <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 flex justify-center">
-                                <div className="flex gap-1 flex-col sm:flex-col lg:flex-row xl:flex-row">
-                                    <div className="bg-blue-500 w-[120px] hover:bg-blue-700 text-white  text-center font-bold p-1 rounded">
-                                        <Link to={`update/${data.program_id}`} className="w-full h-full">Cập nhật</Link></div>
-                                    <div className="bg-red-500 w-[120px] hover:bg-red-700 text-white text-center font-bold p-1 rounded">
-                                        <button onClick={() => { onOpen(); setDeleteId(data.program_id); }} className="w-full h-full">Xóa</button>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
-                </table>
+                <div className="w-full border-collapse border">
+                    <div className="w-full"> 
+                        <div className="w-full border-1 bg-[#475569] text-white text-center">Mô tả</div>
+                    </div>
+                    <div className="border-1 text-justify leading-8 p-5">
+                        <div className="w-full text-xl font-bold">{programData?.programName}</div>
+
+                        <div dangerouslySetInnerHTML={{ __html: programData?.description }}></div>
+                    </div>
+                </div>
+
             </div>
         </div>
     );

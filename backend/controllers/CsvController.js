@@ -46,6 +46,8 @@ const CsvController = {
                 return dataValues;
             });
             const Description = await ProgramModel.describe();
+            console.log(Description);
+
             const filteredProgram = filterDescriptionHaveid(Description)
             const JsonFile = [filteredProgram, ...dataValuesArray]
             const csvData = json2csv(JsonFile);
@@ -67,6 +69,7 @@ const CsvController = {
     getFormPo: async (req, res) => {
         try {
             const Description = await PoModel.describe();
+            console.log(Description);
             const filteredPo = filterDescription(Description, "Po")
 
             if (!Description) {

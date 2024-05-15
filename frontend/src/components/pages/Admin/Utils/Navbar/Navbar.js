@@ -71,7 +71,7 @@ function Nav(props) {
             text: "Programs",
             icon: <i className={`fa-solid fa-gear mr-${collapsedNav ? "0" : "3"} w-4`}></i>,
             submenu: [
-                { text: (<><i className="fa-solid fa-minus mr-3"></i>Chương trình</>), link: "/admin/management-program" },
+                { text: (<><i className="fa-solid fa-minus mr-3"></i>Chương trình</>), link: "/admin/management-program/description" },
                 { text: (<><i className="fa-solid fa-minus mr-3"></i>PLO</>), link: "/admin/management-po" },
                 { text: (<><i className="fa-solid fa-minus mr-3"></i>PO</>), link: "/admin/management-plo" },
             ],
