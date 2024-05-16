@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { UploadOutlined } from '@ant-design/icons';
 import { Table, Upload, Tooltip, Divider, Steps, Button, Collapse } from 'antd';
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "./Po.css"
 import {
 useDisclosure
@@ -15,21 +15,15 @@ import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
 
 const UpdatePo = (nav) => {
-    const { setCollapsedNav, successNoti} = nav;
+    const location = useLocation();
+    const isActive = (path) => location.pathname.startsWith(path);
+    const { setCollapsedNav} = nav;
     const { onOpen} = useDisclosure();
-
-
-
     const [activeTab, setActiveTab] = useState(0);
-
     const [selectedRow, setSelectedRow] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [loading, setLoading] = useState(false);
-
     const [poListData, setPosListData] = useState([]);
-
-  
-
     const [current, setCurrent] = useState(0);
     const onChangexxx = (nameP) => {
         console.log('onChange:', nameP);
@@ -188,27 +182,35 @@ const UpdatePo = (nav) => {
         <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                <Link to={"/admin/management-po"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS PO
+                    <Link to="/admin/management-po">
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive("/admin/management-po") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                Danh sách PO
+                            </div>
                         </div>
                     </Link>
-                    <Link to={"/admin/management-po/store"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Kho lưu trữ
+                    <Link to="/admin/management-po/store">
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]" >
+                            <div className={` ${isActive("/admin/management-po/store") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                Kho lưu trữ
+                            </div>
                         </div>
                     </Link>
-                    <Link to={"/admin/management-po/update"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            update
+                    <Link to="/admin/management-po/update">
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive("/admin/management-po/update") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                                Chỉnh sửa
+                            </div>
                         </div>
                     </Link>
-                    <Link to={"/admin/management-po/create"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Tạo PO
+                    <Link to="/admin/management-po/create">
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive("/admin/management-po/create") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                                Tạo mới
+                            </div>
                         </div>
                     </Link>
-                </div> 
+                </div>
             </div>
             <div className="w-full my-5">
             <Collapse

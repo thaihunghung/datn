@@ -96,7 +96,7 @@ const CreateProgram = (nav) => {
     }, [setCollapsedNav]);
 
     return (
-        <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
+        <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7 bg-[#f5f5f5]-500">
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
                     <Link to="/admin/management-program/description">

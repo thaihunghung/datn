@@ -1,27 +1,16 @@
 // UpdatePoById.js
 
 import { useEffect, useState } from "react";
-import { Switch } from "@nextui-org/react";
-import { Select } from "antd"; // Import Select component from antd
-import { Link } from "react-router-dom";
-import moment from "moment";
-import { useLocation, useNavigate, useParams } from "react-router-dom"; // Import useHistory from react-router-dom
-import {
-    Button,
-    Avatar,
-    Input,
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    useDisclosure,
-} from "@nextui-org/react";
-
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom"; 
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 
+
+import { Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Switch } from "@nextui-org/react";
+import { Select } from "antd"; 
+
 const UpdatePoById = (nav) => {
-    
+    const location = useLocation();
+    const isActive = (path) => location.pathname.startsWith(path);
     const { id } = useParams();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -155,24 +144,32 @@ const UpdatePoById = (nav) => {
             </Modal>
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/management-po"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS PO
+                    <Link to="/admin/management-po">
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive("/admin/management-po") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                Danh sách PO
+                            </div>
                         </div>
                     </Link>
-                    <Link to={"/admin/management-po/store"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Kho lưu trữ
+                    <Link to="/admin/management-po/store">
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]" >
+                            <div className={` ${isActive("/admin/management-po/store") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                Kho lưu trữ
+                            </div>
                         </div>
                     </Link>
-                    <Link to={"/admin/management-po/update"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            update
+                    <Link to="/admin/management-po/update">
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive("/admin/management-po/update") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                                Chỉnh sửa
+                            </div>
                         </div>
                     </Link>
-                    <Link to={"/admin/management-po/create"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Tạo PO
+                    <Link to="/admin/management-po/create">
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive("/admin/management-po/create") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                                Tạo mới
+                            </div>
                         </div>
                     </Link>
                 </div>
