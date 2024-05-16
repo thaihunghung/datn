@@ -1,31 +1,16 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, signInWithGoogle, signOut } from "../../../../../service/firebase";
-import {
-    User,
-    Dropdown,
-    DropdownTrigger,
-    DropdownMenu,
-    DropdownItem,
-    DropdownSection,
-    ScrollShadow,
-    Button,
-    Navbar,
-    NavbarBrand,
-    NavbarMenuToggle,
-    NavbarMenu,
-    NavbarMenuItem,
-    NavbarContent,
-    NavbarItem
-} from "@nextui-org/react";
+import { User, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection, ScrollShadow, Button, Navbar, NavbarBrand, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, NavbarContent, NavbarItem } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { Tooltip } from "antd";
 import { motion } from "framer-motion";
 
 function Nav(props) {
+    const { collapsedNav, setCollapsedNav, setSpinning } = props;
     const navigate = useNavigate();
     const location = useLocation();
-    const { collapsedNav, setCollapsedNav, setSpinning } = props;
+    const isActive = (path) => location.pathname.startsWith(path);
 
     const [submenuVisible, setSubmenuVisible] = useState({});
     const [currentUser, setCurrentUser] = useState(null);
@@ -33,7 +18,6 @@ function Nav(props) {
     // Toggle submenu visibility
     const toggleSubmenu = (text) => {
         setCollapsedNav(false);
-
         setSubmenuVisible({
             ...submenuVisible,
             [text]: !submenuVisible[text],
@@ -52,17 +36,16 @@ function Nav(props) {
     const menuItems = [
         { label: "Home", path: "/home" },
         {
-          label: "About",
-          path: "/about",
-          submenu: [
-            { label: "Our Team", path: "/about/team" },
-            { label: "Our Story", path: "/about/story" }
-          ]
+            label: "About",
+            path: "/about",
+            submenu: [
+                { label: "Our Team", path: "/about/team" },
+                { label: "Our Story", path: "/about/story" }
+            ]
         },
         { label: "Services", path: "/services" },
         { label: "Contact", path: "/contact" }
-      ];
-      
+    ];
 
     const navTab = [
         { text: "Tổng quan", link: "/admin", icon: <i className={`fa-solid fa-house mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
@@ -71,7 +54,15 @@ function Nav(props) {
             text: "Programs",
             icon: <i className={`fa-solid fa-gear mr-${collapsedNav ? "0" : "3"} w-4`}></i>,
             submenu: [
-                { text: (<><i className="fa-solid fa-minus mr-3"></i>Chương trình</>), link: "/admin/management-program/description" },
+                {
+                    text: (<><i className="fa-solid fa-minus mr-3"></i>Chương trình</>),
+                    link: "/admin/management-program/description",
+                    active: [
+                        "/admin/management-program/update",
+                        "/admin/management-program/description",
+                        "/admin/management-program/create"
+                    ]
+                },
                 { text: (<><i className="fa-solid fa-minus mr-3"></i>PLO</>), link: "/admin/management-po" },
                 { text: (<><i className="fa-solid fa-minus mr-3"></i>PO</>), link: "/admin/management-plo" },
             ],
@@ -103,6 +94,7 @@ function Nav(props) {
     }, [location.pathname]);
 
     const handleLoginWithGoogle = async () => { };
+
     const handleLogout = async () => {
         setSpinning(true);
         try {
@@ -117,71 +109,70 @@ function Nav(props) {
     const handleToggleNav = () => {
         setCollapsedNav(!collapsedNav);
     };
-    // bg-[#ff8077]
     return (
         <>
             <div className="block sm:hidden lg:hidden xl:hidden">
-            <Navbar disableAnimation isBordered>
-      <NavbarContent className="sm:hidden" justify="start">
-        <NavbarMenuToggle />
-      </NavbarContent>
-      <NavbarContent className="sm:hidden pr-3" justify="center">
-        <NavbarBrand>
-          <p className="font-bold text-inherit">ACME</p>
-        </NavbarBrand>
-      </NavbarContent>
-      <NavbarContent className="hidden sm:flex gap-4" justify="center">
-        <NavbarBrand>
-          <p className="font-bold text-inherit">ACME</p>
-        </NavbarBrand>
-        <NavbarItem>
-          <Link color="foreground" to="/features">Features</Link>
-        </NavbarItem>
-        <NavbarItem isActive>
-          <Link to="/customers" aria-current="page" color="warning">Customers</Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link color="foreground" to="/integrations">Integrations</Link>
-        </NavbarItem>
-      </NavbarContent>
-      <NavbarContent justify="end">
-        <NavbarItem className="hidden lg:flex">
-          <Link to="/login">Login</Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Button as={Link} color="warning" to="/signup" variant="flat">
-            Sign Up
-          </Button>
-        </NavbarItem>
-      </NavbarContent>
-      <NavbarMenu>
-      {menuItems.map((item, index) => (
-          <NavbarMenuItem key={`${item.label}-${index}`}>
-            <Link
-              className="w-full"
-              color={index === 2 ? "warning" : index === menuItems.length - 1 ? "danger" : "foreground"}
-              to={item.path}
-              size="lg"
-            >
-              {item.label}
-            </Link>
-            {item.submenu && (
-              <div className="submenu">
-                {item.submenu.map((subItem, subIndex) => (
-                  <Link
-                    key={`${subItem.label}-${subIndex}`}
-                    className="submenu-item"
-                    to={subItem.path}
-                  >
-                    {subItem.label}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </NavbarMenuItem>
-        ))}
-      </NavbarMenu>
-    </Navbar>
+                <Navbar disableAnimation isBordered>
+                    <NavbarContent className="sm:hidden" justify="start">
+                        <NavbarMenuToggle />
+                    </NavbarContent>
+                    <NavbarContent className="sm:hidden pr-3" justify="center">
+                        <NavbarBrand>
+                            <p className="font-bold text-inherit">ACME</p>
+                        </NavbarBrand>
+                    </NavbarContent>
+                    <NavbarContent className="hidden sm:flex gap-4" justify="center">
+                        <NavbarBrand>
+                            <p className="font-bold text-inherit">ACME</p>
+                        </NavbarBrand>
+                        <NavbarItem>
+                            <Link color="foreground" to="/features">Features</Link>
+                        </NavbarItem>
+                        <NavbarItem isActive>
+                            <Link to="/customers" aria-current="page" color="warning">Customers</Link>
+                        </NavbarItem>
+                        <NavbarItem>
+                            <Link color="foreground" to="/integrations">Integrations</Link>
+                        </NavbarItem>
+                    </NavbarContent>
+                    <NavbarContent justify="end">
+                        <NavbarItem className="hidden lg:flex">
+                            <Link to="/login">Login</Link>
+                        </NavbarItem>
+                        <NavbarItem>
+                            <Button as={Link} color="warning" to="/signup" variant="flat">
+                                Sign Up
+                            </Button>
+                        </NavbarItem>
+                    </NavbarContent>
+                    <NavbarMenu>
+                        {menuItems.map((item, index) => (
+                            <NavbarMenuItem key={`${item.label}-${index}`}>
+                                <Link
+                                    className="w-full"
+                                    color={index === 2 ? "warning" : index === menuItems.length - 1 ? "danger" : "foreground"}
+                                    to={item.path}
+                                    size="lg"
+                                >
+                                    {item.label}
+                                </Link>
+                                {item.submenu && (
+                                    <div className="submenu">
+                                        {item.submenu.map((subItem, subIndex) => (
+                                            <Link
+                                                key={`${subItem.label}-${subIndex}`}
+                                                className="submenu-item"
+                                                to={subItem.path}
+                                            >
+                                                {subItem.label}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+                            </NavbarMenuItem>
+                        ))}
+                    </NavbarMenu>
+                </Navbar>
             </div>
             <div className="hidden sm:block lg:block xl:block text-[#FEFEFE]">
                 <motion.div
@@ -257,7 +248,7 @@ function Nav(props) {
                                                         </p>
                                                         {!collapsedNav && (
                                                             <i
-                                                                className={`fa-solid fa-chevron-${submenuVisible[tab.text] ? 'right' : 'down'} w-2 opacity-40 group-hover/tab:opacity-100 transition-all`}
+                                                                className={`fa-solid fa-chevron-${submenuVisible[tab.text] ? 'down' : 'right'} w-2 opacity-40 group-hover/tab:opacity-100 transition-all`}
                                                             ></i>
                                                         )}
                                                     </div>
@@ -269,16 +260,22 @@ function Nav(props) {
                                                         transition={{ duration: 0.4 }}
                                                         className="overflow-hidden flex flex-col gap-1"
                                                     >
-                                                        {tab.submenu.map((submenuItem, index) => (
-                                                            <Link
-                                                                key={index}
-                                                                to={submenuItem.link}
-                                                                className={`cursor-pointer text-sm text-[#FEFEFE] w-full p-2 pl-5 rounded-lg flex justify-start items-center 
-                                                            ${location.pathname.startsWith(submenuItem.link) ? setActive(submenuItem.link) : ''}`}
-                                                            >
-                                                                {submenuItem.text}
-                                                            </Link>
-                                                        ))}
+                                                        {tab.submenu.map((submenuItem, index) => {
+                                                            const submenuIsActive = submenuItem.active
+                                                                ? submenuItem.active.some(path => isActive(path))
+                                                                : isActive(submenuItem.link);
+
+                                                            return (
+                                                                <Link
+                                                                    key={index}
+                                                                    to={submenuItem.link}
+                                                                    className={`cursor-pointer text-sm text-[#FEFEFE] w-full p-2 pl-5 rounded-lg flex justify-start items-center 
+                                                                    ${submenuIsActive ? 'Admin_tab-active' : ''}`}
+                                                                >
+                                                                    {submenuItem.text}
+                                                                </Link>
+                                                            );
+                                                        })}
                                                     </motion.div>
                                                 )}
                                             </div>

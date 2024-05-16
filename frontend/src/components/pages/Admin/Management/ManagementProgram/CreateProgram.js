@@ -1,7 +1,7 @@
 // CreateProgram.js
 
 import { useEffect, useState } from "react";
-import { Input, Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
 import { UploadOutlined } from '@ant-design/icons';
 import { Upload, Divider, Steps, Button } from 'antd';
 import { Link, useLocation } from "react-router-dom";
@@ -96,27 +96,22 @@ const CreateProgram = (nav) => {
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
                     <Link to="/admin/management-program/description">
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">                        
-                        <div className={` ${isActive("/admin/management-program/description") ? "border-b-3 text-[#020401] border-[#475569]" : ""}`}>
-                            Chương trình
-                        </div>
-
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive("/admin/management-program/description") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                Chương trình
+                            </div>
                         </div>
                     </Link>
                     <Link to="/admin/management-program/create">
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]" >                        
-                        
-                        <div className={` ${isActive("/admin/management-program/create") ? "border-b-3 text-[#020401] border-[#475569]" : ""}`}>
-                            Tạo chương trình
-                        </div>
-
-
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]" >
+                            <div className={` ${isActive("/admin/management-program/create") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                Tạo chương trình
+                            </div>
                         </div>
                     </Link>
                     <Link to="/admin/management-program/update">
                         <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-
-                            <div className={` ${isActive("/admin/management-program/update") ? "border-b-3 text-[#020401] border-[#475569]" : ""} `}>
+                            <div className={` ${isActive("/admin/management-program/update") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
                                 Chỉnh sửa
                             </div>
                         </div>
@@ -171,9 +166,9 @@ const CreateProgram = (nav) => {
                                         <div className='hidden sm:block lg:hidden xl:hidden w-[50%]'>
                                             <Divider />
                                             <Steps current={current} onChange={setCurrent} direction="vertical" items={[
-                                               { title: 'Bước 1', description: 'Tải về form' },
-                                               { title: 'Bước 2', description: 'Tải lại form' },
-                                               { title: 'Bước 3', description: 'Chờ phản hồi' }
+                                                { title: 'Bước 1', description: 'Tải về form' },
+                                                { title: 'Bước 2', description: 'Tải lại form' },
+                                                { title: 'Bước 3', description: 'Chờ phản hồi' }
                                             ]} />
                                         </div>
                                         <div className='flex flex-col w-full sm:flex-col sm:w-full lg:flex-row xl:flex-row justify-around'>
@@ -212,63 +207,6 @@ const CreateProgram = (nav) => {
 };
 
 export default CreateProgram;
-
-function ConfirmAction({ isOpen, onOpenChange, onConfirm }) {
-    const handleOnOKClick = (onClose) => {
-        onClose();
-        if (typeof onConfirm === 'function') {
-            onConfirm();
-        }
-    };
-
-    return (
-        <Modal
-            isOpen={isOpen}
-            onOpenChange={onOpenChange}
-            motionProps={{
-                variants: {
-                    enter: {
-                        y: 0,
-                        opacity: 1,
-                        transition: {
-                            duration: 0.2,
-                            ease: "easeOut",
-                        },
-                    },
-                    exit: {
-                        y: -20,
-                        opacity: 0,
-                        transition: {
-                            duration: 0.1,
-                            ease: "easeIn",
-                        },
-                    },
-                },
-            }}
-        >
-            <ModalContent>
-                {(onClose) => (
-                    <>
-                        <ModalHeader>Cảnh báo</ModalHeader>
-                        <ModalBody>
-                            <p className="text-[16px]">
-                                Chương trình sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i className="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
-                            </p>
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button variant="light" onPress={onClose}>
-                                Huỷ
-                            </Button>
-                            <Button color="danger" className="font-medium" onPress={() => handleOnOKClick(onClose)}>
-                                Xoá
-                            </Button>
-                        </ModalFooter>
-                    </>
-                )}
-            </ModalContent>
-        </Modal>
-    );
-}
 
 function Tabs({ tabs, activeTab, setActiveTab }) {
     return (

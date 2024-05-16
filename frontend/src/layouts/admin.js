@@ -3,8 +3,6 @@ import { Link, Route, Routes } from 'react-router-dom';
 import { useState } from "react";
 import { message, Spin } from 'antd';
 
-
-
 import ManagePo from '../components/pages/Admin/Management/ManagementPo/ManagePo';
 import StorePo from '../components/pages/Admin/Management/ManagementPo/StorePo';
 import CreatePo from '../components/pages/Admin/Management/ManagementPo/CreatePo';
@@ -19,18 +17,14 @@ import PloClo from '../components/pages/Admin/Management/ManagementClo/PloClo';
 import FormPoint from '../components/pages/Admin/FormPoint/FormPoint';
 import Program from '../components/pages/Client/Program/Program';
 import Nav from '../components/pages/Admin/Utils/Navbar/Navbar';
-
-import MyEditor from '../components/pages/Admin/Utils/MyEditor/MyEditor';
 import Student from '../components/pages/Admin/Management/ManagementStudent/Student';
 import CreateStudent from '../components/pages/Admin/Management/ManagementStudent/CreateStudent';
 import UpdateStudentById from '../components/pages/Admin/Management/ManagementStudent/UpdateStudentById';
 import UpdateStudent from '../components/pages/Admin/Management/ManagementStudent/UpdateStudent';
 import StoreStudent from '../components/pages/Admin/Management/ManagementStudent/StoreStudent';
 import ManageProgram from '../components/pages/Admin/Management/ManagementProgram/ManageProgram';
-import StoreProgram from '../components/pages/Admin/Management/ManagementProgram/StoreProgram';
 import CreateProgram from '../components/pages/Admin/Management/ManagementProgram/CreateProgram';
 import UpdateProgram from '../components/pages/Admin/Management/ManagementProgram/UpdateProgram';
-import UpdateProgramById from '../components/pages/Admin/Management/ManagementProgram/UpdateProgramById';
 import PoPlo from '../components/pages/Admin/Management/ManagementProgram/PoPlo';
 import ManagementRubric from '../components/pages/Admin/Management/ManagementRubric/ManagementRubric';
 import CreateRubic from '../components/pages/Admin/Management/ManagementRubric/CreateRubic';
@@ -66,11 +60,9 @@ function Admin(props) {
       <div className='Admin-Content flex-1 h-full overflow-auto p-2 sm:p-5 sm:px-7 lg:p-5 lg:px-2 xl:p-5 xl:px-2'>
         <Routes>
           <Route path="/management-program/description" element={<ManageProgram collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
-          <Route path="/management-program/store" element={<StoreProgram collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-program/create" element={<CreateProgram collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-program/po-plo" element={<PoPlo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-program/update" element={<UpdateProgram collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
-          <Route path="/management-program/update/:id" element={<UpdateProgramById collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
           <Route path="/Program" element={<Program collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />          
           <Route path="/hung" element={<Template collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />          

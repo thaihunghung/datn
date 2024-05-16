@@ -1,183 +1,44 @@
 // UpdateProgram.js
 
-import { useEffect, useState } from "react";
-import { UploadOutlined } from '@ant-design/icons';
-import { Table, Upload, Tooltip, Divider, Steps, Button, Collapse } from 'antd';
+import React, { useEffect, useState } from "react";
+import { EditorState } from 'draft-js';
+import { Editor } from 'react-draft-wysiwyg';
+import { convertFromHTML, convertToHTML } from 'draft-convert';
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+import { Input, Button } from "@nextui-org/react";
 import { Link, useLocation } from "react-router-dom";
 import "./Program.css"
-import { useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import CustomUpload from "../../CustomUpload/CustomUpload";
 
 const UpdateProgram = (nav) => {
     const location = useLocation();
     const isActive = (path) => location.pathname.startsWith(path);
     const { setCollapsedNav, successNoti } = nav;
-    const { onOpen } = useDisclosure();
+
     const [activeTab, setActiveTab] = useState(0);
-    const [selectedRow, setSelectedRow] = useState([]);
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [nameP, setNameP] = useState("");
+    const [Program, setProgram] = useState({});
+    const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
+    const [convertedContent, setConvertedContent] = useState(null);
 
-    const [programListData, setNewsListData] = useState([]);
-
-    const [current, setCurrent] = useState(0);
-    const onChangexxx = (nameP) => {
-        console.log('onChange:', nameP);
-        setCurrent(nameP);
-    };
-
-    const [fileList, setFileList] = useState([]);
-
-    const columns = [
-        {
-            title: "Tên chương trình",
-            dataIndex: "name",
-            render: (record) => (
-                <div className="text-sm">
-                    <p className="font-medium">{record}</p>
-                </div>
-            ),
-        },
-        {
-            title: "Đã xóa",
-            dataIndex: "isDeleted",
-            render: (record) => (
-                <div className="text-sm">
-                    <p className="font-medium">{record}</p>
-                </div>
-            ),
-        }, {
-            title: (
-                <div className="flex items-center justify-center w-full">
-                    <span>Form</span>
-                    {/* <i className="fa-solid fa-bars text-[18px] ml-3"></i> */}
-                </div>
-            ),
-            dataIndex: "action",
-            render: (_id) => (
-                <div className="flex flex-col items-center justify-center w-full gap-2">
-                    <Tooltip title="Chỉnh sửa">
-                        <Button
-                            isIconOnly
-                            variant="light"
-                            radius="full"
-                            size="sm"
-                            as={Link}
-                            to={`update/${_id}`}
-
-                        >
-                            <i className="fa-solid fa-pen"></i>
-                        </Button>
-                    </Tooltip>
-                    {/* <Tooltip title="Xoá">
-                        <Button
-                            isIconOnly
-                            variant="light"
-                            radius="full"
-                            size="sm"
-                            onClick={() => { onOpen(); setDeleteId(_id);}}
-                        >
-                            <i className="fa-solid fa-trash-can"></i>
-                        </Button>
-                    </Tooltip> */}
-                </div>
-            ),
-        },
-
-    ];
-
-    const rowSelection = {
-        selectedRowKeys,
-        onChange: (selectedRowKeys, selectedRows) => {
-            console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-            setSelectedRow(selectedRows);
-            setSelectedRowKeys(selectedRowKeys);
-        },
-    };
-
-    const handleUnSelect = () => {
-        setSelectedRowKeys([]);
-        setSelectedRow([]);
-    };
-    const getAllProgram = async () => {
-        //setSpinning(true);
+    const getProgram = async () => {
         try {
-            const response = await axiosAdmin.get('/program');
-
-            console.log(response.data)
-
-            const updatedNewsData = response.data.map((program) => {
-                return {
-                    key: program.program_id,
-                    name: program.programName,
-                    isDeleted: program.isDeleted,
-                    action: program.program_id,
-                };
-            });
-
-            setNewsListData(updatedNewsData);
-
-            //setSpinning(false);
+            const response = await axiosAdmin.get('/program/1');
+            setProgram(response.data);
+            setNameP(response.data.programName)
         } catch (error) {
             console.error("Error fetching program:", error);
-            //setSpinning(false);
         }
     };
 
-
-    const handleDownloadProgram = async () => {
-        try {
-            if (selectedRowKeys.length === 0) {
-                alert('Please select at least one program ID');
-                return;
-            }
-            const data = {
-                id: selectedRowKeys
-            }
-            const response = await axiosAdmin.post('csv/program/', { data: data }, {
-                responseType: 'blob'
-            });
-
-            if (response && response.data) {
-                const url = window.URL.createObjectURL(response.data);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'program.csv';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                setCurrent(1);
-            }
-        } catch (error) {
-            console.error('Error downloading file:', error);
-        }
-    };
-    const props = {
-        onRemove: (file) => {
-            const index = fileList.indexOf(file);
-            const newFileList = fileList.slice();
-            newFileList.splice(index, 1);
-            setFileList(newFileList);
-        },
-        beforeUpload: (file) => {
-            setFileList([...fileList, file]);
-            return false;
-        },
-        fileList,
-    };
-
-    const description = 'This is a description.';
     useEffect(() => {
-        //allProgramIsDelete()
-        getAllProgram()
+        getProgram();
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
             } else {
                 setCollapsedNav(false);
             }
-            //console.log(window.innerWidth);
         };
         handleResize();
         window.addEventListener("resize", handleResize);
@@ -186,216 +47,128 @@ const UpdateProgram = (nav) => {
         };
     }, []);
 
+    useEffect(() => {
+        if (Program && Program.description) {
+            const contentState = convertFromHTML(Program.description);
+            if (contentState) {
+                setEditorState(EditorState.createWithContent(contentState));
+            }
+        }
+    }, [Program]);
+
+    useEffect(() => {
+        if (editorState) {
+            let html = convertToHTML(editorState.getCurrentContent());
+            setConvertedContent(html);
+        }
+    }, [editorState]);
+
+    const handleUpdate = async () => {
+        try {
+            if (nameP === "") {
+                alert("Dữ liệu lỗi");
+                document.getElementById("name-program").focus();
+                return;
+            }
+            const data = { programName: nameP, description: convertedContent };
+            await axiosAdmin.put('/program/1', { data: data });
+            successNoti('Program update successfully');
+        } catch (error) {
+            console.error("Error updating program:", error);
+        }
+    }
+
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
-            <div>
+            <div className="pb-5">
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
                     <Link to="/admin/management-program/description">
                         <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-program/description") ? "border-b-3 text-[#020401] border-[#475569]" : ""}`}>
+                            <div className={` ${isActive("/admin/management-program/description") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
                                 Chương trình
                             </div>
-
                         </div>
                     </Link>
                     <Link to="/admin/management-program/create">
                         <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]" >
-
-                            <div className={` ${isActive("/admin/management-program/create") ? "border-b-3 text-[#020401] border-[#475569]" : ""}`}>
+                            <div className={` ${isActive("/admin/management-program/create") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
                                 Tạo chương trình
                             </div>
-
-
                         </div>
                     </Link>
                     <Link to="/admin/management-program/update">
                         <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-
-                            <div className={` ${isActive("/admin/management-program/update") ? "border-b-3 text-[#020401] border-[#475569]" : ""} `}>
+                            <div className={` ${isActive("/admin/management-program/update") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
                                 Chỉnh sửa
                             </div>
                         </div>
                     </Link>
                 </div>
             </div>
-            <div className="w-full my-5">
-                <Collapse
-                    colorBorder="#FFD700"
-                    items={[{
-                        key: '1', label: <span className="text-base font-bold">Danh sách</span>,
-                        children: <div>
-                            {selectedRowKeys.length !== 0 && (
-                                <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 shadow-lg rounded-md border-1 border-slate-300">
-                                    <p className="text-sm font-medium">
-                                        <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
-                                        Đã chọn {selectedRow.length} bài viết
-                                    </p>
-                                    <div className="flex items-center gap-2">
 
-                                        <Tooltip
-                                            title={`Xoá ${selectedRowKeys.length} bài viết`}
-                                            getPopupContainer={() =>
-                                                document.querySelector(".Quick__Option")
-                                            }
-                                        >
-                                            <Button isIconOnly variant="light" radius="full" onClick={onOpen}>
-                                                <i className="fa-solid fa-trash-can"></i>
-                                            </Button>
-                                        </Tooltip>
-                                        <Tooltip
-                                            title="Bỏ chọn"
-                                            getPopupContainer={() =>
-                                                document.querySelector(".Quick__Option")
-                                            }
-                                        >
-                                            <Button
-                                                isIconOnly
-                                                variant="light"
-                                                radius="full"
-                                                onClick={() => {
-                                                    handleUnSelect();
-                                                }}
-                                            >
-                                                <i className="fa-solid fa-xmark text-[18px]"></i>
-                                            </Button>
-                                        </Tooltip>
-                                    </div>
-                                </div>
-                            )}
-                            <div className="ListNews w-full">
-                                <Table className="p-0"
-                                    bordered
-                                    loading={loading}
-                                    rowSelection={{
-                                        type: "checkbox",
-                                        ...rowSelection,
-                                    }}
-                                    columns={columns}
-                                    dataSource={programListData}
-                                />
-                            </div>
-                        </div>
-                    }]}
-                />
-
-
-            </div>
-            <Tabs tabs=
-                {[
+            <Tabs
+                tabs={[
                     {
-                        title: 'Cập nhật bằng CSV',
-                        content:
-                            <div className="w-full h-[1000px] rounded-lg">
-                                <div className=' w-full flex justify-center items-center'>
-                                    <div className='w-full  flex flex-col px-2  sm:gap-5 sm:justify-center h-fix sm:px-5 lg:px-5 xl:px-5 sm:flex-row  lg:flex-col  xl:flex-col  gap-[20px]'>
-                                        <div className='px-10 hidden sm:hidden lg:block xl:block'>
-                                            <Divider />
-                                            <Steps
-                                                current={current}
-                                                onChange={onChangexxx}
-                                                items={[
-                                                    {
-                                                        title: 'Bước 1',
-                                                        description,
-                                                    },
-                                                    {
-                                                        title: 'bước 2',
-                                                        description,
-                                                    },
-                                                    {
-                                                        title: 'bước 3',
-                                                        description,
-                                                    },
-                                                ]}
-                                            />
-                                        </div>
-                                        <div className='hidden sm:block lg:hidden xl:hidden w-[50%]'>
-                                            <Divider />
-                                            <Steps
-                                                current={current}
-                                                onChange={onChangexxx}
-                                                direction="vertical"
-
-                                                items={[
-                                                    {
-                                                        title: 'Bước 1',
-                                                        description,
-                                                    },
-                                                    {
-                                                        title: 'bước 2',
-                                                        description,
-                                                    },
-                                                    {
-                                                        title: 'bước 3',
-                                                        description,
-                                                    },
-                                                ]}
-                                            />
-                                        </div>
-
-                                        <div className='flex flex-col w-full  sm:flex-col sm:w-full lg:flex-row xl:flex-row justify-around'>
-                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%]  flex justify-start items-center'>
-                                                <div className='p-10 w-full mt-10 h-fix sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center  gap-5 rounded-lg'>
-                                                    <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
-                                                    <Button className='w-full bg-primary flex items-center justify-center  p-5 rounded-lg' onClick={handleDownloadProgram}>
-                                                        <scan>Tải xuống mẫu </scan>
-                                                    </Button>
-
-                                                </div>
-                                            </div>
-                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-center items-center'>
-                                                <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
-                                                    <div><p className='w-full text-center'>Gửi lại mẫu</p></div>
-                                                    <Upload {...props} >
-                                                        <Button icon={<UploadOutlined />} className='text-center items-center rounded-lg px-10 h-[40px]'>Select File</Button>
-                                                    </Upload>
-                                                </div>
-                                            </div>
-                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
-                                                <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
-                                                    <div><p className='w-full text-center'>Cập nhật Dữ liệu</p></div>
-                                                    <CustomUpload endpoint={'program/getByID'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
-                                                </div>
-                                            </div>
-                                        </div>
+                        title: 'Cập nhật',
+                        content: (
+                            <div className="w-full rounded-lg">
+                                <div className="w-full flex flex-col gap-2">
+                                    <Input
+                                        label="Tên"
+                                        placeholder="Vui lòng nhập tên chương trình"
+                                        value={nameP}
+                                        onValueChange={setNameP}
+                                        id="name-program"
+                                    />
+                                    <span className="font-bold text-left">Mô tả:</span>
+                                    <Editor
+                                        editorState={editorState}
+                                        onEditorStateChange={setEditorState}
+                                        wrapperClassName="wrapper-class w-full"
+                                        editorClassName="editor-class px-5 border w-full"
+                                        toolbarClassName="toolbar-class"
+                                    />
+                                    <div className="w-full flex justify-center items-center">
+                                        <Button onClick={handleUpdate} className="mt-5 px-20 max-w-[300px] text-[#FEFEFE] hover:bg-[#475569] bg-[#AF84DD]">
+                                            Cập nhật
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
+                        )
                     }
                 ]}
-                activeTab={activeTab} setActiveTab={setActiveTab}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
             />
         </div>
     );
 }
 
-
 export default UpdateProgram;
 
 function Tabs({ tabs, activeTab, setActiveTab }) {
-
-    const handleTabClick = (index) => {
-        setActiveTab(index);
-    };
-
     return (
         <div>
             <table className="mb-2">
-                <tr className="tab-buttons border-collapse border bg-[#ff8077]">
-                    {tabs.map((tab, index) => (
-                        <td>
-                            <button
-                                key={index}
-                                onClick={() => handleTabClick(index)}
-                                className={`${index === activeTab ? 'active ' : ''} ${index === activeTab ? 'bg-slate-600 text-white ' : ''} border p-2 px-7`}
-                            >
-                                {tab.title}
-                            </button>
-                        </td>
-                    ))}
-                </tr>
+                <tbody>
+                    <tr className="tab-buttons border-collapse border-[#020401] border">
+                        {tabs.map((tab, index) => (
+                            <td key={index}>
+                                <button
+                                    onClick={() => {
+                                        setActiveTab(index);
+                                    }}
+                                    className={`${index === activeTab ? 'active bg-[#475569] text-[#FEFEFE] font-bold' : ' text-[#020401]'} text-base border p-2 px-7`}
+                                >
+                                    {tab.title}
+                                </button>
+                            </td>
+                        ))}
+                    </tr>
+                </tbody>
             </table>
-            <div className="tab-content">
+            <div className="w-full mt-5 rounded-lg">
                 {tabs[activeTab].content}
             </div>
         </div>

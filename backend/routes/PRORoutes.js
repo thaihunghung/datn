@@ -187,7 +187,7 @@ router.get('/program/isDelete/false', programController.isDeleteTofalse);
  *       500:
  *         description: Lỗi server
  */
-router.put('/program/isDelete/:id', programController.isdelete);
+router.put('/program/isDelete/:id', programController.toggleIsDelete);
 
 
 

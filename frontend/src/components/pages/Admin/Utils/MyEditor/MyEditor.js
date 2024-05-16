@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { EditorState } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import { convertToHTML, convertFromHTML } from 'draft-convert';
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+import './MyEditor.css';
+
 import { Button } from "@nextui-org/react";
 import { message } from 'antd';
 

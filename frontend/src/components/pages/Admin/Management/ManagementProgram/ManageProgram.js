@@ -75,26 +75,21 @@ const ManageProgram = (nav) => {
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
                     <Link to="/admin/management-program/description">
                         <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-program/description") ? "border-b-3 text-[#020401] border-[#475569]" : ""}`}>
+                            <div className={` ${isActive("/admin/management-program/description") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
                                 Chương trình
                             </div>
-
                         </div>
                     </Link>
                     <Link to="/admin/management-program/create">
                         <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]" >
-
-                            <div className={` ${isActive("/admin/management-program/create") ? "border-b-3 text-[#020401] border-[#475569]" : ""}`}>
+                            <div className={` ${isActive("/admin/management-program/create") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
                                 Tạo chương trình
                             </div>
-
-
                         </div>
                     </Link>
                     <Link to="/admin/management-program/update">
                         <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-
-                            <div className={` ${isActive("/admin/management-program/update") ? "border-b-3 text-[#020401] border-[#475569]" : ""} `}>
+                            <div className={` ${isActive("/admin/management-program/update") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
                                 Chỉnh sửa
                             </div>
                         </div>
@@ -107,7 +102,7 @@ const ManageProgram = (nav) => {
                         <div className="w-full border-1 bg-[#475569] text-white text-center">Mô tả</div>
                     </div>
                     <div className="border-1 text-justify leading-8 p-5">
-                        <div className="w-full text-xl font-bold">{programData?.programName}</div>
+                        <div className="w-full text-2xl text-[#475569] mb-5 font-bold">{programData?.programName}</div>
 
                         <div dangerouslySetInnerHTML={{ __html: programData?.description }}></div>
                     </div>
