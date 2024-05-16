@@ -63,14 +63,27 @@ function Nav(props) {
                         "/admin/management-program/create"
                     ]
                 },
-                { text: (<><i className="fa-solid fa-minus mr-3"></i>PLO</>), link: "/admin/management-po" },
-                { text: (<><i className="fa-solid fa-minus mr-3"></i>PO</>), link: "/admin/management-plo" },
-            ],
+                {
+                    text: (<><i className="fa-solid fa-minus mr-3"></i>PLO</>),
+                    link: "/admin/management-po/list",
+                    active: [
+                        "/admin/management-po/store",
+                        "/admin/management-po/list",
+                        "/admin/management-po/store",
+                        "/admin/management-po/update",
+                        "/admin/management-po/create"
+                    ]
+                },
+                {
+                    text: (<><i className="fa-solid fa-minus mr-3"></i>PO</>),
+                    link: "/admin/management-plo"
+                }
+            ]
         },
         { text: "Rubric", link: "/admin/management-rubric", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
         { text: "Sinh viên", link: "/admin/student", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
     ];
-
+    
     useEffect(() => {
         onAuthStateChanged(auth, async (user) => {
             setCurrentUser(auth);

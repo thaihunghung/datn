@@ -1,7 +1,7 @@
 // StorePo.js
 
 import { useEffect, useState } from "react";
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 import { Link, useLocation } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
@@ -14,37 +14,40 @@ const StorePo = (nav) => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [PoData, setPoData] = useState([]);
     const [deleteId, setDeleteId] = useState(null);
+
     const allPoIsDelete = async () => {
         try {
-            const Po = await axiosAdmin.get('/po/isDelete/true');
-            setPoData(Po.data)
-            console.log(Po.data);
+            const response = await axiosAdmin.get('/po/isDelete/true');
+            setPoData(response.data);
         } catch (err) {
-            console.log("Error: " + err.message);
+            console.log("Error fetching deleted POs:", err.message);
         };
     }
 
     const handleDeletePo = async (id) => {
         try {
-            await axiosAdmin.delete(`/po/${id}`);
-
+            const response = await axiosAdmin.delete(`/po/${id}`);
+            if (response.data.message) {
+                message.success(response.data.message);
+            }
         } catch (err) {
-            console.log("Error: " + err.message);
+            console.log("Error deleting PO:", err.message);
+            message.error('Failed to toggle delete status');
         };
     }
 
     const hangleChangeidDelete = async (id) => {
         try {
-            const response = await axiosAdmin.put(`/po/isDelete/${id}`);
+            const response = await axiosAdmin.put(`/po/${id}/toggle-delete`);
             if (response) {
                 console.log(response.data.message);
+                message.success(response.data.message);
             }
         } catch (err) {
             console.log("Error: " + err.message);
-        };
+            message.error('Failed to toggle delete status');
+        }
     }
-
-  
 
     useEffect(() => {
         allPoIsDelete()
@@ -76,9 +79,9 @@ const StorePo = (nav) => {
             />
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to="/admin/management-po">
+                    <Link to="/admin/management-po/list">
                         <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-po") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                            <div className={` ${isActive("/admin/management-po/list") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
                                 Danh sách PO
                             </div>
                         </div>

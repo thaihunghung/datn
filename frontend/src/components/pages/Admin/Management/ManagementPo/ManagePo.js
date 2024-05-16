@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 import { Link, useLocation } from "react-router-dom";
 import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
@@ -16,21 +16,22 @@ const ManagePo = (nav) => {
         try {
             const po = await axiosAdmin.get('/po/isDelete/false');
             setPoData(po.data)
-            
         } catch (err) {
-            console.log("Error: " + err.message);
+            console.error("Error: " + err.message);
+            message.error('Error fetching PO data');
         };
     }
 
     const hangleChangeidDelete = async (id) => {
         try {
-            console.log("vo roi")
-            const response = await axiosAdmin.put(`/po/isDelete/${id}`);
+            const response = await axiosAdmin.put(`/po/${id}/toggle-delete`);
             if (response) {
                 console.log(response.data.message);
+                message.success(response.data.message);
             }
         } catch (err) {
-            console.log("Error: " + err.message);
+            console.error("Error: " + err.message);
+            message.error('Error updating PO status');
         };
     }
 
@@ -62,12 +63,12 @@ const ManagePo = (nav) => {
                     }
                 }}
             />
-            
-            <div>
+
+<div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to="/admin/management-po">
+                    <Link to="/admin/management-po/list">
                         <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-po") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                            <div className={` ${isActive("/admin/management-po/list") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
                                 Danh sách PO
                             </div>
                         </div>

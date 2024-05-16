@@ -39,7 +39,7 @@ const CreateProgram = (nav) => {
             }
         } catch (error) {
             console.error(error);
-            message.error('Error saving data');;
+            message.error('Error saving data');
         }
     };
 

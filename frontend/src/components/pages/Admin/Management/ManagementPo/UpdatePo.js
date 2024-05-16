@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { UploadOutlined } from '@ant-design/icons';
-import { Table, Upload, Tooltip, Divider, Steps, Button, Collapse } from 'antd';
+import { Table, Upload, Tooltip, Divider, Steps, Button, Collapse, message } from 'antd';
 import { Link, useLocation } from "react-router-dom";
 import "./Po.css"
 import {
@@ -92,12 +92,8 @@ const UpdatePo = (nav) => {
         setSelectedRow([]);
     };
     const getAllPo = async () => {
-        //setSpinning(true);
         try {
             const response = await axiosAdmin.get('/po');
-
-            console.log(response.data)
-
             const updatedPoData = response.data.map((po) => {
                 return {
                     key: po.po_id,
@@ -106,13 +102,10 @@ const UpdatePo = (nav) => {
                     action: po.po_id,
                 };
             });
-
             setPosListData(updatedPoData);
-
-            //setSpinning(false);
         } catch (error) {
-            console.error("Error fetching po:", error);
-            //setSpinning(false);
+            console.error("Error: " + error.message);
+            message.error('Error fetching PO data');
         }
     };
 
@@ -161,7 +154,6 @@ const UpdatePo = (nav) => {
 
     const description = 'This is a description.';
     useEffect(() => {
-        //allPoIsDelete()
         getAllPo()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
@@ -169,7 +161,6 @@ const UpdatePo = (nav) => {
             } else {
                 setCollapsedNav(false);
             }
-            //console.log(window.innerWidth);
         };
         handleResize();
         window.addEventListener("resize", handleResize);
@@ -182,9 +173,9 @@ const UpdatePo = (nav) => {
         <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to="/admin/management-po">
+                    <Link to="/admin/management-po/list">
                         <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-po") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                            <div className={` ${isActive("/admin/management-po/list") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
                                 Danh sách PO
                             </div>
                         </div>

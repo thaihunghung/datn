@@ -3,15 +3,16 @@
 import { useEffect, useState } from "react";
 import { Input } from "@nextui-org/react";
 import { UploadOutlined } from '@ant-design/icons';
-import { Upload, Divider, Steps, Button, Select } from 'antd';
-import { Link } from "react-router-dom";
+import { Upload, Divider, Steps, Button, Select, message } from 'antd';
+import { Link, useLocation } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 
 import CustomUpload from "../../CustomUpload/CustomUpload";
 
 const CreatePo = (nav) => {
-    const { setCollapsedNav, successNoti} = nav;
-
+    const { setCollapsedNav } = nav;
+    const location = useLocation();
+    const isActive = (path) => location.pathname.startsWith(path);
     const [fileList, setFileList] = useState([]);
 
     const [programData, setProgramData] = useState([]);
@@ -25,7 +26,7 @@ const CreatePo = (nav) => {
 
     const handleSave = async () => {
         try {
-            if(poName==="") {
+            if (poName === "") {
                 alert("dữ liệu lỗi")
                 document.getElementById("name-program").focus();
                 return;
@@ -35,15 +36,21 @@ const CreatePo = (nav) => {
                 description: Description,
                 program_id: program_id
             }
-        
-            await axiosAdmin.post('/po',{data: data});
+
+            const response = await axiosAdmin.post('/po', { data: data });
+            if (response.status === 201) {
+                message.success('Data saved successfully');
+            } else {
+                message.error(response.data.message || 'Error saving data');
+            }
         } catch (error) {
-            console.log(error);
+            console.error(error);
+            message.error('Error saving data');
         }
     }
 
 
-const getAllProgram = async () => {
+    const getAllProgram = async () => {
         try {
             const response = await axiosAdmin.get(`/program/isDelete/false`);
             if (response.data) {
@@ -51,7 +58,8 @@ const getAllProgram = async () => {
             }
             console.log(response);
         } catch (error) {
-            console.error("lỗi", error);
+            console.error("Error fetching programs:", error);
+            message.error('Error fetching programs');
         }
     }
     const [current, setCurrent] = useState(0);
@@ -62,7 +70,7 @@ const getAllProgram = async () => {
 
     const handleDownloadPo = async () => {
         try {
-            const response = await axiosAdmin.get('csv/po', {
+            const response = await axiosAdmin.get('po/form/excel', {
                 responseType: 'blob'
             });
 
@@ -70,17 +78,17 @@ const getAllProgram = async () => {
                 const url = window.URL.createObjectURL(response.data);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'po.csv';
+                a.download = 'po.xlsx';
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
                 setCurrent(1);
-            } 
+            }
         } catch (error) {
             console.error('Error downloading file:', error);
         }
     };
-    
+
     const props = {
         onRemove: (file) => {
             const index = fileList.indexOf(file);
@@ -114,29 +122,36 @@ const getAllProgram = async () => {
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
-            <div>
+             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/management-po"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS PO
+                    <Link to="/admin/management-po/list">
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive("/admin/management-po/list") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                Danh sách PO
+                            </div>
                         </div>
                     </Link>
-                    <Link to={"/admin/management-po/store"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Kho lưu trữ
+                    <Link to="/admin/management-po/store">
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]" >
+                            <div className={` ${isActive("/admin/management-po/store") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                Kho lưu trữ
+                            </div>
                         </div>
                     </Link>
-                    <Link to={"/admin/management-po/update"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            update
+                    <Link to="/admin/management-po/update">
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive("/admin/management-po/update") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                                Chỉnh sửa
+                            </div>
                         </div>
                     </Link>
-                    <Link to={"/admin/management-po/create"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Tạo PO
+                    <Link to="/admin/management-po/create">
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive("/admin/management-po/create") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                                Tạo mới
+                            </div>
                         </div>
                     </Link>
-
                 </div>
             </div>
             <div className="w-full mt-5 rounded-lg">
@@ -152,33 +167,33 @@ const getAllProgram = async () => {
                                             placeholder="Enter your name Po"
                                             value={poName}
                                             onValueChange={setPoName}
-                               
+
                                         />
                                         <Input
                                             label="Description"
                                             placeholder="Enter your Description"
                                             value={Description}
                                             onValueChange={setDescription}
-                                           
+
                                         />
-<Select
-                            defaultValue={"Chọn chương trình"}
-                            value={program_id} 
-                            onChange={setProgram_id}
-                            size="large"
-                            className="w-full"
-                        >
-                            {programData.map((program) => (
-                                <Select.Option
-                                    key={program.program_id}
-                                    value={program.program_id}
-                                >
-                                    {program.program_name}
-                                </Select.Option>
-                            ))}
-                        </Select>
-                                         <Button color="primary" onClick={handleSave} className="mt-5 px-20">
-                                                Tạo
+                                        <Select
+                                            defaultValue={"Chọn chương trình"}
+                                            value={program_id}
+                                            onChange={setProgram_id}
+                                            size="large"
+                                            className="w-full"
+                                        >
+                                            {programData.map((program) => (
+                                                <Select.Option
+                                                    key={program.program_id}
+                                                    value={program.program_id}
+                                                >
+                                                    {program.program_name}
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
+                                        <Button color="primary" onClick={handleSave} className="mt-5 px-20">
+                                            Tạo
                                         </Button>
 
                                     </div>

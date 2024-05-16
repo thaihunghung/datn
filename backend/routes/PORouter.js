@@ -142,7 +142,7 @@ router.delete('/po/:id', PO.delete);
  *       500:
  *         description: Lỗi server
  */
-router.get('/po/isDelete/true', PO.isDeleteTotrue);
+router.get('/po/isDelete/true', PO.isDeleteToTrue);
 
 /**
  * @openapi
@@ -164,11 +164,11 @@ router.get('/po/isDelete/true', PO.isDeleteTotrue);
  *       500:
  *         description: Lỗi server
  */
-router.get('/po/isDelete/false', PO.isDeleteTofalse);
+router.get('/po/isDelete/false', PO.isDeleteToFalse);
 
 /**
  * @openapi
- * /api/admin/po/isDelete/{id}:
+ * /api/admin/po/{id}/toggle-delete:
  *   put:
  *     summary: Đảo ngược trạng thái isDelete của một PO
  *     description: Cập nhật trạng thái isDelete cho PO dựa trên ID.
@@ -187,6 +187,9 @@ router.get('/po/isDelete/false', PO.isDeleteTofalse);
  *       500:
  *         description: Lỗi server
  */
-router.put('/po/isDelete/:id', PO.isdelete);
+router.put('/po/:id/toggle-delete', PO.toggleDelete);
+
+router.get('/po/form/excel', PO.getFormPost);
+
 
 module.exports = router;
