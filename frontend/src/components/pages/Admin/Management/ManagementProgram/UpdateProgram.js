@@ -1,11 +1,11 @@
-// UpdateProgram.js
-
 import React, { useEffect, useState } from "react";
 import { EditorState } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import { convertFromHTML, convertToHTML } from 'draft-convert';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { Input, Button } from "@nextui-org/react";
+import { message } from 'antd';
+
 import { Link, useLocation } from "react-router-dom";
 import "./Program.css"
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
@@ -13,7 +13,7 @@ import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 const UpdateProgram = (nav) => {
     const location = useLocation();
     const isActive = (path) => location.pathname.startsWith(path);
-    const { setCollapsedNav, successNoti } = nav;
+    const { setCollapsedNav } = nav;
 
     const [activeTab, setActiveTab] = useState(0);
     const [nameP, setNameP] = useState("");
@@ -28,6 +28,7 @@ const UpdateProgram = (nav) => {
             setNameP(response.data.programName)
         } catch (error) {
             console.error("Error fetching program:", error);
+            message.error('Error fetching program');
         }
     };
 
@@ -71,15 +72,20 @@ const UpdateProgram = (nav) => {
                 return;
             }
             const data = { programName: nameP, description: convertedContent };
-            await axiosAdmin.put('/program/1', { data: data });
-            successNoti('Program update successfully');
+            const response = await axiosAdmin.put('/program/1', { data: data });
+            if (response.status === 200) {
+                message.success('Program updated successfully');
+            } else {
+                message.error(response.data.message || 'Error updating program');
+            }
         } catch (error) {
             console.error("Error updating program:", error);
+            message.error('Error updating program');
         }
     }
 
     return (
-        <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
+        <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7 bg-[#f5f5f5]-500">
             <div className="pb-5">
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
                     <Link to="/admin/management-program/description">
@@ -109,7 +115,7 @@ const UpdateProgram = (nav) => {
             <Tabs
                 tabs={[
                     {
-                        title: 'Cập nhật',
+                        title: 'Thông tin',
                         content: (
                             <div className="w-full rounded-lg">
                                 <div className="w-full flex flex-col gap-2">

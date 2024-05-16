@@ -16,12 +16,11 @@ const programController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
-
   create: async (req, res) => {
     try {
       const { data } = req.body;
       const newProgram = await ProgramModel.create(data);
-      res.status(201).json(newProgram);
+      res.status(201).json({ message: 'Data saved successfully', data: newProgram });
     } catch (error) {
       console.error('Error creating program:', error);
       res.status(500).json({ message: 'Server error' });
@@ -91,7 +90,6 @@ const programController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
-
   toggleIsDelete: async (req, res) => {
     try {
       const { id } = req.params;
@@ -108,6 +106,20 @@ const programController = {
     }
   },
   getFormExels: async (req, res) => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Program');
+
+    worksheet.columns = [
+      { header: 'Tên chương trình', key: 'programName', width: 20 },
+      { header: 'Mô tả (Html)', key: 'description', width: 30 },
+    ];
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="ProgramsForm.xlsx"');
+    await workbook.xlsx.write(res);
+    res.end();
+  },
+  getFormPost: async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Program');
 
@@ -153,7 +165,7 @@ const programController = {
 
     try {
       const createdPrograms = await ProgramModel.bulkCreate(jsonData);
-      res.status(201).json(createdPrograms);
+      res.status(201).json({ message: 'Data saved successfully', data: createdPrograms });
     } catch (error) {
       console.error('Error saving data to the database:', error);
       res.status(500).json({ message: 'Error saving data to the database' });

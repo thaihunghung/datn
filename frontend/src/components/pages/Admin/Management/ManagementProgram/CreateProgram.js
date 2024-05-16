@@ -1,9 +1,7 @@
-// CreateProgram.js
-
 import { useEffect, useState } from "react";
 import { Input } from "@nextui-org/react";
 import { UploadOutlined } from '@ant-design/icons';
-import { Upload, Divider, Steps, Button } from 'antd';
+import { Upload, Divider, Steps, Button, message } from 'antd';
 import { Link, useLocation } from "react-router-dom";
 import { EditorState } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
@@ -15,7 +13,7 @@ import CustomUpload from "../../CustomUpload/CustomUpload";
 const CreateProgram = (nav) => {
     const location = useLocation();
     const isActive = (path) => location.pathname.startsWith(path);
-    const { setCollapsedNav, successNoti } = nav;
+    const { setCollapsedNav } = nav;
 
     const [activeTab, setActiveTab] = useState(0);
     const [nameP, setNameP] = useState("");
@@ -32,16 +30,22 @@ const CreateProgram = (nav) => {
                 return;
             }
             const data = { programName: nameP, description: convertedContent };
-            await axiosAdmin.post('/program', { data });
-            successNoti && successNoti('Program saved successfully');
+            const response = await axiosAdmin.post('/program', { data });
+
+            if (response.status === 201) {
+                message.success('Data saved successfully');
+            } else {
+                message.error(response.data.message || 'Error saving data');
+            }
         } catch (error) {
-            console.log(error);
+            console.error(error);
+            message.error('Error saving data');;
         }
     };
 
     const handleDownloadProgram = async () => {
         try {
-            const response = await axiosAdmin.get('csv/program', {
+            const response = await axiosAdmin.get('program/form/excel', {
                 responseType: 'blob'
             });
 

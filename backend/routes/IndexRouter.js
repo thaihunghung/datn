@@ -35,7 +35,7 @@ const csvSaveRouters = require('./SaveCSVRouter');
 //doc
 router.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-router.use('/api/admin', programRoutes);
+router.use('/api/admin', programRoutes);  
 router.use('/api/admin', ploRoutes);
 router.use('/api/admin', cloRoutes);
 router.use('/api/admin', subjectRoute);
@@ -59,7 +59,9 @@ router.use('/api/admin', qualitylevelsRoutes);
 router.use('/api/admin', poPloRoutes);
 router.use('/api/admin', ploCloRoutes);
 router.use('/api/admin', pdfRouters);
-router.use('/api/admin/csv',csvRouters);
-router.use('/api/admin/csv-save',csvSaveRouters);
+
+router.use('/api/admin/form/excel', csvRouters);
+
+router.use('/api/admin/importExcel', csvSaveRouters);
 
 module.exports = router;
