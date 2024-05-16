@@ -31,7 +31,7 @@ const CreateProgram = (nav) => {
                 document.getElementById("name-program").focus();
                 return;
             }
-            const data = { programName: nameP, description: convertedContent};
+            const data = { programName: nameP, description: convertedContent };
             await axiosAdmin.post('/program', { data });
             successNoti && successNoti('Program saved successfully');
         } catch (error) {
@@ -41,12 +41,15 @@ const CreateProgram = (nav) => {
 
     const handleDownloadProgram = async () => {
         try {
-            const response = await axiosAdmin.get('csv/program', { responseType: 'blob' });
+            const response = await axiosAdmin.get('csv/program', {
+                responseType: 'blob'
+            });
+
             if (response && response.data) {
                 const url = window.URL.createObjectURL(response.data);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'program.csv';
+                a.download = 'program.xlsx';
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
@@ -56,10 +59,11 @@ const CreateProgram = (nav) => {
             console.error('Error downloading file:', error);
         }
     };
-
     const props = {
         onRemove: (file) => {
-            const newFileList = fileList.filter(item => item !== file);
+            const index = fileList.indexOf(file);
+            const newFileList = fileList.slice();
+            newFileList.splice(index, 1);
             setFileList(newFileList);
         },
         beforeUpload: (file) => {
@@ -92,18 +96,29 @@ const CreateProgram = (nav) => {
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
                     <Link to="/admin/management-program/description">
-                        <div className={`p-5 min-w-[100px] ${isActive("/admin/management-program/description") ? "bg-slate-600 text-white" : "hover:bg-slate-600 hover:text-white"}`}>
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">                        
+                        <div className={` ${isActive("/admin/management-program/description") ? "border-b-3 text-[#020401] border-[#475569]" : ""}`}>
                             Chương trình
+                        </div>
+
                         </div>
                     </Link>
                     <Link to="/admin/management-program/create">
-                        <div className={`p-5 ${isActive("/admin/management-program/create") ? "bg-slate-600 text-white" : "hover:bg-slate-600 hover:text-white"}`}>
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]" >                        
+                        
+                        <div className={` ${isActive("/admin/management-program/create") ? "border-b-3 text-[#020401] border-[#475569]" : ""}`}>
                             Tạo chương trình
+                        </div>
+
+
                         </div>
                     </Link>
                     <Link to="/admin/management-program/update">
-                        <div className={`p-5 ${isActive("/admin/management-program/update") ? "bg-slate-600 text-white" : "hover:bg-slate-600 hover:text-white"}`}>
-                            Chỉnh sửa
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+
+                            <div className={` ${isActive("/admin/management-program/update") ? "border-b-3 text-[#020401] border-[#475569]" : ""} `}>
+                                Chỉnh sửa
+                            </div>
                         </div>
                     </Link>
                 </div>
@@ -134,13 +149,13 @@ const CreateProgram = (nav) => {
                                         <Button onClick={handleSave} className="mt-5 px-20 max-w-[300px] text-[#FEFEFE] hover:bg-[#475569] bg-[#AF84DD]">
                                             Tạo
                                         </Button>
-                                    </div> 
+                                    </div>
                                 </div>
                             </div>
                         )
                     },
                     {
-                        title: 'EXCELs',
+                        title: 'Excels',
                         content: (
                             <div className="w-full rounded-lg">
                                 <div className='w-full flex justify-center items-center'>
@@ -148,22 +163,22 @@ const CreateProgram = (nav) => {
                                         <div className='px-10 hidden sm:hidden lg:block xl:block'>
                                             <Divider />
                                             <Steps current={current} onChange={setCurrent} items={[
-                                                { title: 'Bước 1', description: 'This is a description.' },
-                                                { title: 'Bước 2', description: 'This is a description.' },
-                                                { title: 'Bước 3', description: 'This is a description.' }
+                                                { title: 'Bước 1', description: 'Tải về form' },
+                                                { title: 'Bước 2', description: 'Tải lại form' },
+                                                { title: 'Bước 3', description: 'Chờ phản hồi' }
                                             ]} />
                                         </div>
                                         <div className='hidden sm:block lg:hidden xl:hidden w-[50%]'>
                                             <Divider />
                                             <Steps current={current} onChange={setCurrent} direction="vertical" items={[
-                                                { title: 'Bước 1', description: 'This is a description.' },
-                                                { title: 'Bước 2', description: 'This is a description.' },
-                                                { title: 'Bước 3', description: 'This is a description.' }
+                                               { title: 'Bước 1', description: 'Tải về form' },
+                                               { title: 'Bước 2', description: 'Tải lại form' },
+                                               { title: 'Bước 3', description: 'Chờ phản hồi' }
                                             ]} />
                                         </div>
                                         <div className='flex flex-col w-full sm:flex-col sm:w-full lg:flex-row xl:flex-row justify-around'>
                                             <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-start items-center'>
-                                                <div className='p-10 w-full mt-10 h-fix sm:h-fix lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
+                                                <div className='p-10 w-full mt-10 h-fix sm:h-fix lg:min-h-[250px] xl:min-h-[250px] border-[#475569] border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
                                                     <p className='w-full text-center'>Tải Mẫu CSV</p>
                                                     <Button className='w-full bg-primary flex items-center justify-center p-5 rounded-lg' onClick={handleDownloadProgram}>
                                                         Tải xuống mẫu
@@ -171,7 +186,7 @@ const CreateProgram = (nav) => {
                                                 </div>
                                             </div>
                                             <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-center items-center'>
-                                                <div className='p-10 w-full mt-10 sm:h-fix lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
+                                                <div className='p-10 w-full mt-10 sm:h-fix lg:min-h-[250px] xl:min-h-[250px] border-[#475569] border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
                                                     <p className='w-full text-center'>Gửi lại mẫu</p>
                                                     <Upload {...props}>
                                                         <Button icon={<UploadOutlined />} className='text-center items-center rounded-lg px-10 h-[40px]'>Select File</Button>
@@ -179,7 +194,7 @@ const CreateProgram = (nav) => {
                                                 </div>
                                             </div>
                                             <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
-                                                <div className='p-10 w-full mt-10 sm:h-fix lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
+                                                <div className='p-10 w-full mt-10 sm:h-fix lg:min-h-[250px] xl:min-h-[250px] border-[#475569] border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
                                                     <p className='w-full text-center'>Lưu Dữ liệu</p>
                                                     <CustomUpload endpoint={'program'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
                                                 </div>
@@ -260,12 +275,12 @@ function Tabs({ tabs, activeTab, setActiveTab }) {
         <div>
             <table className="mb-2">
                 <tbody>
-                    <tr className="tab-buttons border-collapse border">
+                    <tr className="tab-buttons border-collapse border-[#020401] border">
                         {tabs.map((tab, index) => (
                             <td key={index}>
                                 <button
                                     onClick={() => setActiveTab(index)}
-                                    className={`${index === activeTab ? 'active bg-[#AF84DD] text-[#FEFEFE] font-bold' : 'text-[#020401]'} text-base border p-2 px-7`}
+                                    className={`${index === activeTab ? 'active bg-[#475569] text-[#FEFEFE] font-bold' : ' text-[#020401]'} text-base border p-2 px-7`}
                                 >
                                     {tab.title}
                                 </button>

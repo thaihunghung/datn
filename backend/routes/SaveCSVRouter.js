@@ -6,6 +6,7 @@ const router = express.Router();
 const path = require('path');
 const { CsvSaveController, CsvUpdateController } = require('../controllers/CsvSaveController');
 const StudentController = require('../controllers/StudentController');
+const ProgramsController = require('../controllers/ProgramsController');
 
 const uploadDirectory = path.join(__dirname, '../uploads');
 
@@ -20,7 +21,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post('/program', upload.any(), CsvSaveController.saveFormProgram);
+router.post('/program', upload.any(), ProgramsController.processUploadedFile);
 router.post('/po', upload.any(), CsvSaveController.saveFormPo);
 router.post('/plo', upload.any(), CsvSaveController.saveFormPlo);
 router.post('/student', upload.any(), StudentController.saveStudent);

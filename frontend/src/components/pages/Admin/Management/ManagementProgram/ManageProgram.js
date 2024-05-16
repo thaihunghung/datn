@@ -73,28 +73,37 @@ const ManageProgram = (nav) => {
             />
             <div>
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to="/admin/management-program">
-                        <div className={`p-5 min-w-[100px] ${isActive("/admin/management-program/description") ? "bg-[#475569] text-white" : "hover:bg-[#475569] hover:text-white"}`}>
-                            Chương trình
+                    <Link to="/admin/management-program/description">
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive("/admin/management-program/description") ? "border-b-3 text-[#020401] border-[#475569]" : ""}`}>
+                                Chương trình
+                            </div>
+
                         </div>
                     </Link>
-
                     <Link to="/admin/management-program/create">
-                        <div className={`p-5 ${isActive("/admin/management-program/create") ? "bg-[#475569] text-white" : "hover:bg-[#475569] hover:text-white"}`}>
-                            Tạo chương trình
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]" >
+
+                            <div className={` ${isActive("/admin/management-program/create") ? "border-b-3 text-[#020401] border-[#475569]" : ""}`}>
+                                Tạo chương trình
+                            </div>
+
+
                         </div>
                     </Link>
-
                     <Link to="/admin/management-program/update">
-                        <div className={`p-5 ${isActive("/admin/management-program/update") ? "bg-[#475569] text-white" : "hover:bg-[#475569] hover:text-white"}`}>
-                            Chỉnh sửa
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+
+                            <div className={` ${isActive("/admin/management-program/update") ? "border-b-3 text-[#020401] border-[#475569]" : ""} `}>
+                                Chỉnh sửa
+                            </div>
                         </div>
                     </Link>
                 </div>
             </div>
             <div className="w-full border mt-5 rounded-lg">
                 <div className="w-full border-collapse border">
-                    <div className="w-full"> 
+                    <div className="w-full">
                         <div className="w-full border-1 bg-[#475569] text-white text-center">Mô tả</div>
                     </div>
                     <div className="border-1 text-justify leading-8 p-5">
