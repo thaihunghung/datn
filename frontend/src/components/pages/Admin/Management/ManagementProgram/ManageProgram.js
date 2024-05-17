@@ -7,11 +7,11 @@ const ManageProgram = (nav) => {
     const location = useLocation();
     const isActive = (path) => location.pathname.startsWith(path);
     const { setCollapsedNav } = nav;
-    const [programData, setProgramData] = useState([]);
+    const [programData, setProgramData] = useState({});
 
     const allProgramNotIsDelete = async () => {
         try {
-            const program = await axiosAdmin.get('/program/isDelete/false');
+            const program = await axiosAdmin.get('/program');
             setProgramData(program.data)
             console.log(program.data);
         } catch (error) {

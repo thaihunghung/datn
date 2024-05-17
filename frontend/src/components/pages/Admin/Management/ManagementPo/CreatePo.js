@@ -3,10 +3,9 @@
 import { useEffect, useState } from "react";
 import { Input } from "@nextui-org/react";
 import { UploadOutlined } from '@ant-design/icons';
-import { Upload, Divider, Steps, Button, Select, message } from 'antd';
+import { Upload, Divider, Steps, Button, Select, message, Tooltip } from 'antd';
 import { Link, useLocation } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-
 import CustomUpload from "../../CustomUpload/CustomUpload";
 
 const CreatePo = (nav) => {
@@ -70,7 +69,7 @@ const CreatePo = (nav) => {
 
     const handleDownloadPo = async () => {
         try {
-            const response = await axiosAdmin.get('po/form/excel', {
+            const response = await axiosAdmin.get('/po/templates/post', {
                 responseType: 'blob'
             });
 
@@ -121,27 +120,13 @@ const CreatePo = (nav) => {
     }, []);
 
     return (
-        <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
-             <div>
+        <div className="flex w-full flex-col px-4 justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
+             <div className="flex justify-between px-5 w-full items-center">
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
                     <Link to="/admin/management-po/list">
                         <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
                             <div className={` ${isActive("/admin/management-po/list") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
                                 Danh sách PO
-                            </div>
-                        </div>
-                    </Link>
-                    <Link to="/admin/management-po/store">
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]" >
-                            <div className={` ${isActive("/admin/management-po/store") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                Kho lưu trữ
-                            </div>
-                        </div>
-                    </Link>
-                    <Link to="/admin/management-po/update">
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-po/update") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                                Chỉnh sửa
                             </div>
                         </div>
                     </Link>
@@ -153,6 +138,20 @@ const CreatePo = (nav) => {
                         </div>
                     </Link>
                 </div>
+                <div>
+                    <Link to="/admin/management-po/store">
+                        <Tooltip title="Xoá">
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+
+                            >
+                                 <span className="text-base">Kho lưu trữ </span><i className="fa-solid ml-2 fa-trash-can"></i>
+                            </Button>
+                        </Tooltip></Link>
+                </div>
             </div>
             <div className="w-full mt-5 rounded-lg">
                 <Tabs tabs=
@@ -160,8 +159,8 @@ const CreatePo = (nav) => {
                         {
                             title: 'Nhập liệu bằng form',
                             content:
-                                <div className="w-full h-[1000px] rounded-lg border">
-                                    <div className="w-full flex flex-col gap-2 max-w-[240px]">
+                                <div className="w-full rounded-lg border">
+                                    <div className="w-[50%] p-5 flex flex-col gap-2">
                                         <Input
                                             label="Name Po"
                                             placeholder="Enter your name Po"
@@ -192,10 +191,12 @@ const CreatePo = (nav) => {
                                                 </Select.Option>
                                             ))}
                                         </Select>
-                                        <Button color="primary" onClick={handleSave} className="mt-5 px-20">
+                                        
+                                        <div className="w-full flex justify-center items-center">
+                                        <Button color="primary" onClick={handleSave} className="max-w-[300px] mt-5 px-20">
                                             Tạo
                                         </Button>
-
+                                    </div>
                                     </div>
                                 </div>
                         },
@@ -207,47 +208,19 @@ const CreatePo = (nav) => {
                                         <div className='w-full  flex flex-col px-2  sm:gap-5 sm:justify-center h-fix sm:px-5 lg:px-5 xl:px-5 sm:flex-row  lg:flex-col  xl:flex-col  gap-[20px]'>
                                             <div className='px-10 hidden sm:hidden lg:block xl:block'>
                                                 <Divider />
-                                                <Steps
-                                                    current={current}
-                                                    onChange={onChangexxx}
-                                                    items={[
-                                                        {
-                                                            title: 'Bước 1',
-                                                            description,
-                                                        },
-                                                        {
-                                                            title: 'bước 2',
-                                                            description,
-                                                        },
-                                                        {
-                                                            title: 'bước 3',
-                                                            description,
-                                                        },
-                                                    ]}
-                                                />
+                                                <Steps current={current} onChange={setCurrent} items={[
+                                                { title: 'Bước 1', description: 'Tải về form' },
+                                                { title: 'Bước 2', description: 'Tải lại form' },
+                                                { title: 'Bước 3', description: 'Chờ phản hồi' }
+                                            ]} />
                                             </div>
                                             <div className='hidden sm:block lg:hidden xl:hidden w-[50%]'>
                                                 <Divider />
-                                                <Steps
-                                                    current={current}
-                                                    onChange={onChangexxx}
-                                                    direction="vertical"
-
-                                                    items={[
-                                                        {
-                                                            title: 'Bước 1',
-                                                            description,
-                                                        },
-                                                        {
-                                                            title: 'bước 2',
-                                                            description,
-                                                        },
-                                                        {
-                                                            title: 'bước 3',
-                                                            description,
-                                                        },
-                                                    ]}
-                                                />
+                                                <Steps current={current} onChange={setCurrent} items={[
+                                                { title: 'Bước 1', description: 'Tải về form' },
+                                                { title: 'Bước 2', description: 'Tải lại form' },
+                                                { title: 'Bước 3', description: 'Chờ phản hồi' }
+                                            ]} />
                                             </div>
 
                                             <div className='flex flex-col w-full  sm:flex-col sm:w-full lg:flex-row xl:flex-row justify-around'>
@@ -270,7 +243,7 @@ const CreatePo = (nav) => {
                                                 <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
                                                     <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
                                                         <div><p className='w-full text-center'>Lưu Dữ liệu</p></div>
-                                                        <CustomUpload endpoint={'po'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
+                                                        <CustomUpload endpoint={'po'} method={'POST'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
                                                     </div>
                                                 </div>
                                             </div>

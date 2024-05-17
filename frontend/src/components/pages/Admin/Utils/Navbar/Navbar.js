@@ -34,7 +34,8 @@ function Nav(props) {
     };
 
     const menuItems = [
-        { label: "Home", path: "/home" },
+        { label: "Tổng quan", path: "/admin" },
+        { label: "Chấm điểm", path: "/admin/management-point" },
         {
             label: "About",
             path: "/about",
@@ -43,8 +44,8 @@ function Nav(props) {
                 { label: "Our Story", path: "/about/story" }
             ]
         },
-        { label: "Services", path: "/services" },
-        { label: "Contact", path: "/contact" }
+        { label: "Rubric", path: "/admin/management-rubric" },
+        { label: "Sinh viên", path: "/admin/student" }
     ];
 
     const navTab = [
@@ -64,7 +65,7 @@ function Nav(props) {
                     ]
                 },
                 {
-                    text: (<><i className="fa-solid fa-minus mr-3"></i>PLO</>),
+                    text: (<><i className="fa-solid fa-minus mr-3"></i>PO</>),
                     link: "/admin/management-po/list",
                     active: [
                         "/admin/management-po/store",
@@ -75,7 +76,7 @@ function Nav(props) {
                     ]
                 },
                 {
-                    text: (<><i className="fa-solid fa-minus mr-3"></i>PO</>),
+                    text: (<><i className="fa-solid fa-minus mr-3"></i>PLO</>),
                     link: "/admin/management-plo"
                 }
             ]
@@ -123,7 +124,7 @@ function Nav(props) {
         setCollapsedNav(!collapsedNav);
     };
     return (
-        <>
+        <> 
             <div className="block sm:hidden lg:hidden xl:hidden">
                 <Navbar disableAnimation isBordered>
                     <NavbarContent className="sm:hidden" justify="start">
@@ -162,7 +163,7 @@ function Nav(props) {
                         {menuItems.map((item, index) => (
                             <NavbarMenuItem key={`${item.label}-${index}`}>
                                 <Link
-                                    className="w-full"
+                                    className="w-[60%]"
                                     color={index === 2 ? "warning" : index === menuItems.length - 1 ? "danger" : "foreground"}
                                     to={item.path}
                                     size="lg"

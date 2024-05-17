@@ -306,7 +306,7 @@ const Student = (nav) => {
           </div>
         </div>
       </div>
-      <Table
+      <Table className="h"
         columns={columns}
         dataSource={studentData}
         onChange={onChange}

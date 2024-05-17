@@ -178,7 +178,7 @@ const CreateProgram = (nav) => {
                                         <div className='flex flex-col w-full sm:flex-col sm:w-full lg:flex-row xl:flex-row justify-around'>
                                             <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-start items-center'>
                                                 <div className='p-10 w-full mt-10 h-fix sm:h-fix lg:min-h-[250px] xl:min-h-[250px] border-[#475569] border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
-                                                    <p className='w-full text-center'>Tải Mẫu CSV</p>
+                                                    <p className='w-full text-center'>Tải Mẫu</p>
                                                     <Button className='w-full bg-primary flex items-center justify-center p-5 rounded-lg' onClick={handleDownloadProgram}>
                                                         Tải xuống mẫu
                                                     </Button>
@@ -195,7 +195,7 @@ const CreateProgram = (nav) => {
                                             <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
                                                 <div className='p-10 w-full mt-10 sm:h-fix lg:min-h-[250px] xl:min-h-[250px] border-[#475569] border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
                                                     <p className='w-full text-center'>Lưu Dữ liệu</p>
-                                                    <CustomUpload endpoint={'program'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
+                                                    <CustomUpload endpoint={'program'} method={'POST'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
                                                 </div>
                                             </div>
                                         </div>

@@ -1,27 +1,14 @@
 // UpdatePloById.js
 
 import { useEffect, useState } from "react";
-import { Switch } from "@nextui-org/react";
-import { Select } from "antd"; // Import Select component from antd
-import { Link } from "react-router-dom";
-import moment from "moment";
-import { useLocation, useNavigate, useParams } from "react-router-dom"; // Import useHistory from react-router-dom
-import {
-    Button,
-    Avatar,
-    Input,
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    useDisclosure,
-} from "@nextui-org/react";
-
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom"; 
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import { Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Switch } from "@nextui-org/react";
+import { Select, Tooltip } from "antd"; 
 
 const UpdatePloById = (nav) => {
-    
+    const location = useLocation();
+    const isActive = (path) => location.pathname.startsWith(path);
     const { id } = useParams();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -37,9 +24,9 @@ const UpdatePloById = (nav) => {
     const navigate = useNavigate();
     const [scrollBehavior, setScrollBehavior] = useState("inside");
 
-    const getPloByID = async () => {
+    const getPoByID = async () => {
         try {
-            const response = await axiosAdmin.get(`/plo/${id}`);
+            const response = await axiosAdmin.get(`/po/${id}`);
             if (response.data) {
                 setPlo_id(response.data.plo_id)
                 setPlo_name(response.data.plo_name)
@@ -74,14 +61,14 @@ const UpdatePloById = (nav) => {
             }
             console.log(data);
             const response = await axiosAdmin.put(`/plo/${id}`, { data: data });
-            onClose(navigate("/admin/management-plo/"))
+            onClose(navigate("/admin/management-plo/list"))
         } catch (error) {
             console.error("lỗi", error);
         }
     }
     useEffect(() => {
         onOpen()
-        getPloByID()
+        getPoByID()
         getAllProgram()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
@@ -103,7 +90,7 @@ const UpdatePloById = (nav) => {
 
     return (
         <div className="flex w-full flex-col justify-center items-start leading-8 p-2 bg-[#f5f5f5]-500">
-            <Modal isOpen={isOpen} onClose={() => navigate("/admin/management-plo/")} scrollBehavior={scrollBehavior}>
+            <Modal isOpen={isOpen} onClose={() => navigate("/admin/management-plo/list")} scrollBehavior={scrollBehavior}>
                 <ModalContent className="m-auto">
                     <ModalHeader className="flex flex-col gap-1">Cập nhật</ModalHeader>
                     <ModalBody>
@@ -142,7 +129,7 @@ const UpdatePloById = (nav) => {
                             color="danger"
                             radius="sm"
                             as={Link}
-                            to="/admin/management-plo/"
+                            to="/admin/management-plo/list/"
                             onClick={onClose}
                         >
                             Close
@@ -153,28 +140,36 @@ const UpdatePloById = (nav) => {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
-            <div>
+            <div className="flex justify-between px-5 w-full items-center">
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/management-plo"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS PLO
+                    <Link to="/admin/management-plo/list">
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive("/admin/management-plo/list") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                Danh sách PLO
+                            </div>
                         </div>
                     </Link>
-                    <Link to={"/admin/management-plo/store"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Kho lưu trữ
+                    <Link to="/admin/management-plo/create">
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive("/admin/management-plo/create") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                                Tạo mới
+                            </div>
                         </div>
                     </Link>
-                    <Link to={"/admin/management-plo/update"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            update
-                        </div>
-                    </Link>
-                    <Link to={"/admin/management-plo/create"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Tạo PLO
-                        </div>
-                    </Link>
+                </div>
+                <div>
+                    <Link to="/admin/management-plo/store">
+                        <Tooltip title="Xoá">
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+
+                            >
+                                 <span className="text-base">Kho lưu trữ </span><i className="fa-solid ml-2 fa-trash-can"></i>
+                            </Button>
+                        </Tooltip></Link>
                 </div>
             </div>
         </div>

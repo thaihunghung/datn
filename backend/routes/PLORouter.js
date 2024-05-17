@@ -166,27 +166,13 @@ router.get('/plo/isDelete/true', PLO.isDeleteTotrue);
  */
 router.get('/plo/isDelete/false', PLO.isDeleteTofalse);
 
-/**
- * @openapi
- * /api/admin/plo/isDelete/{id}:
- *   put:
- *     summary: Đảo ngược trạng thái isDelete của một PLO
- *     description: Cập nhật trạng thái isDelete cho PLO dựa trên ID.
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID của PLO cần cập nhật trạng thái isDelete.
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Đã đảo ngược trạng thái isDelete thành công.
- *       404:
- *         description: Không tìm thấy PLO
- *       500:
- *         description: Lỗi server
- */
-router.put('/plo/isDelete/:id', PLO.isdelete);
+
+router.put('/plo/listId/soft-delete-multiple', PLO.softDeleteMultiple);
+
+router.put('/plo/:id/toggle-soft-delete', PLO.toggleSoftDeleteById);
+
+
+router.get('/plo/templates/post', PLO.getFormPost);
+router.post('/plo/templates/update', PLO.getFormUpdate);
 
 module.exports = router;

@@ -3,10 +3,8 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom"; 
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-
-
 import { Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Switch } from "@nextui-org/react";
-import { Select } from "antd"; 
+import { Select, Tooltip } from "antd"; 
 
 const UpdatePoById = (nav) => {
     const location = useLocation();
@@ -63,7 +61,7 @@ const UpdatePoById = (nav) => {
             }
             console.log(data);
             const response = await axiosAdmin.put(`/po/${id}`, { data: data });
-            onClose(navigate("/admin/management-po/"))
+            onClose(navigate("/admin/management-po/list"))
         } catch (error) {
             console.error("lỗi", error);
         }
@@ -92,7 +90,7 @@ const UpdatePoById = (nav) => {
 
     return (
         <div className="flex w-full flex-col justify-center items-start leading-8 p-2 bg-[#f5f5f5]-500">
-            <Modal isOpen={isOpen} onClose={() => navigate("/admin/management-po/")} scrollBehavior={scrollBehavior}>
+            <Modal isOpen={isOpen} onClose={() => navigate("/admin/management-po/list")} scrollBehavior={scrollBehavior}>
                 <ModalContent className="m-auto">
                     <ModalHeader className="flex flex-col gap-1">Cập nhật</ModalHeader>
                     <ModalBody>
@@ -131,7 +129,7 @@ const UpdatePoById = (nav) => {
                             color="danger"
                             radius="sm"
                             as={Link}
-                            to="/admin/management-po/"
+                            to="/admin/management-po/list/"
                             onClick={onClose}
                         >
                             Close
@@ -142,26 +140,12 @@ const UpdatePoById = (nav) => {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
-            <div>
+            <div className="flex justify-between px-5 w-full items-center">
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
                     <Link to="/admin/management-po/list">
                         <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
                             <div className={` ${isActive("/admin/management-po/list") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
                                 Danh sách PO
-                            </div>
-                        </div>
-                    </Link>
-                    <Link to="/admin/management-po/store">
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]" >
-                            <div className={` ${isActive("/admin/management-po/store") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                Kho lưu trữ
-                            </div>
-                        </div>
-                    </Link>
-                    <Link to="/admin/management-po/update">
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-po/update") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                                Chỉnh sửa
                             </div>
                         </div>
                     </Link>
@@ -172,6 +156,20 @@ const UpdatePoById = (nav) => {
                             </div>
                         </div>
                     </Link>
+                </div>
+                <div>
+                    <Link to="/admin/management-po/store">
+                        <Tooltip title="Xoá">
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+
+                            >
+                                 <span className="text-base">Kho lưu trữ </span><i className="fa-solid ml-2 fa-trash-can"></i>
+                            </Button>
+                        </Tooltip></Link>
                 </div>
             </div>
         </div>
