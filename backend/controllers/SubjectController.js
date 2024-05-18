@@ -1,109 +1,105 @@
 const SubjectModel = require("../models/SubjectModel");
 
 const SubjectController = {
-  // Lấy tất cả các môn học
   index: async (req, res) => {
     try {
       const subjects = await SubjectModel.findAll();
-      res.json(subjects);
+      res.status(200).json(subjects);
     } catch (error) {
-      console.error('Lỗi khi lấy tất cả môn học:', error);
-      res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
+      console.error('Error fetching all subjects:', error);
+      res.status(500).json({ message: 'Internal server error' });
     }
   },
-  
-  // Tạo một môn học mới
+
   create: async (req, res) => {
     try {
       const { data } = req.body;
       const newSubject = await SubjectModel.create(data);
-      res.json(newSubject);
+      res.status(201).json(newSubject);
     } catch (error) {
-      console.error('Lỗi khi tạo môn học:', error);
-      res.status(500).json({ message: 'Lỗi máy chủ' });
+      console.error('Error creating subject:', error);
+      res.status(500).json({ message: 'Internal server error' });
     }
   },
 
-  // Lấy một môn học theo ID
   getByID: async (req, res) => {
     try {
       const { id } = req.params;
       const subject = await SubjectModel.findOne({ where: { subject_id: id } });
       if (!subject) {
-        return res.status(404).json({ message: 'Không tìm thấy môn học' });
+        return res.status(404).json({ message: 'Subject not found' });
       }
-      res.json(subject);
+      res.status(200).json(subject);
     } catch (error) {
-      console.error('Lỗi khi tìm kiếm môn học:', error);
-      res.status(500).json({ message: 'Lỗi máy chủ' });
+      console.error('Error fetching subject by ID:', error);
+      res.status(500).json({ message: 'Internal server error' });
     }
   },
 
-  // Cập nhật một môn học
   update: async (req, res) => {
     try {
       const { id } = req.params;
       const { data } = req.body;
       const subject = await SubjectModel.findOne({ where: { subject_id: id } });
       if (!subject) {
-        return res.status(404).json({ message: 'Không tìm thấy môn học' });
+        return res.status(404).json({ message: 'Subject not found' });
       }
       await SubjectModel.update(data, { where: { subject_id: id } });
-      res.json({ message: `Cập nhật thành công môn học có id: ${id}` });
+      res.status(200).json({ message: `Successfully updated subject with ID: ${id}` });
     } catch (error) {
-      console.error('Lỗi khi cập nhật môn học:', error);
-      res.status(500).json({ message: 'Lỗi máy chủ' });
+      console.error('Error updating subject:', error);
+      res.status(500).json({ message: 'Internal server error' });
     }
   },
 
-  // Xóa một môn học
   delete: async (req, res) => {
     try {
       const { id } = req.params;
+      const subject = await SubjectModel.findOne({ where: { subject_id: id } });
+      if (!subject) {
+        return res.status(404).json({ message: 'Subject not found' });
+      }
       await SubjectModel.destroy({ where: { subject_id: id } });
-      res.json({ message: 'Xóa môn học thành công' });
+      res.status(200).json({ message: 'Successfully deleted subject' });
     } catch (error) {
-      console.error('Lỗi khi xóa môn học:', error);
-      res.status(500).json({ message: 'Lỗi máy chủ' });
+      console.error('Error deleting subject:', error);
+      res.status(500).json({ message: 'Internal server error' });
     }
   },
 
-  // Lấy danh sách môn học đã được xóa
   isDeleteTotrue: async (req, res) => {
     try {
       const deletedSubjects = await SubjectModel.findAll({ where: { isDelete: true } });
-      res.json(deletedSubjects);
+      res.status(200).json(deletedSubjects);
     } catch (error) {
-      console.error('Lỗi khi lấy danh sách môn học đã xóa:', error);
-      res.status(500).json({ message: 'Lỗi máy chủ' });
+      console.error('Error fetching deleted subjects:', error);
+      res.status(500).json({ message: 'Internal server error' });
     }
   },
 
-  // Lấy danh sách môn học chưa được xóa
   isDeleteTofalse: async (req, res) => {
     try {
       const activeSubjects = await SubjectModel.findAll({ where: { isDelete: false } });
-      res.json(activeSubjects);
+      res.status(200).json(activeSubjects);
     } catch (error) {
-      console.error('Lỗi khi lấy danh sách môn học chưa xóa:', error);
-      res.status(500).json({ message: 'Lỗi máy chủ' });
+      console.error('Error fetching active subjects:', error);
+      res.status(500).json({ message: 'Internal server error' });
     }
   },
 
-  // Đảo ngược trạng thái isDelete của một môn học
   isDelete: async (req, res) => {
     try {
       const { id } = req.params;
       const subject = await SubjectModel.findOne({ where: { subject_id: id } });
       if (!subject) {
-        return res.status(404).json({ message: 'Không tìm thấy môn học' });
+        return res.status(404).json({ message: 'Subject not found' });
       }
       const updatedIsDeleted = !subject.isDelete;
       await SubjectModel.update({ isDelete: updatedIsDeleted }, { where: { subject_id: id } });
-      res.json({ message: `Đã đảo ngược trạng thái isDelete thành ${updatedIsDeleted}` });
+      res.status(200).json({ message: `Successfully toggled isDelete status to ${updatedIsDeleted}` });
     } catch (error) {
-      console.error('Lỗi khi cập nhật trạng thái isDelete của môn học:', error);
-      res.status(500).json({ message: 'Lỗi máy chủ' });
+      console.error('Error toggling isDelete status:', error);
+      res.status(500).json({ message: 'Internal server error' });
     }
   },
 };

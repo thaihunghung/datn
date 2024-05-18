@@ -2,8 +2,7 @@
 import { useEffect, useState } from "react";
 import { UploadOutlined } from '@ant-design/icons';
 import { Table, Upload, Tooltip, Divider, Steps, Button, message } from 'antd';
-import { Link, useLocation } from "react-router-dom";
-import "./Plo.css"
+import { Link, useLocation, useParams } from "react-router-dom";
 import {
     useDisclosure
 } from "@nextui-org/react";
@@ -19,9 +18,10 @@ import {
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
 
-const ManagePlo = (nav) => {
+const Clo = (nav) => {
     const location = useLocation();
     const isActive = (path) => location.pathname.startsWith(path);
+    const { id } = useParams();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [activeTab, setActiveTab] = useState(0);
@@ -31,12 +31,16 @@ const ManagePlo = (nav) => {
     const [poListData, setPosListData] = useState([]);
     const [current, setCurrent] = useState(0);
     const [deleteId, setDeleteId] = useState(null);
+    
 
+    const handleOnChangeTextName = (nameP) => {
+        setCurrent(nameP);
+    };
 
     const [fileList, setFileList] = useState([]);
     const columns = [
         {
-            title: "Tên PLO",
+            title: "Tên PO",
             dataIndex: "name",
             render: (record) => (
                 <div className="text-sm">
@@ -109,16 +113,16 @@ const ManagePlo = (nav) => {
         setSelectedRowKeys([]);
         setSelectedRow([]);
     };
-    const getAllPlo = async () => {
+    const getAllPo = async () => {
         try {
-            const response = await axiosAdmin.get('/plo/isDelete/false');
-            const updatedPoData = response.data.map((plo) => {
+            const response = await axiosAdmin.get(`/clo/subject/${id}`);
+            const updatedPoData = response.data.map((po) => {
                 return {
-                    key: plo.plo_id,
-                    name: plo.ploName,
-                    description: plo.description,
-                    isDeleted: plo.isDelete,
-                    action: plo.plo_id,
+                    key: po.clo_id,
+                    name: po.cloName,
+                    description: po.description,
+                    isDeleted: po.isDelete,
+                    action: po.clo_id,
                 };
             });
             setPosListData(updatedPoData);
@@ -131,12 +135,12 @@ const ManagePlo = (nav) => {
     
     const handleSoftDelete = async () => {
         const data = {
-            plo_id: selectedRowKeys,
+            po_id: selectedRowKeys,
         };
         console.log(data)
         try {
-            const response = await axiosAdmin.put('/plo/listId/soft-delete-multiple', { data});
-            await getAllPlo();
+            const response = await axiosAdmin.put('/po/listId/soft-delete-multiple', { data});
+            await getAllPo();
             handleUnSelect();
             message.success(response.data.message); 
         } catch (error) {
@@ -147,8 +151,8 @@ const ManagePlo = (nav) => {
     
     const handleSoftDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/plo/${_id}/toggle-soft-delete`);
-            await getAllPlo();
+            const response = await axiosAdmin.put(`/po/${_id}/toggle-soft-delete`);
+            await getAllPo();
             handleUnSelect();
             message.success(response.data.message); 
         } catch (error) {
@@ -167,7 +171,7 @@ const ManagePlo = (nav) => {
             const data = {
                 id: selectedRowKeys
             }
-            const response = await axiosAdmin.post('/plo/templates/update', { data: data }, {
+            const response = await axiosAdmin.post('/po/templates/update', { data: data }, {
                 responseType: 'blob'
             });
 
@@ -175,7 +179,7 @@ const ManagePlo = (nav) => {
                 const url = window.URL.createObjectURL(response.data);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'plo_update.xlsx';
+                a.download = 'po_update.xlsx';
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
@@ -199,8 +203,10 @@ const ManagePlo = (nav) => {
         },
         fileList,
     };
+
+    const description = 'This is a description.';
     useEffect(() => {
-        getAllPlo()
+        getAllPo()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -231,25 +237,26 @@ const ManagePlo = (nav) => {
                 }}
             />
 
-<div className="flex justify-between px-5 w-full items-center">
+            <div className="flex justify-between px-5 w-full items-center">
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to="/admin/management-plo/list">
+                    <Link to={`/admin/management-subject/${id}/update/clo/`}>
+
                         <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-plo/list") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                Danh sách PLO
+                            <div className={` ${isActive("/admin/management-po/list") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                Danh sách CLO
                             </div>
                         </div>
                     </Link>
-                    <Link to="/admin/management-plo/create">
+                    <Link to={`/admin/management-subject/${id}/update/clo/create`}>
                         <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-plo/create") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                            <div className={` ${isActive("/admin/management-po/create") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
                                 Tạo mới
                             </div>
                         </div>
                     </Link>
                 </div>
                 <div>
-                    <Link to="/admin/management-plo/store">
+                    <Link to="/admin/management-po/store">
                         <Tooltip title="Xoá">
                             <Button
                                 isIconOnly
@@ -268,12 +275,12 @@ const ManagePlo = (nav) => {
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
                         <p className="text-sm font-medium">
                             <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
-                            Đã chọn {selectedRow.length} plo
+                            Đã chọn {selectedRow.length} bài viết
                         </p>
                         <div className="flex items-center gap-2">
 
                             <Tooltip
-                                title={`Xoá ${selectedRowKeys.length} plo`}
+                                title={`Xoá ${selectedRowKeys.length} bài viết`}
                                 getPopupContainer={() =>
                                     document.querySelector(".Quick__Option")
                                 }
@@ -315,71 +322,13 @@ const ManagePlo = (nav) => {
                     />
                 </div>
             </div>
-            <Tabs tabs=
-                {[
-                    {
-                        title: 'Cập nhật bằng CSV',
-                        content:
-                            <div className="w-full h-[1000px] rounded-lg">
-                                <div className=' w-full flex justify-center items-center'>
-                                    <div className='w-full  flex flex-col px-2  sm:gap-5 sm:justify-center h-fix sm:px-5 lg:px-5 xl:px-5 sm:flex-row  lg:flex-col  xl:flex-col  gap-[20px]'>
-                                        <div className='px-10 hidden sm:hidden lg:block xl:block'>
-                                            <Divider />
-                                            <Steps current={current} onChange={setCurrent} items={[
-                                                { title: 'Bước 1', description: 'Tải về form' },
-                                                { title: 'Bước 2', description: 'Tải lại form' },
-                                                { title: 'Bước 3', description: 'Chờ phản hồi' }
-                                                ]}
-                                            />
-                                        </div>
-                                        <div className='hidden sm:block lg:hidden xl:hidden w-[50%]'>
-                                            <Divider />
-                                            <Steps current={current} onChange={setCurrent} items={[
-                                                { title: 'Bước 1', description: 'Tải về form' },
-                                                { title: 'Bước 2', description: 'Tải lại form' },
-                                                { title: 'Bước 3', description: 'Chờ phản hồi' }
-                                                ]}
-                                            />
-                                        </div>
 
-                                        <div className='flex flex-col w-full  sm:flex-col sm:w-full lg:flex-row xl:flex-row justify-around'>
-                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%]  flex justify-start items-center'>
-                                                <div className='p-10 w-full mt-10 h-fix sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center  gap-5 rounded-lg'>
-                                                    <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
-                                                    <Button className='w-full bg-primary flex items-center justify-center  p-5 rounded-lg' onClick={handleDownloadPo}>
-                                                        <scan>Tải xuống mẫu </scan>
-                                                    </Button>
-
-                                                </div>
-                                            </div>
-                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-center items-center'>
-                                                <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
-                                                    <div><p className='w-full text-center'>Gửi lại mẫu</p></div>
-                                                    <Upload {...props} >
-                                                        <Button icon={<UploadOutlined />} className='text-center items-center rounded-lg px-10 h-[40px]'>Select File</Button>
-                                                    </Upload>
-                                                </div>
-                                            </div>
-                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
-                                                <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
-                                                    <div><p className='w-full text-center'>Cập nhật Dữ liệu</p></div>
-                                                    <CustomUpload endpoint={'plo/update'} LoadData={getAllPlo} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                    }
-                ]}
-                activeTab={activeTab} setActiveTab={setActiveTab}
-            />
         </div>
     );
 }
 
 
-export default ManagePlo;
+export default Clo;
 function ConfirmAction(props) {
     const { isOpen, onOpenChange, onConfirm } = props;
     const handleOnOKClick = (onClose) => {
@@ -419,7 +368,7 @@ function ConfirmAction(props) {
                         <ModalHeader>Cảnh báo</ModalHeader>
                         <ModalBody>
                             <p className="text-[16px]">
-                                Plo sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
+                                Po sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
                             </p>
                         </ModalBody>
                         <ModalFooter>
@@ -437,32 +386,3 @@ function ConfirmAction(props) {
     )
 }
 
-function Tabs({ tabs, activeTab, setActiveTab }) {
-
-    const handleTabClick = (index) => {
-        setActiveTab(index);
-    };
-
-    return (
-        <div>
-            <table className="mb-2">
-                <tr className="tab-buttons border-collapse border">
-                    {tabs.map((tab, index) => (
-                        <td>
-                            <button
-                                key={index}
-                                onClick={() => handleTabClick(index)}
-                                className={`${index === activeTab ? 'active ' : ''} ${index === activeTab ? 'bg-gray-800 text-white ' : ''} border p-2 px-7`}
-                            >
-                                {tab.title}
-                            </button>
-                        </td>
-                    ))}
-                </tr>
-            </table>
-            <div className="tab-content">
-                {tabs[activeTab].content}
-            </div>
-        </div>
-    );
-}

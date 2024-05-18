@@ -62,7 +62,7 @@ function Nav(props) {
                         "/admin/management-program/update",
                         "/admin/management-program/description",
                         "/admin/management-program/create"
-                    ]
+                    ],
                 },
                 {
                     text: (<><i className="fa-solid fa-minus mr-3"></i>PO</>),
@@ -94,6 +94,18 @@ function Nav(props) {
                     ]
                 }
             ]
+        },
+        {
+            text: "Subjects",
+            icon: <i className={`fa-solid fa-gear mr-${collapsedNav ? "0" : "3"} w-4`}></i>,
+            submenu: [
+                {
+                    text: (<><i className="fa-solid fa-minus mr-3"></i>Subjects</>),
+                    link: "/admin/management-subject/list",
+                    active: [
+                       
+                    ],
+                }]
         },
         { text: "Rubric", link: "/admin/management-rubric", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
         { text: "Sinh viên", link: "/admin/student", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
