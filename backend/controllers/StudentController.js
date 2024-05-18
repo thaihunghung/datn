@@ -1,6 +1,4 @@
 const StudentModel = require("../models/StudentModel");
-const { filterDescription, filterDescriptionHaveid } = require('../utils/filter');
-const json2csv = require('json2csv').parse;
 const fs = require('fs');
 const sequelize = require("../config/database");
 const ExcelJS = require('exceljs');
@@ -196,6 +194,73 @@ const StudentController = {
     await workbook.xlsx.write(res);
     res.end();
   },
+  getFormStudentWithData: async (req, res) => {
+    try {
+      const { data } = req.body;
+
+      if (!data || !Array.isArray(data.id) || data.id.length === 0) {
+        return res.status(400).json({ error: 'Invalid or missing id array' });
+      }
+
+      const { id } = data;
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Students Form');
+
+      const students = await StudentModel.findAll({
+        include: [{
+          model: ClassModel,
+          attributes: ['classCode']
+        }],
+        attributes: ['student_id', 'class_id', 'studentCode', 'email', 'name', 'isDelete'],
+        where: {
+          isDelete: false,
+          student_id: id
+        }
+      });
+
+      worksheet.columns = [
+        { header: 'id', key: 'id', width: 15 },
+        { header: 'Mã lớp', key: 'classCode', width: 15 },
+        { header: 'Tên SV', key: 'name', width: 32 },
+        { header: 'MSSV', key: 'studentCode', width: 20 },
+        { header: 'Email', key: 'email', width: 30 }
+      ];
+
+      students.forEach(student => {
+        worksheet.addRow({
+          id: student.student_id,
+          classCode: student.Class.classCode,
+          name: student.name,
+          studentCode: student.studentCode,
+          email: student.email
+        });
+      });
+
+      await worksheet.protect('yourpassword', {
+        selectLockedCells: true,
+        selectUnlockedCells: true
+      });
+
+      worksheet.eachRow((row, rowNumber) => {
+        row.eachCell((cell, colNumber) => {
+          if (colNumber === 1 ) {
+            cell.protection = { locked: true };
+          } else {
+            cell.protection = { locked: false };
+          }
+        });
+      });
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename="StudentsForm.xlsx"');
+      await workbook.xlsx.write(res);
+      res.end();
+    } catch (error) {
+      console.error('Error generating Excel file:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  },
 
   saveStudentExcel: async (req, res) => {
     console.log("dc");
@@ -266,6 +331,57 @@ const StudentController = {
       res.status(200).json({ message: "Dữ liệu đã được lưu thành công vào cơ sở dữ liệu." });
     } else {
       res.status(400).send('No file uploaded.');
+    }
+  },
+  updateStudentsFromExcel: async (req, res) => {
+    if (!req.files || !req.files.length) {
+      return res.status(400).json({ message: 'No file uploaded.' });
+    }
+
+    try {
+      const uploadDirectory = path.join(__dirname, '../uploads');
+      const filename = req.files[0].filename;
+      const filePath = path.join(uploadDirectory, filename);
+
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.readFile(filePath);
+      const worksheet = workbook.getWorksheet('Students Form');
+
+      const studentUpdates = [];
+
+      worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber > 1) { // Skip header row
+          const studentData = {
+            student_id: row.getCell('A').value,
+            classCode: row.getCell('B').value,
+            name: row.getCell('C').value,
+            studentCode: row.getCell('D').value,
+            email: row.getCell('E').value
+          };
+          studentUpdates.push(studentData);
+        }
+      });
+
+      for (const studentData of studentUpdates) {
+        const student = await StudentModel.findByPk(studentData.student_id);
+        if (student) {
+          const classModel = await ClassModel.findOne({ where: { classCode: studentData.classCode } });
+          if (classModel) {
+            student.class_id = classModel.class_id;
+          }
+          student.name = studentData.name;
+          student.studentCode = studentData.studentCode;
+          student.email = studentData.email;
+          await student.save();
+        }
+      }
+
+      fs.unlinkSync(filePath); // Clean up the uploaded file
+
+      res.status(200).json({ message: 'Students updated successfully' });
+    } catch (error) {
+      console.error('Error updating students from Excel file:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   }
 };

@@ -183,16 +183,18 @@ const UpdateStudent = (nav) => {
     }
 
 
-    const handleDownloadProgram = async () => {
+    const handleDownloadStudent = async () => {
         try {
             if (selectedRowKeys.length === 0) {
-                alert('Please select at least one program ID');
+                alert('Please select at least one student ID');
                 return;
             }
             const data = {
                 id: selectedRowKeys
             }
-            const response = await axiosAdmin.post('csv/program/', { data: data }, {
+
+            console.log(data);
+            const response = await axiosAdmin.post('/student/templates/update', { data: data }, {
                 responseType: 'blob'
             });
 
@@ -200,7 +202,7 @@ const UpdateStudent = (nav) => {
                 const url = window.URL.createObjectURL(response.data);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'program.csv';
+                a.download = 'student.xlsx';
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
@@ -393,7 +395,7 @@ const UpdateStudent = (nav) => {
                                             <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%]  flex justify-start items-center'>
                                                 <div className='p-10 w-full mt-10 h-fix sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center  gap-5 rounded-lg'>
                                                     <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
-                                                    <Button className='w-full bg-primary flex items-center justify-center  p-5 rounded-lg' onClick={handleDownloadProgram}>
+                                                    <Button className='w-full bg-primary flex items-center justify-center  p-5 rounded-lg' onClick={handleDownloadStudent}>
                                                         <scan>Tải xuống mẫu </scan>
                                                     </Button>
 
@@ -410,7 +412,7 @@ const UpdateStudent = (nav) => {
                                             <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
                                                 <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
                                                     <div><p className='w-full text-center'>Cập nhật Dữ liệu</p></div>
-                                                    <CustomUpload endpoint={'program/getByID'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
+                                                    <CustomUpload endpoint={'student/update'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
                                                 </div>
                                             </div>
                                         </div>

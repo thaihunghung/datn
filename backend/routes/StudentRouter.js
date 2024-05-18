@@ -206,4 +206,7 @@ router.delete('/student/:id', StudentController.delete);
 router.get('/student/isDelete/true', StudentController.isDeleteTotrue);
 router.get('/student/isDelete/false', StudentController.isDeleteTofalse);
 router.put('/student/isDelete/:id', StudentController.isDelete);
+
+router.get('/student/templates/post', StudentController.getFormStudent);
+router.post('/student/templates/update', StudentController.getFormStudentWithData);
 module.exports = router;

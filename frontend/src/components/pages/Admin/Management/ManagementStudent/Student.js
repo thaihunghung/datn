@@ -305,7 +305,7 @@ const Student = (props) => {
           </div>
         </div>
       </div>
-      <Table className="h"
+      <Table
         columns={columns}
         dataSource={studentData}
         onChange={onChange}
