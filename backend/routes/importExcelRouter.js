@@ -9,6 +9,7 @@ const StudentController = require('../controllers/StudentController');
 const ProgramsController = require('../controllers/ProgramsController');
 const PoController = require('../controllers/PoController');
 const PloController = require('../controllers/PloController');
+const CloController = require('../controllers/CloController');
 
 const uploadDirectory = path.join(__dirname, '../uploads');
 
@@ -27,8 +28,12 @@ router.post('/program', upload.any(), ProgramsController.processSaveTemplate);
 router.post('/po', upload.any(), PoController.processSaveTemplatePo);
 router.post('/plo', upload.any(), PloController.processSaveTemplatePlo);
 router.post('/student', upload.any(), StudentController.saveStudent);
+router.post('/clo', upload.any(), CloController.processSaveTemplateClo);
+
 
 router.put('/program/update', upload.any(), CsvUpdateController.updateFormProgram);
 router.put('/po/update', upload.any(), PoController.processUpdateTemplatePo);
 router.put('/plo/update', upload.any(), PloController.processUpdateTemplatePlo);
+router.post('/clo/update', upload.any(), CloController.processUpdateTemplateClo);
+
 module.exports = router;

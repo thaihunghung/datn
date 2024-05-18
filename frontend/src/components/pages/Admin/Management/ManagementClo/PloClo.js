@@ -20,7 +20,6 @@ const PloClo = (nav) => {
     const [plos, setPlos] = useState([]);
     const [PloClos, setPloClos] = useState([]);
     const [comparePloClos, setComparePloClos] = useState([]);
-    const [hidden, setHidden] = useState(false);
 
     const GetAllPlo = async () => {
         try {

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Input } from "@nextui-org/react";
 import { UploadOutlined } from '@ant-design/icons';
 import { Upload, Divider, Steps, Button, Select, message, Tooltip } from 'antd';
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
 
@@ -12,31 +12,24 @@ const CreateClo = (nav) => {
     const { setCollapsedNav } = nav;
     const location = useLocation();
     const isActive = (path) => location.pathname.startsWith(path);
+    const { id } = useParams();
     const [fileList, setFileList] = useState([]);
 
-    const [programData, setProgramData] = useState([]);
     const [activeTab, setActiveTab] = useState(0);
 
 
-    const [poName, setPoName] = useState("");
+    const [cloName, setcloName] = useState("");
     const [Description, setDescription] = useState("");
-    const [program_id, setProgram_id] = useState();
-
 
     const handleSave = async () => {
         try {
-            if (poName === "") {
-                alert("dữ liệu lỗi")
-                document.getElementById("name-program").focus();
-                return;
-            }
             const data = {
-                poName: poName,
+                subject_id: id,
+                cloName: cloName,
                 description: Description,
-                program_id: program_id
             }
 
-            const response = await axiosAdmin.post('/po', { data: data });
+            const response = await axiosAdmin.post('/clo', { data: data });
             if (response.status === 201) {
                 message.success('Data saved successfully');
             } else {
@@ -48,28 +41,11 @@ const CreateClo = (nav) => {
         }
     }
 
-
-    const getAllProgram = async () => {
-        try {
-            const response = await axiosAdmin.get(`/program/isDelete/false`);
-            if (response.data) {
-                setProgramData(response.data);
-            }
-            console.log(response);
-        } catch (error) {
-            console.error("Error fetching programs:", error);
-            message.error('Error fetching programs');
-        }
-    }
     const [current, setCurrent] = useState(0);
-    const onChangexxx = (poName) => {
-        console.log('onChange:', poName);
-        setCurrent(poName);
-    };
 
     const handleDownloadPo = async () => {
         try {
-            const response = await axiosAdmin.get('/po/templates/post', {
+            const response = await axiosAdmin.get('/clo/templates/post', {
                 responseType: 'blob'
             });
 
@@ -77,7 +53,7 @@ const CreateClo = (nav) => {
                 const url = window.URL.createObjectURL(response.data);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'po.xlsx';
+                a.download = 'clo.xlsx';
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
@@ -102,9 +78,7 @@ const CreateClo = (nav) => {
         fileList,
     };
 
-    const description = 'This is a description.';
     useEffect(() => {
-        getAllProgram()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -120,19 +94,26 @@ const CreateClo = (nav) => {
     }, []);
 
     return (
-        <div className="flex w-full flex-col px-4 justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
-             <div className="flex justify-between px-5 w-full items-center">
+        <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
+            <div className="flex justify-between px-5 w-full items-center">
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to="/admin/management-po/list">
+                    <Link to={`/admin/management-subject/${id}/clo/update`}>
                         <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-po/list") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                Danh sách PO
+                            <div className={` ${isActive(`/admin/management-subject/${id}/clo/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                Danh sách CLO
                             </div>
                         </div>
                     </Link>
-                    <Link to="/admin/management-po/create">
+                    <Link to={`/admin/management-subject/${id}/clo-plo/`}>
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive(`/admin/management-subject/${id}/clo-plo/`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                CLO_PLO
+                            </div>
+                        </div>
+                    </Link>
+                    <Link to={`/admin/management-subject/${id}/clo/create`}>
                         <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-po/create") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                            <div className={` ${isActive(`/admin/management-subject/${id}/clo/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
                                 Tạo mới
                             </div>
                         </div>
@@ -153,7 +134,7 @@ const CreateClo = (nav) => {
                         </Tooltip></Link>
                 </div>
             </div>
-            <div className="w-full mt-5 rounded-lg">
+            <div className="w-full mt-5 px-5 rounded-lg">
                 <Tabs tabs=
                     {[
                         {
@@ -162,10 +143,10 @@ const CreateClo = (nav) => {
                                 <div className="w-full rounded-lg border">
                                     <div className="w-[50%] p-5 flex flex-col gap-2">
                                         <Input
-                                            label="Name Po"
-                                            placeholder="Enter your name Po"
-                                            value={poName}
-                                            onValueChange={setPoName}
+                                            label="Name Clo"
+                                            placeholder="Enter your name Clo"
+                                            value={cloName}
+                                            onValueChange={setcloName}
 
                                         />
                                         <Input
@@ -175,28 +156,12 @@ const CreateClo = (nav) => {
                                             onValueChange={setDescription}
 
                                         />
-                                        <Select
-                                            defaultValue={"Chọn chương trình"}
-                                            value={program_id}
-                                            onChange={setProgram_id}
-                                            size="large"
-                                            className="w-full"
-                                        >
-                                            {programData.map((program) => (
-                                                <Select.Option
-                                                    key={program.program_id}
-                                                    value={program.program_id}
-                                                >
-                                                    {program.program_name}
-                                                </Select.Option>
-                                            ))}
-                                        </Select>
-                                        
+                                
                                         <div className="w-full flex justify-center items-center">
-                                        <Button color="primary" onClick={handleSave} className="max-w-[300px] mt-5 px-20">
-                                            Tạo
-                                        </Button>
-                                    </div>
+                                            <Button color="primary" onClick={handleSave} className="max-w-[300px] mt-5 px-20">
+                                                Tạo
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                         },
@@ -209,18 +174,18 @@ const CreateClo = (nav) => {
                                             <div className='px-10 hidden sm:hidden lg:block xl:block'>
                                                 <Divider />
                                                 <Steps current={current} onChange={setCurrent} items={[
-                                                { title: 'Bước 1', description: 'Tải về form' },
-                                                { title: 'Bước 2', description: 'Tải lại form' },
-                                                { title: 'Bước 3', description: 'Chờ phản hồi' }
-                                            ]} />
+                                                    { title: 'Bước 1', description: 'Tải về form' },
+                                                    { title: 'Bước 2', description: 'Tải lại form' },
+                                                    { title: 'Bước 3', description: 'Chờ phản hồi' }
+                                                ]} />
                                             </div>
                                             <div className='hidden sm:block lg:hidden xl:hidden w-[50%]'>
                                                 <Divider />
                                                 <Steps current={current} onChange={setCurrent} items={[
-                                                { title: 'Bước 1', description: 'Tải về form' },
-                                                { title: 'Bước 2', description: 'Tải lại form' },
-                                                { title: 'Bước 3', description: 'Chờ phản hồi' }
-                                            ]} />
+                                                    { title: 'Bước 1', description: 'Tải về form' },
+                                                    { title: 'Bước 2', description: 'Tải lại form' },
+                                                    { title: 'Bước 3', description: 'Chờ phản hồi' }
+                                                ]} />
                                             </div>
 
                                             <div className='flex flex-col w-full  sm:flex-col sm:w-full lg:flex-row xl:flex-row justify-around'>
@@ -243,7 +208,7 @@ const CreateClo = (nav) => {
                                                 <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
                                                     <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
                                                         <div><p className='w-full text-center'>Lưu Dữ liệu</p></div>
-                                                        <CustomUpload endpoint={'po'} method={'POST'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
+                                                        <CustomUpload endpoint={'clo'} method={'POST'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
                                                     </div>
                                                 </div>
                                             </div>

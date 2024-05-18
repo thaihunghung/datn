@@ -31,7 +31,7 @@ const Clo = (nav) => {
     const [poListData, setPosListData] = useState([]);
     const [current, setCurrent] = useState(0);
     const [deleteId, setDeleteId] = useState(null);
-    
+
 
     const handleOnChangeTextName = (nameP) => {
         setCurrent(nameP);
@@ -65,21 +65,19 @@ const Clo = (nav) => {
             ),
             dataIndex: "action",
             render: (_id) => (
-                <div className="flex flex-col items-center justify-center w-full gap-2">
-                    
-               
+                <div className="flex items-center justify-center w-full gap-2">
                     <Link to={`/admin/management-po/update/${_id}`}>
-    <Tooltip title="Chỉnh sửa">
-        <Button
-            isIconOnly
-            variant="light"
-            radius="full"
-            size="sm"
-        >
-            <i className="fa-solid fa-pen"></i>
-        </Button>
-    </Tooltip>
-</Link>
+                        <Tooltip title="Chỉnh sửa">
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+                            >
+                                <i className="fa-solid fa-pen"></i>
+                            </Button>
+                        </Tooltip>
+                    </Link>
 
 
                     <Tooltip title="Xoá">
@@ -113,7 +111,7 @@ const Clo = (nav) => {
         setSelectedRowKeys([]);
         setSelectedRow([]);
     };
-    const getAllPo = async () => {
+    const getAllClo = async () => {
         try {
             const response = await axiosAdmin.get(`/clo/subject/${id}`);
             const updatedPoData = response.data.map((po) => {
@@ -132,32 +130,32 @@ const Clo = (nav) => {
             message.error('Error fetching PO data');
         }
     };
-    
+
     const handleSoftDelete = async () => {
         const data = {
             po_id: selectedRowKeys,
         };
         console.log(data)
         try {
-            const response = await axiosAdmin.put('/po/listId/soft-delete-multiple', { data});
-            await getAllPo();
+            const response = await axiosAdmin.put('/po/listId/soft-delete-multiple', { data });
+            await getAllClo();
             handleUnSelect();
-            message.success(response.data.message); 
+            message.success(response.data.message);
         } catch (error) {
             console.error("Error soft deleting POs:", error);
-            message.error('Error soft deleting POs'); 
+            message.error('Error soft deleting POs');
         }
     };
-    
+
     const handleSoftDeleteById = async (_id) => {
         try {
             const response = await axiosAdmin.put(`/po/${_id}/toggle-soft-delete`);
-            await getAllPo();
+            await getAllClo();
             handleUnSelect();
-            message.success(response.data.message); 
+            message.success(response.data.message);
         } catch (error) {
             console.error(`Error toggling soft delete for PO with ID ${_id}:`, error);
-            message.error(`Error toggling soft delete for PO with ID ${_id}`); 
+            message.error(`Error toggling soft delete for PO with ID ${_id}`);
         }
     };
 
@@ -206,7 +204,7 @@ const Clo = (nav) => {
 
     const description = 'This is a description.';
     useEffect(() => {
-        getAllPo()
+        getAllClo()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -222,7 +220,7 @@ const Clo = (nav) => {
     }, []);
 
     return (
-        <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
+        <div className="flex w-full flex-col justify-center leading-8 pt-5">
             <ConfirmAction
                 onOpenChange={onOpenChange}
                 isOpen={isOpen}
@@ -236,40 +234,29 @@ const Clo = (nav) => {
                     }
                 }}
             />
-
-            <div className="flex justify-between px-5 w-full items-center">
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={`/admin/management-subject/${id}/update/clo/`}>
-
+           <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
+                    <Link to={`/admin/management-subject/${id}/clo/update`}>
                         <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-po/list") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                            <div className={` ${isActive(`/admin/management-subject/${id}/clo/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
                                 Danh sách CLO
                             </div>
                         </div>
                     </Link>
-                    <Link to={`/admin/management-subject/${id}/update/clo/create`}>
+                    <Link to={`/admin/management-subject/${id}/clo-plo/`}>
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive(`/admin/management-subject/${id}/clo-plo/`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                CLO_PLO
+                            </div>
+                        </div>
+                    </Link>
+                    <Link to={`/admin/management-subject/${id}/clo/create`}>
                         <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-po/create") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                            <div className={` ${isActive(`/admin/management-subject/${id}/clo/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
                                 Tạo mới
                             </div>
                         </div>
                     </Link>
                 </div>
-                <div>
-                    <Link to="/admin/management-po/store">
-                        <Tooltip title="Xoá">
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
-
-                            >
-                                 <span className="text-base">Kho lưu trữ </span><i className="fa-solid ml-2 fa-trash-can"></i>
-                            </Button>
-                        </Tooltip></Link>
-                </div>
-            </div>
             <div className="w-full my-5 px-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">

@@ -53,7 +53,7 @@ const Subject = (nav) => {
       title: "CĐR học phần",
       dataIndex: "action",
       render: (_id) => (
-        <Link to={`/admin/management-subject/${_id}/update/clo/`}>
+        <Link to={`/admin/management-subject/${_id}/clo/update`}>
             <Tooltip title="Chỉnh sửa">
               <Button
                 isIconOnly

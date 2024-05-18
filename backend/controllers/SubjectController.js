@@ -1,4 +1,5 @@
 const SubjectModel = require("../models/SubjectModel");
+const CloModel = require("../models/CloModel");
 
 const SubjectController = {
   index: async (req, res) => {
@@ -35,6 +36,27 @@ const SubjectController = {
       res.status(500).json({ message: 'Internal server error' });
     }
   },
+  getArrayIDCloBySubjectId: async (req, res) => {
+    try {
+        const { id } = req.params;
+        const clos = await CloModel.findAll({
+            where: { subject_id: id },
+            attributes: ['clo_id'] 
+        });
+
+        if (clos.length === 0) {
+            return res.status(404).json({ message: 'No CLOs found for the given subject ID' });
+        }
+
+        const cloIds = clos.map(clo => clo.clo_id);
+        res.status(200).json(cloIds);
+    } catch (error) {
+        console.error('Error fetching CLOs by subject ID:', error);
+        res.status(500).json({ message: 'An error occurred while fetching CLOs' });
+    }
+},
+
+
 
   update: async (req, res) => {
     try {
