@@ -29,8 +29,8 @@ const qualitylevelsRoutes = require('./QualityLevelsRouter');
 
 
 const pdfRouters = require('./PdfRouter');
-const csvRouters = require('./CsvRouter');
-const csvSaveRouters = require('./SaveCSVRouter');
+
+const importExcelRouters = require('./importExcelRouter');
 
 //doc
 router.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -60,8 +60,6 @@ router.use('/api/admin', poPloRoutes);
 router.use('/api/admin', ploCloRoutes);
 router.use('/api/admin', pdfRouters);
 
-router.use('/api/admin/form/excel', csvRouters);
-
-router.use('/api/admin/importExcel', csvSaveRouters);
+router.use('/api/admin/importExcel', importExcelRouters);
 
 module.exports = router;

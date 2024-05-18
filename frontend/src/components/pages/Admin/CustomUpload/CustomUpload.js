@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, message } from 'antd';
 import { axiosAdmin } from '../../../../service/AxiosAdmin';
 
-const CustomUpload = ({ endpoint, setCurrent, fileList, setFileList }) => {
+const CustomUpload = ({ endpoint, setCurrent, fileList, setFileList, method, LoadData }) => {
   const [uploading, setUploading] = useState(false);
 
   const handleUpload = () => {
@@ -11,8 +11,9 @@ const CustomUpload = ({ endpoint, setCurrent, fileList, setFileList }) => {
       formData.append('files[]', file);
     });
     setUploading(true);
+    const axiosRequest = method === 'POST' ? axiosAdmin.post : axiosAdmin.put;
 
-    axiosAdmin.post(`/importExcel/${endpoint}`, formData)
+    axiosRequest(`/importExcel/${endpoint}`, formData)
       .then((response) => {
         const data = response.data;
         console.log(data);
@@ -23,6 +24,9 @@ const CustomUpload = ({ endpoint, setCurrent, fileList, setFileList }) => {
           setFileList([]);
           message.success(data.message);
           setCurrent(2);
+          if (LoadData) {
+            LoadData();
+          }
         }
       })
       .catch((error) => {
@@ -34,6 +38,7 @@ const CustomUpload = ({ endpoint, setCurrent, fileList, setFileList }) => {
       });
   };
 
+  
   return (
     <div className='text-xl w-full flex flex-col items-center'>
       <Button

@@ -187,9 +187,13 @@ router.get('/po/isDelete/false', PO.isDeleteToFalse);
  *       500:
  *         description: Lỗi server
  */
-router.put('/po/:id/toggle-delete', PO.toggleDelete);
+router.put('/po/listId/soft-delete-multiple', PO.softDeleteMultiple);
 
-router.get('/po/form/excel', PO.getFormPost);
+router.put('/po/:id/toggle-soft-delete', PO.toggleSoftDeleteById);
 
+
+router.get('/po/templates/post', PO.getFormPost);
+router.post('/po/templates/update', PO.getFormUpdate);
 
 module.exports = router;
+

@@ -4,53 +4,167 @@ import { useEffect, useState } from "react";
 import { Button, message } from 'antd';
 import { Link, useLocation } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { Table, Upload, Tooltip, Divider, Steps } from 'antd';
+
+
 const StorePo = (nav) => {
-    const { setCollapsedNav } = nav;
     const location = useLocation();
     const isActive = (path) => location.pathname.startsWith(path);
-
-
+    const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [PoData, setPoData] = useState([]);
+    const [selectedRow, setSelectedRow] = useState([]);
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [poListData, setPosListData] = useState([]);
     const [deleteId, setDeleteId] = useState(null);
 
-    const allPoIsDelete = async () => {
+    const columns = [
+        {
+            title: "Tên PO",
+            dataIndex: "name",
+            render: (record) => (
+                <div className="text-sm">
+                    <p className="font-medium">{record}</p>
+                </div>
+            ),
+        },
+        {
+            title: "Mô tả",
+            dataIndex: "description",
+            render: (record) => (
+                <div className="text-sm">
+                    <p className="font-medium">{record}</p>
+                </div>
+            ),
+        },
+        {
+            title: (
+                <div className="flex items-center justify-center w-full">
+                    <span>Form</span>
+                </div>
+            ),
+            dataIndex: "action",
+            render: (_id) => (
+                <div className="flex flex-col items-center justify-center w-full gap-2">
+                    <Tooltip title="Khôi phục">
+                        <Button
+                            isIconOnly
+                            variant="light"
+                            radius="full"
+                            onClick={() => handleRestoreById(_id)}
+                        >
+                            <i className="fa-solid fa-clock-rotate-left"></i>
+                        </Button>
+                    </Tooltip>
+                    <Tooltip title="Xoá vĩnh viễn">
+                        <Button
+                            isIconOnly
+                            variant="light"
+                            radius="full"
+                            color="danger"
+                            onClick={() => { onOpen(); setDeleteId(_id); }}
+                        >
+                            <i className="fa-solid fa-trash-can"></i>
+                        </Button>
+                    </Tooltip>
+                </div>
+            ),
+        },
+
+    ];
+
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: (selectedRowKeys, selectedRows) => {
+            console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+            setSelectedRow(selectedRows);
+            setSelectedRowKeys(selectedRowKeys);
+        },
+    };
+
+    const handleUnSelect = () => {
+        setSelectedRowKeys([]);
+        setSelectedRow([]);
+    };
+    const handleRestore = async () => {
+        const data = {
+            po_id: selectedRowKeys,
+        }
+        try {
+            const response = await axiosAdmin.put('/po/listId/soft-delete-multiple', { data });
+            handleUnSelect();
+            message.success(response.data.message);
+            getAllPo()
+        } catch (error) {
+            console.error("Error soft deleting POs:", error);
+            message.error('Error soft deleting POs');
+        }
+    };
+
+    const handleRestoreById = async (_id) => {
+        try {
+            const response = await axiosAdmin.put(`/po/${_id}/toggle-soft-delete`);
+            handleUnSelect();
+            message.success(response.data.message);
+            getAllPo()
+        } catch (error) {
+
+            console.error(`Error toggling soft delete for PO with ID ${_id}:`, error);
+            message.error(`Error toggling soft delete for PO with ID ${_id}`);
+        }
+    };
+
+    const getAllPo = async () => {
         try {
             const response = await axiosAdmin.get('/po/isDelete/true');
-            setPoData(response.data);
-        } catch (err) {
-            console.log("Error fetching deleted POs:", err.message);
-        };
-    }
-
-    const handleDeletePo = async (id) => {
-        try {
-            const response = await axiosAdmin.delete(`/po/${id}`);
-            if (response.data.message) {
-                message.success(response.data.message);
-            }
-        } catch (err) {
-            console.log("Error deleting PO:", err.message);
-            message.error('Failed to toggle delete status');
-        };
-    }
-
-    const hangleChangeidDelete = async (id) => {
-        try {
-            const response = await axiosAdmin.put(`/po/${id}/toggle-delete`);
-            if (response) {
-                console.log(response.data.message);
-                message.success(response.data.message);
-            }
-        } catch (err) {
-            console.log("Error: " + err.message);
-            message.error('Failed to toggle delete status');
+            const updatedPoData = response.data.map((po) => {
+                return {
+                    key: po.po_id,
+                    name: po.poName,
+                    description: po.description,
+                    isDeleted: po.isDelete,
+                    action: po.po_id,
+                };
+            });
+            setPosListData(updatedPoData);
+            console.log(response.data);
+        } catch (error) {
+            console.error("Error: " + error.message);
+            message.error('Error fetching PO data');
         }
-    }
+    };
+
+    const handleSoftDelete = async () => {
+        const data = {
+            po_id: selectedRowKeys,
+        };
+        console.log(data);
+        try {
+            const response = await axiosAdmin.put('/po/listId/soft-delete-multiple', { data: data });
+            await getAllPo();
+            handleUnSelect();
+            message.success(response.data.message);
+        } catch (error) {
+            console.error("Error soft deleting POs:", error);
+            message.error('Error soft deleting POs');
+        }
+    };
+
+    const handleSoftDeleteById = async (_id) => {
+        try {
+            const response = await axiosAdmin.put(`/po/${_id}/toggle-soft-delete`);
+            await getAllPo();
+            handleUnSelect();
+            message.success(response.data.message);
+        } catch (error) {
+            console.error(`Error toggling soft delete for PO with ID ${_id}:`, error);
+            message.error(`Error toggling soft delete for PO with ID ${_id}`);
+        }
+    };
 
     useEffect(() => {
-        allPoIsDelete()
+        getAllPo()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -72,31 +186,20 @@ const StorePo = (nav) => {
                 isOpen={isOpen}
                 onConfirm={() => {
                     if (deleteId) {
-                        handleDeletePo(deleteId);
+                        handleSoftDeleteById(deleteId);
                         setDeleteId(null);
+                    } else if (selectedRowKeys.length > 0) {
+                        handleSoftDelete();
+                        setSelectedRowKeys([]);
                     }
                 }}
             />
-            <div>
+            <div className="flex justify-between px-5 w-full items-center">
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
                     <Link to="/admin/management-po/list">
                         <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
                             <div className={` ${isActive("/admin/management-po/list") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
                                 Danh sách PO
-                            </div>
-                        </div>
-                    </Link>
-                    <Link to="/admin/management-po/store">
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]" >
-                            <div className={` ${isActive("/admin/management-po/store") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                Kho lưu trữ
-                            </div>
-                        </div>
-                    </Link>
-                    <Link to="/admin/management-po/update">
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-po/update") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                                Chỉnh sửa
                             </div>
                         </div>
                     </Link>
@@ -108,31 +211,83 @@ const StorePo = (nav) => {
                         </div>
                     </Link>
                 </div>
+                <div>
+                    <Link to="/admin/management-po/store">
+                        <Tooltip title="Xoá">
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+
+                            >
+                                <span className="text-base">Kho lưu trữ </span><i className="fa-solid ml-2 fa-trash-can"></i>
+                            </Button>
+                        </Tooltip></Link>
+                </div>
             </div>
-            <div className="w-full border mt-5 rounded-lg">
-                <table className="table-auto border-collapse border w-full">
-                    <tr>
-                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-gray-800 text-white text-center">STT</td>
-                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-gray-800 text-white text-center">Tên po</td>
-                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-gray-800 text-white text-center">Thao tác</td>
-                    </tr>
-                    {PoData.map((data, i) => (
-                        <tr key={i}>
-                            <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">{i + 1}</td>
-                            <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">{data.poName}</td>
-                            <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 flex justify-center">
-                                <div className="flex gap-1 flex-col sm:flex-col lg:flex-row xl:flex-row">
-                                    <div className="bg-lime-800 w-[120px] hover:bg-lime-600 text-white text-center font-bold p-1 rounded">
-                                        <button onClick={() => { hangleChangeidDelete(data.po_id); }} className="w-full h-full">Khôi phục</button>
-                                    </div>
-                                    <div className="bg-red-500 w-[120px] hover:bg-red-700 text-white text-center font-bold p-1 rounded">
-                                        <button onClick={() => { onOpen(); setDeleteId(data.po_id); }} className="w-full h-full">Xóa</button>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
-                </table>
+            <div className="w-full my-5 px-5">
+                {selectedRowKeys.length !== 0 && (
+                    <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
+                        <p className="text-sm font-medium">
+                            <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
+                            Đã chọn {selectedRow.length} po
+                        </p>
+                        <div className="flex items-center gap-2">
+
+                            <Tooltip
+                                title={`Khôi phục ${selectedRowKeys.length} po`}
+                                getPopupContainer={() =>
+                                    document.querySelector(".Quick__Option")
+                                }
+                            >
+                                <Button isIconOnly variant="light" radius="full" onClick={() => handleRestore()}>
+                                    <i className="fa-solid fa-clock-rotate-left"></i>
+                                </Button>
+                            </Tooltip>
+                            <Tooltip
+                                title={`Xoá vĩnh viễn ${selectedRowKeys.length} po`}
+                                getPopupContainer={() =>
+                                    document.querySelector(".Quick__Option")
+                                }
+                            >
+                                <Button isIconOnly variant="light" radius="full" onClick={onOpen}>
+                                    <i className="fa-solid fa-trash-can"></i>
+                                </Button>
+                            </Tooltip>
+
+                            <Tooltip
+                                title="Bỏ chọn"
+                                getPopupContainer={() =>
+                                    document.querySelector(".Quick__Option")
+                                }
+                            >
+                                <Button
+                                    isIconOnly
+                                    variant="light"
+                                    radius="full"
+                                    onClick={() => {
+                                        handleUnSelect();
+                                    }}
+                                >
+                                    <i className="fa-solid fa-xmark text-[18px]"></i>
+                                </Button>
+                            </Tooltip>
+                        </div>
+                    </div>
+                )}
+                <div className="w-full ">
+                    <Table className="table-po text-[#fefefe]"
+                        bordered
+                        loading={loading}
+                        rowSelection={{
+                            type: "checkbox",
+                            ...rowSelection,
+                        }}
+                        columns={columns}
+                        dataSource={poListData}
+                    />
+                </div>
             </div>
         </div>
     );
@@ -179,7 +334,7 @@ function ConfirmAction(props) {
                         <ModalHeader>Cảnh báo</ModalHeader>
                         <ModalBody>
                             <p className="text-[16px]">
-                                Po sẽ được và không thể khôi phục lại, tiếp tục thao tác?
+                                xóa vĩnh viễn, tiếp tục thao tác?
                             </p>
                         </ModalBody>
                         <ModalFooter>

@@ -16,6 +16,7 @@ const programController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+  
   create: async (req, res) => {
     try {
       const { data } = req.body;
@@ -26,6 +27,7 @@ const programController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   getByID: async (req, res) => {
     try {
       const { id } = req.params;
@@ -39,6 +41,7 @@ const programController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   update: async (req, res) => {
     try {
       const { id } = req.params;
@@ -53,6 +56,7 @@ const programController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   delete: async (req, res) => {
     try {
       const { id } = req.params;
@@ -66,9 +70,10 @@ const programController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   isDeleteTotrue: async (req, res) => {
     try {
-      const program = await ProgramModel.findOne({ where: { isDelete: true } });
+      const program = await ProgramModel.findAll({ where: { isDelete: true } });
       if (!program) {
         return res.status(404).json({ message: 'Program not found' });
       }
@@ -78,9 +83,10 @@ const programController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   isDeleteTofalse: async (req, res) => {
     try {
-      const program = await ProgramModel.findOne({ where: { isDelete: false } });
+      const program = await ProgramModel.findAll({ where: { isDelete: false } });
       if (!program) {
         return res.status(404).json({ message: 'Program not found' });
       }
@@ -90,6 +96,7 @@ const programController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   toggleIsDelete: async (req, res) => {
     try {
       const { id } = req.params;
@@ -105,6 +112,7 @@ const programController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   getFormExels: async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Program');
@@ -119,6 +127,7 @@ const programController = {
     await workbook.xlsx.write(res);
     res.end();
   },
+
   getFormPost: async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Program');
@@ -133,7 +142,8 @@ const programController = {
     await workbook.xlsx.write(res);
     res.end();
   },
-  processUploadedFile: async (req, res) => {
+
+  processSaveTemplate: async (req, res) => {
     if (!req.files) {
       return res.status(400).send('No file uploaded.');
     }

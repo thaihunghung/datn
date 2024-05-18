@@ -1,20 +1,9 @@
-// PoPlo.js
 import { useEffect, useState } from "react";
-import { Tooltip } from 'antd';
-import { Link } from "react-router-dom";
-
-import {
-    Button,
-    Modal, Chip,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter, useDisclosure
-} from "@nextui-org/react";
+import { Tooltip, message } from 'antd';
+import { Button } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 const PoPlo = (nav) => {
     const { setCollapsedNav } = nav;
-    const { isOpen, onOpenChange } = useDisclosure();
   
     const [pos, setPos] = useState([]);
     const [plos, setPlos] = useState([]);
@@ -23,7 +12,7 @@ const PoPlo = (nav) => {
 
     const GetAllPo = async () => {
         try {
-            const response = await axiosAdmin.get('/po');
+            const response = await axiosAdmin.get('/po/isDelete/false');
             setPos(response.data);
         } catch (error) {
             console.error('Error fetching POs:', error);
@@ -32,7 +21,7 @@ const PoPlo = (nav) => {
 
     const GetAllPlo = async () => {
         try {
-            const response = await axiosAdmin.get('/plo');
+            const response = await axiosAdmin.get('/plo/isDelete/false');
             setPlos(response.data)
         } catch (error) {
             console.error('Error fetching PLOs:', error);
@@ -41,35 +30,33 @@ const PoPlo = (nav) => {
     const handleSaveOrDelete= async ()=>{
         let luu = [];
         let xoa = [];
-        // Lọc các phần tử trong setComparePoPlos mà không có trong setPoPlos để lưu
         luu = comparePoPlos.filter(compareItem => {
             return !poPlos.some(poPloItem => poPloItem.po_id === compareItem.po_id && poPloItem.plo_id === compareItem.plo_id);
         });
 
-        // Lọc các phần tử trong setPoPlos mà không có trong setComparePoPlos để xóa
         xoa = poPlos.filter(poPloItem => {
             return !comparePoPlos.some(compareItem => compareItem.po_id === poPloItem.po_id && compareItem.plo_id === poPloItem.plo_id);
         });
 
-        if(luu.length > 0) {
-            console.log("Save:", luu);
+        if (luu.length > 0) {
             try {
-                const response = await axiosAdmin.post('/po-plo/SaveOrDelete', {dataSave: luu})
-                console.log(response.data);
+              const response = await axiosAdmin.post('/po-plo', { dataSave: luu });
+              message.success(response.data.message);
             } catch (error) {
-                console.log("Error:", error);
+              console.error("Error:", error);
+              message.error(error.response?.data?.message || 'Error saving data');
             }
-
-        }
-        if(xoa.length > 0) {
-            console.log("Delete:", xoa);
+          }
+        
+          if (xoa.length > 0) {
             try {
-                const response = await axiosAdmin.post('/po-plo/SaveOrDelete',{dataDelete: xoa})
-                console.log(response.data);
+              const response = await axiosAdmin.delete('/po-plo', { data: { dataDelete: xoa } });
+              message.success(response.data.message);
             } catch (error) {
-                    console.log("Error:", error);
+              console.error("Error:", error);
+              message.error(error.response?.data?.message || 'Error deleting data');
             }
-        }
+          }
     }
     const GetAllPoPlo = async () => {
         try {
@@ -79,12 +66,10 @@ const PoPlo = (nav) => {
 
             setPoPlos(response.data.map(item => ({id_po_plo: item.id_po_plo, po_id: item.po_id, plo_id: item.plo_id })));
             setComparePoPlos(response.data.map(item => ({ po_id: item.po_id, plo_id: item.plo_id })))
-            //console.log(response.data)
         } catch (error) {
             console.error('Error fetching PO-PLO mappings:', error);
         }
     };
-    const [deleteId, setDeleteId] = useState(null);
 
     // Hàm xử lý thay đổi trạng thái của checkbox
     const handleCheckboxChange = (plo_id, po_id, checked) => {
@@ -94,16 +79,6 @@ const PoPlo = (nav) => {
             setComparePoPlos(comparePoPlos.filter(item => !(item.plo_id === plo_id && item.po_id === po_id)));
         }
     };
-    const hangleChangeidDelete = async (id) => {
-        try {
-            const response = await axiosAdmin.put(`/program/isDelete/${id}`);
-            if (response) {
-                console.log(response.data.message);
-            }
-        } catch (err) {
-            console.log("Error: " + err.message);
-        };
-    }
 
     useEffect(() => {
         GetAllPo();
@@ -125,56 +100,15 @@ const PoPlo = (nav) => {
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 p-5 sm:p-5 lg:p-10 xl:p-10 bg-[#f5f5f5]-500">
-            <ConfirmAction
-                onOpenChange={onOpenChange}
-                isOpen={isOpen}
-                onConfirm={() => {
-                    if (deleteId) {
-                        hangleChangeidDelete(deleteId);
-                        setDeleteId(null);
-                    }
-                }}
-            />
-            <div>
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/management-program"}>
-                        <div className="p-5 min-w-[100px] hover:bg-slate-600 hover:text-white">
-                            Chương trình
-                        </div>
-                    </Link>
-                    <Link to={"/admin/management-program/store"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Kho lưu trữ
-                        </div>
-                    </Link> 
-                    <Link to={"/admin/management-program/create"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Tạo chương trình
-                        </div>
-                    </Link>
-                    <Link to={"/admin/management-program/update"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                        update
-                        </div>
-                    </Link>
-                    <Link to={"/admin/management-program/po-plo"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            PO-PLO
-                        </div>
-                    </Link>
-                </div>
-            </div>
-
             <div className="w-full border mt-5 rounded-lg">
                 <table className="table-auto w-full border-collapse border">
                     <thead className="w-full">
                         <tr>
-                            <th className="p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-slate-600 text-white hidden sm:block lg:block xl:block">STT</th>
-                            <th className="p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-slate-600 text-white">PLO</th>
-                            <th className="p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-slate-600 text-white hidden sm:hidden lg:block xl:block">Nội dung</th>
+                            <th className="p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-[#475569] text-[#fefefe]">PLO</th>
+                            <th className="p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-[#475569] text-[#fefefe] hidden sm:hidden lg:block xl:block">Nội dung</th>
                             {pos.map((po_item) => (
-                                <th key={po_item.po_id} className="p-2 lg:w-[8%] xl:w-[8%] text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-slate-600 text-white">                        
-                                    <Tooltip title={po_item.description} color={'yellow'}>
+                                <th key={po_item.po_id} className="p-2 lg:w-[8%] xl:w-[8%] text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-[#475569] text-[#fefefe]">                        
+                                    <Tooltip title={po_item.description} color={'#FF9908'}>
                                         <span>{po_item.poName}</span>
                                     </Tooltip>
                                 </th>
@@ -183,15 +117,12 @@ const PoPlo = (nav) => {
                     </thead>
                     <tbody className="w-full">
                         {plos.map((plo_item, index) => (
-                            <tr key={index} className="w-full">
-                                <td className="border p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 hidden sm:block lg:block xl:block">
-                                    <span>{index+1}</span>
-                                </td>
+                            <tr key={index} className="w-full text-[#020401]">
                                 <td className="border p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">
                                     <span className="hidden sm:hidden lg:block xl:block">{plo_item.ploName}</span>
                                     <Tooltip title={plo_item.description} 
-                                        color={'yellow'}
-                                        className="block sm:block lg:hidden xl:hidden"
+                                        color={'#FF9908'}
+                                        className="block sm:block lg:hidden xl:hidden text-[#020401]"
                                     >
                                         <span>{plo_item.ploName}</span>
                                     </Tooltip>
@@ -232,59 +163,3 @@ const PoPlo = (nav) => {
 
 
 export default PoPlo;
-function ConfirmAction(props) {
-    const { isOpen, onOpenChange, onConfirm } = props;
-    const handleOnOKClick = (onClose) => {
-        onClose();
-        if (typeof onConfirm === 'function') {
-            onConfirm();
-        }
-    }
-    return (
-        <Modal
-            isOpen={isOpen}
-            onOpenChange={onOpenChange}
-            motionProps={{
-                variants: {
-                    enter: {
-                        y: 0,
-                        opacity: 1,
-                        transition: {
-                            duration: 0.2,
-                            ease: "easeOut",
-                        },
-                    },
-                    exit: {
-                        y: -20,
-                        opacity: 0,
-                        transition: {
-                            duration: 0.1,
-                            ease: "easeIn",
-                        },
-                    },
-                }
-            }}
-        >
-            <ModalContent>
-                {(onClose) => (
-                    <>
-                        <ModalHeader>Cảnh báo</ModalHeader>
-                        <ModalBody>
-                            <p className="text-[16px]">
-                                Chương trình sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
-                            </p>
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button variant="light" onPress={onClose}>
-                                Huỷ
-                            </Button>
-                            <Button color="danger" className="font-medium" onPress={() => handleOnOKClick(onClose)}>
-                                Xoá
-                            </Button>
-                        </ModalFooter>
-                    </>
-                )}
-            </ModalContent>
-        </Modal>
-    )
-}
