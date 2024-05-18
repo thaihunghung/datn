@@ -184,9 +184,6 @@ const StudentController = {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Students Form');
 
-
-    const CodeClass = await ClassModel.findAll({ attributes: ['classCode'] }, { where: { isDelete: true } });
-
     worksheet.columns = [
       { header: 'Mã lớp', key: 'classCode', width: 15 },
       { header: 'Tên SV', key: 'name', width: 32 },
@@ -194,35 +191,13 @@ const StudentController = {
       { header: 'Email', key: 'email', width: 30 },
     ];
 
-    // const cellA19 = worksheet.getCell('G1');
-    // cellA19.value = 'Các mã lớp';
-    // for (let row = 2; row <= CodeClass.length; row++) {
-    //   for (let col = 1; col <= 1; col++) {
-    //     const cell = worksheet.getCell(row, 7);
-    //     cell.value = CodeClass[row-2].classCode;
-    //   }
-    // }
-
-    const worksheetData = workbook.addWorksheet('Description');
-
-    worksheetData.columns = [
-      { header: 'Mã lớp', key: 'classCode', width: 15 }
-    ];
-
-    for (let row = 2; row <= CodeClass.length; row++) {
-      for (let col = 1; col <= 1; col++) {
-        const cell = worksheetData.getCell(row, 1);
-        cell.value = CodeClass[row - 2].classCode;
-      }
-    }
-
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename="StudentsForm.xlsx"');
     await workbook.xlsx.write(res);
     res.end();
   },
 
-  saveStudent: async (req, res) => {
+  saveStudentExcel: async (req, res) => {
     console.log("dc");
     if (req.files) {
       console.log("dc1");
@@ -235,25 +210,54 @@ const StudentController = {
       const worksheet = workbook.getWorksheet(1);
 
       const insertPromises = [];
+      const emailsSet = new Set();
+      const studentCodesSet = new Set();
+
       worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
-        if (rowNumber !== 1) { // bỏ hàng đầu
-          const emailCell = row.getCell(4);
-          let email = emailCell.value;
+        if (rowNumber !== 1) { // bỏ dòng đầu
+          let email = row.getCell(4).value;
+          let studentCode = row.getCell(3).value;
+
           if (email && typeof email === 'object' && email.hasOwnProperty('text')) {
             email = email.text;
           }
 
+          if (!email || emailsSet.has(email)) {
+            console.error(`Duplicate or invalid email found at row ${rowNumber}: ${email}`);
+            return; // Skip this row
+          }
+
+          if (!studentCode || studentCodesSet.has(studentCode)) {
+            console.error(`Duplicate or invalid studentCode found at row ${rowNumber}: ${studentCode}`);
+            return; // Skip this row
+          }
+
+          emailsSet.add(email);
+          studentCodesSet.add(studentCode);
+
           const sql = `INSERT INTO students (class_id, name, studentCode, email)
-                       VALUES ((SELECT class_id FROM classes WHERE classCode = ?), ?, ?, ?)`;
+                 VALUES ((SELECT class_id FROM classes WHERE classCode = ?), ?, ?, ?)`;
           const values = [
             row.getCell(1).value,
             row.getCell(2).value,
-            row.getCell(3).value,
+            studentCode,
             email,
           ];
-          insertPromises.push(sequelize.query(sql, { replacements: values }));
+          insertPromises.push(sequelize.query(sql, { replacements: values })
+            .catch(error => {
+              console.error(`Error inserting row ${rowNumber}: ${error.message}`);
+            }));
         }
       });
+
+      Promise.all(insertPromises)
+        .then(() => {
+          console.log('All rows inserted successfully');
+        })
+        .catch(error => {
+          console.error('Error inserting rows:', error);
+        });
+
 
       await Promise.all(insertPromises);
       console.log('All data has been inserted into the database!');

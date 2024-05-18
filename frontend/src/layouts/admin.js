@@ -37,7 +37,6 @@ function Admin(props) {
   const [collapsedNav, setCollapsedNav] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [spinning, setSpinning] = useState(false);
-
   const { user } = props;
 
   const successNoti = (msg) => {
@@ -45,6 +44,7 @@ function Admin(props) {
       type: 'success',
       content: msg,
     });
+    console.log("scsc");
   };
   const errorNoti = (msg) => {
     messageApi.open({
@@ -55,6 +55,7 @@ function Admin(props) {
 
   return (
     <div className="Admin flex flex-col sm:flex-row lg:flex-row xl:flex-row  h-[100vh] bg-[#FEFEFE]">
+      {contextHolder}
       <Spin spinning={spinning} fullscreen />
       <Nav collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} setSpinning={setSpinning} user={user}/>
       <div className='Admin-Content flex-1 h-full overflow-auto p-2 sm:p-5 sm:px-7 lg:p-5 lg:px-2 xl:p-5 xl:px-2'>

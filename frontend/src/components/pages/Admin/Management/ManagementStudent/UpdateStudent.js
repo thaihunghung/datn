@@ -1,8 +1,8 @@
 // UpdateStudent.js
 
-import { useEffect, useState } from "react";
-import { UploadOutlined } from '@ant-design/icons';
-import { Table, Upload, Tooltip, Divider, Steps, Button, Collapse } from 'antd';
+import { useEffect, useState, useRef } from "react";
+import { UploadOutlined, SearchOutlined } from '@ant-design/icons';
+import { Table, Upload, Tooltip, Divider, Steps, Button, Collapse, Space, Input } from 'antd';
 import { Link } from "react-router-dom";
 import "./Student.css"
 import { useDisclosure } from "@nextui-org/react";
@@ -17,8 +17,7 @@ const UpdateStudent = (nav) => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const [programListData, setNewsListData] = useState([]);
-
+    const [studentData, setStudentData] = useState([]);
     const [current, setCurrent] = useState(0);
     const onChangexxx = (nameP) => {
         console.log('onChange:', nameP);
@@ -27,62 +26,121 @@ const UpdateStudent = (nav) => {
 
     const [fileList, setFileList] = useState([]);
 
+    const searchInput = useRef(null);
+    const handleSearch = (selectedKeys, confirm, dataIndex) => {
+        confirm();
+    };
+    const handleReset = (clearFilters) => {
+        clearFilters();
+    };
+    const getColumnSearchProps = (dataIndex) => ({
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+            <div
+                style={{
+                    padding: 8,
+                }}
+                onKeyDown={(e) => e.stopPropagation()}
+            >
+                <Input
+                    ref={searchInput}
+                    placeholder={`Search ${dataIndex}`}
+                    value={selectedKeys[0]}
+                    onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                    onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                    style={{
+                        marginBottom: 8,
+                        display: 'block',
+                    }}
+                />
+                <Space>
+                    <Button
+                        type="primary"
+                        onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                        icon={<SearchOutlined />}
+                        size="small"
+                        style={{
+                            width: 90,
+                        }}
+                    >
+                        Search
+                    </Button>
+                    <Button
+                        onClick={() => clearFilters && handleReset(clearFilters)}
+                        size="small"
+                        style={{
+                            width: 90,
+                        }}
+                    >
+                        Reset
+                    </Button>
+                </Space>
+            </div>
+        ),
+        filterIcon: (filtered) => (
+            <SearchOutlined
+                style={{
+                    color: filtered ? '#1677ff' : undefined,
+                }}
+            />
+        ),
+        onFilter: (value, record) =>
+            record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+        onFilterDropdownOpenChange: (visible) => {
+            if (visible) {
+                setTimeout(() => searchInput.current?.select(), 100);
+            }
+        },
+        render: (text) =>
+            text
+    });
+
     const columns = [
         {
-            title: "Tên chương trình",
-            dataIndex: "name",
-            render: (record) => (
-                <div className="text-sm">
-                    <p className="font-medium">{record}</p>
-                </div>
+            title: (
+                <Tooltip title="Thông tin chi tiết về sinh viên">
+                    Tên sinh viên
+                </Tooltip>
             ),
+            dataIndex: 'name',
+            key: 'name',
+            width: '40%',
+            ...getColumnSearchProps('name'),
+            // render: (text) => (              //tooltip từng dòng của cột
+            //   <Tooltip title="Thông tin chi tiết">
+            //     {text}
+            //   </Tooltip>
+            // ),
         },
         {
-            title: "Đã xóa",
-            dataIndex: "isDeleted",
-            render: (record) => (
-                <div className="text-sm">
-                    <p className="font-medium">{record}</p>
-                </div>
-            ),
-        }, {
-            title: (
-                <div className="flex items-center justify-center w-full">
-                    <span>Form</span>
-                    {/* <i className="fa-solid fa-bars text-[18px] ml-3"></i> */}
-                </div>
-            ),
-            dataIndex: "action",
-            render: (_id) => (
-                <div className="flex flex-col items-center justify-center w-full gap-2">
-                    <Tooltip title="Chỉnh sửa">
-                        <Button
-                            isIconOnly
-                            variant="light"
-                            radius="full"
-                            size="sm"
-                            as={Link}
-                            to={`update/${_id}`}
-
-                        >
-                            <i className="fa-solid fa-pen"></i>
-                        </Button>
-                    </Tooltip>
-                    {/* <Tooltip title="Xoá">
-                        <Button
-                            isIconOnly
-                            variant="light"
-                            radius="full"
-                            size="sm"
-                            onClick={() => { onOpen(); setDeleteId(_id);}}
-                        >
-                            <i className="fa-solid fa-trash-can"></i>
-                        </Button>
-                    </Tooltip> */}
-                </div>
-            ),
+            title: 'Mã số sinh viên',
+            dataIndex: 'studentCode',
+            key: 'studentCode',
+            width: '30%',
+            ...getColumnSearchProps('studentCode'),
+            sorter: (a, b) => parseInt(a.studentCode) - parseInt(b.studentCode),// cần quan tâm kiểu dữ liệu
+            sortDirections: ['descend', 'ascend'],
         },
-
+        {
+            title: 'Mã lớp',
+            dataIndex: 'classCode',
+            key: 'classCode',
+            filters: [
+                {
+                    text: '2020',
+                    value: "DA20",
+                },
+                {
+                    text: '2021',
+                    value: 'DA21',
+                },
+            ],
+            onFilter: (value, record) => record.classCode.startsWith(value),
+            filterSearch: true,
+            // ...getColumnSearchProps('classCode'), 
+            width: '20%',
+            // sorter: (a, b) => a.classCode - b.classCode,
+            // sortDirections: ['descend', 'ascend'],
+        },
     ];
 
     const rowSelection = {
@@ -98,30 +156,31 @@ const UpdateStudent = (nav) => {
         setSelectedRowKeys([]);
         setSelectedRow([]);
     };
-    const getAllProgram = async () => {
-        //setSpinning(true);
+    const getAllStudent = async () => {
         try {
-            const response = await axiosAdmin.get('/program');
+            const student = await axiosAdmin.get('/student-class');
+            console.log("ssssâ", student.data);
 
-            console.log(response.data)
-
-            const updatedNewsData = response.data.map((program) => {
+            const newStudents = student.data.map((student) => {
                 return {
-                    key: program.program_id,
-                    name: program.programName,
-                    isDeleted: program.isDeleted,
-                    action: program.program_id,
+                    key: student.student_id,
+                    name: student.name,
+                    studentCode: student.studentCode,
+                    class_id: student.class_id,
+                    classCode: student.Class.classCode,
+                    email: student.email,
+                    created_at: student.createdAt,
+                    updated_at: student.updatedAt,
+                    // action: student.student_id,
                 };
             });
 
-            setNewsListData(updatedNewsData);
-
-            //setSpinning(false);
-        } catch (error) {
-            console.error("Error fetching program:", error);
-            //setSpinning(false);
-        }
-    };
+            setStudentData(newStudents);
+            console.log("ssss", studentData);
+        } catch (err) {
+            console.log("Error: " + err.message);
+        };
+    }
 
 
     const handleDownloadProgram = async () => {
@@ -168,7 +227,7 @@ const UpdateStudent = (nav) => {
     const description = 'This is a description.';
     useEffect(() => {
         //allProgramIsDelete()
-        getAllProgram()
+        getAllStudent()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -268,7 +327,7 @@ const UpdateStudent = (nav) => {
                                         ...rowSelection,
                                     }}
                                     columns={columns}
-                                    dataSource={programListData}
+                                    dataSource={studentData}
                                 />
                             </div>
                         </div>

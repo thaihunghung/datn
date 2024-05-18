@@ -76,7 +76,7 @@ const CreateStudent = (nav) => {
 
     const handleDownloadStudent = async () => {
         try {
-            const response = await axiosAdmin.get('csv/student', {
+            const response = await axiosAdmin.get('form/excel/student', {
                 responseType: 'blob'
             });
 

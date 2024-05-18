@@ -15,9 +15,8 @@ import {
 } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 
-const Student = (nav) => {
-  const location = useLocation();
-  const { setCollapsedNav } = nav;
+const Student = (props) => {
+  const { setCollapsedNav, successNoti } = props;
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const [studentData, setStudentData] = useState([]);
@@ -91,13 +90,13 @@ const Student = (nav) => {
     try {
       const response = await axiosAdmin.put(`/student/isDelete/${id}`);
       if (response) {
-        console.log(response.data);
-
-        console.log(response.data.message);
+        console.log("Response data:", response.data); // Debug statement
+        getAllStudent();
+        successNoti("Chuyển vào thùng rác thành công");
       }
     } catch (err) {
       console.log("Error: " + err.message);
-    };
+    }
   }
 
   useEffect(() => {

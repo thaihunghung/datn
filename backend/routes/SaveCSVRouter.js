@@ -24,7 +24,7 @@ const upload = multer({ storage: storage });
 router.post('/program', upload.any(), ProgramsController.processUploadedFile);
 router.post('/po', upload.any(), CsvSaveController.saveFormPo);
 router.post('/plo', upload.any(), CsvSaveController.saveFormPlo);
-router.post('/student', upload.any(), StudentController.saveStudent);
+router.post('/student', upload.any(), StudentController.saveStudentExcel);
 
 router.post('/program/getByID', upload.any(), CsvUpdateController.updateFormProgram);
 router.post('/po/getByID', upload.any(), CsvUpdateController.updateFormPo);
