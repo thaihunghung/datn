@@ -77,7 +77,21 @@ function Nav(props) {
                 },
                 {
                     text: (<><i className="fa-solid fa-minus mr-3"></i>PLO</>),
-                    link: "/admin/management-plo"
+                    link: "/admin/management-plo/list",
+                    active: [
+                        "/admin/management-plo/store",
+                        "/admin/management-plo/list",
+                        "/admin/management-plo/store",
+                        "/admin/management-plo/update",
+                        "/admin/management-plo/create"
+                    ]
+                },
+                {
+                    text: (<><i className="fa-solid fa-minus mr-3"></i>PO_PLO</>),
+                    link: "/admin/po-plo",
+                    active: [
+                        "/admin/po-plo",
+                    ]
                 }
             ]
         },

@@ -117,7 +117,7 @@ const StorePlo = (nav) => {
 
     const getAllPo = async () => {
         try {
-            const response = await axiosAdmin.get('/po/isDelete/true');
+            const response = await axiosAdmin.get('/plo/isDelete/true');
             const updatedPloData = response.data.map((plo) => {
                 return {
                     key: plo.plo_id,

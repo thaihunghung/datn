@@ -3,6 +3,7 @@ const ProgramModel = require('../models/ProgramModel');
 const ExcelJS = require('exceljs');
 const fs = require('fs');
 const path = require('path');
+const PloModel = require('../models/PloModel');
 
 const PloController = {
   index: async (req, res) => {
@@ -161,7 +162,7 @@ const PloController = {
         return res.status(404).json({ message: 'One or more PLOs not found' });
       }
 
-      const updatedPlos = await Promise.all(pos.map(async (plo) => {
+      const updatedPlos = await Promise.all(plos.map(async (plo) => {
         const updatedIsDeleted = !plo.isDelete;
         await plo.update({ isDelete: updatedIsDeleted });
         return { plo_id: plo.plo_id, isDelete: updatedIsDeleted };
@@ -210,7 +211,7 @@ const PloController = {
       worksheet.columns = [
         { header: 'Mã plo (int)', key: 'plo_id', width: 20 },
         { header: 'Mã chương trình (int)', key: 'program_id', width: 20 },
-        { header: 'Tên PLO', key: 'poName', width: 20 },
+        { header: 'Tên PLO', key: 'ploName', width: 20 },
         { header: 'Mô tả', key: 'description', width: 30 },
       ];
 
@@ -219,7 +220,7 @@ const PloController = {
         worksheet.addRow({
           plo_id: element.plo_id,
           program_id: element.program_id,
-          poName: element.poName,
+          ploName: element.ploName,
           description: element.description
         });
       });
@@ -272,7 +273,7 @@ const PloController = {
       if (rowNumber > 1) {
         jsonData.push({
           program_id: row.getCell(1).value,
-          poName: row.getCell(2).value,
+          ploName: row.getCell(2).value,
           description: row.getCell(3).value,
         });
       }
@@ -280,7 +281,7 @@ const PloController = {
 
     fs.unlinkSync(filePath);
     try {
-      const createdPos = await PoModel.bulkCreate(jsonData);
+      const createdPos = await PloModel.bulkCreate(jsonData);
       res.status(201).json({ message: 'Data saved successfully', data: createdPos });
     } catch (error) {
       console.error('Error saving data to the database:', error);
@@ -312,7 +313,7 @@ const PloController = {
         updateData.push({
           plo_id: row.getCell(1).value,
           program_id: row.getCell(2).value,
-          poName: row.getCell(3).value,
+          ploName: row.getCell(3).value,
           description: row.getCell(4).value,
         });
       }
@@ -322,10 +323,10 @@ const PloController = {
 
     try {
       await Promise.all(updateData.map(async (data) => {
-        const updatedRows = await PoModel.update(
+        const updatedRows = await PloModel.update(
           {
             program_id: data.program_id,
-            poName: data.poName,
+            ploName: data.ploName,
             description: data.description
           },
           { where: { plo_id: data.plo_id } }
