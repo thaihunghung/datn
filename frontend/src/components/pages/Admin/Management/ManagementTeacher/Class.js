@@ -1,39 +1,41 @@
-// StoreStudent.js
 import React, { useEffect, useState, useRef } from "react";
 import { Button, Select, Tooltip, Input, Space, Table } from 'antd';
-import { Link } from "react-router-dom";
-import { DeleteOutlined, RedoOutlined, SearchOutlined } from '@ant-design/icons';
-import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import { Link, useLocation } from "react-router-dom";
+import { DeleteFilled, EditFilled, SearchOutlined } from '@ant-design/icons';
+import './Class.css'
+
 import {
-  Modal,
+  Modal, Chip,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter, useDisclosure
 } from "@nextui-org/react";
-import './Student.css'
-const StoreStudent = (props) => {
+import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+
+const Class = (props) => {
   const { setCollapsedNav, successNoti } = props;
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
   const [studentData, setStudentData] = useState([]);
-
-
   const [deleteId, setDeleteId] = useState(null);
-  const [toggleId, setToggleId] = useState(null);
-  const allStudentIsDelete = async () => {
-    try {
-      const student = await axiosAdmin.get('/student/isDelete/true');
+  const [classOptions, setClassOptions] = useState([]);
+  const [selectedClass, setSelectedClass] = useState('');
 
-      const newStudents = student.data.map((student) => {
+  const getAllStudent = async () => {
+    try {
+      const classes = await axiosAdmin.get('/class-teacher');
+      console.log("ssssâ", classes.data);
+
+      const newStudents = classes.data.map((classes) => {
         return {
-          key: student.student_id,
-          name: student.name,
-          studentCode: student.studentCode,
-          class_id: student.class_id,
-          classCode: student.Class.classCode,
-          email: student.email,
-          created_at: student.createdAt,
-          updated_at: student.updatedAt,
+          key: classes.class_id,
+          teacher_id: classes.teacher_id,
+          className: classes.className,
+          classCode: classes.classCode,
+          nameTeacher: classes.teacher.name,
+          created_at: classes.createdAt,
+          updated_at: classes.updatedAt,
           // action: student.student_id,
         };
       });
@@ -45,38 +47,68 @@ const StoreStudent = (props) => {
     };
   }
 
-  const handleDeleteStudent = async (id) => {
+  const getAllStudentByClass = async () => {
     try {
-      await axiosAdmin.delete(`/student/${id}`);
-      allStudentIsDelete();
-      successNoti("Xóa sinh viên thành công");
+      const student = await axiosAdmin.get(`/student/class/${selectedClass}`);
+      setStudentData(student.data)
+      console.log(student.data);
     } catch (err) {
       console.log("Error: " + err.message);
     };
   }
 
-  const handleChangeIdDelete = async (id) => {
+  const GetAllCodeClass = async () => {
+    try {
+      const response = await axiosAdmin.get('/class'); // use axios or your axiosAdmin instance
+      const options = response.data.map(classItem => ({
+        value: `${classItem.class_id.toString()}-${classItem.classCode}`,
+        label: classItem.classCode
+      }));
+      setClassOptions(options);
+      console.log(classOptions);
+    } catch (error) {
+      console.error('Lỗi khi get dữ liệu:', error);
+    }
+  };
+
+  const handleClassChange = (value) => {
+    const classId = parseInt(value.toString().charAt(0));
+    if (!isNaN(classId) || classId == selectedClass) {
+      setSelectedClass(classId);
+      console.log("select:", classId);
+      console.log("okoko2");
+    } else {
+      console.log("okoko");
+      getAllStudent();
+    }
+  };
+
+  const hangleChangeidDelete = async (id) => {
     try {
       const response = await axiosAdmin.put(`/student/isDelete/${id}`);
       if (response) {
-        allStudentIsDelete();
-        console.log(response.data.message);
-        successNoti("Khôi phục sinh viên thành công");
+        console.log("Response data:", response.data); // Debug statement
+        getAllStudent();
+        successNoti("Chuyển vào thùng rác thành công");
       }
     } catch (err) {
       console.log("Error: " + err.message);
-    };
+    }
   }
 
   useEffect(() => {
-    allStudentIsDelete()
+    getAllStudentByClass();
+  }, [selectedClass])
+
+  useEffect(() => {
+    getAllStudent();
+    GetAllCodeClass();
     const handleResize = () => {
       if (window.innerWidth < 1024) {
         setCollapsedNav(true);
       } else {
         setCollapsedNav(false);
       }
-      //console.log(window.innerWidth);
     };
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -84,6 +116,7 @@ const StoreStudent = (props) => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
   const searchInput = useRef(null);
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -154,50 +187,67 @@ const StoreStudent = (props) => {
 
   const columns = [
     {
-      title: (
-        <Tooltip title="Thông tin chi tiết về sinh viên">
-          Tên sinh viên
-        </Tooltip>
-      ),
-      dataIndex: 'name',
-      key: 'name',
-      width: '40%',
-      ...getColumnSearchProps('name'),
-      // render: (text) => (              //tooltip từng dòng của cột
-      //   <Tooltip title="Thông tin chi tiết">
-      //     {text}
-      //   </Tooltip>
-      // ),
-    },
-    {
-      title: 'Mã số sinh viên',
-      dataIndex: 'studentCode',
-      key: 'studentCode',
-      width: '30%',
-      ...getColumnSearchProps('studentCode'),
-      sorter: (a, b) => parseInt(a.studentCode) - parseInt(b.studentCode),// cần quan tâm kiểu dữ liệu
-      sortDirections: ['descend', 'ascend'],
+      title: 'STT',
+      dataIndex: 'key',
+      align: 'center',
+      width: '5%'
     },
     {
       title: 'Mã lớp',
       dataIndex: 'classCode',
       key: 'classCode',
+      align: 'center',
       filters: [
         {
-          text: '2020',
-          value: "DA20",
+          text: 'Năm học 2017',
+          value: "DA17",
         },
         {
-          text: '2021',
+          text: 'Năm học 2018',
+          value: 'DA18',
+        },
+        {
+          text: 'Năm học 2019',
+          value: "DA19",
+        },
+        {
+          text: 'Năm học 2020',
+          value: 'DA20',
+        }, {
+          text: 'Năm học 2021',
           value: 'DA21',
         },
       ],
-      // onFilter: (value, record) => record.classCode.startsWith(value),
-      // filterSearch: true,
-      ...getColumnSearchProps('classCode'), //search và filter chỉ ton tai 1 
-      width: '20%',
+      onFilter: (value, record) => record.classCode.startsWith(value),
+      filterSearch: true,
+      // ...getColumnSearchProps('classCode'), 
+      width: '15%',
       // sorter: (a, b) => a.classCode - b.classCode,
       // sortDirections: ['descend', 'ascend'],
+    },
+    {
+      title: 'Tên lớp',
+      dataIndex: 'className',
+      key: 'className',
+      width: '30%',
+      ...getColumnSearchProps('className'),
+      sorter: (a, b) => parseInt(a.className) - parseInt(b.className),// cần quan tâm kiểu dữ liệu
+      sortDirections: ['descend', 'ascend'],
+    },
+    {
+      title: 'Tên giáo viên cố vấn',
+      dataIndex: 'nameTeacher',
+      key: 'nameTeacher',
+      ...getColumnSearchProps('nameTeacher'),
+      render: (value, record) => (
+        <Link to={`teacher/${record.teacher_id}`}>
+          <div>
+            {record.nameTeacher}
+          </div>
+        </Link>
+      ),
+      align: 'center',
+      width: '20%',
     },
     {
       title: 'Hành động',
@@ -205,22 +255,19 @@ const StoreStudent = (props) => {
       key: 'action',
       render: (value, record) => (
         <Space>
-          <Tooltip title="Khôi phục sinh viên này">
+          <Tooltip title="Cập nhật thông tin sinh viên">
+            <Button icon={<EditFilled />} href="#" />
+          </Tooltip>
+          <Tooltip title="Chuyển vào thùng rác">
             <Button onClick={() => {
               onOpen();
-              setToggleId(record.key);
-              console.log("delete", record.key);
-            }} icon={<RedoOutlined />} />
-          </Tooltip>
-          <Tooltip title="Xóa vĩnh viễn">
-            <Button icon={<DeleteOutlined />} onClick={() => {
-              onOpen();
               setDeleteId(record.key);
-            }} />
+              console.log("delete", record.key);
+            }} icon={<DeleteFilled />} />
           </Tooltip>
-
         </Space>
       ),
+      align: 'center',
       width: '10%',
     }
   ];
@@ -228,50 +275,44 @@ const StoreStudent = (props) => {
   const onChange = (pagination, filters, sorter, extra) => {
     console.log('params', pagination, filters, sorter, extra);
   };
+
   return (
+
     <>
       <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
         <ConfirmAction
           onOpenChange={onOpenChange}
           isOpen={isOpen}
-          message={toggleId ?
-            "Sinh viên này sẽ khôi phục lại, bạn có muốn tiếp tục thao tác?" :
-            "Sinh viên này sẽ được xóa vĩnh viễn, bạn có muốn tiếp tục thao tác?"
-          }
           onConfirm={() => {
-            if (toggleId) {
-              handleChangeIdDelete(toggleId);
-              setDeleteId(null);
-            }
-            else {
-              handleDeleteStudent(deleteId);
+            if (deleteId) {
+              hangleChangeidDelete(deleteId);
               setDeleteId(null);
             }
           }}
         />
         <div>
           <div className="w-fit flex justify-start text-base font-bold rounded-lg mb-5">
-            <Link to={"/admin/student"} className="rounded-lg bg-blue-600 text-white">
+            <Link to={"/admin/class"} className="rounded-lg bg-blue-600">
               <div className="p-5 text-white rounded-lg">
-                DS Sinh viên
+                DS Các lớp
               </div>
             </Link>
-            <Link to={"/admin/student/store"}>
+            <Link to={"/admin/class/store"}>
               <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
                 Kho lưu trữ
               </div>
             </Link>
-            <Link to={"/admin/student/create"}>
+            <Link to={"/admin/class/create"}>
               <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
-                Thêm sinh viên
+                Thêm class
               </div>
             </Link>
-            <Link to={"/admin/student/update"}>
+            <Link to={"/admin/class/update"}>
               <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
                 Cập nhật
               </div>
             </Link>
-            {/* <Link to={"/admin/student/po-plo"}>
+            {/* <Link to={"/admin/class/po-plo"}>
             <div className="p-5 hover:bg-slate-600 hover:text-white">
               PO-PLO
             </div>
@@ -290,15 +331,17 @@ const StoreStudent = (props) => {
         }}
       />
     </>
+
   );
 }
 
+export default Class;
 
-export default StoreStudent;
 function ConfirmAction(props) {
-  const { isOpen, onOpenChange, onConfirm, message } = props;
+  const { isOpen, onOpenChange, onConfirm } = props;
   const handleOnOKClick = (onClose) => {
     onClose();
+    console.log('thanđ');
     if (typeof onConfirm === 'function') {
       onConfirm();
     }
@@ -334,7 +377,11 @@ function ConfirmAction(props) {
             <ModalHeader>Cảnh báo</ModalHeader>
             <ModalBody>
               <p className="text-[16px]">
-                {message}
+                Chương trình sẽ được chuyển vào
+                <Chip radius="sm" className="bg-zinc-200">
+                  <i class="fa-solid fa-trash-can-arrow-up mr-2"></i>
+                  Kho lưu trữ
+                </Chip> và có thể khôi phục lại, tiếp tục thao tác?
               </p>
             </ModalBody>
             <ModalFooter>
@@ -342,7 +389,7 @@ function ConfirmAction(props) {
                 Huỷ
               </Button>
               <Button color="danger" className="font-medium" onClick={() => handleOnOKClick(onClose)}>
-                Ok
+                Chuyển
               </Button>
             </ModalFooter>
           </>

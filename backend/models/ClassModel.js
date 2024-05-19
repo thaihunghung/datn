@@ -45,4 +45,8 @@ const ClassModel = sequelize.define('Class', {
   tableName: 'classes',
 });
 
+ClassModel.belongsTo(TeacherModel, {
+  foreignKey: 'teacher_id'
+});
+
 module.exports = ClassModel;

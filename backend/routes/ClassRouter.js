@@ -139,6 +139,7 @@ const router = express.Router();
 router.get('/class', ClassController.index);
 router.post('/class', ClassController.create);
 router.get('/class/:id', ClassController.getByID);
+router.get('/class-teacher', ClassController.getAllWithTeacher);
 
 router.put('/class/:id', ClassController.update);
 router.delete('/class/:id', ClassController.delete);

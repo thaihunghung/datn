@@ -151,33 +151,6 @@ const StudentController = {
       res.status(500).json({ message: 'Lỗi máy chủ' });
     }
   },
-
-  // getFormStudent: async (req, res) => {
-  //   try {
-  //     const Description = await StudentModel.describe();
-
-  //     console.log(Description);
-  //     const filteredStudent = filterDescription(Description, "Student")
-  //     if (!Description) {
-  //       return res.status(404).json({ message: 'Không tìm thấy mô tả Student' });
-  //     }
-
-  //     const csvData = json2csv(filteredStudent);
-  //     fs.writeFileSync('student.csv', csvData, 'utf8');
-  //     res.download('student.csv', 'student.csv', (err) => {
-  //       if (err) {
-  //         console.error('Lỗi khi gửi tệp:', err);
-  //         res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
-  //       } else {
-  //         fs.unlinkSync('student.csv');
-  //       }
-  //     });
-  //   } catch (error) {
-  //     console.error('Error get form Student:', error);
-  //     res.status(500).json({ message: 'Internal server error' });
-  //   }
-  // },
-
   getFormStudent: async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Students Form');

@@ -1,4 +1,3 @@
-// StoreStudent.js
 import React, { useEffect, useState, useRef } from "react";
 import { Button, Select, Tooltip, Input, Space, Table } from 'antd';
 import { Link } from "react-router-dom";
@@ -11,8 +10,8 @@ import {
   ModalBody,
   ModalFooter, useDisclosure
 } from "@nextui-org/react";
-import './Student.css'
-const StoreStudent = (props) => {
+import './Class.css'
+const StoreClass = (props) => {
   const { setCollapsedNav, successNoti } = props;
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [studentData, setStudentData] = useState([]);
@@ -251,27 +250,27 @@ const StoreStudent = (props) => {
         />
         <div>
           <div className="w-fit flex justify-start text-base font-bold rounded-lg mb-5">
-            <Link to={"/admin/student"} className="rounded-lg bg-blue-600 text-white">
-              <div className="p-5 text-white rounded-lg">
-                DS Sinh viên
+            <Link to={"/admin/class"} >
+              <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
+                DS Các lớp
               </div>
             </Link>
-            <Link to={"/admin/student/store"}>
+            <Link to={"/admin/class/store"} className="rounded-lg bg-blue-600 text-white">
               <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
                 Kho lưu trữ
               </div>
             </Link>
-            <Link to={"/admin/student/create"}>
+            <Link to={"/admin/class/create"}>
               <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
-                Thêm sinh viên
+                Thêm class
               </div>
             </Link>
-            <Link to={"/admin/student/update"}>
+            <Link to={"/admin/class/update"}>
               <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
                 Cập nhật
               </div>
             </Link>
-            {/* <Link to={"/admin/student/po-plo"}>
+            {/* <Link to={"/admin/class/po-plo"}>
             <div className="p-5 hover:bg-slate-600 hover:text-white">
               PO-PLO
             </div>
@@ -294,7 +293,7 @@ const StoreStudent = (props) => {
 }
 
 
-export default StoreStudent;
+export default StoreClass;
 function ConfirmAction(props) {
   const { isOpen, onOpenChange, onConfirm, message } = props;
   const handleOnOKClick = (onClose) => {

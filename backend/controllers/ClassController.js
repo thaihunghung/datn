@@ -1,4 +1,5 @@
 const ClassModel = require("../models/ClassModel");
+const TeacherModel = require("../models/TeacherModel");
 
 const ClassController = {
   // Lấy tất cả các lớp học
@@ -11,7 +12,23 @@ const ClassController = {
       res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
     }
   },
-  
+  getAllWithTeacher: async (req, res) => {
+    try {
+      const classes = await ClassModel.findAll({
+        include: [{
+          model: TeacherModel,
+          attributes: ['name']
+        }],
+        attributes: ['class_id','teacher_id', 'className', 'classCode', 'isDelete'],// Lọc ra các trường cần lấy
+        where: { isDelete: false }
+      });
+
+      res.json(classes);
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  },
   // Tạo một lớp học mới
   create: async (req, res) => {
     try {

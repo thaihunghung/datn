@@ -29,6 +29,12 @@ import CreateRubic from '../components/pages/Admin/Management/ManagementRubric/C
 import UpdateRubic from '../components/pages/Admin/Management/ManagementRubric/UpdateRubic';
 import Template from '../components/pages/Client/Template/Template';
 import CloChapter from '../components/pages/Admin/Management/ManagementClo/CloChapter';
+import Class from '../components/pages/Admin/Management/ManagementTeacher/Class';
+import UpdateClass from '../components/pages/Admin/Management/ManagementTeacher/UpdateClass';
+import StoreClass from '../components/pages/Admin/Management/ManagementTeacher/StoreClass';
+import UpdateClassById from '../components/pages/Admin/Management/ManagementTeacher/UpdateClassById';
+import CreateClass from '../components/pages/Admin/Management/ManagementTeacher/CreateClass';
+
 
 function Admin(props) {
 
@@ -92,7 +98,12 @@ function Admin(props) {
           <Route path="/student/update/:id" element={<UpdateStudentById collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/student/store" element={<StoreStudent collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
-          
+          <Route path="/class" element={<Class collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
+          <Route path="/class/create" element={<CreateClass collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/class/update" element={<UpdateClass collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/class/update/:id" element={<UpdateClassById collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/class/store" element={<StoreClass collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+
         </Routes> 
       </div>
     </div>
