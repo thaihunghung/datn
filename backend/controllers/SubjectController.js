@@ -1,5 +1,6 @@
 const SubjectModel = require("../models/SubjectModel");
 const CloModel = require("../models/CloModel");
+const ChapterModel = require("../models/ChapterModel");
 
 const SubjectController = {
   index: async (req, res) => {
@@ -101,7 +102,24 @@ const SubjectController = {
 
   isDeleteTofalse: async (req, res) => {
     try {
-      const activeSubjects = await SubjectModel.findAll({ where: { isDelete: false } });
+      const activeSubjects = await SubjectModel.findAll({
+        where: { isDelete: false }
+      });
+      const subjectIds = activeSubjects.map(subject => subject.subject_id);
+      const Clos = await CloModel.findAll({ where: {subject_id: subjectIds}});
+      const Chapter = await ChapterModel.findAll({ where: {subject_id: subjectIds}});
+
+
+      for (const subject of activeSubjects) { 
+        const closForSubject = Clos.filter(clos => clos.subject_id === subject.subject_id);
+        const ChapterForSubject = Chapter.filter(Chapter => Chapter.subject_id === subject.subject_id);
+        subject.dataValues.CLO = closForSubject;
+        subject.dataValues.CHAPTER = ChapterForSubject;
+      }
+      
+      //activeSubjects.dataValues.CLO = Clos;
+      //activeSubjects.dataValues.CHAPTER = Chapter;
+
       res.status(200).json(activeSubjects);
     } catch (error) {
       console.error('Error fetching active subjects:', error);

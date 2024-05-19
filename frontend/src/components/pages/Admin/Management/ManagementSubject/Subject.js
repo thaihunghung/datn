@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { Table, Tooltip, Button, message } from 'antd';
 import { Link, useLocation } from "react-router-dom";
-// import "./Po.css"
 import {
   useDisclosure
 } from "@nextui-org/react";
@@ -51,22 +50,81 @@ const Subject = (nav) => {
     // },
     {
       title: "CĐR học phần",
-      dataIndex: "action",
-      render: (_id) => (
-        <Link to={`/admin/management-subject/${_id}/clo/update`}>
-            <Tooltip title="Chỉnh sửa">
-              <Button
-                isIconOnly
-                variant="light"
-                radius="full"
-                size="sm"
-              >
-               Clo  <i className="fa-solid fa-pen ml-2"></i>
-              </Button>
-            </Tooltip>
-          </Link>
-      ),  
+      dataIndex: "clos",
+      render: (clos) => (
+        <div>
+          {clos.check ? (
+            <Link to={`/admin/management-subject/${clos.id}/clo/update`}>
+              {/* <Tooltip title="Chỉnh sửa"> */}
+                <Button
+                  isIconOnly
+                  variant="light"
+                  radius="full"
+                  size="sm"
+                >
+                  Cập nhật 
+                  {/* <i className="fa-solid fa-pen ml-2"></i> */}
+                </Button>
+              {/* </Tooltip> */}
+            </Link>
+          ) : (
+            <Link to={`/admin/management-subject/${clos.id}/clo/create`}>
+              {/* <Tooltip title="Tạo mới"> */}
+                <Button
+                  isIconOnly
+                  variant="light"
+                  radius="full"
+                  size="sm"
+                >
+                  Tạo mới 
+                  {/* <i className="fa-solid fa-pen ml-2"></i> */}
+                </Button>
+              {/* </Tooltip> */}
+            </Link>
+          )}
+        </div>
+      ),
     },
+    {
+      title: "Chương",
+      dataIndex: "chapters",
+      render: (clos) => (
+        <div>
+          {clos.checkChapter ? (
+            <Link to={`/admin/management-subject/${clos.id}/clo/update`}>
+            <Tooltip title={clos.checkCLo===false?"Vui lòng nhập Clo trước":"" }> 
+                <Button
+                  isIconOnly
+                  variant="light"
+                  radius="full"
+                  size="sm"
+                  disabled={!clos.checkCLo}
+                >
+                  Cập nhật 
+              {/* <i className="fa-solid fa-pen ml-2"></i> */}
+                </Button>
+             </Tooltip> 
+            </Link>
+          ) : (
+            <Link to={`/admin/management-subject/${clos.id}/clo/create`}>
+            <Tooltip title={clos.checkCLo===false?"Vui lòng nhập Clo trước":"" }> 
+                <Button
+                  isIconOnly
+                  variant="light"
+                  radius="full"
+                  size="sm"
+                  disabled={!clos.checkCLo}
+                >
+                  Tạo mới 
+                  {/* <i className="fa-solid fa-pen ml-2"></i> */}
+                </Button>
+              </Tooltip> 
+            </Link>
+          )}
+        </div>
+      ),
+    },
+    
     {
       title: "TL",
       dataIndex: "numberCreditsTheory",
@@ -149,15 +207,28 @@ const Subject = (nav) => {
     try {
       const response = await axiosAdmin.get('/subject/isDelete/false');
       const updatedPoData = response.data.map((subject) => {
+        const clos = {
+          id: subject.subject_id,
+          check: subject.CLO.length > 0 ? true : false
+        };
+  
+        const chapters = {
+          id: subject.subject_id,
+          checkCLo: subject.CLO.length > 0 ? true : false,
+          checkChapter: subject.CHAPTER.length > 0 ? true : false
+        }; 
+        
         return {
           key: subject.subject_id,
           name: subject.subjectName,
           description: subject.description,
           numberCredits: subject.numberCredits,
+          clos: clos,
+          chapters: chapters,
           numberCreditsTheory: subject.numberCreditsTheory,
           numberCreditsPractice: subject.numberCreditsPractice,
           typesubject: subject.typesubject,
-          action: subject.subject_id,
+          action: subject.subject_id
         };
       });
       setSubjects(updatedPoData);
@@ -167,6 +238,7 @@ const Subject = (nav) => {
       message.error('Error fetching PO data');
     }
   };
+  
 
   const handleSoftDelete = async () => {
     const data = {
@@ -237,9 +309,9 @@ const Subject = (nav) => {
               </div>
             </div>
           </Link>
-          <Link to="/admin/management-po/create">
+          <Link to="/admin/management-subject/create">
             <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-              <div className={` ${isActive("/admin/management-subject/list") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+              <div className={` ${isActive("/admin/management-subject/create") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
                 Tạo mới
               </div>
             </div>

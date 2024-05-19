@@ -44,5 +44,6 @@ const ChapterModel = sequelize.define('Chapter', {
   updatedAt: 'updatedAt',
   tableName: 'chapters'
 });
+ChapterModel.belongsTo(SubjectModel, { foreignKey: 'subject_id' });
 
 module.exports = ChapterModel;
