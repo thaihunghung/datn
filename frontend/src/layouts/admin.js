@@ -33,6 +33,9 @@ import Subject from '../components/pages/Admin/Management/ManagementSubject/Subj
 import Clo from '../components/pages/Admin/Management/ManagementSubject/Clo';
 import CreateClo from '../components/pages/Admin/Management/ManagementSubject/CreateClo';
 import CloPlo from '../components/pages/Admin/Management/ManagementSubject/CloPlo';
+import Chapter from '../components/pages/Admin/Management/ManagementSubject/Chapter';
+import ChapterClo from '../components/pages/Admin/Management/ManagementSubject/ChapterClo';
+import UpdateClo from '../components/pages/Admin/Management/ManagementSubject/UpdateClo';
 
 function Admin(props) {
 
@@ -83,8 +86,16 @@ function Admin(props) {
 
           <Route path="/management-subject/list" element={<Subject collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-subject/:id/clo/update" element={<Clo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/management-subject/:id/clo/update/:clo_id" element={<UpdateClo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          
+          
           <Route path="/management-subject/:id/clo/create" element={<CreateClo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
-          <Route path="/management-subject/:id/clo-plo/" element={<CloPlo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/management-subject/:id/clo-plo" element={<CloPlo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+
+          <Route path="/management-subject/:id/chapter/update" element={<Chapter collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          
+          
+          <Route path="/management-subject/:id/chapter-clo" element={<ChapterClo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
           <Route path="/management-clo/plo-clo" element={<PloClo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-clo/clo-chapter" element={<CloChapter collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />

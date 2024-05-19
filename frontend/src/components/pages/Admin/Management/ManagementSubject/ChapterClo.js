@@ -3,18 +3,18 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { Tooltip, message } from 'antd';
 import { Button } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-const CloPlo = (nav) => {
+const ChapterClo = (nav) => {
     const location = useLocation();
     const isActive = (path) => location.pathname.startsWith(path);
     const { id } = useParams();
     const { setCollapsedNav } = nav;
 
     const [clos, setClos] = useState([]);
-    const [plos, setPlos] = useState([]);
-    const [PloClos, setPloClos] = useState([]);
-    const [comparePloClos, setComparePloClos] = useState([]);
+    const [chapters, setChapter] = useState([]);
+    const [ChapterClos, setChapterClos] = useState([]);
+    const [compareChapterClos, setCompareChapterClos] = useState([]);
 
-    const [CloArr, setCloArr] = useState([]);
+    const [ChapterArr, setChapterArr] = useState([]);
 
 
     const GetAllClo = async () => {
@@ -28,74 +28,45 @@ const CloPlo = (nav) => {
         }
     };
 
-    const GetArrCloBySubjectID = async () => {
+    const GetArrChapterBySubjectID = async () => {
         try {
-            const response = await axiosAdmin.get(`/subject/${id}/clo-ids`);
-            setCloArr(response.data);
-            //console.log(response.data);
+            const response = await axiosAdmin.get(`/subject/${id}/chapter-ids`);
+            setChapterArr(response.data);
+            //console.log(response.data); 
             //message.success('CLOs fetched successfully.');
         } catch (error) {
-            console.error('Error fetching CLOs:', error);
+            console.error('Error fetching chapters:', error);
             if (error.response && error.response.status === 404) {
-                message.error('No CLOs found for the given subject ID.');
+                message.error('No chapters found for the given subject ID.');
             } else {
-                message.error('An error occurred while fetching CLOs.');
+                message.error('An error occurred while fetching chapters.');
             }
         }
     };
 
     const GetAllPlo = async () => {
         try {
-            const response = await axiosAdmin.get('/plo/isDelete/false');
-            setPlos(response.data)
+            const response = await axiosAdmin.get(`/chapter/subject/${id}`);
+            setChapter(response.data)
         } catch (error) {
             console.error('Error fetching PLOs:', error);
         }
     };
     const handleSaveOrDelete = async () => {
-        // let luu = [];
-        // let xoa = [];
-        // luu = compareCloPlos.filter(compareItem => {
-        //     return !poPlos.some(poPloItem => poPloItem.clo_id === compareItem.clo_id && poPloItem.plo_id === compareItem.plo_id);
-        // });
 
-        // xoa = poPlos.filter(poPloItem => {
-        //     return !compareCloPlos.some(compareItem => compareItem.clo_id === poPloItem.clo_id && compareItem.plo_id === poPloItem.plo_id);
-        // });
-
-        // if (luu.length > 0) {
-        //     try {
-        //       const response = await axiosAdmin.clost('/po-plo', { dataSave: luu });
-        //       message.success(response.data.message);
-        //     } catch (error) {
-        //       console.error("Error:", error);
-        //       message.error(error.response?.data?.message || 'Error saving data');
-        //     }
-        //   }
-
-        //   if (xoa.length > 0) {
-        //     try {
-        //       const response = await axiosAdmin.delete('/po-plo', { data: { dataDelete: xoa } });
-        //       message.success(response.data.message);
-        //     } catch (error) {
-        //       console.error("Error:", error);
-        //       message.error(error.response?.data?.message || 'Error deleting data');
-        //     }
-        //   }
         let luu = [];
         let xoa = [];
-        luu = comparePloClos.filter(compareItem => {
-
-            return !PloClos.some(cloPloItem => cloPloItem.clo_id === compareItem.clo_id && cloPloItem.plo_id === compareItem.plo_id);
+        luu = compareChapterClos.filter(compareItem => {
+            return !ChapterClos.some(cloPloItem => cloPloItem.clo_id === compareItem.clo_id && cloPloItem.chapter_id === compareItem.chapter_id);
         });
 
-        xoa = PloClos.filter(cloPloItem => {
-            return !comparePloClos.some(compareItem => compareItem.clo_id === cloPloItem.clo_id && compareItem.plo_id === cloPloItem.plo_id);
+        xoa = ChapterClos.filter(cloPloItem => {
+            return !compareChapterClos.some(compareItem => compareItem.clo_id === cloPloItem.clo_id && compareItem.chapter_id === cloPloItem.chapter_id);
         });
-
+        console.log(xoa)
         if (luu.length > 0) {
             try {
-                const response = await axiosAdmin.post('/plo-clo', { dataSave: luu });
+                const response = await axiosAdmin.post('/clo-chapter', { dataSave: luu });
                 message.success(response.data.message);
             } catch (error) {
                 console.error("Error:", error);
@@ -105,7 +76,7 @@ const CloPlo = (nav) => {
 
         if (xoa.length > 0) {
             try {
-                const response = await axiosAdmin.delete('/plo-clo', { data: { dataDelete: xoa } });
+                const response = await axiosAdmin.delete('/clo-chapter', { data: { dataDelete: xoa } });
                 message.success(response.data.message);
             } catch (error) {
                 console.error("Error:", error);
@@ -113,37 +84,36 @@ const CloPlo = (nav) => {
             }
         }
     }
-    const GetAllCloPlo = async () => {
+    const GetAllChapterClo = async () => {
         try {
-            //CloArr is []
+            //ChapterArr is []
             const data = {
-                id_clos: CloArr
+                id_Chapters: ChapterArr
             }
-            const response = await axiosAdmin.post('/plo-clo/id_clos', { data: data });
-            console.log(response.data);
-            console.log("hi");
-            const po_plo_ids = response.data.map(item => ({ plo_id: item.plo_id, clo_id: item.clo_id }));
-            console.log(po_plo_ids)
+            console.log(data);
+            const response = await axiosAdmin.post('/clo-chapter/id_Chapters', { data: data });
 
-            setPloClos(response.data.map(item => ({ id_plo_clo: item.id_plo_clo, clo_id: item.clo_id, plo_id: item.plo_id })));
-            setComparePloClos(response.data.map(item => ({ clo_id: item.clo_id, plo_id: item.plo_id })))
+            const id_clo_chapters = response.data.map(item => ({ chapter_id: item.chapter_id, clo_id: item.clo_id }));
+            console.log(id_clo_chapters)
+
+            setChapterClos(response.data.map(item => ({ id_clo_chapter: item.id_clo_chapter, clo_id: item.clo_id, chapter_id: item.chapter_id })));
+            setCompareChapterClos(response.data.map(item => ({ clo_id: item.clo_id, chapter_id: item.chapter_id })))
         } catch (error) {
             console.error('Error fetching PO-PLO mappings:', error);
         }
     };
 
-    // Hàm xử lý thay đổi trạng thái của checkbox
-    const handleCheckboxChange = (plo_id, clo_id, checked) => {
+    const handleCheckboxChange = (chapter_id, clo_id, checked) => {
         if (checked) {
-            setComparePloClos([...comparePloClos, { plo_id, clo_id }]);
+            setCompareChapterClos([...compareChapterClos, { chapter_id, clo_id }]);
         } else {
-            setComparePloClos(comparePloClos.filter(item => !(item.plo_id === plo_id && item.clo_id === clo_id)));
+            setCompareChapterClos(compareChapterClos.filter(item => !(item.chapter_id === chapter_id && item.clo_id === clo_id)));
         }
     };
 
     useEffect(() => {
         GetAllClo();
-        GetArrCloBySubjectID()
+        GetArrChapterBySubjectID()
         GetAllPlo();
 
         const handleResize = () => {
@@ -161,40 +131,30 @@ const CloPlo = (nav) => {
     }, []);
     useEffect(() => {
 
-        GetAllCloPlo();
+        GetAllChapterClo();
 
-    }, [CloArr]);
+    }, [ChapterArr]);
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 relative">
-            <div className="w-fit px-5 flex border justify-start text-base font-bold rounded-lg">
-                <Link to={`/admin/management-subject/list`}>
-                    <Tooltip title="Quay lại" color={'#ff9908'}>
-                        <div className="p-5">
-                            <i class="fa-solid fa-arrow-left text-xl"></i>
-                        </div>
-                    </Tooltip>
-                </Link>
-
-                <Link to={`/admin/management-subject/${id}/clo/update`}>
+            <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
+                <Link to={`/admin/management-subject/${id}/chapter/update`}>
                     <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/clo/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                            Danh sách CLO
+                        <div className={` ${isActive(`/admin/management-subject/${id}/chapter/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                            Danh sách CHAPTER
                         </div>
                     </div>
                 </Link>
-
-                <Link to={`/admin/management-subject/${id}/clo-plo`}>
+                <Link to={`/admin/management-subject/${id}/chapter-clo`}>
                     <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/clo-plo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                            CLO_PLO
+                        <div className={` ${isActive(`/admin/management-subject/${id}/chapter-clo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                            CHAPTER_CLO
                         </div>
                     </div>
                 </Link>
-
-                <Link to={`/admin/management-subject/${id}/clo/create`}>
+                <Link to={`/admin/management-subject/${id}/chapter/create`}>
                     <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/clo/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                        <div className={` ${isActive(`/admin/management-subject/${id}/chapter/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
                             Tạo mới
                         </div>
                     </div>
@@ -227,36 +187,36 @@ const CloPlo = (nav) => {
                         <thead>
                             <tr>
                                 <th className="p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 hidden sm:block lg:block xl:block bg-[#475569]  text-[#fefefe]">CLO</th>
-                                {plos.map((plo_item, index) => (
+                                {clos.map((clo_item, index) => (
                                     <th key={index} className="p-2 lg:w-[8%] xl:w-[8%] text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-[#475569]  text-[#fefefe]">
-                                        <Tooltip title={plo_item.description} color={'#ff9908'}>
-                                            <span>{plo_item.ploName}</span>
+                                        <Tooltip title={clo_item.description} color={'#ff9908'}>
+                                            <span>{clo_item.cloName}</span>
                                         </Tooltip>
                                     </th>
                                 ))}
                             </tr>
                         </thead>
                         <tbody>
-                            {clos.map((clo_item, index) => (
+                            {chapters.map((chapter_item, index) => (
                                 <tr key={index} className="w-full h-full">
                                     <td className="border p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 hidden sm:block lg:block xl:block">
-                                        <Tooltip title={clo_item.description} color={'#ff9908'}>
-                                            <span>{clo_item.cloName}</span>
+                                        <Tooltip title={chapter_item.description} color={'#ff9908'}>
+                                            <span>{chapter_item.chapterName}</span>
                                         </Tooltip>
                                     </td>
-                                    {plos.map((plo_item) => {
-                                        const isFound = comparePloClos.some(
-                                            (item) => item.plo_id === plo_item.plo_id && item.clo_id === clo_item.clo_id
+                                    {clos.map((clo_item) => {
+                                        const isFound = compareChapterClos.some(
+                                            (item) => item.chapter_id === chapter_item.chapter_id && item.clo_id === clo_item.clo_id
                                         );
                                         const found = isFound ? true : false;
                                         return (
-                                            <td key={plo_item.plo_id} className="border p-2 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">
+                                            <td key={clo_item.clo_id} className="border p-2 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">
                                                 <input
                                                     type="checkbox"
                                                     checked={found}
                                                     onChange={(e) => {
                                                         const isChecked = e.target.checked;
-                                                        handleCheckboxChange(plo_item.plo_id, clo_item.clo_id, isChecked);
+                                                        handleCheckboxChange(chapter_item.chapter_id, clo_item.clo_id, isChecked);
                                                     }}
                                                     className="form-checkbox h-5 w-5 text-blue-600"
                                                 />
@@ -284,4 +244,4 @@ const CloPlo = (nav) => {
 }
 
 
-export default CloPlo;
+export default ChapterClo;

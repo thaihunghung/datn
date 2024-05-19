@@ -18,7 +18,7 @@ import {
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
 
-const Clo = (nav) => {
+const Chapter = (nav) => {
     const location = useLocation();
     const isActive = (path) => location.pathname.startsWith(path);
     const { id } = useParams();
@@ -40,7 +40,7 @@ const Clo = (nav) => {
     const [fileList, setFileList] = useState([]);
     const columns = [
         {
-            title: "Tên PO",
+            title: "Tên Chương",
             dataIndex: "name",
             render: (record) => (
                 <div className="text-sm">
@@ -66,7 +66,7 @@ const Clo = (nav) => {
             dataIndex: "action",
             render: (_id) => (
                 <div className="flex items-center justify-center w-full gap-2">
-                    <Link to={`/admin/management-subject/${id}/clo/update/${_id}`}>
+                    <Link to={`/admin/management-po/update/${_id}`}>
                         <Tooltip title="Chỉnh sửa">
                             <Button
                                 isIconOnly
@@ -113,14 +113,14 @@ const Clo = (nav) => {
     };
     const getAllClo = async () => {
         try {
-            const response = await axiosAdmin.get(`/clo/subject/${id}`);
+            const response = await axiosAdmin.get(`/chapter/subject/${id}`);
             const updatedPoData = response.data.map((po) => {
                 return {
-                    key: po.clo_id,
-                    name: po.cloName,
+                    key: po.chapter_id,
+                    name: po.chapterName,
                     description: po.description,
                     isDeleted: po.isDelete,
-                    action: po.clo_id,
+                    action: po.chapter_id,
                 };
             });
             setPosListData(updatedPoData);
@@ -133,28 +133,29 @@ const Clo = (nav) => {
 
     const handleSoftDelete = async () => {
         const data = {
-            clo_id: selectedRowKeys,
+            po_id: selectedRowKeys,
         };
+        console.log(data)
         try {
-            const response = await axiosAdmin.put('/clo/listId/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/po/listId/soft-delete-multiple', { data });
             await getAllClo();
             handleUnSelect();
             message.success(response.data.message);
         } catch (error) {
-            console.error("Error soft deleting Clos:", error);
-            message.error('Error soft deleting Clos');
+            console.error("Error soft deleting POs:", error);
+            message.error('Error soft deleting POs');
         }
     };
 
     const handleSoftDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/clo/${_id}/toggle-soft-delete`);
+            const response = await axiosAdmin.put(`/po/${_id}/toggle-soft-delete`);
             await getAllClo();
             handleUnSelect();
             message.success(response.data.message);
         } catch (error) {
-            console.error(`Error toggling soft delete for Clo with ID ${_id}:`, error);
-            message.error(`Error toggling soft delete for Clo with ID ${_id}`);
+            console.error(`Error toggling soft delete for PO with ID ${_id}:`, error);
+            message.error(`Error toggling soft delete for PO with ID ${_id}`);
         }
     };
 
@@ -233,51 +234,40 @@ const Clo = (nav) => {
                     }
                 }}
             />
-
-            <div className="w-fit flex border px-5 justify-start text-base font-bold rounded-lg">
-                <Link to={`/admin/management-subject/list`}>
-                    <Tooltip title="Quay lại" color={'#ff9908'}>
-                        <div className="p-5">
-                            <i class="fa-solid fa-arrow-left text-xl"></i>
+           <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
+                    <Link to={`/admin/management-subject/${id}/chapter/update`}>
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                Danh sách CHAPTER
+                            </div>
                         </div>
-                    </Tooltip>
-                </Link>
-
-                <Link to={`/admin/management-subject/${id}/clo/update`}>
-                    <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/clo/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                            Danh sách CLO
+                    </Link>
+                    <Link to={`/admin/management-subject/${id}/chapter-clo`}>
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter-clo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                CHAPTER_CLO
+                            </div>
                         </div>
-                    </div>
-                </Link>
-
-                <Link to={`/admin/management-subject/${id}/clo-plo`}>
-                    <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/clo-plo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                            CLO_PLO
+                    </Link>
+                    <Link to={`/admin/management-subject/${id}/chapter/create`}>
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                                Tạo mới
+                            </div>
                         </div>
-                    </div>
-                </Link>
-
-                <Link to={`/admin/management-subject/${id}/clo/create`}>
-                    <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/clo/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                            Tạo mới
-                        </div>
-                    </div>
-                </Link>
-            </div>
+                    </Link>
+                </div>
             <div className="w-full my-5 px-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
                         <p className="text-sm font-medium">
                             <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
-                            Đã chọn {selectedRow.length} clo
+                            Đã chọn {selectedRow.length} bài viết
                         </p>
                         <div className="flex items-center gap-2">
 
                             <Tooltip
-                                title={`Xoá ${selectedRowKeys.length} clo`}
+                                title={`Xoá ${selectedRowKeys.length} bài viết`}
                                 getPopupContainer={() =>
                                     document.querySelector(".Quick__Option")
                                 }
@@ -325,7 +315,7 @@ const Clo = (nav) => {
 }
 
 
-export default Clo;
+export default Chapter;
 function ConfirmAction(props) {
     const { isOpen, onOpenChange, onConfirm } = props;
     const handleOnOKClick = (onClose) => {

@@ -88,17 +88,17 @@ const Subject = (nav) => {
     {
       title: "Chương",
       dataIndex: "chapters",
-      render: (clos) => (
+      render: (Chapters) => (
         <div>
-          {clos.checkChapter ? (
-            <Link to={`/admin/management-subject/${clos.id}/clo/update`}>
-            <Tooltip title={clos.checkCLo===false?"Vui lòng nhập Clo trước":"" }> 
+          {Chapters.checkChapter ? (
+            <Link to={`/admin/management-subject/${Chapters.id}/chapter/update`}>
+            <Tooltip title={Chapters.checkCLo===false?"Vui lòng nhập Clo trước":"" }> 
                 <Button
                   isIconOnly
                   variant="light"
                   radius="full"
                   size="sm"
-                  disabled={!clos.checkCLo}
+                  disabled={!Chapters.checkCLo}
                 >
                   Cập nhật 
               {/* <i className="fa-solid fa-pen ml-2"></i> */}
@@ -106,14 +106,14 @@ const Subject = (nav) => {
              </Tooltip> 
             </Link>
           ) : (
-            <Link to={`/admin/management-subject/${clos.id}/clo/create`}>
-            <Tooltip title={clos.checkCLo===false?"Vui lòng nhập Clo trước":"" }> 
+            <Link to={`/admin/management-subject/${Chapters.id}/chapter/create`}>
+            <Tooltip title={Chapters.checkCLo===false?"Vui lòng nhập Clo trước":"" }> 
                 <Button
                   isIconOnly
                   variant="light"
                   radius="full"
                   size="sm"
-                  disabled={!clos.checkCLo}
+                  disabled={!Chapters.checkCLo}
                 >
                   Tạo mới 
                   {/* <i className="fa-solid fa-pen ml-2"></i> */}

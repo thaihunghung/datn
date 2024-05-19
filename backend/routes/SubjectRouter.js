@@ -8,6 +8,7 @@ router.get('/subject', SubjectController.index);
 router.post('/subject', SubjectController.create);
 router.get('/subject/:id', SubjectController.getByID);
 router.get('/subject/:id/clo-ids', SubjectController.getArrayIDCloBySubjectId);
+router.get('/subject/:id/chapter-ids', SubjectController.getArrayIDChapterBySubjectId);
 
 router.put('/subject/:id', SubjectController.update);
 router.delete('/subject/:id', SubjectController.delete);

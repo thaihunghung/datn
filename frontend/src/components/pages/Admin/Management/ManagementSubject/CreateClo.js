@@ -95,44 +95,38 @@ const CreateClo = (nav) => {
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
-            <div className="flex justify-between px-5 w-full items-center">
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={`/admin/management-subject/${id}/clo/update`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/clo/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                Danh sách CLO
-                            </div>
+            <div className="w-fit px-5 flex border justify-start text-base font-bold rounded-lg">
+                <Link to={`/admin/management-subject/list`}>
+                    <Tooltip title="Quay lại" color={'#ff9908'}>
+                        <div className="p-5">
+                            <i class="fa-solid fa-arrow-left text-xl"></i>
                         </div>
-                    </Link>
-                    <Link to={`/admin/management-subject/${id}/clo-plo/`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/clo-plo/`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                CLO_PLO
-                            </div>
-                        </div>
-                    </Link>
-                    <Link to={`/admin/management-subject/${id}/clo/create`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/clo/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                                Tạo mới
-                            </div>
-                        </div>
-                    </Link>
-                </div>
-                <div>
-                    <Link to="/admin/management-po/store">
-                        <Tooltip title="Xoá">
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
+                    </Tooltip>
+                </Link>
 
-                            >
-                                 <span className="text-base">Kho lưu trữ </span><i className="fa-solid ml-2 fa-trash-can"></i>
-                            </Button>
-                        </Tooltip></Link>
-                </div>
+                <Link to={`/admin/management-subject/${id}/clo/update`}>
+                    <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                        <div className={` ${isActive(`/admin/management-subject/${id}/clo/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                            Danh sách CLO
+                        </div>
+                    </div>
+                </Link>
+
+                <Link to={`/admin/management-subject/${id}/clo-plo`}>
+                    <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                        <div className={` ${isActive(`/admin/management-subject/${id}/clo-plo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                            CLO_PLO
+                        </div>
+                    </div>
+                </Link>
+
+                <Link to={`/admin/management-subject/${id}/clo/create`}>
+                    <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+                        <div className={` ${isActive(`/admin/management-subject/${id}/clo/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                            Tạo mới
+                        </div>
+                    </div>
+                </Link>
             </div>
             <div className="w-full mt-5 px-5 rounded-lg">
                 <Tabs tabs=
@@ -208,7 +202,7 @@ const CreateClo = (nav) => {
                                                 <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
                                                     <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
                                                         <div><p className='w-full text-center'>Lưu Dữ liệu</p></div>
-                                                        <CustomUpload endpoint={'clo'} method={'POST'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
+                                                        <CustomUpload endpoint={'clo'} method={'POST'} Data={parseInt(id)} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
                                                     </div>
                                                 </div>
                                             </div>

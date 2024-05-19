@@ -37,27 +37,45 @@ const SubjectController = {
       res.status(500).json({ message: 'Internal server error' });
     }
   },
+
   getArrayIDCloBySubjectId: async (req, res) => {
     try {
-        const { id } = req.params;
-        const clos = await CloModel.findAll({
-            where: { subject_id: id },
-            attributes: ['clo_id'] 
-        });
+      const { id } = req.params;
+      const clos = await CloModel.findAll({
+        where: { subject_id: id },
+        attributes: ['clo_id']
+      });
 
-        if (clos.length === 0) {
-            return res.status(404).json({ message: 'No CLOs found for the given subject ID' });
-        }
+      if (clos.length === 0) {
+        return res.status(404).json({ message: 'No CLOs found for the given subject ID' });
+      }
 
-        const cloIds = clos.map(clo => clo.clo_id);
-        res.status(200).json(cloIds);
+      const cloIds = clos.map(clo => clo.clo_id);
+      res.status(200).json(cloIds);
     } catch (error) {
-        console.error('Error fetching CLOs by subject ID:', error);
-        res.status(500).json({ message: 'An error occurred while fetching CLOs' });
+      console.error('Error fetching CLOs by subject ID:', error);
+      res.status(500).json({ message: 'An error occurred while fetching CLOs' });
     }
-},
+  },
+  
+  getArrayIDChapterBySubjectId: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const Chapters = await ChapterModel.findAll({
+        where: { subject_id: id },
+        attributes: ['chapter_id']
+      });
 
-
+      if (Chapters.length === 0) {
+        return res.status(404).json({ message: 'No Chapters found for the given subject ID' });
+      }
+      const ChapterIds = Chapters.map(Chapter => Chapter.chapter_id);
+      res.status(200).json(ChapterIds);
+    } catch (error) {
+      console.error('Error fetching Chapters by subject ID:', error);
+      res.status(500).json({ message: 'An error occurred while fetching Chapters' });
+    }
+  },
 
   update: async (req, res) => {
     try {
@@ -106,17 +124,17 @@ const SubjectController = {
         where: { isDelete: false }
       });
       const subjectIds = activeSubjects.map(subject => subject.subject_id);
-      const Clos = await CloModel.findAll({ where: {subject_id: subjectIds}});
-      const Chapter = await ChapterModel.findAll({ where: {subject_id: subjectIds}});
+      const Clos = await CloModel.findAll({ where: { subject_id: subjectIds } });
+      const Chapter = await ChapterModel.findAll({ where: { subject_id: subjectIds } });
 
 
-      for (const subject of activeSubjects) { 
+      for (const subject of activeSubjects) {
         const closForSubject = Clos.filter(clos => clos.subject_id === subject.subject_id);
         const ChapterForSubject = Chapter.filter(Chapter => Chapter.subject_id === subject.subject_id);
         subject.dataValues.CLO = closForSubject;
         subject.dataValues.CHAPTER = ChapterForSubject;
       }
-      
+
       //activeSubjects.dataValues.CLO = Clos;
       //activeSubjects.dataValues.CHAPTER = Chapter;
 

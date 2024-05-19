@@ -1,7 +1,7 @@
 const ChapterModel = require('../models/ChapterModel');
+const SubjectModel = require('../models/SubjectModel');
 
 const ChapterController = {
-  // Get all chapters
   index: async (req, res) => {
     try {
       const chapters = await ChapterModel.findAll();
@@ -11,7 +11,6 @@ const ChapterController = {
       res.status(500).json({ message: 'Internal server error' });
     }
   },
-  // Create a new chapter
   create: async (req, res) => {
     try {
       const { data } = req.body;
@@ -22,7 +21,6 @@ const ChapterController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
-  // Get chapter by ID
   getByID: async (req, res) => {
     try {
       const { id } = req.params;
@@ -38,9 +36,12 @@ const ChapterController = {
   },
   GetChapterBySubjectId: async (req, res) => {
     try {
-
       const { subject_id } = req.params;
-      const chapter = await ChapterModel.findAll({ where: { subject_id: subject_id } });
+      const chapter = await ChapterModel.findAll({ where: { subject_id: subject_id, isDelete: false },
+        include: [{
+          model: SubjectModel,
+          attributes: ['subject_id', 'subjectName']
+        }] });
       if (!chapter) {
         return res.status(404).json({ message: 'Chapter not found' });
       }
@@ -50,7 +51,6 @@ const ChapterController = {
       res.status(500).json({ message: 'Server error' });
     }
   }, 
-  // Update chapter
   update: async (req, res) => {
     try {
       const { id } = req.params;
@@ -66,7 +66,6 @@ const ChapterController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
-  // Delete chapter
   delete: async (req, res) => {
     try {
       const { id } = req.params;
@@ -77,7 +76,6 @@ const ChapterController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
-  // Get chapters with isDelete = true
   isDeleteTotrue: async (req, res) => {
     try {
       const chapters = await ChapterModel.findAll({ where: { isDelete: true } });
@@ -90,7 +88,6 @@ const ChapterController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
-  // Get chapters with isDelete = false
   isDeleteTofalse: async (req, res) => {
     try {
       const chapters = await ChapterModel.findAll({ where: { isDelete: false } });
@@ -103,7 +100,7 @@ const ChapterController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
-  // Toggle isDelete status of a chapter
+
   isdelete: async (req, res) => {
     try {
       const { id } = req.params;

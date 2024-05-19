@@ -42,4 +42,6 @@ const MapCloChapterModel = sequelize.define('MapCloChapter', {
   tableName: 'map_clo_chapters'
 });
 
+MapCloChapterModel.belongsTo(ChapterModel, { foreignKey: 'chapter_id'});
+MapCloChapterModel.belongsTo(CloModel, { foreignKey: 'clo_id'});
 module.exports = MapCloChapterModel;
