@@ -1,20 +1,12 @@
-
 import { useEffect, useState } from "react";
 import { UploadOutlined } from '@ant-design/icons';
-import { Table, Upload, Tooltip, Divider, Steps, Button, message } from 'antd';
+import { Table, Upload, Tooltip, Divider, Steps, message } from 'antd';
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@nextui-org/react";
 import { Link, useLocation, useParams } from "react-router-dom";
+import { useDisclosure } from "@nextui-org/react";
 import {
-    useDisclosure
+    Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter
 } from "@nextui-org/react";
-
-import {
-    Modal, Chip,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter
-} from "@nextui-org/react";
-
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
 
@@ -24,6 +16,7 @@ const Clo = (nav) => {
     const { id } = useParams();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
     const [activeTab, setActiveTab] = useState(0);
     const [selectedRow, setSelectedRow] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -31,13 +24,24 @@ const Clo = (nav) => {
     const [poListData, setPosListData] = useState([]);
     const [current, setCurrent] = useState(0);
     const [deleteId, setDeleteId] = useState(null);
+    const [selectedItem, setSelectedItem] = useState("Danh sách CLO");
+    const [fileList, setFileList] = useState([]);
 
+    const items = [
+        { key: "Danh sách CLO", label: "Danh sách CLO", path: `/admin/management-subject/${id}/clo/update` },
+        { key: "CLO_PLO", label: "CLO_PLO", path: `/admin/management-subject/${id}/clo-plo` },
+        { key: "Tạo mới", label: "Tạo mới", path: `/admin/management-subject/${id}/clo/create` }
+    ];
+
+    const handleAction = (key) => {
+        const selected = items.find(item => item.key === key);
+        if (selected) setSelectedItem(selected.label);
+    };
 
     const handleOnChangeTextName = (nameP) => {
         setCurrent(nameP);
     };
 
-    const [fileList, setFileList] = useState([]);
     const columns = [
         {
             title: "Tên PO",
@@ -68,18 +72,11 @@ const Clo = (nav) => {
                 <div className="flex items-center justify-center w-full gap-2">
                     <Link to={`/admin/management-subject/${id}/clo/update/${_id}`}>
                         <Tooltip title="Chỉnh sửa">
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
-                            >
+                            <Button isIconOnly variant="light" radius="full" size="sm">
                                 <i className="fa-solid fa-pen"></i>
                             </Button>
                         </Tooltip>
                     </Link>
-
-
                     <Tooltip title="Xoá">
                         <Button
                             isIconOnly
@@ -91,17 +88,14 @@ const Clo = (nav) => {
                             <i className="fa-solid fa-trash-can"></i>
                         </Button>
                     </Tooltip>
-
                 </div>
             ),
         },
-
     ];
 
     const rowSelection = {
         selectedRowKeys,
         onChange: (selectedRowKeys, selectedRows) => {
-            //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
             setSelectedRow(selectedRows);
             setSelectedRowKeys(selectedRowKeys);
         },
@@ -111,30 +105,26 @@ const Clo = (nav) => {
         setSelectedRowKeys([]);
         setSelectedRow([]);
     };
+
     const getAllClo = async () => {
         try {
             const response = await axiosAdmin.get(`/clo/subject/${id}`);
-            const updatedPoData = response.data.map((po) => {
-                return {
-                    key: po.clo_id,
-                    name: po.cloName,
-                    description: po.description,
-                    isDeleted: po.isDelete,
-                    action: po.clo_id,
-                };
-            });
+            const updatedPoData = response.data.map((po) => ({
+                key: po.clo_id,
+                name: po.cloName,
+                description: po.description,
+                isDeleted: po.isDelete,
+                action: po.clo_id,
+            }));
             setPosListData(updatedPoData);
             console.log(response.data);
         } catch (error) {
             console.error("Error: " + error.message);
-            //message.error('Error fetching PO data');
         }
     };
 
     const handleSoftDelete = async () => {
-        const data = {
-            clo_id: selectedRowKeys,
-        };
+        const data = { clo_id: selectedRowKeys };
         try {
             const response = await axiosAdmin.put('/clo/listId/soft-delete-multiple', { data });
             await getAllClo();
@@ -158,19 +148,14 @@ const Clo = (nav) => {
         }
     };
 
-
     const handleDownloadPo = async () => {
         try {
             if (selectedRowKeys.length === 0) {
                 alert('Please select at least one po ID');
                 return;
             }
-            const data = {
-                id: selectedRowKeys
-            }
-            const response = await axiosAdmin.post('/po/templates/update', { data: data }, {
-                responseType: 'blob'
-            });
+            const data = { id: selectedRowKeys };
+            const response = await axiosAdmin.post('/po/templates/update', { data }, { responseType: 'blob' });
 
             if (response && response.data) {
                 const url = window.URL.createObjectURL(response.data);
@@ -180,14 +165,14 @@ const Clo = (nav) => {
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
-
                 setCurrent(1);
             }
         } catch (error) {
             console.error('Error downloading file:', error);
         }
     };
-    const props = {
+
+    const uploadProps = {
         onRemove: (file) => {
             const index = fileList.indexOf(file);
             const newFileList = fileList.slice();
@@ -201,15 +186,10 @@ const Clo = (nav) => {
         fileList,
     };
 
-    const description = 'This is a description.';
     useEffect(() => {
-        getAllClo()
+        getAllClo();
         const handleResize = () => {
-            if (window.innerWidth < 1024) {
-                setCollapsedNav(true);
-            } else {
-                setCollapsedNav(false);
-            }
+            setCollapsedNav(window.innerWidth < 1024);
         };
         handleResize();
         window.addEventListener("resize", handleResize);
@@ -234,7 +214,36 @@ const Clo = (nav) => {
                 }}
             />
             <div className="flex justify-between px-5 w-full items-center">
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
+                <div className="flex gap-2 justify-center items-center lg:hidden xl:hidden">
+                    <Link to={`/admin/management-subject/list`}>
+                        <Tooltip title="Quay lại" color={'#ff9908'}>
+                        <Button variant="bordered" className="w-fit"> 
+                                <i class="fa-solid fa-arrow-left text-xl"></i>
+                            </Button>
+                        </Tooltip>
+                    </Link>
+                    <Dropdown>
+                        <DropdownTrigger>
+                            <Button variant="bordered" className="text-base font-bold">
+                                {selectedItem} <i className="fas fa-chevron-right ml-2"></i>
+                            </Button>
+                        </DropdownTrigger>
+                        <DropdownMenu aria-label="Dynamic Actions" items={items} onAction={handleAction}>
+                            {(item) => (
+                                <DropdownItem key={item.key}>
+                                    <Link to={item.path} className="h-full">
+                                        <div className="min-w-[200px] text-base font-bold text-[#020401]">
+                                            {item.label}
+                                        </div>
+                                    </Link>
+                                </DropdownItem>
+                            )}
+                        </DropdownMenu>
+                    </Dropdown>
+                </div>
+
+             <div className="hidden sm:hidden lg:block xl:block">
+                <div className="flex border justify-start text-base font-bold rounded-lg">
                     <Link to={`/admin/management-subject/list`}>
                         <Tooltip title="Quay lại" color={'#ff9908'}>
                             <div className="p-5">
@@ -267,19 +276,22 @@ const Clo = (nav) => {
                         </div>
                     </Link>
                 </div>
-                <div>
+                </div>
+                <div className="hidden sm:hidden lg:block xl:block">
                     <Link to={`/admin/management-subject/${id}/clo/store`}>
-                        <Tooltip title="Kho lưu trữ">
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
-
-                            >
-                                <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
-                            </Button>
-                        </Tooltip></Link>
+                        <Button color="default">
+                            <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
+                        </Button>
+                    </Link>
+                </div>
+                <div className="lg:hidden xl:hidden">
+                    <Link to={`/admin/management-subject/${id}/clo/store`}>
+                       <Tooltip title="Kho lưu trữ" color={'#ff9908'}>
+                        <Button color="default" className="w-fit">
+                            <i className="fa-solid fa-trash-can"></i>
+                        </Button>
+                        </Tooltip> 
+                    </Link>
                 </div>
             </div>
             <div className="w-full my-5 px-5">

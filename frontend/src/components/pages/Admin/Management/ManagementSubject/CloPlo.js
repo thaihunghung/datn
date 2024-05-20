@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { Tooltip, message, Button } from 'antd';
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 const CloPlo = (nav) => {
     const location = useLocation();
@@ -14,8 +15,30 @@ const CloPlo = (nav) => {
     const [comparePloClos, setComparePloClos] = useState([]);
 
     const [CloArr, setCloArr] = useState([]);
-
-
+    const items = [
+        {
+            key: "Danh sách CLO",
+            label: "Danh sách CLO",
+            path: `/admin/management-subject/${id}/clo/update`
+        },
+        {
+            key: "CLO_PLO",
+            label: "CLO_PLO",
+            path: `/admin/management-subject/${id}/clo-plo`
+        },
+        {
+            key: "Tạo mới",
+            label: "Tạo mới",
+            path: `/admin/management-subject/${id}/clo/create`
+        }
+    ];
+    const [selectedItem, setSelectedItem] = useState("update");
+    const handleAction = (key) => {
+        const selected = items.find(item => item.key === key);
+        if (selected) {
+            setSelectedItem(selected.label);
+        }
+    };
     const GetAllClo = async () => {
         try {
             const response = await axiosAdmin.get(`/clo/subject/${id}`);
@@ -144,7 +167,10 @@ const CloPlo = (nav) => {
         GetAllClo();
         GetArrCloBySubjectID()
         GetAllPlo();
-
+        const initialSelectedItem = items.find(item => isActive(item.path));
+        if (initialSelectedItem) {
+            setSelectedItem(initialSelectedItem.key);
+        }
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -166,53 +192,85 @@ const CloPlo = (nav) => {
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 relative">
-            <div className="flex justify-between px-5 w-full items-center">
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                <Link to={`/admin/management-subject/list`}>
-                    <Tooltip title="Quay lại" color={'#ff9908'}>
-                        <div className="p-5">
-                            <i class="fa-solid fa-arrow-left text-xl"></i>
-                        </div>
-                    </Tooltip>
-                </Link>
-
-                <Link to={`/admin/management-subject/${id}/clo/update`}>
-                    <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/clo/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                            Danh sách CLO
-                        </div>
-                    </div>
-                </Link>
-
-                <Link to={`/admin/management-subject/${id}/clo-plo`}>
-                    <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/clo-plo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                            CLO_PLO
-                        </div>
-                    </div>
-                </Link>
-
-                <Link to={`/admin/management-subject/${id}/clo/create`}>
-                    <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/clo/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                            Tạo mới
-                        </div>
-                    </div>
-                </Link>
-                </div>
-                <div>
-                    <Link to={`/admin/management-subject/${id}/clo/store`}>
-                        <Tooltip title="Kho lưu trữ">
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
-
-                            >
-                                <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
+<div className="flex justify-between px-5 w-full items-center">
+                <div className="flex gap-2 justify-center items-center lg:hidden xl:hidden">
+                    <Link to={`/admin/management-subject/list`}>
+                        <Tooltip title="Quay lại" color={'#ff9908'}>
+                        <Button variant="bordered"> 
+                                <i class="fa-solid fa-arrow-left text-xl"></i>
                             </Button>
-                        </Tooltip></Link>
+                        </Tooltip>
+                    </Link>
+                    <Dropdown>
+                        <DropdownTrigger>
+                            <Button variant="bordered" className="text-base font-bold">
+                                {selectedItem} <i className="fas fa-chevron-right ml-2"></i>
+                            </Button>
+                        </DropdownTrigger>
+                        <DropdownMenu aria-label="Dynamic Actions" items={items} onAction={handleAction}>
+                            {(item) => (
+                                <DropdownItem key={item.key}>
+                                    <Link to={item.path} className="h-full">
+                                        <div className="min-w-[200px] text-base font-bold text-[#020401]">
+                                            {item.label}
+                                        </div>
+                                    </Link>
+                                </DropdownItem>
+                            )}
+                        </DropdownMenu>
+                    </Dropdown>
+                </div>
+
+             <div className="hidden sm:hidden lg:block xl:block">
+                <div className="flex border justify-start text-base font-bold rounded-lg">
+                    <Link to={`/admin/management-subject/list`}>
+                        <Tooltip title="Quay lại" color={'#ff9908'}>
+                            <div className="p-5">
+                                <i class="fa-solid fa-arrow-left text-xl"></i>
+                            </div>
+                        </Tooltip>
+                    </Link>
+
+                    <Link to={`/admin/management-subject/${id}/clo/update`}>
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive(`/admin/management-subject/${id}/clo/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                Danh sách CLO
+                            </div>
+                        </div>
+                    </Link>
+
+                    <Link to={`/admin/management-subject/${id}/clo-plo`}>
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive(`/admin/management-subject/${id}/clo-plo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                CLO_PLO
+                            </div>
+                        </div>
+                    </Link>
+
+                    <Link to={`/admin/management-subject/${id}/clo/create`}>
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive(`/admin/management-subject/${id}/clo/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                                Tạo mới
+                            </div>
+                        </div>
+                    </Link>
+                </div>
+                </div>
+                <div className="hidden sm:hidden lg:block xl:block">
+                    <Link to={`/admin/management-subject/${id}/clo/store`}>
+                        <Button color="default">
+                            <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
+                        </Button>
+                    </Link>
+                </div>
+                <div className="lg:hidden xl:hidden">
+                    <Link to={`/admin/management-subject/${id}/clo/store`}>
+                       <Tooltip title="Kho lưu trữ" color={'#ff9908'}>
+                        <Button color="default" className="w-fit">
+                            <i className="fa-solid fa-trash-can"></i>
+                        </Button>
+                        </Tooltip> 
+                    </Link>
                 </div>
             </div>
             <div className="px-5 mt-5 flex justify-end items-start relative">

@@ -2,18 +2,7 @@
 import { useEffect, useState } from "react";
 import { Table, Tooltip, Button, message } from 'antd';
 import { Link, useLocation } from "react-router-dom";
-import {
-  useDisclosure
-} from "@nextui-org/react";
-
-import {
-  Modal, Chip,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter
-} from "@nextui-org/react";
-
+import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 
 const Subject = (nav) => {
@@ -238,7 +227,6 @@ const Subject = (nav) => {
       message.error('Error fetching PO data');
     }
   };
-
 
   const handleSoftDelete = async () => {
     const data = {
