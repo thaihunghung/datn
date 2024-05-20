@@ -37,7 +37,7 @@ const CloPlo = (nav) => {
         } catch (error) {
             console.error('Error fetching CLOs:', error);
             if (error.response && error.response.status === 404) {
-                message.error('No CLOs found for the given subject ID.');
+               // message.error('No CLOs found for the given subject ID.');
             } else {
                 message.error('An error occurred while fetching CLOs.');
             }

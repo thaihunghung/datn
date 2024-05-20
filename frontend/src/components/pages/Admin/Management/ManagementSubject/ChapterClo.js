@@ -138,6 +138,13 @@ const ChapterClo = (nav) => {
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 relative">
             <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
+                <Link to={`/admin/management-subject/list`}>
+                    <Tooltip title="Quay lại" color={'#ff9908'}>
+                        <div className="p-5">
+                            <i class="fa-solid fa-arrow-left text-xl"></i>
+                        </div>
+                    </Tooltip>
+                </Link>
                 <Link to={`/admin/management-subject/${id}/chapter/update`}>
                     <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
                         <div className={` ${isActive(`/admin/management-subject/${id}/chapter/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
@@ -165,15 +172,15 @@ const ChapterClo = (nav) => {
                     <table>
                         <thead>
                             <tr>
-                                <th className="p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-[#475569] text-[#fefefe]">CLO</th>
+                                <th className="p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-[#475569] text-[#fefefe]">Chương</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {clos.map((clo_item, index) => (
-                                <tr key={index} className="w-full h-full">
-                                    <td className="border p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">
-                                        <Tooltip title={clo_item.description} color={'#ff9908'}>
-                                            <span>{clo_item.cloName}</span>
+                            {chapters.map((chapter_item, index) => (
+                                <tr key={index} className="w-full h-full ">
+                                    <td className="border w-[200px] p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">
+                                        <Tooltip title={chapter_item.description} color={'#ff9908'}>
+                                            <span>{chapter_item.chapterName}</span>
                                         </Tooltip>
                                     </td>
                                 </tr>

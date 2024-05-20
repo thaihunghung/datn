@@ -10,6 +10,7 @@ const ProgramsController = require('../controllers/ProgramsController');
 const PoController = require('../controllers/PoController');
 const PloController = require('../controllers/PloController');
 const CloController = require('../controllers/CloController');
+const ChapterController = require('../controllers/ChapterController');
 
 const uploadDirectory = path.join(__dirname, '../uploads');
 
@@ -29,6 +30,7 @@ router.post('/po', upload.any(), PoController.processSaveTemplatePo);
 router.post('/plo', upload.any(), PloController.processSaveTemplatePlo);
 router.post('/student', upload.any(), StudentController.saveStudent);
 router.post('/clo', upload.any(), CloController.processSaveTemplateClo);
+router.post('/chapter', upload.any(), ChapterController.processSaveTemplateChapter);
 
 
 router.put('/program/update', upload.any(), CsvUpdateController.updateFormProgram);

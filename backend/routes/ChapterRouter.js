@@ -206,4 +206,13 @@ router.get('/chapter/isDelete/false', ChapterController.isDeleteTofalse);
  */
 router.put('/chapter/isDelete/:id', ChapterController.isdelete);
 
+router.put('/chapter/listId/soft-delete-multiple', ChapterController.softDeleteMultiple);
+
+router.put('/chapter/:id/toggle-soft-delete', ChapterController.toggleSoftDeleteById);
+
+router.get('/chapter/templates/post', ChapterController.getFormPost);
+
+router.post('/chapter/templates/update', ChapterController.getFormUpdate);
+
+
 module.exports = router;

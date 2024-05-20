@@ -111,7 +111,7 @@ const Chapter = (nav) => {
         setSelectedRowKeys([]);
         setSelectedRow([]);
     };
-    const getAllClo = async () => {
+    const getAllChapter = async () => {
         try {
             const response = await axiosAdmin.get(`/chapter/subject/${id}`);
             const updatedPoData = response.data.map((po) => {
@@ -137,8 +137,8 @@ const Chapter = (nav) => {
         };
         console.log(data)
         try {
-            const response = await axiosAdmin.put('/po/listId/soft-delete-multiple', { data });
-            await getAllClo();
+            const response = await axiosAdmin.put('/chapter/listId/soft-delete-multiple', { data });
+            await getAllChapter();
             handleUnSelect();
             message.success(response.data.message);
         } catch (error) {
@@ -149,8 +149,8 @@ const Chapter = (nav) => {
 
     const handleSoftDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/po/${_id}/toggle-soft-delete`);
-            await getAllClo();
+            const response = await axiosAdmin.put(`/chapter/${_id}/toggle-soft-delete`);
+            await getAllChapter();
             handleUnSelect();
             message.success(response.data.message);
         } catch (error) {
@@ -204,7 +204,7 @@ const Chapter = (nav) => {
 
     const description = 'This is a description.';
     useEffect(() => {
-        getAllClo()
+        getAllChapter()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -235,28 +235,35 @@ const Chapter = (nav) => {
                 }}
             />
            <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={`/admin/management-subject/${id}/chapter/update`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                Danh sách CHAPTER
-                            </div>
+                <Link to={`/admin/management-subject/list`}>
+                    <Tooltip title="Quay lại" color={'#ff9908'}>
+                        <div className="p-5">
+                            <i class="fa-solid fa-arrow-left text-xl"></i>
                         </div>
-                    </Link>
-                    <Link to={`/admin/management-subject/${id}/chapter-clo`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter-clo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                CHAPTER_CLO
-                            </div>
+                    </Tooltip>
+                </Link>
+                <Link to={`/admin/management-subject/${id}/chapter/update`}>
+                    <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                        <div className={` ${isActive(`/admin/management-subject/${id}/chapter/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                            Danh sách CHAPTER
                         </div>
-                    </Link>
-                    <Link to={`/admin/management-subject/${id}/chapter/create`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                                Tạo mới
-                            </div>
+                    </div>
+                </Link>
+                <Link to={`/admin/management-subject/${id}/chapter-clo`}>
+                    <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                        <div className={` ${isActive(`/admin/management-subject/${id}/chapter-clo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                            CHAPTER_CLO
                         </div>
-                    </Link>
-                </div>
+                    </div>
+                </Link>
+                <Link to={`/admin/management-subject/${id}/chapter/create`}>
+                    <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+                        <div className={` ${isActive(`/admin/management-subject/${id}/chapter/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                            Tạo mới
+                        </div>
+                    </div>
+                </Link>
+            </div>
             <div className="w-full my-5 px-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
@@ -355,7 +362,7 @@ function ConfirmAction(props) {
                         <ModalHeader>Cảnh báo</ModalHeader>
                         <ModalBody>
                             <p className="text-[16px]">
-                                Po sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
+                                Chương sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
                             </p>
                         </ModalBody>
                         <ModalFooter>
