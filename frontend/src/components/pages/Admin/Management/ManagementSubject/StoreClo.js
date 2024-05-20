@@ -1,46 +1,28 @@
+// StoreClo.js
 
 import { useEffect, useState } from "react";
-import { UploadOutlined } from '@ant-design/icons';
-import { Table, Upload, Tooltip, Divider, Steps, Button, message } from 'antd';
+import { Button, message } from 'antd';
 import { Link, useLocation, useParams } from "react-router-dom";
-import {
-    useDisclosure
-} from "@nextui-org/react";
-
-import {
-    Modal, Chip,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter
-} from "@nextui-org/react";
-
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import CustomUpload from "../../CustomUpload/CustomUpload";
+import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { Table, Upload, Tooltip, Divider, Steps } from 'antd';
 
-const Clo = (nav) => {
+
+const StoreClo = (nav) => {
     const location = useLocation();
     const isActive = (path) => location.pathname.startsWith(path);
     const { id } = useParams();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [activeTab, setActiveTab] = useState(0);
     const [selectedRow, setSelectedRow] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [loading, setLoading] = useState(false);
     const [poListData, setPosListData] = useState([]);
-    const [current, setCurrent] = useState(0);
     const [deleteId, setDeleteId] = useState(null);
 
-
-    const handleOnChangeTextName = (nameP) => {
-        setCurrent(nameP);
-    };
-
-    const [fileList, setFileList] = useState([]);
     const columns = [
         {
-            title: "Tên PO",
+            title: "Tên CLO",
             dataIndex: "name",
             render: (record) => (
                 <div className="text-sm">
@@ -65,33 +47,28 @@ const Clo = (nav) => {
             ),
             dataIndex: "action",
             render: (_id) => (
-                <div className="flex items-center justify-center w-full gap-2">
-                    <Link to={`/admin/management-subject/${id}/clo/update/${_id}`}>
-                        <Tooltip title="Chỉnh sửa">
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
-                            >
-                                <i className="fa-solid fa-pen"></i>
-                            </Button>
-                        </Tooltip>
-                    </Link>
-
-
-                    <Tooltip title="Xoá">
+                <div className="flex flex-col items-center justify-center w-full gap-2">
+                    <Tooltip title="Khôi phục">
                         <Button
                             isIconOnly
                             variant="light"
                             radius="full"
-                            size="sm"
+                            onClick={() => handleRestoreById(_id)}
+                        >
+                            <i className="fa-solid fa-clock-rotate-left"></i>
+                        </Button>
+                    </Tooltip>
+                    <Tooltip title="Xoá vĩnh viễn">
+                        <Button
+                            isIconOnly
+                            variant="light"
+                            radius="full"
+                            color="danger"
                             onClick={() => { onOpen(); setDeleteId(_id); }}
                         >
                             <i className="fa-solid fa-trash-can"></i>
                         </Button>
                     </Tooltip>
-
                 </div>
             ),
         },
@@ -101,7 +78,7 @@ const Clo = (nav) => {
     const rowSelection = {
         selectedRowKeys,
         onChange: (selectedRowKeys, selectedRows) => {
-            //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+            console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
             setSelectedRow(selectedRows);
             setSelectedRowKeys(selectedRowKeys);
         },
@@ -111,97 +88,84 @@ const Clo = (nav) => {
         setSelectedRowKeys([]);
         setSelectedRow([]);
     };
-    const getAllClo = async () => {
-        try {
-            const response = await axiosAdmin.get(`/clo/subject/${id}`);
-            const updatedPoData = response.data.map((po) => {
-                return {
-                    key: po.clo_id,
-                    name: po.cloName,
-                    description: po.description,
-                    isDeleted: po.isDelete,
-                    action: po.clo_id,
-                };
-            });
-            setPosListData(updatedPoData);
-            console.log(response.data);
-        } catch (error) {
-            console.error("Error: " + error.message);
-            //message.error('Error fetching PO data');
-        }
-    };
-
-    const handleSoftDelete = async () => {
+    const handleRestore = async () => {
         const data = {
             clo_id: selectedRowKeys,
-        };
+        }
         try {
             const response = await axiosAdmin.put('/clo/listId/soft-delete-multiple', { data });
-            await getAllClo();
             handleUnSelect();
             message.success(response.data.message);
+            getAllClo()
         } catch (error) {
-            console.error("Error soft deleting Clos:", error);
-            message.error('Error soft deleting Clos');
+            console.error("Error soft deleting PLOs:", error);
+            message.error('Error soft deleting PLOs');
         }
     };
 
-    const handleSoftDeleteById = async (_id) => {
+    const handleRestoreById = async (_id) => {
         try {
             const response = await axiosAdmin.put(`/clo/${_id}/toggle-soft-delete`);
-            await getAllClo();
             handleUnSelect();
             message.success(response.data.message);
+            getAllClo()
         } catch (error) {
-            console.error(`Error toggling soft delete for Clo with ID ${_id}:`, error);
-            message.error(`Error toggling soft delete for Clo with ID ${_id}`);
+
+            console.error(`Error toggling soft delete for PO with ID ${_id}:`, error);
+            message.error(`Error toggling soft delete for PO with ID ${_id}`);
         }
     };
 
-
-    const handleDownloadPo = async () => {
+    const getAllClo = async () => {
         try {
-            if (selectedRowKeys.length === 0) {
-                alert('Please select at least one po ID');
-                return;
-            }
-            const data = {
-                id: selectedRowKeys
-            }
-            const response = await axiosAdmin.post('/po/templates/update', { data: data }, {
-                responseType: 'blob'
+            const response = await axiosAdmin.get(`/clo/archive/subject/${id}`);
+            const updatedPloData = response.data.map((plo) => {
+                return {
+                    key: plo.clo_id,
+                    name: plo.cloName,
+                    description: plo.description,
+                    isDeleted: plo.isDelete,
+                    action: plo.clo_id,
+                };
             });
-
-            if (response && response.data) {
-                const url = window.URL.createObjectURL(response.data);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'po_update.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-
-                setCurrent(1);
-            }
+            setPosListData(updatedPloData);
+            
         } catch (error) {
-            console.error('Error downloading file:', error);
+            console.error("Error: " + error.message);
+            //message.error('Error fetching PLO data');
         }
     };
-    const props = {
-        onRemove: (file) => {
-            const index = fileList.indexOf(file);
-            const newFileList = fileList.slice();
-            newFileList.splice(index, 1);
-            setFileList(newFileList);
-        },
-        beforeUpload: (file) => {
-            setFileList([...fileList, file]);
-            return false;
-        },
-        fileList,
-    };
 
-    const description = 'This is a description.';
+    const handleDelete = async () => {
+      const data = {
+          clo_id: selectedRowKeys,
+      };
+      console.log(data)
+      try {
+        const response = await axiosAdmin.delete('/clo/delete/multiple', { params: data });
+
+        await getAllClo();
+          handleUnSelect();
+          message.success(response.data.message);
+      } catch (error) {
+          console.error("Error soft deleting Clos:", error);
+          message.error('Error soft deleting Clos');
+      }
+  };
+
+  const handleDeleteById = async (_id) => {
+    console.log(_id)
+      try {
+          const response = await axiosAdmin.delete(`/clo/${_id}`);
+          await getAllClo();
+          handleUnSelect();
+          message.success(response.data.message);
+      } catch (error) {
+          console.error(`Error toggling soft delete for Clo with ID ${_id}:`, error);
+          message.error(`Error toggling soft delete for Clo with ID ${_id}`);
+      }
+  };
+
     useEffect(() => {
         getAllClo()
         const handleResize = () => {
@@ -219,67 +183,56 @@ const Clo = (nav) => {
     }, []);
 
     return (
-        <div className="flex w-full flex-col justify-center leading-8 pt-5">
+        <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
             <ConfirmAction
                 onOpenChange={onOpenChange}
                 isOpen={isOpen}
                 onConfirm={() => {
                     if (deleteId) {
-                        handleSoftDeleteById(deleteId);
+                        handleDeleteById(deleteId);
                         setDeleteId(null);
                     } else if (selectedRowKeys.length > 0) {
-                        handleSoftDelete();
+                        handleDelete();
                         setSelectedRowKeys([]);
                     }
                 }}
             />
             <div className="flex justify-between px-5 w-full items-center">
                 <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={`/admin/management-subject/list`}>
-                        <Tooltip title="Quay lại" color={'#ff9908'}>
-                            <div className="p-5">
-                                <i class="fa-solid fa-arrow-left text-xl"></i>
-                            </div>
-                        </Tooltip>
-                    </Link>
-
-                    <Link to={`/admin/management-subject/${id}/clo/update`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/clo/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                Danh sách CLO
-                            </div>
+                <Link to={`/admin/management-subject/list`}>
+                    <Tooltip title="Quay lại" color={'#ff9908'}>
+                        <div className="p-5">
+                            <i class="fa-solid fa-arrow-left text-xl"></i>
                         </div>
-                    </Link>
+                    </Tooltip>
+                </Link>
 
-                    <Link to={`/admin/management-subject/${id}/clo-plo`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/clo-plo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                CLO_PLO
-                            </div>
+                <Link to={`/admin/management-subject/${id}/clo/update`}>
+                    <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                        <div className={` ${isActive(`/admin/management-subject/${id}/clo/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                            Danh sách CLO
                         </div>
-                    </Link>
+                    </div>
+                </Link>
 
-                    <Link to={`/admin/management-subject/${id}/clo/create`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/clo/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                                Tạo mới
-                            </div>
+                <Link to={`/admin/management-subject/${id}/clo-plo`}>
+                    <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                        <div className={` ${isActive(`/admin/management-subject/${id}/clo-plo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                            CLO_PLO
                         </div>
-                    </Link>
+                    </div>
+                </Link>
+
+                <Link to={`/admin/management-subject/${id}/clo/create`}>
+                    <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+                        <div className={` ${isActive(`/admin/management-subject/${id}/clo/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                            Tạo mới
+                        </div>
+                    </div>
+                </Link>
                 </div>
                 <div>
-                    <Link to={`/admin/management-subject/${id}/clo/store`}>
-                        <Tooltip title="Kho lưu trữ">
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
-
-                            >
-                                <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
-                            </Button>
-                        </Tooltip></Link>
+                    
                 </div>
             </div>
             <div className="w-full my-5 px-5">
@@ -292,7 +245,17 @@ const Clo = (nav) => {
                         <div className="flex items-center gap-2">
 
                             <Tooltip
-                                title={`Xoá ${selectedRowKeys.length} clo`}
+                                title={`Khôi phục ${selectedRowKeys.length} clo`}
+                                getPopupContainer={() =>
+                                    document.querySelector(".Quick__Option")
+                                }
+                            >
+                                <Button isIconOnly variant="light" radius="full" onClick={() => handleRestore()}>
+                                    <i className="fa-solid fa-clock-rotate-left"></i>
+                                </Button>
+                            </Tooltip>
+                            <Tooltip
+                                title={`Xoá vĩnh viễn ${selectedRowKeys.length} clo`}
                                 getPopupContainer={() =>
                                     document.querySelector(".Quick__Option")
                                 }
@@ -301,6 +264,7 @@ const Clo = (nav) => {
                                     <i className="fa-solid fa-trash-can"></i>
                                 </Button>
                             </Tooltip>
+
                             <Tooltip
                                 title="Bỏ chọn"
                                 getPopupContainer={() =>
@@ -334,13 +298,12 @@ const Clo = (nav) => {
                     />
                 </div>
             </div>
-
         </div>
     );
 }
 
 
-export default Clo;
+export default StoreClo;
 function ConfirmAction(props) {
     const { isOpen, onOpenChange, onConfirm } = props;
     const handleOnOKClick = (onClose) => {
@@ -380,7 +343,7 @@ function ConfirmAction(props) {
                         <ModalHeader>Cảnh báo</ModalHeader>
                         <ModalBody>
                             <p className="text-[16px]">
-                                Clo sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
+                                xóa vĩnh viễn, tiếp tục thao tác?
                             </p>
                         </ModalBody>
                         <ModalFooter>
@@ -397,4 +360,3 @@ function ConfirmAction(props) {
         </Modal>
     )
 }
-

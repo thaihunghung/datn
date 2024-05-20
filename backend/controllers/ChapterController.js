@@ -1,5 +1,10 @@
 const ChapterModel = require('../models/ChapterModel');
 const SubjectModel = require('../models/SubjectModel');
+const RubricItemModel = require('../models/RubricItemModel');
+const CloChapterModel = require('../models/CloChapterModel');
+
+
+
 const ExcelJS = require('exceljs');
 const fs = require('fs');
 const path = require('path');
@@ -40,11 +45,13 @@ const ChapterController = {
   GetChapterBySubjectId: async (req, res) => {
     try {
       const { subject_id } = req.params;
-      const chapter = await ChapterModel.findAll({ where: { subject_id: subject_id, isDelete: false },
+      const chapter = await ChapterModel.findAll({
+        where: { subject_id: subject_id, isDelete: false },
         include: [{
           model: SubjectModel,
           attributes: ['subject_id', 'subjectName']
-        }] });
+        }]
+      });
       if (!chapter) {
         return res.status(404).json({ message: 'Chapter not found' });
       }
@@ -53,7 +60,26 @@ const ChapterController = {
       console.error('Error finding chapter:', error);
       res.status(500).json({ message: 'Server error' });
     }
-  }, 
+  },
+  GetChapterArchiveBySubjectId: async (req, res) => {
+    try {
+      const { subject_id } = req.params;
+      const chapter = await ChapterModel.findAll({
+        where: { subject_id: subject_id, isDelete: true },
+        include: [{
+          model: SubjectModel,
+          attributes: ['subject_id', 'subjectName']
+        }]
+      });
+      if (!chapter) {
+        return res.status(404).json({ message: 'Chapter not found' });
+      }
+      res.json(chapter);
+    } catch (error) {
+      console.error('Error finding chapter:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
   update: async (req, res) => {
     try {
       const { id } = req.params;
@@ -77,6 +103,22 @@ const ChapterController = {
     } catch (error) {
       console.error('Error deleting chapter:', error);
       res.status(500).json({ message: 'Server error' });
+    }
+  },
+  deleteMultiple: async (req, res) => {
+    const { chapter_id } = req.query;
+    try {
+      const chapterIds = chapter_id.map(id => parseInt(id));
+      for (const id of chapterIds) {
+        await CloChapterModel.destroy({ where: { chapter_id: id } });
+        await RubricItemModel.destroy({ where: { chapter_id: id } });
+      }
+
+      await ChapterModel.destroy({ where: { chapter_id: chapter_id } });
+      res.status(200).json({ message: 'Xóa nhiều Chapter thành công' });
+    } catch (error) {
+      console.error('Lỗi khi xóa nhiều Chapter:', error);
+      res.status(500).json({ message: 'Lỗi server nội bộ' });
     }
   },
   isDeleteTotrue: async (req, res) => {
@@ -135,7 +177,7 @@ const ChapterController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
-  
+
   softDeleteMultiple: async (req, res) => {
     try {
       const { data } = req.body;
@@ -238,6 +280,15 @@ const ChapterController = {
       return res.status(400).send('No file uploaded.');
     }
     const subject_id = req.body.data;
+    try {
+      const subject = await SubjectModel.findByPk(subject_id);
+      if (!subject) {
+        return res.status(404).json({ message: 'Subject not found' });
+      }
+    } catch (error) {
+      console.error('Error fetching subject:', error);
+      return res.status(500).json({ message: 'Error fetching subject from the database' });
+    }
 
     const uploadDirectory = path.join(__dirname, '../uploads');
     const filename = req.files[0].filename;
@@ -265,7 +316,7 @@ const ChapterController = {
 
     fs.unlinkSync(filePath);
     try {
-      const createdChapter= await ChapterModel.bulkCreate(jsonData);
+      const createdChapter = await ChapterModel.bulkCreate(jsonData);
       res.status(201).json({ message: 'Data saved successfully', data: createdChapter });
     } catch (error) {
       console.error('Error saving data to the database:', error);

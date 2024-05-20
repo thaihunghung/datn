@@ -11,7 +11,6 @@ import ManagePlo from '../components/pages/Admin/Management/ManagementPlo/Manage
 import StorePlo from '../components/pages/Admin/Management/ManagementPlo/StorePlo';
 import CreatePlo from '../components/pages/Admin/Management/ManagementPlo/CreatePlo';
 import UpdatePloById from '../components/pages/Admin/Management/ManagementPlo/UpdatePloById';
-import PloClo from '../components/pages/Admin/Management/ManagementClo/PloClo';
 import FormPoint from '../components/pages/Admin/FormPoint/FormPoint';
 import Program from '../components/pages/Client/Program/Program';
 import Nav from '../components/pages/Admin/Utils/Navbar/Navbar';
@@ -28,7 +27,6 @@ import ManagementRubric from '../components/pages/Admin/Management/ManagementRub
 import CreateRubic from '../components/pages/Admin/Management/ManagementRubric/CreateRubic';
 import UpdateRubic from '../components/pages/Admin/Management/ManagementRubric/UpdateRubic';
 import Template from '../components/pages/Client/Template/Template';
-import CloChapter from '../components/pages/Admin/Management/ManagementClo/CloChapter';
 import Subject from '../components/pages/Admin/Management/ManagementSubject/Subject';
 import Clo from '../components/pages/Admin/Management/ManagementSubject/Clo';
 import CreateClo from '../components/pages/Admin/Management/ManagementSubject/CreateClo';
@@ -37,6 +35,9 @@ import Chapter from '../components/pages/Admin/Management/ManagementSubject/Chap
 import ChapterClo from '../components/pages/Admin/Management/ManagementSubject/ChapterClo';
 import UpdateClo from '../components/pages/Admin/Management/ManagementSubject/UpdateClo';
 import CreateChapter from '../components/pages/Admin/Management/ManagementSubject/CreateChapter';
+import StoreClo from '../components/pages/Admin/Management/ManagementSubject/StoreClo';
+import UpdateChapter from '../components/pages/Admin/Management/ManagementSubject/UpdateChapter';
+import StoreChapter from '../components/pages/Admin/Management/ManagementSubject/StoreChapter';
 
 function Admin(props) {
 
@@ -88,18 +89,15 @@ function Admin(props) {
           <Route path="/management-subject/list" element={<Subject collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-subject/:id/clo/update" element={<Clo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-subject/:id/clo/update/:clo_id" element={<UpdateClo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
-          
-          
           <Route path="/management-subject/:id/clo/create" element={<CreateClo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/management-subject/:id/clo/store" element={<StoreClo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-subject/:id/clo-plo" element={<CloPlo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
           <Route path="/management-subject/:id/chapter/update" element={<Chapter collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-subject/:id/chapter/create" element={<CreateChapter collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
-
-          
+          <Route path="/management-subject/:id/chapter/store" element={<StoreChapter collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-subject/:id/chapter-clo" element={<ChapterClo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
-          <Route path="/management-clo/plo-clo" element={<PloClo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
-          <Route path="/management-clo/clo-chapter" element={<CloChapter collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/management-subject/:id/chapter/update/:chapter_id" element={<UpdateChapter collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
           <Route path="/management-point" element={<FormPoint collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-rubric" element={<ManagementRubric collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />

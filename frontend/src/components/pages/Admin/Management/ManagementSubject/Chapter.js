@@ -66,7 +66,7 @@ const Chapter = (nav) => {
             dataIndex: "action",
             render: (_id) => (
                 <div className="flex items-center justify-center w-full gap-2">
-                    <Link to={`/admin/management-po/update/${_id}`}>
+                    <Link to={`/admin/management-subject/${id}/chapter/update/${_id}`}>
                         <Tooltip title="Chỉnh sửa">
                             <Button
                                 isIconOnly
@@ -133,7 +133,7 @@ const Chapter = (nav) => {
 
     const handleSoftDelete = async () => {
         const data = {
-            po_id: selectedRowKeys,
+            chapter_id: selectedRowKeys,
         };
         console.log(data)
         try {
@@ -234,35 +234,51 @@ const Chapter = (nav) => {
                     }
                 }}
             />
-           <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                <Link to={`/admin/management-subject/list`}>
-                    <Tooltip title="Quay lại" color={'#ff9908'}>
-                        <div className="p-5">
-                            <i class="fa-solid fa-arrow-left text-xl"></i>
+            <div className="flex justify-between px-5 w-full items-center">
+                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
+                    <Link to={`/admin/management-subject/list`}>
+                        <Tooltip title="Quay lại" color={'#ff9908'}>
+                            <div className="p-5">
+                                <i class="fa-solid fa-arrow-left text-xl"></i>
+                            </div>
+                        </Tooltip>
+                    </Link>
+                    <Link to={`/admin/management-subject/${id}/chapter/update`}>
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                Danh sách CHAPTER
+                            </div>
                         </div>
-                    </Tooltip>
-                </Link>
-                <Link to={`/admin/management-subject/${id}/chapter/update`}>
-                    <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/chapter/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                            Danh sách CHAPTER
+                    </Link>
+                    <Link to={`/admin/management-subject/${id}/chapter-clo`}>
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter-clo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                CHAPTER_CLO
+                            </div>
                         </div>
-                    </div>
-                </Link>
-                <Link to={`/admin/management-subject/${id}/chapter-clo`}>
-                    <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/chapter-clo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                            CHAPTER_CLO
+                    </Link>
+                    <Link to={`/admin/management-subject/${id}/chapter/create`}>
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                                Tạo mới
+                            </div>
                         </div>
-                    </div>
-                </Link>
-                <Link to={`/admin/management-subject/${id}/chapter/create`}>
-                    <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/chapter/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                            Tạo mới
-                        </div>
-                    </div>
-                </Link>
+                    </Link>
+                </div>
+                <div>
+                    <Link to={`/admin/management-subject/${id}/chapter/store`}>
+                        <Tooltip title="Kho lưu trữ">
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+
+                            >
+                                <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
+                            </Button>
+                        </Tooltip></Link>
+                </div>
             </div>
             <div className="w-full my-5 px-5">
                 {selectedRowKeys.length !== 0 && (

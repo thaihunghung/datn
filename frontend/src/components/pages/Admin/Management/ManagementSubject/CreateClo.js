@@ -95,7 +95,8 @@ const CreateClo = (nav) => {
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
-            <div className="w-fit px-5 flex border justify-start text-base font-bold rounded-lg">
+            <div className="flex justify-between px-5 w-full items-center">
+                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
                 <Link to={`/admin/management-subject/list`}>
                     <Tooltip title="Quay lại" color={'#ff9908'}>
                         <div className="p-5">
@@ -127,6 +128,21 @@ const CreateClo = (nav) => {
                         </div>
                     </div>
                 </Link>
+                </div>
+                <div>
+                    <Link to={`/admin/management-subject/${id}/clo/store`}>
+                        <Tooltip title="Kho lưu trữ">
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+
+                            >
+                                <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
+                            </Button>
+                        </Tooltip></Link>
+                </div>
             </div>
             <div className="w-full mt-5 px-5 rounded-lg">
                 <Tabs tabs=

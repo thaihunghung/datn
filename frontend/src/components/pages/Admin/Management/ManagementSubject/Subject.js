@@ -26,7 +26,7 @@ const Subject = (nav) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [loading, setLoading] = useState(false);
   const [subjects, setSubjects] = useState([]);
-  
+
   const [deleteId, setDeleteId] = useState(null);
 
   const columns = [
@@ -56,29 +56,29 @@ const Subject = (nav) => {
           {clos.check ? (
             <Link to={`/admin/management-subject/${clos.id}/clo/update`}>
               {/* <Tooltip title="Chỉnh sửa"> */}
-                <Button
-                  isIconOnly
-                  variant="light"
-                  radius="full"
-                  size="sm"
-                >
-                  Cập nhật 
-                  {/* <i className="fa-solid fa-pen ml-2"></i> */}
-                </Button>
+              <Button
+                isIconOnly
+                variant="light"
+                radius="full"
+                size="sm"
+              >
+                Cập nhật
+                {/* <i className="fa-solid fa-pen ml-2"></i> */}
+              </Button>
               {/* </Tooltip> */}
             </Link>
           ) : (
             <Link to={`/admin/management-subject/${clos.id}/clo/create`}>
               {/* <Tooltip title="Tạo mới"> */}
-                <Button
-                  isIconOnly
-                  variant="light"
-                  radius="full"
-                  size="sm"
-                >
-                  Tạo mới 
-                  {/* <i className="fa-solid fa-pen ml-2"></i> */}
-                </Button>
+              <Button
+                isIconOnly
+                variant="light"
+                radius="full"
+                size="sm"
+              >
+                Tạo mới
+                {/* <i className="fa-solid fa-pen ml-2"></i> */}
+              </Button>
               {/* </Tooltip> */}
             </Link>
           )}
@@ -92,7 +92,7 @@ const Subject = (nav) => {
         <div>
           {Chapters.checkChapter ? (
             <Link to={`/admin/management-subject/${Chapters.id}/chapter/update`}>
-            <Tooltip title={Chapters.checkCLo===false?"Vui lòng nhập Clo trước":"" }> 
+              <Tooltip title={Chapters.checkCLo === false ? "Vui lòng nhập Clo trước" : ""}>
                 <Button
                   isIconOnly
                   variant="light"
@@ -100,14 +100,14 @@ const Subject = (nav) => {
                   size="sm"
                   disabled={!Chapters.checkCLo}
                 >
-                  Cập nhật 
-              {/* <i className="fa-solid fa-pen ml-2"></i> */}
+                  Cập nhật
+                  {/* <i className="fa-solid fa-pen ml-2"></i> */}
                 </Button>
-             </Tooltip> 
+              </Tooltip>
             </Link>
           ) : (
             <Link to={`/admin/management-subject/${Chapters.id}/chapter/create`}>
-            <Tooltip title={Chapters.checkCLo===false?"Vui lòng nhập Clo trước":"" }> 
+              <Tooltip title={Chapters.checkCLo === false ? "Vui lòng nhập Clo trước" : ""}>
                 <Button
                   isIconOnly
                   variant="light"
@@ -115,16 +115,16 @@ const Subject = (nav) => {
                   size="sm"
                   disabled={!Chapters.checkCLo}
                 >
-                  Tạo mới 
+                  Tạo mới
                   {/* <i className="fa-solid fa-pen ml-2"></i> */}
                 </Button>
-              </Tooltip> 
+              </Tooltip>
             </Link>
           )}
         </div>
       ),
     },
-    
+
     {
       title: "TL",
       dataIndex: "numberCreditsTheory",
@@ -211,13 +211,13 @@ const Subject = (nav) => {
           id: subject.subject_id,
           check: subject.CLO.length > 0 ? true : false
         };
-  
+
         const chapters = {
           id: subject.subject_id,
           checkCLo: subject.CLO.length > 0 ? true : false,
           checkChapter: subject.CHAPTER.length > 0 ? true : false
-        }; 
-        
+        };
+
         return {
           key: subject.subject_id,
           name: subject.subjectName,
@@ -238,7 +238,7 @@ const Subject = (nav) => {
       message.error('Error fetching PO data');
     }
   };
-  
+
 
   const handleSoftDelete = async () => {
     const data = {
@@ -319,7 +319,7 @@ const Subject = (nav) => {
         </div>
         <div>
           <Link to="/admin/management-po/store">
-            <Tooltip title="Xoá">
+            <Tooltip title="Kho lưu trữ">
               <Button
                 isIconOnly
                 variant="light"
@@ -327,7 +327,7 @@ const Subject = (nav) => {
                 size="sm"
 
               >
-                <span className="text-base">Kho lưu trữ </span><i className="fa-solid ml-2 fa-trash-can"></i>
+                <span className="text-base">Kho lưu trữ</span><i className="fa-solid ml-2 fa-trash-can"></i>
               </Button>
             </Tooltip></Link>
         </div>
@@ -429,7 +429,7 @@ function ConfirmAction(props) {
             <ModalHeader>Cảnh báo</ModalHeader>
             <ModalBody>
               <p className="text-[16px]">
-                {datavalue}              
+                {datavalue}
               </p>
             </ModalBody>
             <ModalFooter>

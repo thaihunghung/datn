@@ -1,4 +1,8 @@
 const CloModel = require("../models/CloModel");
+const SubjectModel = require("../models/SubjectModel");
+const CloChapterModel = require('../models/CloChapterModel');
+const PloCloModel = require('../models/PloCloModel');
+
 const ExcelJS = require('exceljs');
 const fs = require('fs');
 const path = require('path');
@@ -26,7 +30,20 @@ const CloController = {
       res.status(500).json({ message: 'Internal server error' });
     }
   },
-
+  GetCloArchiveBySubjectId: async (req, res) => {
+    try {
+      const { subject_id } = req.params;
+      const clos = await CloModel.findAll({ where: { subject_id: subject_id, isDelete: true } });
+      console.log(clos);
+      if (!clos.length) {
+        return res.status(404).json({ message: 'No CLOs found for the given subject ID' });
+      }
+      res.status(200).json(clos);
+    } catch (error) {
+      console.error('Error getting CLOs by subject ID:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
   create: async (req, res) => {
     try {
       const { data } = req.body;
@@ -72,6 +89,8 @@ const CloController = {
     try {
       const { id } = req.params;
       const clo = await CloModel.findOne({ where: { clo_id: id } });
+      await CloChapterModel.destroy({ where: { clo_id: id } });
+      await PloCloModel.destroy({ where: { clo_id: id } });
       if (!clo) {
         return res.status(404).json({ message: 'CLO not found' });
       }
@@ -80,6 +99,24 @@ const CloController = {
     } catch (error) {
       console.error('Error deleting CLO:', error);
       res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+
+  deleteMultiple: async (req, res) => {
+    const { clo_id } = req.query;
+    try {
+      const cloIds = clo_id.map(id => parseInt(id));
+      for (const id of cloIds) {
+        await CloChapterModel.destroy({ where: { clo_id: id } });
+        await PloCloModel.destroy({ where: { clo_id: id } });
+      }
+
+      await CloModel.destroy({ where: { clo_id: clo_id } });
+
+      res.status(200).json({ message: 'Xóa nhiều CLO thành công' });
+    } catch (error) {
+      console.error('Lỗi khi xóa nhiều CLO:', error);
+      res.status(500).json({ message: 'Lỗi server nội bộ' });
     }
   },
 
@@ -142,7 +179,7 @@ const CloController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
-  
+
   softDeleteMultiple: async (req, res) => {
     try {
       const { data } = req.body;
@@ -246,7 +283,15 @@ const CloController = {
       return res.status(400).send('No file uploaded.');
     }
     const subject_id = req.body.data;
-
+    try {
+      const subject = await SubjectModel.findByPk(subject_id);
+      if (!subject) {
+        return res.status(404).json({ message: 'Subject not found' });
+      }
+    } catch (error) {
+      console.error('Error fetching subject:', error);
+      return res.status(500).json({ message: 'Error fetching subject from the database' });
+    }
     const uploadDirectory = path.join(__dirname, '../uploads');
     const filename = req.files[0].filename;
     const filePath = path.join(uploadDirectory, filename);

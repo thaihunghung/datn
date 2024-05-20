@@ -158,12 +158,12 @@ function Nav(props) {
                     </NavbarContent>
                     <NavbarContent className="sm:hidden pr-3" justify="center">
                         <NavbarBrand>
-                            <p className="font-bold text-inherit">ACME</p>
+                            <p className="font-bold text-inherit">SET</p>
                         </NavbarBrand>
                     </NavbarContent>
                     <NavbarContent className="hidden sm:flex gap-4" justify="center">
                         <NavbarBrand>
-                            <p className="font-bold text-inherit">ACME</p>
+                            <p className="font-bold text-inherit">SET</p>
                         </NavbarBrand>
                         <NavbarItem>
                             <Link color="foreground" to="/features">Features</Link>

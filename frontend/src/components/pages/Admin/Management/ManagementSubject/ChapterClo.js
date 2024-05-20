@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
-import { Tooltip, message } from 'antd';
-import { Button } from "@nextui-org/react";
+import { Tooltip, message, Button } from 'antd';
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 const ChapterClo = (nav) => {
     const location = useLocation();
@@ -137,35 +136,51 @@ const ChapterClo = (nav) => {
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 relative">
-            <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                <Link to={`/admin/management-subject/list`}>
-                    <Tooltip title="Quay lại" color={'#ff9908'}>
-                        <div className="p-5">
-                            <i class="fa-solid fa-arrow-left text-xl"></i>
+            <div className="flex justify-between px-5 w-full items-center">
+                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
+                    <Link to={`/admin/management-subject/list`}>
+                        <Tooltip title="Quay lại" color={'#ff9908'}>
+                            <div className="p-5">
+                                <i class="fa-solid fa-arrow-left text-xl"></i>
+                            </div>
+                        </Tooltip>
+                    </Link>
+                    <Link to={`/admin/management-subject/${id}/chapter/update`}>
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                Danh sách CHAPTER
+                            </div>
                         </div>
-                    </Tooltip>
-                </Link>
-                <Link to={`/admin/management-subject/${id}/chapter/update`}>
-                    <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/chapter/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                            Danh sách CHAPTER
+                    </Link>
+                    <Link to={`/admin/management-subject/${id}/chapter-clo`}>
+                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter-clo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                CHAPTER_CLO
+                            </div>
                         </div>
-                    </div>
-                </Link>
-                <Link to={`/admin/management-subject/${id}/chapter-clo`}>
-                    <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/chapter-clo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                            CHAPTER_CLO
+                    </Link>
+                    <Link to={`/admin/management-subject/${id}/chapter/create`}>
+                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                                Tạo mới
+                            </div>
                         </div>
-                    </div>
-                </Link>
-                <Link to={`/admin/management-subject/${id}/chapter/create`}>
-                    <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/chapter/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                            Tạo mới
-                        </div>
-                    </div>
-                </Link>
+                    </Link>
+                </div>
+                <div>
+                    <Link to={`/admin/management-subject/${id}/chapter/store`}>
+                        <Tooltip title="Kho lưu trữ">
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+
+                            >
+                                <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
+                            </Button>
+                        </Tooltip></Link>
+                </div>
             </div>
             <div className="px-5 mt-5 flex justify-end items-start relative">
                 <div className="sticky left-0 top-0 z-50 block sm:hidden lg:hidden xl:hidden">

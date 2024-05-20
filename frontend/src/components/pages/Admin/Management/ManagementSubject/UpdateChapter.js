@@ -3,32 +3,28 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import { Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-import { Tooltip, message } from 'antd';
+import { Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { Tooltip, message, Button } from 'antd';
 
-const UpdateClo = (nav) => {
+const UpdateChapter = (nav) => {
     const location = useLocation();
     const isActive = (path) => location.pathname.startsWith(path);
-    const { id, clo_id } = useParams();
+    const { id, chapter_id } = useParams();
 
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onClose } = useDisclosure();
 
-    const [cloname, setCloName] = useState("");
+    const [chaptername, setChapterName] = useState("");
     const [Description, setDescription] = useState("");
 
     const [scrollBehavior, setScrollBehavior] = useState("inside");
 
-    const [isDelete, setisDelete] = useState(false);
-
     const navigate = useNavigate();
-
-
-    const getPoByID = async () => {
+    const getChapterByID = async () => {
         try {
-            const response = await axiosAdmin.get(`/clo/${clo_id}`);
+            const response = await axiosAdmin.get(`/chapter/${chapter_id}`);
             if (response.data) {
-                setCloName(response.data?.cloName)
+                setChapterName(response.data?.chapterName)
                 setDescription(response.data?.description)
             }
             console.log(response.data);
@@ -37,24 +33,24 @@ const UpdateClo = (nav) => {
         }
     }
 
-    const UpdatePos = async () => {
+    const UpdateChapter = async () => {
         try {
             const data = {
-                clo_id: clo_id,
-                cloName: cloname,
+                clo_id: chapter_id,
+                cloName: chaptername,
                 description: Description,
                 subject_id: id
             }
             console.log(data);
-            const response = await axiosAdmin.put(`/clo/${clo_id}`, { data: data });
-            onClose(navigate(`/admin/management-subject/${id}/clo/update`))
+            await axiosAdmin.put(`/chapter/${chapter_id}`, { data: data });
+            onClose(navigate(`/admin/management-subject/${id}/chapter/update`))
         } catch (error) {
             console.error("lỗi", error);
         }
     }
     useEffect(() => {
         onOpen()
-        getPoByID()
+        getChapterByID()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
 
@@ -75,16 +71,16 @@ const UpdateClo = (nav) => {
         <div className="flex w-full flex-col justify-center items-start leading-8 p-2 bg-[#f5f5f5]-500">
             <Modal
                 isOpen={isOpen}
-                onClose={() => navigate(`/admin/management-subject/${id}/clo/update`)}
+                onClose={() => navigate(`/admin/management-subject/${id}/chapter/update`)}
                 scrollBehavior={scrollBehavior}
             >
                 <ModalContent className="m-auto">
                     <ModalHeader className="flex flex-col gap-1">Cập nhật</ModalHeader>
                     <ModalBody>
-                        <span>Tên CLO</span>
+                        <span>Tên Chapter</span>
                         <Input
-                            value={cloname}
-                            onValueChange={setCloName}
+                            value={chaptername}
+                            onValueChange={setChapterName}
                             className="max-w-xs"
                         />
                         <span>Mô tả</span>
@@ -101,12 +97,12 @@ const UpdateClo = (nav) => {
                             color="danger"
                             radius="sm"
                             as={Link}
-                            to={`/admin/management-subject/${id}/clo/update`}
+                            to={`/admin/management-subject/${id}/chapter/update`}
                             onClick={onClose}
                         >
                             Close
                         </Button>
-                        <Button onClick={UpdatePos} color="primary" radius="sm">
+                        <Button onClick={UpdateChapter} color="primary" radius="sm">
                             <span className="font-medium">Cập nhật</span>
                         </Button>
                     </ModalFooter>
@@ -121,34 +117,45 @@ const UpdateClo = (nav) => {
                             </div>
                         </Tooltip>
                     </Link>
-
-                    <Link to={`/admin/management-subject/${id}/clo/update`}>
+                    <Link to={`/admin/management-subject/${id}/chapter/update`}>
                         <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/clo/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                Danh sách CLO
+                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                Danh sách CHAPTER
                             </div>
                         </div>
                     </Link>
-
-                    <Link to={`/admin/management-subject/${id}/clo-plo`}>
+                    <Link to={`/admin/management-subject/${id}/chapter-clo`}>
                         <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/clo-plo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                CLO_PLO
+                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter-clo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                                CHAPTER_CLO
                             </div>
                         </div>
                     </Link>
-
-                    <Link to={`/admin/management-subject/${id}/clo/create`}>
+                    <Link to={`/admin/management-subject/${id}/chapter/create`}>
                         <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/clo/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
+                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
                                 Tạo mới
                             </div>
                         </div>
                     </Link>
+                </div>
+                <div>
+                    <Link to={`/admin/management-subject/${id}/chapter/store`}>
+                        <Tooltip title="Kho lưu trữ">
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+
+                            >
+                                <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
+                            </Button>
+                        </Tooltip></Link>
                 </div>
             </div>
         </div>
     );
 }
 
-export default UpdateClo;
+export default UpdateChapter;
