@@ -97,15 +97,8 @@ function Nav(props) {
         },
         {
             text: "Subjects",
-            icon: <i className={`fa-solid fa-gear mr-${collapsedNav ? "0" : "3"} w-4`}></i>,
-            submenu: [
-                {
-                    text: (<><i className="fa-solid fa-minus mr-3"></i>Subjects</>),
-                    link: "/admin/management-subject/list",
-                    active: [
-                       
-                    ],
-                }]
+            icon: <i className={`fa-solid fa-star mr-${collapsedNav ? "0" : "3"} w-4`}></i>,
+            link: "/admin/management-subject/list"
         },
         { text: "Rubric", link: "/admin/management-rubric", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
         { text: "Sinh viên", link: "/admin/student", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },

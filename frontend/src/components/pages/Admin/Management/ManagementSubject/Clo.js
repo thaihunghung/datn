@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { UploadOutlined } from '@ant-design/icons';
-import { Table, Upload, Tooltip, Divider, Steps, message } from 'antd';
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@nextui-org/react";
+import { Table, Upload, Tooltip, Divider, Steps, message, Button } from 'antd';
 import { Link, useLocation, useParams } from "react-router-dom";
 import { useDisclosure } from "@nextui-org/react";
 import {
@@ -9,10 +8,11 @@ import {
 } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
+import DropdownAndNavClo from "../../Utils/DropdownAndNav/DropdownAndNavClo";
+import Tabs from "../../Utils/Tabs/Tabs";
 
 const Clo = (nav) => {
     const location = useLocation();
-    const isActive = (path) => location.pathname.startsWith(path);
     const { id } = useParams();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -26,17 +26,6 @@ const Clo = (nav) => {
     const [deleteId, setDeleteId] = useState(null);
     const [selectedItem, setSelectedItem] = useState("Danh sách CLO");
     const [fileList, setFileList] = useState([]);
-
-    const items = [
-        { key: "Danh sách CLO", label: "Danh sách CLO", path: `/admin/management-subject/${id}/clo/update` },
-        { key: "CLO_PLO", label: "CLO_PLO", path: `/admin/management-subject/${id}/clo-plo` },
-        { key: "Tạo mới", label: "Tạo mới", path: `/admin/management-subject/${id}/clo/create` }
-    ];
-
-    const handleAction = (key) => {
-        const selected = items.find(item => item.key === key);
-        if (selected) setSelectedItem(selected.label);
-    };
 
     const handleOnChangeTextName = (nameP) => {
         setCurrent(nameP);
@@ -151,17 +140,17 @@ const Clo = (nav) => {
     const handleDownloadPo = async () => {
         try {
             if (selectedRowKeys.length === 0) {
-                alert('Please select at least one po ID');
+                alert('Please select at least one clo ID');
                 return;
             }
             const data = { id: selectedRowKeys };
-            const response = await axiosAdmin.post('/po/templates/update', { data }, { responseType: 'blob' });
+            const response = await axiosAdmin.post('/clo/templates/update', { data }, { responseType: 'blob' });
 
             if (response && response.data) {
                 const url = window.URL.createObjectURL(response.data);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'po_update.xlsx';
+                a.download = 'clo.xlsx';
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
@@ -172,7 +161,7 @@ const Clo = (nav) => {
         }
     };
 
-    const uploadProps = {
+    const props = {
         onRemove: (file) => {
             const index = fileList.indexOf(file);
             const newFileList = fileList.slice();
@@ -199,7 +188,7 @@ const Clo = (nav) => {
     }, []);
 
     return (
-        <div className="flex w-full flex-col justify-center leading-8 pt-5">
+        <div className="flex w-full h-fit flex-col justify-center leading-8 pt-5">
             <ConfirmAction
                 onOpenChange={onOpenChange}
                 isOpen={isOpen}
@@ -213,87 +202,7 @@ const Clo = (nav) => {
                     }
                 }}
             />
-            <div className="flex justify-between px-5 w-full items-center">
-                <div className="flex gap-2 justify-center items-center lg:hidden xl:hidden">
-                    <Link to={`/admin/management-subject/list`}>
-                        <Tooltip title="Quay lại" color={'#ff9908'}>
-                        <Button variant="bordered" className="w-fit"> 
-                                <i class="fa-solid fa-arrow-left text-xl"></i>
-                            </Button>
-                        </Tooltip>
-                    </Link>
-                    <Dropdown>
-                        <DropdownTrigger>
-                            <Button variant="bordered" className="text-base font-bold">
-                                {selectedItem} <i className="fas fa-chevron-right ml-2"></i>
-                            </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu aria-label="Dynamic Actions" items={items} onAction={handleAction}>
-                            {(item) => (
-                                <DropdownItem key={item.key}>
-                                    <Link to={item.path} className="h-full">
-                                        <div className="min-w-[200px] text-base font-bold text-[#020401]">
-                                            {item.label}
-                                        </div>
-                                    </Link>
-                                </DropdownItem>
-                            )}
-                        </DropdownMenu>
-                    </Dropdown>
-                </div>
-
-             <div className="hidden sm:hidden lg:block xl:block">
-                <div className="flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={`/admin/management-subject/list`}>
-                        <Tooltip title="Quay lại" color={'#ff9908'}>
-                            <div className="p-5">
-                                <i class="fa-solid fa-arrow-left text-xl"></i>
-                            </div>
-                        </Tooltip>
-                    </Link>
-
-                    <Link to={`/admin/management-subject/${id}/clo/update`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/clo/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                Danh sách CLO
-                            </div>
-                        </div>
-                    </Link>
-
-                    <Link to={`/admin/management-subject/${id}/clo-plo`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/clo-plo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                CLO_PLO
-                            </div>
-                        </div>
-                    </Link>
-
-                    <Link to={`/admin/management-subject/${id}/clo/create`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/clo/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                                Tạo mới
-                            </div>
-                        </div>
-                    </Link>
-                </div>
-                </div>
-                <div className="hidden sm:hidden lg:block xl:block">
-                    <Link to={`/admin/management-subject/${id}/clo/store`}>
-                        <Button color="default">
-                            <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
-                        </Button>
-                    </Link>
-                </div>
-                <div className="lg:hidden xl:hidden">
-                    <Link to={`/admin/management-subject/${id}/clo/store`}>
-                       <Tooltip title="Kho lưu trữ" color={'#ff9908'}>
-                        <Button color="default" className="w-fit">
-                            <i className="fa-solid fa-trash-can"></i>
-                        </Button>
-                        </Tooltip> 
-                    </Link>
-                </div>
-            </div>
+            <DropdownAndNavClo />
             <div className="w-full my-5 px-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
@@ -333,8 +242,8 @@ const Clo = (nav) => {
                         </div>
                     </div>
                 )}
-                <div className="w-full ">
-                    <Table className="table-po text-[#fefefe]"
+                <div className="w-full h-fit overflow-auto">
+                    <Table className="table-po min-w-[400px] sm:min-w-[400px] lg:min-w-full xl:min-w-full table-auto text-[#fefefe]"
                         bordered
                         loading={loading}
                         rowSelection={{
@@ -346,7 +255,59 @@ const Clo = (nav) => {
                     />
                 </div>
             </div>
+            <Tabs tabs=
+                {[
+                    {
+                        title: 'Cập nhật',
+                        content:
+                            <div className="w-full rounded-lg">
+                                <div className=' w-full flex justify-center items-center'>
+                                    <div className='w-full  flex flex-col px-2  sm:gap-5 sm:justify-center h-fix sm:px-5 lg:px-5 xl:px-5 sm:flex-col  lg:flex-col  xl:flex-col  gap-[20px]'>
+                                        <div className='px-10 hidden sm:hidden lg:block xl:block'>
+                                            <Divider />
+                                            <Steps
+                                                current={current}
+                                                onChange={handleOnChangeTextName}
+                                                items={[
+                                                    { title: 'Bước 1', description: 'Tải về form' },
+                                                    { title: 'Bước 2', description: 'Tải lại form' },
+                                                    { title: 'Bước 3', description: 'Chờ phản hồi' }
+                                                ]}
+                                            />
+                                        </div>
 
+                                        <div className='flex flex-col gap-5 justify-center items-center w-full  sm:flex-col sm:w-full lg:flex-row xl:flex-row'>
+                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%]  flex justify-start items-center'>
+                                                <div className='p-10 w-full mt-10 h-fix sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center  gap-5 rounded-lg'>
+                                                    <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
+                                                    <Button className='w-full bg-primary flex items-center justify-center  p-5 rounded-lg' onClick={handleDownloadPo}>
+                                                        <scan>Tải xuống mẫu </scan>
+                                                    </Button>
+
+                                                </div>
+                                            </div>
+                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-center items-center'>
+                                                <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
+                                                    <div><p className='w-full text-center'>Gửi lại mẫu</p></div>
+                                                    <Upload {...props} >
+                                                        <Button icon={<UploadOutlined />} className='text-center items-center rounded-lg px-10 h-[40px]'>Select File</Button>
+                                                    </Upload>
+                                                </div>
+                                            </div>
+                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
+                                                <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
+                                                    <div><p className='w-full text-center'>Cập nhật Dữ liệu</p></div>
+                                                    <CustomUpload endpoint={'clo/update'} LoadData={getAllClo} Data={parseInt(id)}  setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    }
+                ]}
+                activeTab={activeTab} setActiveTab={setActiveTab}
+            />
         </div>
     );
 }
@@ -409,4 +370,3 @@ function ConfirmAction(props) {
         </Modal>
     )
 }
-

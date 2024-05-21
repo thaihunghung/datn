@@ -6,6 +6,7 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { Table, Upload, Tooltip, Divider, Steps } from 'antd';
+import DropdownAndNavChapter from "../../Utils/DropdownAndNav/DropdownAndNavChapter";
 
 
 const StoreChapter = (nav) => {
@@ -196,44 +197,7 @@ const StoreChapter = (nav) => {
                     }
                 }}
             />
-            <div className="flex justify-between px-5 w-full items-center">
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                <Link to={`/admin/management-subject/list`}>
-                    <Tooltip title="Quay lại" color={'#ff9908'}>
-                        <div className="p-5">
-                            <i class="fa-solid fa-arrow-left text-xl"></i>
-                        </div>
-                    </Tooltip>
-                </Link>
-
-                <Link to={`/admin/management-subject/${id}/chapter/update`}>
-                    <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/chapter/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                            Danh sách CLO
-                        </div>
-                    </div>
-                </Link>
-
-                <Link to={`/admin/management-subject/${id}/chapter-clo`}>
-                    <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/chapter-clo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                            CHAPTER_CLO
-                        </div>
-                    </div>
-                </Link>
-
-                <Link to={`/admin/management-subject/${id}/chapter/create`}>
-                    <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                        <div className={` ${isActive(`/admin/management-subject/${id}/chapter/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                            Tạo mới
-                        </div>
-                    </div>
-                </Link>
-                </div>
-                <div>
-                  
-                </div>
-            </div>
+            <DropdownAndNavChapter/>
             <div className="w-full my-5 px-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
@@ -284,8 +248,8 @@ const StoreChapter = (nav) => {
                         </div>
                     </div>
                 )}
-                <div className="w-full ">
-                    <Table className="table-po text-[#fefefe]"
+                <div className="w-full h-fit overflow-auto">
+                    <Table className="table-po min-w-[400px] sm:min-w-[400px] lg:min-w-full xl:min-w-full table-auto text-[#fefefe]"
                         bordered
                         loading={loading}
                         rowSelection={{

@@ -36,6 +36,7 @@ router.post('/chapter', upload.any(), ChapterController.processSaveTemplateChapt
 router.put('/program/update', upload.any(), CsvUpdateController.updateFormProgram);
 router.put('/po/update', upload.any(), PoController.processUpdateTemplatePo);
 router.put('/plo/update', upload.any(), PloController.processUpdateTemplatePlo);
-router.post('/clo/update', upload.any(), CloController.processUpdateTemplateClo);
+router.put('/clo/update', upload.any(), CloController.processUpdateTemplateClo);
+router.put('/chapter/update', upload.any(), ChapterController.processUpdateTemplateChapter);
 
 module.exports = router;

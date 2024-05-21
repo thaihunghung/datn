@@ -10,6 +10,7 @@ const CustomUpload = ({ endpoint, setCurrent, fileList, setFileList, method, Loa
       formData.append('files[]', file);
     });
     formData.append('data', JSON.stringify(Data));
+    console.log(Data);
     setUploading(true);
     const axiosRequest = method === 'POST' ? axiosAdmin.post : axiosAdmin.put;
 

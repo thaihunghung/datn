@@ -17,6 +17,8 @@ import {
 
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
+import DropdownAndNavChapter from "../../Utils/DropdownAndNav/DropdownAndNavChapter";
+import Tabs from "../../Utils/Tabs/Tabs";
 
 const Chapter = (nav) => {
     const location = useLocation();
@@ -159,17 +161,16 @@ const Chapter = (nav) => {
         }
     };
 
-
-    const handleDownloadPo = async () => {
+    const handleDownloadChapter = async () => {
         try {
             if (selectedRowKeys.length === 0) {
-                alert('Please select at least one po ID');
+                alert('Please select at least one chapter ID');
                 return;
             }
             const data = {
                 id: selectedRowKeys
             }
-            const response = await axiosAdmin.post('/po/templates/update', { data: data }, {
+            const response = await axiosAdmin.post('/chapter/templates/update', { data: data }, {
                 responseType: 'blob'
             });
 
@@ -177,7 +178,7 @@ const Chapter = (nav) => {
                 const url = window.URL.createObjectURL(response.data);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'po_update.xlsx';
+                a.download = 'chapter_update.xlsx';
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
@@ -202,7 +203,6 @@ const Chapter = (nav) => {
         fileList,
     };
 
-    const description = 'This is a description.';
     useEffect(() => {
         getAllChapter()
         const handleResize = () => {
@@ -234,63 +234,18 @@ const Chapter = (nav) => {
                     }
                 }}
             />
-            <div className="flex justify-between px-5 w-full items-center">
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={`/admin/management-subject/list`}>
-                        <Tooltip title="Quay lại" color={'#ff9908'}>
-                            <div className="p-5">
-                                <i class="fa-solid fa-arrow-left text-xl"></i>
-                            </div>
-                        </Tooltip>
-                    </Link>
-                    <Link to={`/admin/management-subject/${id}/chapter/update`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                Danh sách CHAPTER
-                            </div>
-                        </div>
-                    </Link>
-                    <Link to={`/admin/management-subject/${id}/chapter-clo`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter-clo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                CHAPTER_CLO
-                            </div>
-                        </div>
-                    </Link>
-                    <Link to={`/admin/management-subject/${id}/chapter/create`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                                Tạo mới
-                            </div>
-                        </div>
-                    </Link>
-                </div>
-                <div>
-                    <Link to={`/admin/management-subject/${id}/chapter/store`}>
-                        <Tooltip title="Kho lưu trữ">
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
-
-                            >
-                                <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
-                            </Button>
-                        </Tooltip></Link>
-                </div>
-            </div>
+            <DropdownAndNavChapter />
             <div className="w-full my-5 px-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
                         <p className="text-sm font-medium">
                             <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
-                            Đã chọn {selectedRow.length} bài viết
+                            Đã chọn {selectedRow.length} chapter
                         </p>
                         <div className="flex items-center gap-2">
 
                             <Tooltip
-                                title={`Xoá ${selectedRowKeys.length} bài viết`}
+                                title={`Xoá ${selectedRowKeys.length} chapter`}
                                 getPopupContainer={() =>
                                     document.querySelector(".Quick__Option")
                                 }
@@ -319,8 +274,8 @@ const Chapter = (nav) => {
                         </div>
                     </div>
                 )}
-                <div className="w-full ">
-                    <Table className="table-po text-[#fefefe]"
+                <div className="w-full h-fit overflow-auto">
+                    <Table className="table-po min-w-[500px] sm:min-w-[500px] lg:min-w-full xl:min-w-full table-auto text-[#fefefe]"
                         bordered
                         loading={loading}
                         rowSelection={{
@@ -332,7 +287,59 @@ const Chapter = (nav) => {
                     />
                 </div>
             </div>
+            <Tabs tabs=
+                {[
+                    {
+                        title: 'Cập nhật',
+                        content:
+                            <div className="w-full rounded-lg">
+                                <div className=' w-full flex justify-center items-center'>
+                                    <div className='w-full  flex flex-col px-2  sm:gap-5 sm:justify-center h-fix sm:px-5 lg:px-5 xl:px-5 sm:flex-col  lg:flex-col  xl:flex-col  gap-[20px]'>
+                                        <div className='px-10 hidden sm:hidden lg:block xl:block'>
+                                            <Divider />
+                                            <Steps
+                                                current={current}
+                                                onChange={handleOnChangeTextName}
+                                                items={[
+                                                    { title: 'Bước 1', description: 'Tải về form' },
+                                                    { title: 'Bước 2', description: 'Tải lại form' },
+                                                    { title: 'Bước 3', description: 'Chờ phản hồi' }
+                                                ]}
+                                            />
+                                        </div>
 
+                                        <div className='flex flex-col gap-5 justify-center items-center w-full  sm:flex-col sm:w-full lg:flex-row xl:flex-row'>
+                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%]  flex justify-start items-center'>
+                                                <div className='p-10 w-full mt-10 h-fix sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center  gap-5 rounded-lg'>
+                                                    <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
+                                                    <Button className='w-full bg-primary flex items-center justify-center  p-5 rounded-lg' onClick={handleDownloadChapter}>
+                                                        <scan>Tải xuống mẫu </scan>
+                                                    </Button>
+
+                                                </div>
+                                            </div>
+                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-center items-center'>
+                                                <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
+                                                    <div><p className='w-full text-center'>Gửi lại mẫu</p></div>
+                                                    <Upload {...props} >
+                                                        <Button icon={<UploadOutlined />} className='text-center items-center rounded-lg px-10 h-[40px]'>Select File</Button>
+                                                    </Upload>
+                                                </div>
+                                            </div>
+                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
+                                                <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
+                                                    <div><p className='w-full text-center'>Cập nhật Dữ liệu</p></div>
+                                                    <CustomUpload endpoint={'chapter/update'} LoadData={getAllChapter} Data={parseInt(id)} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    }
+                ]}
+                activeTab={activeTab} setActiveTab={setActiveTab}
+            />
         </div>
     );
 }
@@ -395,4 +402,3 @@ function ConfirmAction(props) {
         </Modal>
     )
 }
-

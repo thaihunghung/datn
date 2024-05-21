@@ -4,6 +4,7 @@ import { Table, Tooltip, Button, message } from 'antd';
 import { Link, useLocation } from "react-router-dom";
 import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import DropdownAndNavSubject from "../../Utils/DropdownAndNav/DropdownAndNavSubject";
 
 const Subject = (nav) => {
   const location = useLocation();
@@ -23,22 +24,14 @@ const Subject = (nav) => {
       title: "Tên Học phần",
       dataIndex: "name",
       render: (record) => (
-        <div className="text-sm">
+        <div className="text-sm min-w-[100px]">
           <p className="font-medium">{record}</p>
         </div>
       ),
     },
-    // {
-    //   title: "Mô tả",
-    //   dataIndex: "description",
-    //   render: (record) => (
-    //     <div className="text-sm">
-    //       <p className="font-medium text-justify">{record}</p>
-    //     </div>
-    //   ),  
-    // },
+
     {
-      title: "CĐR học phần",
+      title: "CĐR",
       dataIndex: "clos",
       render: (clos) => (
         <div>
@@ -117,9 +110,9 @@ const Subject = (nav) => {
     {
       title: "TL",
       dataIndex: "numberCreditsTheory",
-      render: (_id) => (
-        <div className="text-sm">
-          <Link to={``}></Link>
+      render: (record) => (
+        <div className="text-sm text-center">
+          <p className="font-medium">{record}</p>
         </div>
       ),
     },
@@ -127,13 +120,13 @@ const Subject = (nav) => {
       title: "TH",
       dataIndex: "numberCreditsPractice",
       render: (record) => (
-        <div className="text-sm">
+        <div className="text-sm text-center">
           <p className="font-medium">{record}</p>
         </div>
       ),
     },
     {
-      title: "Loại học phần",
+      title: "Loại",
       dataIndex: "typesubject",
       render: (record) => (
         <div className="text-sm">
@@ -149,7 +142,7 @@ const Subject = (nav) => {
       ),
       dataIndex: "action",
       render: (_id) => (
-        <div className="flex flex-col items-center justify-center w-full gap-2">
+        <div className="flex items-center justify-center w-full gap-2">
           <Link to={`/admin/management-subject/update/${_id}`}>
             <Tooltip title="Chỉnh sửa">
               <Button
@@ -288,38 +281,7 @@ const Subject = (nav) => {
         }}
       />
 
-      <div className="flex justify-between px-5 w-full items-center">
-        <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-          <Link to="/admin/management-subject/list">
-            <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-              <div className={` ${isActive("/admin/management-subject/list") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                Danh sách Subject
-              </div>
-            </div>
-          </Link>
-          <Link to="/admin/management-subject/create">
-            <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-              <div className={` ${isActive("/admin/management-subject/create") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                Tạo mới
-              </div>
-            </div>
-          </Link>
-        </div>
-        <div>
-          <Link to="/admin/management-po/store">
-            <Tooltip title="Kho lưu trữ">
-              <Button
-                isIconOnly
-                variant="light"
-                radius="full"
-                size="sm"
-
-              >
-                <span className="text-base">Kho lưu trữ</span><i className="fa-solid ml-2 fa-trash-can"></i>
-              </Button>
-            </Tooltip></Link>
-        </div>
-      </div>
+      <DropdownAndNavSubject/>
       <div className="w-full my-5 px-5">
         {selectedRowKeys.length !== 0 && (
           <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
@@ -359,7 +321,7 @@ const Subject = (nav) => {
             </div>
           </div>
         )}
-        <div className="w-full ">
+        <div className="w-full overflow-auto">
           <Table className="table-po text-[#fefefe]"
             bordered
             loading={loading}
@@ -375,7 +337,6 @@ const Subject = (nav) => {
     </div>
   );
 }
-
 
 export default Subject;
 function ConfirmAction(props) {

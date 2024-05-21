@@ -4,12 +4,10 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-import { Tooltip, message } from 'antd';
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
+import DropdownAndNavClo from "../../Utils/DropdownAndNav/DropdownAndNavClo";
 
 const UpdateClo = (nav) => {
     const location = useLocation();
-    const isActive = (path) => location.pathname.startsWith(path);
     const { id, clo_id } = useParams();
 
     const { setCollapsedNav } = nav;
@@ -20,26 +18,8 @@ const UpdateClo = (nav) => {
 
     const [scrollBehavior, setScrollBehavior] = useState("inside");
 
-    const [isDelete, setisDelete] = useState(false);
 
     const navigate = useNavigate();
-    const items = [
-        {
-            key: "Danh sách CLO",
-            label: "Danh sách CLO",
-            path: `/admin/management-subject/${id}/clo/update`
-        },
-        {
-            key: "CLO_PLO",
-            label: "CLO_PLO",
-            path: `/admin/management-subject/${id}/clo-plo`
-        },
-        {
-            key: "Tạo mới",
-            label: "Tạo mới",
-            path: `/admin/management-subject/${id}/clo/create`
-        }
-    ];
 
     const getPoByID = async () => {
         try {
@@ -53,14 +33,6 @@ const UpdateClo = (nav) => {
             console.error("lỗi", error);
         }
     }
-    const [selectedItem, setSelectedItem] = useState("Danh sách CLO");
-
-    const handleAction = (key) => {
-        const selected = items.find(item => item.key === key);
-        if (selected) {
-            setSelectedItem(selected.label);
-        }
-    };
 
     const UpdatePos = async () => {
         try {
@@ -71,7 +43,7 @@ const UpdateClo = (nav) => {
                 subject_id: id
             }
             console.log(data);
-            const response = await axiosAdmin.put(`/clo/${clo_id}`, { data: data });
+            await axiosAdmin.put(`/clo/${clo_id}`, { data: data });
             onClose(navigate(`/admin/management-subject/${id}/clo/update`))
         } catch (error) {
             console.error("lỗi", error);
@@ -137,88 +109,7 @@ const UpdateClo = (nav) => {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
-<div className="flex gap-2 justify-between px-5 w-full items-center">
-                <div className="flex justify-center items-center lg:hidden xl:hidden">
-                    <Link to={`/admin/management-subject/list`}>
-                        <Tooltip title="Quay lại" color={'#ff9908'}>
-                        <Button variant="bordered">                            
-                        
-                        <i class="fa-solid fa-arrow-left text-xl"></i>
-                        </Button> 
-                        </Tooltip>
-                    </Link>
-                    <Dropdown>
-                        <DropdownTrigger>
-                            <Button variant="bordered" className="text-base font-bold">
-                                {selectedItem} <i className="fas fa-chevron-right ml-2"></i>
-                            </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu aria-label="Dynamic Actions" items={items} onAction={handleAction}>
-                            {(item) => (
-                                <DropdownItem key={item.key}>
-                                    <Link to={item.path} className="h-full">
-                                        <div className="min-w-[200px] text-base font-bold text-[#020401]">
-                                            {item.label}
-                                        </div>
-                                    </Link>
-                                </DropdownItem>
-                            )}
-                        </DropdownMenu>
-                    </Dropdown>
-                </div>
-
-             <div className="hidden sm:hidden lg:block xl:block">
-                <div className="flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={`/admin/management-subject/list`}>
-                        <Tooltip title="Quay lại" color={'#ff9908'}>
-                        <Button color="default">
-                                <i class="fa-solid fa-arrow-left text-xl"></i>
-                            </Button>
-                        </Tooltip>
-                    </Link>
-
-                    <Link to={`/admin/management-subject/${id}/clo/update`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/clo/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                Danh sách CLO
-                            </div>
-                        </div>
-                    </Link>
-
-                    <Link to={`/admin/management-subject/${id}/clo-plo`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/clo-plo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                CLO_PLO
-                            </div>
-                        </div>
-                    </Link>
-
-                    <Link to={`/admin/management-subject/${id}/clo/create`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/clo/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                                Tạo mới
-                            </div>
-                        </div>
-                    </Link>
-                </div>
-                </div>
-                <div className="hidden sm:hidden lg:block xl:block">
-                    <Link to={`/admin/management-subject/${id}/clo/store`}>
-                        <Button color="default">
-                            <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
-                        </Button>
-                    </Link>
-                </div>
-                <div className="lg:hidden xl:hidden">
-                    <Link to={`/admin/management-subject/${id}/clo/store`}>
-                       <Tooltip title="Kho lưu trữ" color={'#ff9908'}>
-                        <Button color="default" className="w-fit">
-                            <i className="fa-solid fa-trash-can"></i>
-                        </Button>
-                        </Tooltip> 
-                    </Link>
-                </div>
-            </div>
+            <DropdownAndNavClo />
         </div>
     );
 }

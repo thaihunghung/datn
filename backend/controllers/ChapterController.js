@@ -210,7 +210,7 @@ const ChapterController = {
 
     worksheet.columns = [
       { header: 'Tên chapter', key: 'chapterName', width: 20 },
-      { header: 'Mô tả', key: 'description', width: 30 },
+      { header: 'Mô tả', key: 'description', width: 100 },
     ];
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -220,60 +220,60 @@ const ChapterController = {
   },
 
   getFormUpdate: async (req, res) => {
-    // try {
-    //   const { data } = req.body;
-    //   if (!data || !data.id) {
-    //     return res.status(400).json({ message: 'Invalid input data. Expected format: { data: { id: [1, 2, 3] } }' });
-    //   }
+    try {
+      const { data } = req.body;
+      if (!data || !data.id) {
+        return res.status(400).json({ message: 'Invalid input data. Expected format: { data: { id: [1, 2, 3] } }' });
+      }
 
-    //   const { id } = data;
-    //   const pos = await CloModel.findAll({ where: { clo_id: id } });
+      const { id } = data;
+      const chapters = await ChapterModel.findAll({ where: { chapter_id: id } });
 
-    //   if (!pos || pos.length === 0) {
-    //     return res.status(404).json({ message: 'CloModels not found' });
-    //   }
+      if (!chapters || chapters.length === 0) {
+        return res.status(404).json({ message: 'ChapterModel not found' });
+      }
 
-    //   const workbook = new ExcelJS.Workbook();
-    //   const worksheet = workbook.addWorksheet('CLO');
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('CHAPTER');
 
-    //   worksheet.columns = [
-    //     { header: 'Mã học phần', key: 'subject_id', width: 20 },
-    //     { header: 'Tên Clo', key: 'cloName', width: 20 },
-    //     { header: 'Mô tả', key: 'description', width: 30 },
-    //   ];
+      worksheet.columns = [
+        { header: 'mã Chapter', key: 'chapter_id', width: 20 },
+        { header: 'Tên chapter', key: 'chapterName', width: 20 },
+        { header: 'Mô tả', key: 'description', width: 100 },
+      ];
 
-    //   // Add rows to the worksheet
-    //   pos.forEach(element => {
-    //     worksheet.addRow({
-    //       clo_id: element.clo_id,
-    //       cloName: element.cloName,
-    //       description: element.description
-    //     });
-    //   });
+      // Add rows to the worksheet
+      chapters.forEach(element => {
+        worksheet.addRow({
+          chapter_id: element.chapter_id,
+          chapterName: element.chapterName,
+          description: element.description
+        });
+      });
 
-    //   await worksheet.protect('yourpassword', {
-    //     selectLockedCells: true,
-    //     selectUnlockedCells: true
-    //   });
+      await worksheet.protect('yourpassword', {
+        selectLockedCells: true,
+        selectUnlockedCells: true
+      });
 
-    //   worksheet.eachRow((row, rowNumber) => {
-    //     row.eachCell((cell, colNumber) => {
-    //       if (colNumber === 1) {
-    //         cell.protection = { locked: true };
-    //       } else {
-    //         cell.protection = { locked: false };
-    //       }
-    //     });
-    //   });
-    //   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    //   res.setHeader('Content-Disposition', 'attachment; filename="cloForm.xlsx"');
+      worksheet.eachRow((row, rowNumber) => {
+        row.eachCell((cell, colNumber) => {
+          if (colNumber === 1) {
+            cell.protection = { locked: true };
+          } else {
+            cell.protection = { locked: false };
+          }
+        });
+      });
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename="chapterForm.xlsx"');
 
-    //   await workbook.xlsx.write(res);
-    //   res.status(200).end();
-    // } catch (error) {
-    //   console.error('Error generating CloModel update form:', error);
-    //   res.status(500).json({ message: 'Server error' });
-    // }
+      await workbook.xlsx.write(res);
+      res.status(200).end();
+    } catch (error) {
+      console.error('Error generating chapterModel update form:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
   },
   processSaveTemplateChapter: async (req, res) => {
     if (!req.files) {
@@ -324,58 +324,70 @@ const ChapterController = {
     }
   },
 
-  // processUpdateTemplateChapter: async (req, res) => {
-  //   if (!req.files || !req.files.length) {
-  //     return res.status(400).json({ message: 'No file uploaded.' });
-  //   }
+  processUpdateTemplateChapter: async (req, res) => {
+    if (!req.files || !req.files.length) {
+      return res.status(400).json({ message: 'No file uploaded.' });
+    }
 
-  //   const uploadDirectory = path.join(__dirname, '../uploads');
-  //   const filename = req.files[0].filename;
-  //   const filePath = path.join(uploadDirectory, filename);
+    const subject_id = req.body.data;
 
-  //   const workbook = new ExcelJS.Workbook();
-  //   try {
-  //     await workbook.xlsx.readFile(filePath);
-  //   } catch (error) {
-  //     console.error('Error reading the uploaded file:', error);
-  //     return res.status(500).json({ message: 'Error reading the uploaded file' });
-  //   }
+    try {
+      const subject = await SubjectModel.findByPk(subject_id);
+      if (!subject) {
+        return res.status(404).json({ message: 'Subject not found' });
+      }
+    } catch (error) {
+      console.error('Error fetching subject:', error);
+      return res.status(500).json({ message: 'Error fetching subject from the database' });
+    }
+    const uploadDirectory = path.join(__dirname, '../uploads');
+    const filename = req.files[0].filename;
+    const filePath = path.join(uploadDirectory, filename);
 
-  //   const worksheet = workbook.getWorksheet('CLO');
-  //   const updateData = [];
-  //   worksheet.eachRow((row, rowNumber) => {
-  //     if (rowNumber > 1) {
-  //       updateData.push({
-  //         subject_id: row.getCell(1).value,
-  //         cloName: row.getCell(2).value,
-  //         description: row.getCell(3).value,
-  //       });
-  //     }
-  //   });
+    const workbook = new ExcelJS.Workbook();
+    try {
+      await workbook.xlsx.readFile(filePath);
+    } catch (error) {
+      console.error('Error reading the uploaded file:', error);
+      return res.status(500).json({ message: 'Error reading the uploaded file' });
+    }
 
-  //   fs.unlinkSync(filePath);
+    const worksheet = workbook.getWorksheet('CHAPTER');
+    const updateData = [];
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber > 1) {
+        updateData.push({
+          subject_id: subject_id,
+          chapter_id: row.getCell(1).value,
+          chapterName: row.getCell(2).value,
+          description: row.getCell(3).value,
+        });
+      }
+    });
 
-  //   try {
-  //     await Promise.all(updateData.map(async (data) => {
-  //       const updatedRows = await CloModel.update(
-  //         {
-  //           cloName: data.cloName,
-  //           description: data.description
-  //         },
-  //         { where: { clo_id: data.clo_id } }
-  //       );
+    fs.unlinkSync(filePath);
 
-  //       if (updatedRows[0] === 0) {
-  //         console.warn(`No CloModel found with ID ${data.clo_id} for update`);
-  //       }
-  //     }));
+    try {
+      await Promise.all(updateData.map(async (data) => {
+        const updatedRows = await ChapterModel.update(
+          {
+            chapterName: data.chapterName,
+            description: data.description
+          },
+          { where: { chapter_id: data.chapter_id } }
+        );
 
-  //     return res.status(200).json({ message: 'CloModels updated successfully' });
-  //   } catch (error) {
-  //     console.error('Error updating CloModels:', error);
-  //     return res.status(500).json({ message: 'Server error' });
-  //   }
-  // },
+        if (updatedRows[0] === 0) {
+          console.warn(`No ChapterModel found with ID ${data.chapter_id} for update`);
+        }
+      }));
+
+      return res.status(200).json({ message: 'ChapterModels updated successfully' });
+    } catch (error) {
+      console.error('Error updating ChapterModels:', error);
+      return res.status(500).json({ message: 'Server error' });
+    }
+  },
 };
 
 module.exports = ChapterController;

@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { Tooltip, message, Button } from 'antd';
+import DropdownAndNavChapter from "../../Utils/DropdownAndNav/DropdownAndNavChapter";
 
 const UpdateChapter = (nav) => {
     const location = useLocation();
@@ -108,52 +109,9 @@ const UpdateChapter = (nav) => {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
-            <div className="flex justify-between px-5 w-full items-center">
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={`/admin/management-subject/list`}>
-                        <Tooltip title="Quay lại" color={'#ff9908'}>
-                            <div className="p-5">
-                                <i class="fa-solid fa-arrow-left text-xl"></i>
-                            </div>
-                        </Tooltip>
-                    </Link>
-                    <Link to={`/admin/management-subject/${id}/chapter/update`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                Danh sách CHAPTER
-                            </div>
-                        </div>
-                    </Link>
-                    <Link to={`/admin/management-subject/${id}/chapter-clo`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter-clo`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                CHAPTER_CLO
-                            </div>
-                        </div>
-                    </Link>
-                    <Link to={`/admin/management-subject/${id}/chapter/create`}>
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive(`/admin/management-subject/${id}/chapter/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                                Tạo mới
-                            </div>
-                        </div>
-                    </Link>
-                </div>
-                <div>
-                    <Link to={`/admin/management-subject/${id}/chapter/store`}>
-                        <Tooltip title="Kho lưu trữ">
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
 
-                            >
-                                <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
-                            </Button>
-                        </Tooltip></Link>
-                </div>
-            </div>
+
+            <DropdownAndNavChapter/>
         </div>
     );
 }

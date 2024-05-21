@@ -239,7 +239,7 @@ const CloController = {
       const worksheet = workbook.addWorksheet('CLO');
 
       worksheet.columns = [
-        { header: 'Mã học phần', key: 'subject_id', width: 20 },
+        { header: 'mã Clo', key: 'clo_id', width: 20 },
         { header: 'Tên Clo', key: 'cloName', width: 20 },
         { header: 'Mô tả', key: 'description', width: 30 },
       ];
@@ -330,7 +330,16 @@ const CloController = {
     if (!req.files || !req.files.length) {
       return res.status(400).json({ message: 'No file uploaded.' });
     }
-
+    const subject_id = req.body.data;
+    try {
+      const subject = await SubjectModel.findByPk(subject_id);
+      if (!subject) {
+        return res.status(404).json({ message: 'Subject not found' });
+      }
+    } catch (error) {
+      console.error('Error fetching subject:', error);
+      return res.status(500).json({ message: 'Error fetching subject from the database' });
+    }
     const uploadDirectory = path.join(__dirname, '../uploads');
     const filename = req.files[0].filename;
     const filePath = path.join(uploadDirectory, filename);
@@ -348,7 +357,8 @@ const CloController = {
     worksheet.eachRow((row, rowNumber) => {
       if (rowNumber > 1) {
         updateData.push({
-          subject_id: row.getCell(1).value,
+          subject_id: subject_id,
+          clo_id: row.getCell(1).value,
           cloName: row.getCell(2).value,
           description: row.getCell(3).value,
         });
