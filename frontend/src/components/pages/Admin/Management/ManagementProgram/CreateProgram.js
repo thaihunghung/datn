@@ -9,6 +9,7 @@ import { convertToHTML } from 'draft-convert';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
+import DropdownAndNavProgram from "../../Utils/DropdownAndNav/DropdownAndNavProgram";
 
 const CreateProgram = (nav) => {
     const location = useLocation();
@@ -97,31 +98,7 @@ const CreateProgram = (nav) => {
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7 bg-[#f5f5f5]-500">
-            <div>
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to="/admin/management-program/description">
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-program/description") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                Chương trình
-                            </div>
-                        </div>
-                    </Link>
-                    <Link to="/admin/management-program/create">
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]" >
-                            <div className={` ${isActive("/admin/management-program/create") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                Tạo chương trình
-                            </div>
-                        </div>
-                    </Link>
-                    <Link to="/admin/management-program/update">
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-program/update") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                                Chỉnh sửa
-                            </div>
-                        </div>
-                    </Link>
-                </div>
-            </div>
+            <DropdownAndNavProgram />
             <div className="w-full mt-5 rounded-lg">
                 <Tabs tabs={[
                     {
