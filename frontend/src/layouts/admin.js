@@ -39,6 +39,8 @@ import StoreClo from '../components/pages/Admin/Management/ManagementSubject/Sto
 import UpdateChapter from '../components/pages/Admin/Management/ManagementSubject/UpdateChapter';
 import StoreChapter from '../components/pages/Admin/Management/ManagementSubject/StoreChapter';
 import UpdateSubject from '../components/pages/Admin/Management/ManagementSubject/UpdateSubject';
+import StoreSubject from '../components/pages/Admin/Management/ManagementSubject/StoreSubject';
+import CreateSubject from '../components/pages/Admin/Management/ManagementSubject/CreateSubject';
 
 function Admin(props) {
 
@@ -88,6 +90,8 @@ function Admin(props) {
           {/* <Route path="/management-rubric" element={<Rubic collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} /> */}
 
           <Route path="/management-subject/list" element={<Subject collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/management-subject/create" element={<CreateSubject collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/management-subject/store" element={<StoreSubject collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-subject/update/:id" element={<UpdateSubject collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
           

@@ -44,17 +44,17 @@ const UpdateSubject = (nav) => {
         try {
             const data = {
                 subject_id: id,
-                subjectName,
+                subjectName: subjectName,
                 description: description,
                 numberCredits: numberCredit,
-                numberCreditsTheory,
-                numberCreditsPractice,
+                numberCreditsTheory: numberCreditsTheory,
+                numberCreditsPractice: numberCreditsPractice,
                 typesubject: typeSubject
             };
             console.log(data);
-            await axiosAdmin.put(`/subject`, { data });
+            await axiosAdmin.put(`/subject/${id}`, { data });
             onClose();
-            navigate(`/admin/management-subject`);
+            navigate(`/admin/management-subject/list`);
         } catch (error) {
             console.error("Error:", error);
         }
@@ -102,13 +102,13 @@ const UpdateSubject = (nav) => {
         <div className="flex w-full flex-col justify-center items-start leading-8 p-2 bg-[#f5f5f5]-500">
             <Modal
                 isOpen={isOpen}
-                onClose={() => navigate(`/admin/management-subject`)}
+                onClose={() => navigate(`/admin/management-subject/list`)}
                 scrollBehavior={scrollBehavior}
             >
                 <ModalContent className="m-auto">
                     <ModalHeader className="flex flex-col gap-1">Cập nhật</ModalHeader>
                     <ModalBody>
-                    <span>Tên subject</span>
+                        <span>Tên subject</span>
                         <Input
                             value={subjectName}
                             onValueChange={setSubjectName}
@@ -152,7 +152,7 @@ const UpdateSubject = (nav) => {
                             color="danger"
                             radius="sm"
                             as={Link}
-                            to={`/admin/management-subject`}
+                            to={`/admin/management-subject/list`}
                             onClick={onClose}
                         >
                             Close

@@ -17,11 +17,9 @@ router.get('/clo/isDelete/false', CloController.isDeleteTofalse);
 router.put('/clo/isDelete/:id', CloController.isdelete);
 
 router.put('/clo/listId/soft-delete-multiple', CloController.softDeleteMultiple);
-
 router.put('/clo/:id/toggle-soft-delete', CloController.toggleSoftDeleteById);
 
 router.get('/clo/templates/post', CloController.getFormPost);
-
 router.post('/clo/templates/update', CloController.getFormUpdate);
 
 module.exports = router;

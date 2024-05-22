@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Table, Tooltip, Button, message } from 'antd';
 import { Link, useLocation } from "react-router-dom";
-import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
+import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Chip } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavSubject from "../../Utils/DropdownAndNav/DropdownAndNavSubject";
 
@@ -223,29 +223,29 @@ const Subject = (nav) => {
 
   const handleSoftDelete = async () => {
     const data = {
-      po_id: selectedRowKeys,
+      subject_id: selectedRowKeys,
     };
     console.log(data)
     try {
-      const response = await axiosAdmin.put('/po/listId/soft-delete-multiple', { data });
+      const response = await axiosAdmin.put('/subject/listId/soft-delete-multiple', { data });
       await getAllSubjectIsDeleteFalse();
       handleUnSelect();
       message.success(response.data.message);
     } catch (error) {
-      console.error("Error soft deleting POs:", error);
-      message.error('Error soft deleting POs');
+      console.error("Error soft deleting subjects:", error);
+      message.error('Error soft deleting subjects');
     }
   };
 
   const handleSoftDeleteById = async (_id) => {
     try {
-      const response = await axiosAdmin.put(`/po/${_id}/toggle-soft-delete`);
+      const response = await axiosAdmin.put(`/subject/${_id}/toggle-soft-delete`);
       await getAllSubjectIsDeleteFalse();
       handleUnSelect();
       message.success(response.data.message);
     } catch (error) {
-      console.error(`Error toggling soft delete for PO with ID ${_id}:`, error);
-      message.error(`Error toggling soft delete for PO with ID ${_id}`);
+      console.error(`Error toggling soft delete for subject with ID ${_id}:`, error);
+      message.error(`Error toggling soft delete for subject with ID ${_id}`);
     }
   };
 
@@ -378,7 +378,8 @@ function ConfirmAction(props) {
             <ModalHeader>Cảnh báo</ModalHeader>
             <ModalBody>
               <p className="text-[16px]">
-                {datavalue}
+              Subject sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
+
               </p>
             </ModalBody>
             <ModalFooter>

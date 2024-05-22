@@ -13,22 +13,25 @@ const ChapterController = {
   index: async (req, res) => {
     try {
       const chapters = await ChapterModel.findAll();
-      res.json(chapters);
+      res.status(200).json(chapters);
     } catch (error) {
       console.error('Error getting all chapters:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
   },
+
   create: async (req, res) => {
     try {
       const { data } = req.body;
+      console.log(data);
       const newChapter = await ChapterModel.create(data);
-      res.json(newChapter);
+      res.status(201).json(newChapter);
     } catch (error) {
       console.error('Error creating chapter:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   getByID: async (req, res) => {
     try {
       const { id } = req.params;
@@ -36,12 +39,13 @@ const ChapterController = {
       if (!chapter) {
         return res.status(404).json({ message: 'Chapter not found' });
       }
-      res.json(chapter);
+      res.status(200).json(chapter);
     } catch (error) {
       console.error('Error finding chapter:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   GetChapterBySubjectId: async (req, res) => {
     try {
       const { subject_id } = req.params;
@@ -55,12 +59,13 @@ const ChapterController = {
       if (!chapter) {
         return res.status(404).json({ message: 'Chapter not found' });
       }
-      res.json(chapter);
+      res.status(200).json(chapter);
     } catch (error) {
       console.error('Error finding chapter:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   GetChapterArchiveBySubjectId: async (req, res) => {
     try {
       const { subject_id } = req.params;
@@ -74,12 +79,13 @@ const ChapterController = {
       if (!chapter) {
         return res.status(404).json({ message: 'Chapter not found' });
       }
-      res.json(chapter);
+      res.status(200).json(chapter);
     } catch (error) {
       console.error('Error finding chapter:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   update: async (req, res) => {
     try {
       const { id } = req.params;
@@ -89,22 +95,24 @@ const ChapterController = {
         return res.status(404).json({ message: 'Chapter not found' });
       }
       const updatedChapter = await ChapterModel.update(data, { where: { chapter_id: id } });
-      res.json({ message: `Successfully updated chapter with ID: ${id}` });
+      res.status(200).json({ message: `Successfully updated chapter with ID: ${id}` });
     } catch (error) {
       console.error('Error updating chapter:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   delete: async (req, res) => {
     try {
       const { id } = req.params;
       await ChapterModel.destroy({ where: { chapter_id: id } });
-      res.json({ message: 'Successfully deleted chapter' });
+      res.status(200).json({ message: 'Successfully deleted chapter' });
     } catch (error) {
       console.error('Error deleting chapter:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   deleteMultiple: async (req, res) => {
     const { chapter_id } = req.query;
     try {
@@ -115,31 +123,33 @@ const ChapterController = {
       }
 
       await ChapterModel.destroy({ where: { chapter_id: chapter_id } });
-      res.status(200).json({ message: 'Xóa nhiều Chapter thành công' });
+      res.status(200).json({ message: 'Successfully deleted multiple chapters' });
     } catch (error) {
-      console.error('Lỗi khi xóa nhiều Chapter:', error);
-      res.status(500).json({ message: 'Lỗi server nội bộ' });
+      console.error('Error deleting multiple chapters:', error);
+      res.status(500).json({ message: 'Server error' });
     }
   },
+
   isDeleteTotrue: async (req, res) => {
     try {
       const chapters = await ChapterModel.findAll({ where: { isDelete: true } });
       if (!chapters) {
         return res.status(404).json({ message: 'No chapters found' });
       }
-      res.json(chapters);
+      res.status(200).json(chapters);
     } catch (error) {
       console.error('Error finding chapters with isDelete true:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   isDeleteTofalse: async (req, res) => {
     try {
       const chapters = await ChapterModel.findAll({ where: { isDelete: false } });
       if (!chapters) {
         return res.status(404).json({ message: 'No chapters found' });
       }
-      res.json(chapters);
+      res.status(200).json(chapters);
     } catch (error) {
       console.error('Error finding chapters with isDelete false:', error);
       res.status(500).json({ message: 'Server error' });
@@ -155,12 +165,13 @@ const ChapterController = {
       }
       const updatedIsDeleted = !chapter.isDelete;
       await ChapterModel.update({ isDelete: updatedIsDeleted }, { where: { chapter_id: id } });
-      res.json({ message: `Successfully toggled isDelete status to ${updatedIsDeleted}` });
+      res.status(200).json({ message: `Successfully toggled isDelete status to ${updatedIsDeleted}` });
     } catch (error) {
       console.error('Error updating isDelete status:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   toggleSoftDeleteById: async (req, res) => {
     try {
       const { id } = req.params;
@@ -170,8 +181,7 @@ const ChapterController = {
       }
       const updatedIsDeleted = !chapter.isDelete;
       await ChapterModel.update({ isDelete: updatedIsDeleted }, { where: { chapter_id: id } });
-      res.json({ message: `Successfully toggled isDelete status to ${updatedIsDeleted}` });
-
+      res.status(200).json({ message: `Successfully toggled isDelete status to ${updatedIsDeleted}` });
     } catch (error) {
       console.error('Error updating isDelete status:', error);
       res.status(500).json({ message: 'Server error' });
@@ -183,12 +193,12 @@ const ChapterController = {
       const { data } = req.body;
       const { chapter_id } = data;
       if (!Array.isArray(chapter_id) || chapter_id.length === 0) {
-        return res.status(400).json({ message: 'No ChapterModel ids provided' });
+        return res.status(400).json({ message: 'No chapter ids provided' });
       }
 
       const chapters = await ChapterModel.findAll({ where: { chapter_id: chapter_id } });
       if (chapters.length !== chapter_id.length) {
-        return res.status(404).json({ message: 'One or more ChapterModels not found' });
+        return res.status(404).json({ message: 'One or more chapters not found' });
       }
 
       const updatedChapters = await Promise.all(chapters.map(async (chapter) => {
@@ -197,9 +207,9 @@ const ChapterController = {
         return { chapter_id: chapter.chapter_id, isDelete: updatedIsDeleted };
       }));
 
-      res.json({ message: 'ChapterModel delete statuses toggled', updatedChapters });
+      res.status(200).json({ message: 'Chapter delete statuses toggled', updatedChapters });
     } catch (error) {
-      console.error('Error toggling ChapterModel delete status:', error);
+      console.error('Error toggling chapter delete status:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
@@ -223,14 +233,14 @@ const ChapterController = {
     try {
       const { data } = req.body;
       if (!data || !data.id) {
-        return res.status(400).json({ message: 'Invalid input data. Expected format: { data: { id: [1, 2, 3] } }' });
+        return res.status(400).json({ message: 'Missing chapter ID in request body' });
       }
 
-      const { id } = data;
+      const id = data.id;
       const chapters = await ChapterModel.findAll({ where: { chapter_id: id } });
 
       if (!chapters || chapters.length === 0) {
-        return res.status(404).json({ message: 'ChapterModel not found' });
+        return res.status(404).json({ message: 'Chapter not found' });
       }
 
       const workbook = new ExcelJS.Workbook();
@@ -242,7 +252,6 @@ const ChapterController = {
         { header: 'Mô tả', key: 'description', width: 100 },
       ];
 
-      // Add rows to the worksheet
       chapters.forEach(element => {
         worksheet.addRow({
           chapter_id: element.chapter_id,
@@ -258,16 +267,12 @@ const ChapterController = {
 
       worksheet.eachRow((row, rowNumber) => {
         row.eachCell((cell, colNumber) => {
-          if (colNumber === 1) {
-            cell.protection = { locked: true };
-          } else {
-            cell.protection = { locked: false };
-          }
+          cell.protection = { locked: colNumber === 1 };
         });
       });
+
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', 'attachment; filename="chapterForm.xlsx"');
-
       await workbook.xlsx.write(res);
       res.status(200).end();
     } catch (error) {
@@ -275,11 +280,14 @@ const ChapterController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   processSaveTemplateChapter: async (req, res) => {
     if (!req.files) {
       return res.status(400).send('No file uploaded.');
     }
+
     const subject_id = req.body.data;
+
     try {
       const subject = await SubjectModel.findByPk(subject_id);
       if (!subject) {
@@ -315,6 +323,7 @@ const ChapterController = {
     });
 
     fs.unlinkSync(filePath);
+
     try {
       const createdChapter = await ChapterModel.bulkCreate(jsonData);
       res.status(201).json({ message: 'Data saved successfully', data: createdChapter });
@@ -340,6 +349,7 @@ const ChapterController = {
       console.error('Error fetching subject:', error);
       return res.status(500).json({ message: 'Error fetching subject from the database' });
     }
+
     const uploadDirectory = path.join(__dirname, '../uploads');
     const filename = req.files[0].filename;
     const filePath = path.join(uploadDirectory, filename);
@@ -382,10 +392,10 @@ const ChapterController = {
         }
       }));
 
-      return res.status(200).json({ message: 'ChapterModels updated successfully' });
+      res.status(200).json({ message: 'ChapterModels updated successfully' });
     } catch (error) {
       console.error('Error updating ChapterModels:', error);
-      return res.status(500).json({ message: 'Server error' });
+      res.status(500).json({ message: 'Server error' });
     }
   },
 };
