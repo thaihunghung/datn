@@ -370,7 +370,7 @@ const UpdateStudentById = (props) => {
                                 showSearch
                                 placeholder="Chọn mã lớp"
                                 value={classCode}
-                                onChange={setClassCode}
+                                onChange={setClassId}
                                 onSearch={handleSearchOption}
                                 size="large"
                                 className="w-full"
