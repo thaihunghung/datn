@@ -32,6 +32,11 @@ const StudentModel = sequelize.define('Student', {
     type: DataTypes.TINYINT,
     defaultValue: 0
   },
+  date_of_birth: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: null
+  },
   createdAt: {
     type: DataTypes.DATE,
     allowNull: false,

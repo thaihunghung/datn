@@ -86,7 +86,7 @@ const Student = (props) => {
     }
   };
 
-  const hangleChangeidDelete = async (id) => {
+  const handleChangeIdDelete = async (id) => {
     try {
       const response = await axiosAdmin.put(`/student/isDelete/${id}`);
       if (response) {
@@ -230,7 +230,7 @@ const Student = (props) => {
       ],
       onFilter: (value, record) => record.classCode.startsWith(value),
       filterSearch: true,
-      // ...getColumnSearchProps('classCode'), 
+      ...getColumnSearchProps('classCode'),
       width: '20%',
       // sorter: (a, b) => a.classCode - b.classCode,
       // sortDirections: ['descend', 'ascend'],
@@ -241,9 +241,11 @@ const Student = (props) => {
       key: 'action',
       render: (value, record) => (
         <Space>
-          <Tooltip title="Cập nhật thông tin sinh viên">
-            <Button icon={<EditFilled />} href="#" />
-          </Tooltip>
+          <Link to={`update/${record.key}`}>
+            <Tooltip title="Cập nhật thông tin sinh viên">
+              <Button icon={<EditFilled />}/>
+            </Tooltip>
+          </Link>
           <Tooltip title="Chuyển vào thùng rác">
             <Button onClick={() => {
               onOpen();
@@ -270,7 +272,7 @@ const Student = (props) => {
           isOpen={isOpen}
           onConfirm={() => {
             if (deleteId) {
-              hangleChangeidDelete(deleteId);
+              handleChangeIdDelete(deleteId);
               setDeleteId(null);
             }
           }}

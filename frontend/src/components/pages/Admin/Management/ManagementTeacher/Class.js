@@ -17,12 +17,12 @@ const Class = (props) => {
   const { setCollapsedNav, successNoti } = props;
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  const [studentData, setStudentData] = useState([]);
+  const [classData, setClassData] = useState([]);
   const [deleteId, setDeleteId] = useState(null);
   const [classOptions, setClassOptions] = useState([]);
   const [selectedClass, setSelectedClass] = useState('');
 
-  const getAllStudent = async () => {
+  const getAllClass = async () => {
     try {
       const classes = await axiosAdmin.get('/class-teacher');
       console.log("ssssâ", classes.data);
@@ -40,55 +40,19 @@ const Class = (props) => {
         };
       });
 
-      setStudentData(newStudents);
-      console.log("ssss", studentData);
+      setClassData(newStudents);
+      console.log("ssss", classData);
     } catch (err) {
       console.log("Error: " + err.message);
     };
   }
-
-  const getAllStudentByClass = async () => {
-    try {
-      const student = await axiosAdmin.get(`/student/class/${selectedClass}`);
-      setStudentData(student.data)
-      console.log(student.data);
-    } catch (err) {
-      console.log("Error: " + err.message);
-    };
-  }
-
-  const GetAllCodeClass = async () => {
-    try {
-      const response = await axiosAdmin.get('/class'); // use axios or your axiosAdmin instance
-      const options = response.data.map(classItem => ({
-        value: `${classItem.class_id.toString()}-${classItem.classCode}`,
-        label: classItem.classCode
-      }));
-      setClassOptions(options);
-      console.log(classOptions);
-    } catch (error) {
-      console.error('Lỗi khi get dữ liệu:', error);
-    }
-  };
-
-  const handleClassChange = (value) => {
-    const classId = parseInt(value.toString().charAt(0));
-    if (!isNaN(classId) || classId == selectedClass) {
-      setSelectedClass(classId);
-      console.log("select:", classId);
-      console.log("okoko2");
-    } else {
-      console.log("okoko");
-      getAllStudent();
-    }
-  };
 
   const hangleChangeidDelete = async (id) => {
     try {
-      const response = await axiosAdmin.put(`/student/isDelete/${id}`);
+      const response = await axiosAdmin.put(`/class/isDelete/${id}`);
       if (response) {
         console.log("Response data:", response.data); // Debug statement
-        getAllStudent();
+        getAllClass();
         successNoti("Chuyển vào thùng rác thành công");
       }
     } catch (err) {
@@ -97,12 +61,7 @@ const Class = (props) => {
   }
 
   useEffect(() => {
-    getAllStudentByClass();
-  }, [selectedClass])
-
-  useEffect(() => {
-    getAllStudent();
-    GetAllCodeClass();
+    getAllClass();
     const handleResize = () => {
       if (window.innerWidth < 1024) {
         setCollapsedNav(true);
@@ -218,12 +177,10 @@ const Class = (props) => {
           value: 'DA21',
         },
       ],
-      onFilter: (value, record) => record.classCode.startsWith(value),
-      filterSearch: true,
-      // ...getColumnSearchProps('classCode'), 
+      ...getColumnSearchProps('classCode'),
       width: '15%',
-      // sorter: (a, b) => a.classCode - b.classCode,
-      // sortDirections: ['descend', 'ascend'],
+      sorter: (a, b) => parseInt(a.classCode.substring(2,4)) - parseInt(b.classCode.substring(2,4)),
+      sortDirections: ['descend', 'ascend'],
     },
     {
       title: 'Tên lớp',
@@ -231,8 +188,8 @@ const Class = (props) => {
       key: 'className',
       width: '30%',
       ...getColumnSearchProps('className'),
-      sorter: (a, b) => parseInt(a.className) - parseInt(b.className),// cần quan tâm kiểu dữ liệu
-      sortDirections: ['descend', 'ascend'],
+      // sorter: (a, b) => parseInt(a.className) - parseInt(b.className),// cần quan tâm kiểu dữ liệu
+      // sortDirections: ['descend', 'ascend'],
     },
     {
       title: 'Tên giáo viên cố vấn',
@@ -241,9 +198,9 @@ const Class = (props) => {
       ...getColumnSearchProps('nameTeacher'),
       render: (value, record) => (
         <Link to={`teacher/${record.teacher_id}`}>
-          <div>
+          <Tooltip title="Click để xem thông tin chi tiết">
             {record.nameTeacher}
-          </div>
+          </Tooltip>
         </Link>
       ),
       align: 'center',
@@ -322,7 +279,7 @@ const Class = (props) => {
       </div>
       <Table
         columns={columns}
-        dataSource={studentData}
+        dataSource={classData}
         onChange={onChange}
         pagination={{
           defaultPageSize: 10,

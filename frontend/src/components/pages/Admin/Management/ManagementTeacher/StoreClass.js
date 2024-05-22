@@ -19,25 +19,25 @@ const StoreClass = (props) => {
 
   const [deleteId, setDeleteId] = useState(null);
   const [toggleId, setToggleId] = useState(null);
-  const allStudentIsDelete = async () => {
+  const getAllClassDelete = async () => {
     try {
-      const student = await axiosAdmin.get('/student/isDelete/true');
+      const classes = await axiosAdmin.get('/class/isDelete/true');
+      console.log("class delete", classes.data);
 
-      const newStudents = student.data.map((student) => {
+      const newClasses = classes.data.map((classes) => {
         return {
-          key: student.student_id,
-          name: student.name,
-          studentCode: student.studentCode,
-          class_id: student.class_id,
-          classCode: student.Class.classCode,
-          email: student.email,
-          created_at: student.createdAt,
-          updated_at: student.updatedAt,
+          key: classes.class_id,
+          teacher_id: classes.teacher_id,
+          className: classes.className,
+          classCode: classes.classCode,
+          nameTeacher: classes.teacher.name,
+          created_at: classes.createdAt,
+          updated_at: classes.updatedAt,
           // action: student.student_id,
         };
       });
 
-      setStudentData(newStudents);
+      setStudentData(newClasses);
       console.log("ssss", studentData);
     } catch (err) {
       console.log("Error: " + err.message);
@@ -46,8 +46,8 @@ const StoreClass = (props) => {
 
   const handleDeleteStudent = async (id) => {
     try {
-      await axiosAdmin.delete(`/student/${id}`);
-      allStudentIsDelete();
+      await axiosAdmin.delete(`/class/${id}`);
+      getAllClassDelete();
       successNoti("Xóa sinh viên thành công");
     } catch (err) {
       console.log("Error: " + err.message);
@@ -56,9 +56,9 @@ const StoreClass = (props) => {
 
   const handleChangeIdDelete = async (id) => {
     try {
-      const response = await axiosAdmin.put(`/student/isDelete/${id}`);
+      const response = await axiosAdmin.put(`/class/isDelete/${id}`);
       if (response) {
-        allStudentIsDelete();
+        getAllClassDelete();
         console.log(response.data.message);
         successNoti("Khôi phục sinh viên thành công");
       }
@@ -68,7 +68,7 @@ const StoreClass = (props) => {
   }
 
   useEffect(() => {
-    allStudentIsDelete()
+    getAllClassDelete()
     const handleResize = () => {
       if (window.innerWidth < 1024) {
         setCollapsedNav(true);
@@ -153,50 +153,67 @@ const StoreClass = (props) => {
 
   const columns = [
     {
-      title: (
-        <Tooltip title="Thông tin chi tiết về sinh viên">
-          Tên sinh viên
-        </Tooltip>
-      ),
-      dataIndex: 'name',
-      key: 'name',
-      width: '40%',
-      ...getColumnSearchProps('name'),
-      // render: (text) => (              //tooltip từng dòng của cột
-      //   <Tooltip title="Thông tin chi tiết">
-      //     {text}
-      //   </Tooltip>
-      // ),
-    },
-    {
-      title: 'Mã số sinh viên',
-      dataIndex: 'studentCode',
-      key: 'studentCode',
-      width: '30%',
-      ...getColumnSearchProps('studentCode'),
-      sorter: (a, b) => parseInt(a.studentCode) - parseInt(b.studentCode),// cần quan tâm kiểu dữ liệu
-      sortDirections: ['descend', 'ascend'],
+      title: 'STT',
+      dataIndex: 'key',
+      align: 'center',
+      width: '5%'
     },
     {
       title: 'Mã lớp',
       dataIndex: 'classCode',
       key: 'classCode',
+      align: 'center',
       filters: [
         {
-          text: '2020',
-          value: "DA20",
+          text: 'Năm học 2017',
+          value: "DA17",
         },
         {
-          text: '2021',
+          text: 'Năm học 2018',
+          value: 'DA18',
+        },
+        {
+          text: 'Năm học 2019',
+          value: "DA19",
+        },
+        {
+          text: 'Năm học 2020',
+          value: 'DA20',
+        }, {
+          text: 'Năm học 2021',
           value: 'DA21',
         },
       ],
-      // onFilter: (value, record) => record.classCode.startsWith(value),
-      // filterSearch: true,
-      ...getColumnSearchProps('classCode'), //search và filter chỉ ton tai 1 
-      width: '20%',
+      onFilter: (value, record) => record.classCode.startsWith(value),
+      filterSearch: true,
+      // ...getColumnSearchProps('classCode'), 
+      width: '15%',
       // sorter: (a, b) => a.classCode - b.classCode,
       // sortDirections: ['descend', 'ascend'],
+    },
+    {
+      title: 'Tên lớp',
+      dataIndex: 'className',
+      key: 'className',
+      width: '30%',
+      ...getColumnSearchProps('className'),
+      sorter: (a, b) => parseInt(a.className) - parseInt(b.className),// cần quan tâm kiểu dữ liệu
+      sortDirections: ['descend', 'ascend'],
+    },
+    {
+      title: 'Tên giáo viên cố vấn',
+      dataIndex: 'nameTeacher',
+      key: 'nameTeacher',
+      ...getColumnSearchProps('nameTeacher'),
+      render: (value, record) => (
+        <Link to={`teacher/${record.teacher_id}`}>
+          <Tooltip title="Click để xem thông tin chi tiết">
+            {record.nameTeacher}
+          </Tooltip>
+        </Link>
+      ),
+      align: 'center',
+      width: '20%',
     },
     {
       title: 'Hành động',
@@ -204,7 +221,7 @@ const StoreClass = (props) => {
       key: 'action',
       render: (value, record) => (
         <Space>
-          <Tooltip title="Khôi phục sinh viên này">
+          <Tooltip title="Khôi phục lớp học này">
             <Button onClick={() => {
               onOpen();
               setToggleId(record.key);
@@ -234,8 +251,8 @@ const StoreClass = (props) => {
           onOpenChange={onOpenChange}
           isOpen={isOpen}
           message={toggleId ?
-            "Sinh viên này sẽ khôi phục lại, bạn có muốn tiếp tục thao tác?" :
-            "Sinh viên này sẽ được xóa vĩnh viễn, bạn có muốn tiếp tục thao tác?"
+            "Lớp này sẽ khôi phục lại, bạn có muốn tiếp tục thao tác?" :
+            "Lớp này sẽ được xóa vĩnh viễn, bạn có muốn tiếp tục thao tác?"
           }
           onConfirm={() => {
             if (toggleId) {

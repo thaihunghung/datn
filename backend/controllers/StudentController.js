@@ -43,7 +43,6 @@ const StudentController = {
   },
   getAllWithClass: async (req, res) => {
     try {
-      // Lấy thông tin sinh viên
       const students = await StudentModel.findAll({
         include: [{
           model: ClassModel,
@@ -63,13 +62,21 @@ const StudentController = {
   getByID: async (req, res) => {
     try {
       const { id } = req.params;
-      const studentDetails = await StudentModel.findOne({ where: { student_id: id } });
-      if (!studentDetails) {
-        return res.status(404).json({ message: 'Không tìm thấy sinh viên' });
+      const students = await StudentModel.findAll({
+        include: [{
+          model: ClassModel,
+          attributes: ['classCode']
+        }],
+        attributes: ['student_id', 'class_id', 'studentCode','date_of_birth', 'email', 'name', 'isDelete'],
+        where:
+          { student_id: id, isDelete: false }
+      });
+      if (!students) {
+        return res.status(404).json({ message: 'Không tìm thấy students' });
       }
-      res.json(studentDetails);
+      res.json(students);
     } catch (error) {
-      console.error('Lỗi khi tìm kiếm sinh viên:', error);
+      console.error('Lỗi tìm kiếm students:', error);
       res.status(500).json({ message: 'Lỗi server' });
     }
   },

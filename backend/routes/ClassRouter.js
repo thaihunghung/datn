@@ -146,6 +146,7 @@ router.delete('/class/:id', ClassController.delete);
 
 router.get('/class/isDelete/true', ClassController.isDeleteTotrue);
 router.get('/class/isDelete/false', ClassController.isDeleteTofalse);
+router.post('/class/templates/update', ClassController.getExcelWithData);
 
 router.put('/class/isDelete/:id', ClassController.IsDelete);
 module.exports = router;
