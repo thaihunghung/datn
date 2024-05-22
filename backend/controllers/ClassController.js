@@ -36,11 +36,21 @@ const ClassController = {
   getByID: async (req, res) => {
     try {
       const { id } = req.params;
-      const classObj = await ClassModel.findOne({ where: { class_id: id, isDelete: false } });
-      if (!classObj) {
+      const classes = await ClassModel.findAll({
+        include: [{
+          model: TeacherModel,
+          attributes: ['name']
+        }],
+        attributes: ['class_id','teacher_id', 'className', 'classCode', 'isDelete'],// Lọc ra các trường cần lấy
+        where: {
+          isDelete: false,
+          class_id: id
+         }
+      });
+      if (!classes) {
         return res.status(404).json({ message: 'Không tìm thấy lớp học' });
       }
-      res.json(classObj);
+      res.json(classes);
     } catch (error) {
       console.error('Lỗi khi tìm kiếm lớp học:', error);
       res.status(500).json({ message: 'Lỗi máy chủ' });

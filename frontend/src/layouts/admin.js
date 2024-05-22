@@ -29,11 +29,11 @@ import CreateRubic from '../components/pages/Admin/Management/ManagementRubric/C
 import UpdateRubic from '../components/pages/Admin/Management/ManagementRubric/UpdateRubic';
 import Template from '../components/pages/Client/Template/Template';
 import CloChapter from '../components/pages/Admin/Management/ManagementClo/CloChapter';
-import Class from '../components/pages/Admin/Management/ManagementTeacher/Class';
-import UpdateClass from '../components/pages/Admin/Management/ManagementTeacher/UpdateClass';
-import StoreClass from '../components/pages/Admin/Management/ManagementTeacher/StoreClass';
-import UpdateClassById from '../components/pages/Admin/Management/ManagementTeacher/UpdateClassById';
-import CreateClass from '../components/pages/Admin/Management/ManagementTeacher/CreateClass';
+import Class from '../components/pages/Admin/Management/ManagementClass/Class';
+import UpdateClass from '../components/pages/Admin/Management/ManagementClass/UpdateClass';
+import StoreClass from '../components/pages/Admin/Management/ManagementClass/StoreClass';
+import UpdateClassById from '../components/pages/Admin/Management/ManagementClass/UpdateClassById';
+import CreateClass from '../components/pages/Admin/Management/ManagementClass/CreateClass';
 
 
 function Admin(props) {

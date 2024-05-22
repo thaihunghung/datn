@@ -1,93 +1,87 @@
+// UpdateClassById.js
+
 import React, { useEffect, useState, useRef } from "react";
-import { Button, Select, Tooltip, Input, Space, Table, Form, DatePicker, Modal } from 'antd';
+import { Button, Select, Tooltip, Input, Space, Table, Form, Modal } from 'antd';
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { DeleteFilled, EditFilled, SearchOutlined } from '@ant-design/icons';
-import moment from 'moment';
-import './Student.css'
+import './Class.css';
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 
-const UpdateStudentById = (props) => {
+const UpdateClassById = (props) => {
     const { setCollapsedNav, successNoti } = props;
     const { id } = useParams();
-    const [studentData, setStudentData] = useState([]);
+    const [classData, setClassData] = useState([]);
     const [deleteId, setDeleteId] = useState(null);
-    const [classOptions, setClassOptions] = useState([]);
-    const [studentId, setStudentId] = useState('');
     const [classId, setClassId] = useState('');
-    const [studentCode, setStudentCode] = useState('');
-    const [email, setEmail] = useState('');
-    const [name, setName] = useState('');
+    const [teacherId, setTeacherId] = useState('');
     const [classCode, setClassCode] = useState('');
-    const [scrollBehavior, setScrollBehavior] = useState("inside");
-    const [filteredOptions, setFilteredOptions] = useState(classOptions);
-    const [dob, setDob] = useState(null);
+    const [className, setClassName] = useState('');
+    const [teacherName, setTeacherName] = useState('');
+    const [teacherOptions, setTeacherOptions] = useState([]);
+    const [filteredOptions, setFilteredOptions] = useState(teacherOptions);
     const [modalVisible, setModalVisible] = useState(false);
     const [form] = Form.useForm();
     const navigate = useNavigate();
 
-    const getAllStudent = async () => {
+    const getAllClass = async () => {
         try {
-            const student = await axiosAdmin.get(`/student-class`);
-
-            const newStudent = student.data.map((student) => {
+            const response = await axiosAdmin.get(`/class`);
+            const newClass = response.data.map((classItem) => {
                 return {
-                    key: student.student_id,
-                    name: student.name,
-                    studentCode: student.studentCode,
-                    class_id: student.class_id,
-                    classCode: student.Class.classCode,
-                    email: student.email,
-                    created_at: student.createdAt,
-                    updated_at: student.updatedAt,
+                    key: classItem.class_id,
+                    className: classItem.className,
+                    classCode: classItem.classCode,
+                    teacherName: classItem.teacher.name,
                 };
             });
-
-            setStudentData(newStudent);
-            console.log("data", studentData)
-            getAllStudentById();
+            setClassData(newClass);
+            getClassById();
         } catch (err) {
             console.log("Error: " + err.message);
-        };
+        }
     }
 
-    const getAllStudentById = async () => {
+    const getClassById = async () => {
         try {
-            const student = await axiosAdmin.get(`/student/${id}`);
-            console.log("student id", student.data);
-
-            setStudentId(student.data[0].student_id);
-            setName(student.data[0].name);
-            setStudentCode(student.data[0].studentCode);
-            setClassId(student.data[0].class_id);
-            setClassCode(student.data[0].Class.classCode);
-            setEmail(student.data[0].email);
-            setDob(student.data[0].date_of_birth ? moment(student.data[0].date_of_birth) : null);
+            const response = await axiosAdmin.get(`/class/${id}`);
+            const classItem = response.data[0];
+            setClassId(classItem.class_id);
+            setClassName(classItem.className);
+            setClassCode(classItem.classCode);
+            setTeacherName(classItem.teacher.name);
 
             form.setFieldsValue({
-                name: student.data[0].name,
-                email: student.data[0].email,
-                classCode: student.data[0].Class.classCode,
-                studentCode: student.data[0].studentCode,
-                dob: student.data[0].date_of_birth ? moment(student.data[0].date_of_birth) : null,
-            });
+                className: classItem.className,
+                classCode: classItem.classCode,
+                teacherName: classItem.teacher.name,
 
+            });
         } catch (err) {
             console.log("Error: " + err.message);
-        };
+        }
     }
 
-    const GetAllCodeClass = async () => {
+    const GetAllTeacher = async () => {
         try {
-            const response = await axiosAdmin.get('/class');
-            const options = response.data.map(classItem => ({
-                value: classItem.class_id.toString(),
-                label: classItem.classCode
+            const response = await axiosAdmin.get('/teacher');
+            const options = response.data.map(teacherItem => ({
+                value: teacherItem.teacher_id.toString(),
+                label: teacherItem.name
             }));
-            setClassOptions(options);
-            console.log("aaa", classOptions);
+            setTeacherOptions(options);
+            console.log("aaa", teacherOptions);
         } catch (error) {
             console.error('Lỗi khi get dữ liệu:', error);
         }
+    };
+
+    const handleSearchOption = (value) => {
+        console.log("Search Value:", value);
+        const filtered = teacherOptions.filter(option =>
+            option.label.toLowerCase().includes(value.toLowerCase())
+        );
+        console.log("Filtered Options:", filtered);
+        setFilteredOptions(filtered);
     };
 
     const searchInput = useRef(null);
@@ -99,22 +93,14 @@ const UpdateStudentById = (props) => {
     };
     const getColumnSearchProps = (dataIndex) => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
-            <div
-                style={{
-                    padding: 8,
-                }}
-                onKeyDown={(e) => e.stopPropagation()}
-            >
+            <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
                 <Input
                     ref={searchInput}
                     placeholder={`Search ${dataIndex}`}
                     value={selectedKeys[0]}
                     onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
                     onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-                    style={{
-                        marginBottom: 8,
-                        display: 'block',
-                    }}
+                    style={{ marginBottom: 8, display: 'block' }}
                 />
                 <Space>
                     <Button
@@ -122,18 +108,14 @@ const UpdateStudentById = (props) => {
                         onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
                         icon={<SearchOutlined />}
                         size="small"
-                        style={{
-                            width: 90,
-                        }}
+                        style={{ width: 90 }}
                     >
                         Search
                     </Button>
                     <Button
                         onClick={() => clearFilters && handleReset(clearFilters)}
                         size="small"
-                        style={{
-                            width: 90,
-                        }}
+                        style={{ width: 90 }}
                     >
                         Reset
                     </Button>
@@ -141,11 +123,7 @@ const UpdateStudentById = (props) => {
             </div>
         ),
         filterIcon: (filtered) => (
-            <SearchOutlined
-                style={{
-                    color: filtered ? '#1677ff' : undefined,
-                }}
-            />
+            <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
         ),
         onFilter: (value, record) =>
             record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
@@ -157,73 +135,49 @@ const UpdateStudentById = (props) => {
         render: (text) => text
     });
 
-    const updateStudent = async () => {
+    const updateClass = async () => {
         try {
             const data = {
-                student_id: studentId,
-                name: name,
-                email: email,
-                studentCode: studentCode,
-                date_of_birth: dob,
-                class_id: classId
-            }
-            console.log("data update: ", data);
-            const response = await axiosAdmin.put(`/student/${id}`, { data: data });
+                class_id: classId,
+                className: className,
+                classCode: classCode,
+                teacher_id: teacherId
+            };
+            const response = await axiosAdmin.put(`/class/${id}`, { data: data });
             setModalVisible(false);
-            navigate("/admin/student")
+            navigate("/admin/class")
         } catch (error) {
-            console.error("lỗi", error);
+            console.error("Error:", error);
         }
     }
-
-    const handleSearchOption = (value) => {
-        console.log("Search Value:", value);
-        const filtered = classOptions.filter(option =>
-            option.label.toLowerCase().includes(value.toLowerCase())
-        );
-        console.log("Filtered Options:", filtered);
-        setFilteredOptions(filtered);
-    };
 
     const columns = [
         {
             title: (
-                <Tooltip title="Thông tin chi tiết về sinh viên">
-                    Tên sinh viên
+                <Tooltip title="Thông tin chi tiết về lớp học">
+                    Tên lớp học
                 </Tooltip>
             ),
-            dataIndex: 'name',
-            key: 'name',
+            dataIndex: 'className',
+            key: 'className',
             width: '40%',
-            ...getColumnSearchProps('name'),
-        },
-        {
-            title: 'Mã số sinh viên',
-            dataIndex: 'studentCode',
-            key: 'studentCode',
-            width: '30%',
-            ...getColumnSearchProps('studentCode'),
-            sorter: (a, b) => parseInt(a.studentCode) - parseInt(b.studentCode),
-            sortDirections: ['descend', 'ascend'],
+            ...getColumnSearchProps('className'),
         },
         {
             title: 'Mã lớp',
             dataIndex: 'classCode',
             key: 'classCode',
-            filters: [
-                {
-                    text: '2020',
-                    value: "DA20",
-                },
-                {
-                    text: '2021',
-                    value: 'DA21',
-                },
-            ],
-            onFilter: (value, record) => record.classCode.startsWith(value),
-            filterSearch: true,
+            width: '30%',
             ...getColumnSearchProps('classCode'),
-            width: '20%',
+            sorter: (a, b) => a.classCode.localeCompare(b.classCode),
+            sortDirections: ['descend', 'ascend'],
+        },
+        {
+            title: 'Tên giáo viên',
+            dataIndex: 'teacherName',
+            key: 'teacherName',
+            width: '30%',
+            ...getColumnSearchProps('teacherName'),
         },
         {
             title: 'Hành động',
@@ -231,8 +185,8 @@ const UpdateStudentById = (props) => {
             key: 'action',
             render: (value, record) => (
                 <Space>
-                    <Link to={`/student/update/${record.key}`}>
-                        <Tooltip title="Cập nhật thông tin sinh viên">
+                    <Link to={`/class/update/${record.key}`}>
+                        <Tooltip title="Cập nhật thông tin lớp học">
                             <Button icon={<EditFilled />} />
                         </Tooltip>
                     </Link>
@@ -263,8 +217,8 @@ const UpdateStudentById = (props) => {
     };
 
     const onFinish = (values) => {
-        console.log("vaa", values);
-        updateStudent();
+        console.log(values);
+        updateClass();
     };
 
     const validateMessages = {
@@ -279,13 +233,13 @@ const UpdateStudentById = (props) => {
     };
 
     useEffect(() => {
-        setFilteredOptions(classOptions);
-    }, [classOptions]);
+        setFilteredOptions(teacherOptions);
+    }, [teacherOptions]);
 
     useEffect(() => {
-        getAllStudentById();
-        getAllStudent();
-        GetAllCodeClass();
+        GetAllTeacher();
+        getAllClass();
+        getClassById();
         setModalVisible(true);
     }, []);
 
@@ -308,9 +262,9 @@ const UpdateStudentById = (props) => {
         <>
             <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
                 <Modal
-                    title="Update Student"
+                    title="Update Class"
                     visible={modalVisible}
-                    onCancel={() => navigate("/admin/student")}
+                    onCancel={() => navigate("/admin/class")}
                     footer={null}
                 >
                     <Form
@@ -321,55 +275,43 @@ const UpdateStudentById = (props) => {
                         style={{ maxWidth: 600 }}
                         validateMessages={validateMessages}
                         initialValues={{
-                            name: name,
-                            email: email,
+                            className: className,
                             classCode: classCode,
-                            studentCode: studentCode,
-                            dob: dob,
+                            teacherName: teacherName,
                         }}
                     >
                         <Form.Item
-                            name="name"
-                            label="Name"
+                            name="className"
+                            label="Class Name"
                             rules={[{ required: true }]}
                         >
                             <Input
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="max-w-xs"
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            name="studentCode"
-                            label="Mã số sinh viên"
-                            rules={[{ type: 'mssv' }]}
-                        >
-                            <Input
-                                value={studentCode}
-                                onChange={(e) => setStudentCode(e.target.value)}
-                                className="max-w-xs"
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            name="email"
-                            label="Email"
-                            rules={[{ type: 'email' }]}
-                        >
-                            <Input
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                value={className}
+                                onChange={(e) => setClassName(e.target.value)}
                                 className="max-w-xs"
                             />
                         </Form.Item>
                         <Form.Item
                             name="classCode"
                             label="Class Code"
+                            rules={[{ required: true }]}
+                        >
+                            <Input
+                                value={classCode}
+                                onChange={(e) => setClassCode(e.target.value)}
+                                className="max-w-xs"
+                            />
+                        </Form.Item>
+                       
+                        <Form.Item
+                            name="teacherName"
+                            label="Chọn giáo viên cố vấn"
                         >
                             <Select
                                 showSearch
                                 placeholder="Chọn mã lớp"
-                                value={classCode}
-                                onChange={setClassId}
+                                value={teacherName}
+                                onChange={setTeacherId}
                                 onSearch={handleSearchOption}
                                 size="middle"
                                 className="w-full"
@@ -387,20 +329,6 @@ const UpdateStudentById = (props) => {
                             </Select>
                         </Form.Item>
                         <Form.Item
-                            name="dob"
-                            label="Ngày sinh"
-                            rules={[
-                                { required: true, type: 'object', message: 'Please select date of birth!' }
-                            ]}
-                        >
-                            <DatePicker
-                                value={dob}
-                                onChange={(date) => setDob(date ? moment(date).format('YYYY-MM-DD') : null)}
-                                format="YYYY-MM-DD"
-                                className="max-w-xs"
-                            />
-                        </Form.Item>
-                        <Form.Item
                             wrapperCol={{ ...layout.wrapperCol, offset: 8 }}
                         >
                             <Button type="primary" htmlType="submit">
@@ -411,22 +339,22 @@ const UpdateStudentById = (props) => {
                 </Modal>
                 <div>
                     <div className="w-fit flex justify-start text-base font-bold rounded-lg mb-5">
-                        <Link to={"/admin/student"} className="rounded-lg bg-blue-600">
+                        <Link to={"/admin/class"} className="rounded-lg bg-blue-600">
                             <div className="p-5 text-white rounded-lg">
-                                DS Sinh viên
+                                DS Lớp học
                             </div>
                         </Link>
-                        <Link to={"/admin/student/store"}>
+                        <Link to={"/admin/class/store"}>
                             <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
                                 Kho lưu trữ
                             </div>
                         </Link>
-                        <Link to={"/admin/student/create"}>
+                        <Link to={"/admin/class/create"}>
                             <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
-                                Thêm sinh viên
+                                Thêm lớp học
                             </div>
                         </Link>
-                        <Link to={"/admin/student/update"}>
+                        <Link to={"/admin/class/update"}>
                             <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
                                 Cập nhật
                             </div>
@@ -436,7 +364,7 @@ const UpdateStudentById = (props) => {
             </div>
             <Table
                 columns={columns}
-                dataSource={studentData}
+                dataSource={classData}
                 onChange={onChange}
                 pagination={{ defaultPageSize: 10, responsive: true, style: { justifyContent: "center" } }}
             />
@@ -444,4 +372,4 @@ const UpdateStudentById = (props) => {
     );
 }
 
-export default UpdateStudentById;
+export default UpdateClassById;

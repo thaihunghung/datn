@@ -27,7 +27,7 @@ const Class = (props) => {
       const classes = await axiosAdmin.get('/class-teacher');
       console.log("ssssâ", classes.data);
 
-      const newStudents = classes.data.map((classes) => {
+      const newClass = classes.data.map((classes) => {
         return {
           key: classes.class_id,
           teacher_id: classes.teacher_id,
@@ -40,7 +40,7 @@ const Class = (props) => {
         };
       });
 
-      setClassData(newStudents);
+      setClassData(newClass);
       console.log("ssss", classData);
     } catch (err) {
       console.log("Error: " + err.message);
@@ -179,7 +179,7 @@ const Class = (props) => {
       ],
       ...getColumnSearchProps('classCode'),
       width: '15%',
-      sorter: (a, b) => parseInt(a.classCode.substring(2,4)) - parseInt(b.classCode.substring(2,4)),
+      sorter: (a, b) => parseInt(a.classCode.substring(2, 4)) - parseInt(b.classCode.substring(2, 4)),
       sortDirections: ['descend', 'ascend'],
     },
     {
@@ -212,9 +212,12 @@ const Class = (props) => {
       key: 'action',
       render: (value, record) => (
         <Space>
-          <Tooltip title="Cập nhật thông tin sinh viên">
-            <Button icon={<EditFilled />} href="#" />
-          </Tooltip>
+          <Link to={`update/${record.key}`}>
+            <Tooltip title="Cập nhật thông tin lớp học">
+              <Button icon={<EditFilled />} />
+            </Tooltip>
+          </Link>
+
           <Tooltip title="Chuyển vào thùng rác">
             <Button onClick={() => {
               onOpen();
