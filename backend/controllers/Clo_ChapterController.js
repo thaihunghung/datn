@@ -30,24 +30,59 @@ const Clo_ChapterController = {
       res.status(500).json({ message: 'Internal server error' });
     }
   },
-  SaveOrDelete: async (req, res) => {
+  GetChapterCloByCloIds: async (req, res) => {
     try {
-      const { dataSave, dataDelete } = req.body;
+      const { data } = req.body;
+      const { id_Chapters } = data;
 
+      const CloChaps = await CloChapterModel.findAll({
+        where: {
+          chapter_id: id_Chapters
+        }
+      });
+
+      if (CloChaps.length === 0) {
+        return res.status(404).json({ message: 'No CHAPTER-CLOs found for the given CHAPTER IDs' });
+      }
+
+      res.status(200).json(CloChaps);
+    } catch (error) {
+      console.error('Error fetching CHAPTER-CLOs by CHAPTER IDs:', error);
+      res.status(500).json({ message: 'An error occurred while fetching CHAPTER-CLOs' });
+    }
+  },
+
+  SaveCloChapter: async (req, res) => {
+    try {
+      const { dataSave } = req.body;
       if (dataSave && dataSave.length > 0) {
           await CloChapterModel.bulkCreate(dataSave);
       }
-      console.log(dataDelete);
-      if (dataDelete && dataDelete.length > 0) {
-          await CloChapterModel.destroy({ where: { id_clo_chapter : dataDelete.map(item => item.id_clo_chapter ) } });
-      }
-
-      res.json({ message: 'Data saved and/or deleted successfully' });
+      res.json({ message: 'Data saved successfully' });
     } catch (error) {
       console.error('Error SaveOrDelete:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
   },
+
+  DeleteCloChapter: async (req, res) => {
+    try {
+      const { dataDelete } = req.body;
+
+      console.log(dataDelete);
+      if (dataDelete && dataDelete.length > 0) {
+          await CloChapterModel.destroy({ where: { id_clo_chapter : dataDelete.map(item => item.id_clo_chapter ) } });
+      }
+
+      res.json({ message: 'Data deleted successfully' });
+    } catch (error) {
+      console.error('Error SaveOrDelete:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+  
+  
+  
 };
 
 module.exports = Clo_ChapterController;

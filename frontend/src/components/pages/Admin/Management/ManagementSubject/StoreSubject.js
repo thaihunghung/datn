@@ -1,28 +1,26 @@
-// StorePlo.js
+// StoreSubject.js
 
 import { useEffect, useState } from "react";
 import { Button, message } from 'antd';
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { Table, Upload, Tooltip, Divider, Steps } from 'antd';
-import DropdownAndNavPlo from "../../Utils/DropdownAndNav/DropdownAndNavPlo";
+import DropdownAndNavSubject from "../../Utils/DropdownAndNav/DropdownAndNavSubject";
 
-
-const StorePlo = (nav) => {
+const StoreSubject = (nav) => {
     const location = useLocation();
-    const isActive = (path) => location.pathname.startsWith(path);
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [selectedRow, setSelectedRow] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [poListData, setPosListData] = useState([]);
+    const [subjectListData, setSubjectListData] = useState([]);
     const [deleteId, setDeleteId] = useState(null);
 
     const columns = [
         {
-            title: "Tên PLO",
+            title: "Tên subject",
             dataIndex: "name",
             render: (record) => (
                 <div className="text-sm">
@@ -90,82 +88,83 @@ const StorePlo = (nav) => {
     };
     const handleRestore = async () => {
         const data = {
-            plo_id: selectedRowKeys,
-        }
-        try {
-            const response = await axiosAdmin.put('/plo/listId/soft-delete-multiple', { data });
+            subject_id: selectedRowKeys,
+          };
+          console.log(data)
+          try {
+            const response = await axiosAdmin.put('/subject/listId/soft-delete-multiple', { data });
+            await getAllSubjectIsDeleteTrue();
             handleUnSelect();
             message.success(response.data.message);
-            getAllPo()
-        } catch (error) {
-            console.error("Error soft deleting PLOs:", error);
-            message.error('Error soft deleting PLOs');
-        }
+          } catch (error) {
+            console.error("Error soft deleting subjects:", error);
+            message.error('Error soft deleting subjects');
+          }
     };
 
     const handleRestoreById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/po/${_id}/toggle-soft-delete`);
+            const response = await axiosAdmin.put(`/subject/${_id}/toggle-soft-delete`);
+            await getAllSubjectIsDeleteTrue();
             handleUnSelect();
             message.success(response.data.message);
-            getAllPo()
-        } catch (error) {
-
-            console.error(`Error toggling soft delete for PO with ID ${_id}:`, error);
-            message.error(`Error toggling soft delete for PO with ID ${_id}`);
-        }
+          } catch (error) {
+            console.error(`Error toggling soft delete for subject with ID ${_id}:`, error);
+            message.error(`Error toggling soft delete for subject with ID ${_id}`);
+          }
     };
 
-    const getAllPo = async () => {
+    const getAllSubjectIsDeleteTrue = async () => {
         try {
-            const response = await axiosAdmin.get('/plo/isDelete/true');
-            const updatedPloData = response.data.map((plo) => {
+            const response = await axiosAdmin.get(`/subject/isDelete/true`);
+            const updatedSubjectData = response.data.map((subject) => {
                 return {
-                    key: plo.plo_id,
-                    name: plo.ploName,
-                    description: plo.description,
-                    isDeleted: plo.isDelete,
-                    action: plo.plo_id,
+                    key: subject.subject_id,
+                    name: subject.subjectName,
+                    description: subject.description,
+                    action: subject.subject_id,
                 };
             });
-            setPosListData(updatedPloData);
-            console.log(response.data);
+            setSubjectListData(updatedSubjectData);
+            
         } catch (error) {
             console.error("Error: " + error.message);
-            message.error('Error fetching PLO data');
+            //message.error('Error fetching PLO data');
         }
     };
 
-    const handleSoftDelete = async () => {
-        const data = {
-            plo_id: selectedRowKeys,
-        };
-        console.log(data);
-        try {
-            const response = await axiosAdmin.put('/plo/listId/soft-delete-multiple', { data: data });
-            await getAllPo();
-            handleUnSelect();
-            message.success(response.data.message);
-        } catch (error) {
-            console.error("Error soft deleting POs:", error);
-            message.error('Error soft deleting POs');
-        }
-    };
+    const handleDelete = async () => {
+      const data = {
+          subject_id: selectedRowKeys,
+      };
+      console.log(data)
+      try {
+        const response = await axiosAdmin.delete('/subject/delete/multiple', { params: data });
 
-    const handleSoftDeleteById = async (_id) => {
-        try {
-            const response = await axiosAdmin.put(`/plo/${_id}/toggle-soft-delete`);
-            await getAllPo();
-            handleUnSelect();
-            message.success(response.data.message);
-        } catch (error) {
-            console.error(`Error toggling soft delete for PO with ID ${_id}:`, error);
-            message.error(`Error toggling soft delete for PO with ID ${_id}`);
-        }
-    };
+        await getAllSubjectIsDeleteTrue();
+          handleUnSelect();
+          message.success(response.data.message);
+      } catch (error) {
+          console.error("Error soft deleting Clos:", error);
+          message.error('Error soft deleting Clos');
+      }
+  };
+
+  const handleDeleteById = async (_id) => {
+      try {
+          const response = await axiosAdmin.delete(`/subject/${_id}`);
+          await getAllSubjectIsDeleteTrue();
+          handleUnSelect();
+          message.success(response.data.message);
+      } catch (error) {
+          console.error(`Error toggling soft delete for Clo with ID ${_id}:`, error);
+          message.error(`Error toggling soft delete for Clo with ID ${_id}`);
+      }
+  };
 
     useEffect(() => {
-        getAllPo()
+        getAllSubjectIsDeleteTrue()
+
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -187,26 +186,26 @@ const StorePlo = (nav) => {
                 isOpen={isOpen}
                 onConfirm={() => {
                     if (deleteId) {
-                        handleSoftDeleteById(deleteId);
+                        handleDeleteById(deleteId);
                         setDeleteId(null);
                     } else if (selectedRowKeys.length > 0) {
-                        handleSoftDelete();
+                        handleDelete();
                         setSelectedRowKeys([]);
                     }
                 }}
             />
-            <DropdownAndNavPlo />
+            <DropdownAndNavSubject />
             <div className="w-full my-5 px-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
                         <p className="text-sm font-medium">
                             <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
-                            Đã chọn {selectedRow.length} po
+                            Đã chọn {selectedRow.length} subject
                         </p>
                         <div className="flex items-center gap-2">
 
                             <Tooltip
-                                title={`Khôi phục ${selectedRowKeys.length} po`}
+                                title={`Khôi phục ${selectedRowKeys.length} subject`}
                                 getPopupContainer={() =>
                                     document.querySelector(".Quick__Option")
                                 }
@@ -216,7 +215,7 @@ const StorePlo = (nav) => {
                                 </Button>
                             </Tooltip>
                             <Tooltip
-                                title={`Xoá vĩnh viễn ${selectedRowKeys.length} po`}
+                                title={`Xoá vĩnh viễn ${selectedRowKeys.length} subject`}
                                 getPopupContainer={() =>
                                     document.querySelector(".Quick__Option")
                                 }
@@ -246,8 +245,8 @@ const StorePlo = (nav) => {
                         </div>
                     </div>
                 )}
-                <div className="w-full ">
-                    <Table className="table-po text-[#fefefe]"
+                <div className="w-full h-fit overflow-auto">
+                    <Table className="table-po min-w-[400px] sm:min-w-[400px] lg:min-w-full xl:min-w-full table-auto text-[#fefefe]"
                         bordered
                         loading={loading}
                         rowSelection={{
@@ -255,7 +254,7 @@ const StorePlo = (nav) => {
                             ...rowSelection,
                         }}
                         columns={columns}
-                        dataSource={poListData}
+                        dataSource={subjectListData}
                     />
                 </div>
             </div>
@@ -264,7 +263,7 @@ const StorePlo = (nav) => {
 }
 
 
-export default StorePlo;
+export default StoreSubject;
 function ConfirmAction(props) {
     const { isOpen, onOpenChange, onConfirm } = props;
     const handleOnOKClick = (onClose) => {

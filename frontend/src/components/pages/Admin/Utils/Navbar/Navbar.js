@@ -62,7 +62,7 @@ function Nav(props) {
                         "/admin/management-program/update",
                         "/admin/management-program/description",
                         "/admin/management-program/create"
-                    ]
+                    ],
                 },
                 {
                     text: (<><i className="fa-solid fa-minus mr-3"></i>PO</>),
@@ -94,6 +94,11 @@ function Nav(props) {
                     ]
                 }
             ]
+        },
+        {
+            text: "Subjects",
+            icon: <i className={`fa-solid fa-star mr-${collapsedNav ? "0" : "3"} w-4`}></i>,
+            link: "/admin/management-subject/list"
         },
         { text: "Rubric", link: "/admin/management-rubric", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
         { text: "Sinh viên", link: "/admin/student", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
@@ -148,12 +153,12 @@ function Nav(props) {
                     </NavbarContent>
                     <NavbarContent className="sm:hidden pr-3" justify="center">
                         <NavbarBrand>
-                            <p className="font-bold text-inherit">ACME</p>
+                            <p className="font-bold text-inherit">SET</p>
                         </NavbarBrand>
                     </NavbarContent>
                     <NavbarContent className="hidden sm:flex gap-4" justify="center">
                         <NavbarBrand>
-                            <p className="font-bold text-inherit">ACME</p>
+                            <p className="font-bold text-inherit">SET</p>
                         </NavbarBrand>
                         <NavbarItem>
                             <Link color="foreground" to="/features">Features</Link>

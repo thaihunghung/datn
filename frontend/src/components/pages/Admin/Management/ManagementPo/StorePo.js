@@ -6,6 +6,7 @@ import { Link, useLocation } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { Table, Upload, Tooltip, Divider, Steps } from 'antd';
+import DropdownAndNavPo from "../../Utils/DropdownAndNav/DropdownAndNavPo";
 
 
 const StorePo = (nav) => {
@@ -194,38 +195,7 @@ const StorePo = (nav) => {
                     }
                 }}
             />
-            <div className="flex justify-between px-5 w-full items-center">
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to="/admin/management-po/list">
-                        <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-po/list") ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                                Danh sách PO
-                            </div>
-                        </div>
-                    </Link>
-                    <Link to="/admin/management-po/create">
-                        <div className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-                            <div className={` ${isActive("/admin/management-po/create") ? "border-b-4 text-[#020401] border-[#475569]" : ""} `}>
-                                Tạo mới
-                            </div>
-                        </div>
-                    </Link>
-                </div>
-                <div>
-                    <Link to="/admin/management-po/store">
-                        <Tooltip title="Xoá">
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
-
-                            >
-                                <span className="text-base">Kho lưu trữ </span><i className="fa-solid ml-2 fa-trash-can"></i>
-                            </Button>
-                        </Tooltip></Link>
-                </div>
-            </div>
+            <DropdownAndNavPo />
             <div className="w-full my-5 px-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">

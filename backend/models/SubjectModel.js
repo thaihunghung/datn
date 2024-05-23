@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const ProgramModel = require('./ProgramModel');
+const CloModel = require('./CloModel');
 
 const SubjectModel = sequelize.define('subject', {
   subject_id: {
@@ -31,14 +31,6 @@ const SubjectModel = sequelize.define('subject', {
   typesubject: {
     type: DataTypes.ENUM('Đại cương', 'Cơ sở ngành', 'Chuyên ngành', 'Thực tập và Đồ án'),
     allowNull: false
-  },
-  program_id: { 
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: ProgramModel,
-      key: 'program_id' 
-    }
   },
   isDelete: {
     type: DataTypes.TINYINT,
