@@ -34,6 +34,7 @@ import UpdateClass from '../components/pages/Admin/Management/ManagementClass/Up
 import StoreClass from '../components/pages/Admin/Management/ManagementClass/StoreClass';
 import UpdateClassById from '../components/pages/Admin/Management/ManagementClass/UpdateClassById';
 import CreateClass from '../components/pages/Admin/Management/ManagementClass/CreateClass';
+import Course from '../components/pages/Admin/Management/ManagementCourse/Course';
 
 
 function Admin(props) {
@@ -104,6 +105,8 @@ function Admin(props) {
           <Route path="/class/update/:id" element={<UpdateClassById collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/class/store" element={<StoreClass collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
+          <Route path="/course" element={<Course collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          
         </Routes> 
       </div>
     </div>
