@@ -47,6 +47,7 @@ import StoreClass from '../components/pages/Admin/Management/ManagementClass/Sto
 import UpdateClassById from '../components/pages/Admin/Management/ManagementClass/UpdateClassById';
 import CreateClass from '../components/pages/Admin/Management/ManagementClass/CreateClass';
 import Course from '../components/pages/Admin/Management/ManagementCourse/Course';
+import MangementRubricItems from '../components/pages/Admin/Management/ManagementRubric/MangementRubricItems';
 
 
 function Admin(props) {
