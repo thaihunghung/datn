@@ -100,7 +100,7 @@ function Nav(props) {
             icon: <i className={`fa-solid fa-star mr-${collapsedNav ? "0" : "3"} w-4`}></i>,
             link: "/admin/management-subject/list"
         },
-        { text: "Rubric", link: "/admin/management-rubric", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
+        { text: "Rubric", link: "/admin/management-rubric/list", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
         { text: "Sinh viên", link: "/admin/student", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
     ];
     

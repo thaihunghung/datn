@@ -56,7 +56,7 @@ const DropdownAndNavPo = () => {
           <Link to={`/admin/management-po/list`}>
             <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
               <div className={` ${isActive(`/admin/management-po/list`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                Danh sách Subject
+                Danh sách po
               </div>
             </div>
           </Link>

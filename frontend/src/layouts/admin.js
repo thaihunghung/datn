@@ -41,6 +41,7 @@ import StoreChapter from '../components/pages/Admin/Management/ManagementSubject
 import UpdateSubject from '../components/pages/Admin/Management/ManagementSubject/UpdateSubject';
 import StoreSubject from '../components/pages/Admin/Management/ManagementSubject/StoreSubject';
 import CreateSubject from '../components/pages/Admin/Management/ManagementSubject/CreateSubject';
+import MangementRubricItems from '../components/pages/Admin/Management/ManagementRubric/MangementRubricItems';
 
 function Admin(props) {
 
@@ -108,9 +109,17 @@ function Admin(props) {
           <Route path="/management-subject/:id/chapter/update/:chapter_id" element={<UpdateChapter collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
           <Route path="/management-point" element={<FormPoint collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
-          <Route path="/management-rubric" element={<ManagementRubric collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/management-rubric/list" element={<ManagementRubric collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-rubric/create" element={<CreateRubic collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-rubric/update/:id" element={<UpdateRubic collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          
+
+          <Route path="/management-rubric/:id/rubric-items/list" element={<MangementRubricItems collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/management-rubric/:id/rubric-items/create" element={<UpdateRubic collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/management-rubric/:id/rubric-items/update" element={<UpdateRubic collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/management-rubric/:id/rubric-items/store" element={<UpdateRubic collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/management-rubric/:id/rubric-items/:rubric_item_id" element={<UpdateRubic collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+
           
           <Route path="/student" element={<Student collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
           <Route path="/student/create" element={<CreateStudent collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />

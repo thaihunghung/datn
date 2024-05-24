@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import TodoList from "../../Utils/TodoList/TodoList";
+import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
 
 const UpdateRubic = (nav) => {
   const { id } = useParams();
@@ -42,39 +43,7 @@ const UpdateRubic = (nav) => {
 
   return (
     <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
-      <div>
-        <div className="w-fit flex  justify-start text-base font-bold rounded-lg border-1 border-[#FF8077]">
-          <Link to={"/admin/management-rubric"}
-            className={location.pathname.startsWith('/admin/management-rubric') ? "bg-[#475569] text-[#FEFEFE]" : ""}
-          >
-            
-            <div className="p-5  hover:bg-slate-600 hover:text-white">
-              DS rubric
-            </div>
-          </Link>
-          <Link to={"/admin/management-rubric/store"}
-            className={location.pathname.startsWith('/admin/management-rubric/store') ? "bg-[#475569] text-[#FEFEFE]" : ""}
-          >
-            <div className="p-5  hover:bg-slate-600 hover:text-white">
-              Kho lưu trữ
-            </div>
-          </Link>
-          <Link to={"/admin/management-rubric/create"}
-            className={location.pathname.startsWith('/admin/management-rubric/create') ? "bg-[#475569] text-[#FEFEFE]" : ""}
-          >
-            <div className="p-5  hover:bg-slate-600 hover:text-white">
-              Tạo rubric
-            </div>
-          </Link>
-          <Link to={"/admin/management-rubric/update"}
-            className={location.pathname.startsWith('/admin/management-rubric/update') ? "bg-[#475569] text-[#FEFEFE]" : ""}
-          >
-            <div className="p-5  hover:bg-slate-600 hover:text-white">
-              update
-            </div>
-          </Link>
-        </div>
-      </div>
+      <DropdownAndNavRubric />
       <div className="w-full mt-5 rounded-lg">
         <TodoList data={data} rubric_id={id} Clo={CloData} Chapter={ChapterData} successNoti={successNoti} setSpinning={setSpinning} />
         {RubicData.map((rubricItem) => (

@@ -3,14 +3,14 @@ import { Link, useLocation } from "react-router-dom";
 import { Tooltip } from 'antd';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@nextui-org/react";
 
-const DropdownAndNavPlo = () => {
+const DropdownAndNavRubric = () => {
   const location = useLocation();
   const isActive = (path) => location.pathname.startsWith(path);
 
   const items = useMemo(() => [
-    { key: "Danh sách plo", label: "Danh sách plo", path: `/admin/management-plo/list`},
-    { key: "Kho lưu trữ", label: "Kho lưu trữ", path: `/admin/management-plo/store` },
-    { key: "Tạo mới", label: "Tạo mới", path: `/admin/management-plo/create` }
+    { key: "Danh sách rubric", label: "Danh sách rubric", path: `/admin/management-rubric/list`},
+    { key: "Kho lưu trữ", label: "Kho lưu trữ", path: `/admin/management-rubric/store` },
+    { key: "Tạo mới", label: "Tạo mới", path: `/admin/management-rubric/create` }
   ], []);
 
   const [selectedItem, setSelectedItem] = useState('');
@@ -29,7 +29,7 @@ const DropdownAndNavPlo = () => {
     }
   };
   return (
-    <div className="flex justify-between px-5 w-full items-center">
+    <div className="flex justify-between w-full items-center">
       <div className="flex gap-2 justify-center items-center lg:hidden xl:hidden">
         <Dropdown>
           <DropdownTrigger>
@@ -53,17 +53,17 @@ const DropdownAndNavPlo = () => {
 
       <div className="hidden sm:hidden lg:block xl:block">
         <div className="flex border justify-start text-base font-bold rounded-lg">
-          <Link to={`/admin/management-plo/list`}>
+          <Link to={`/admin/management-rubric/list`}>
             <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-              <div className={` ${isActive(`/admin/management-plo/list`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                Danh sách Plo
+              <div className={` ${isActive(`/admin/management-rubric/list`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                Danh sách rubric
               </div>
             </div>
           </Link>
 
-          <Link to={`/admin/management-plo/create`}>
+          <Link to={`/admin/management-rubric/create`}>
             <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-              <div className={` ${isActive(`/admin/management-plo/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+              <div className={` ${isActive(`/admin/management-rubric/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
                 Tạo mới
               </div>
             </div>
@@ -71,14 +71,14 @@ const DropdownAndNavPlo = () => {
         </div>
       </div>
       <div className="hidden sm:hidden lg:block xl:block">
-        <Link to={`/admin/management-plo/store`}>
+        <Link to={`/admin/management-rubric/store`}>
           <Button color="default">
             <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
           </Button>
         </Link>
       </div>
       <div className="lg:hidden xl:hidden">
-        <Link to={`/admin/management-plo/store`}>
+        <Link to={`/admin/management-rubric/store`}>
           <Tooltip title="Kho lưu trữ" color={'#ff9908'}>   
               <button className="p-1">
               <i className="fa-solid fa-trash-can"></i>
@@ -90,5 +90,5 @@ const DropdownAndNavPlo = () => {
   );
 }
 
-export default DropdownAndNavPlo;
+export default DropdownAndNavRubric;
 

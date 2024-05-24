@@ -38,9 +38,9 @@ const RubricItemController = {
       const rubricScores =await results.map(result => ({
         total_score: result.dataValues.total_score
       }));
-      console.log("rubricScores",data)
+      //console.log("rubricScores",data)
       const totalScore = parseFloat(rubricScores[0].total_score) + parseFloat(data.score);
-      console.log('newValue',totalScore);
+      //console.log('newValue',totalScore);
       if (totalScore <= 10) {
         const newRubric = await RubricItemModel.create(data.data);
         res.status(201).json({ success: true, message: "Rubric item created successfully", data: newRubric });

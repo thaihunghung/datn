@@ -24,7 +24,7 @@ const RubricController = {
     try {
       const { data } = req.body;
       const newrubric = await RubricModel.create(data);
-      res.json(newrubric);
+      res.status(201).json(newrubric);
     } catch (error) {
       console.error('Error creating rubric:', error);
       res.status(500).json({ message: 'Server error' });
@@ -143,6 +143,50 @@ const RubricController = {
     } catch (error) {
       console.error('Error getting all rubrics:', error);
       res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+  toggleSoftDeleteById: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const rubric = await RubricModel.findOne({ where: { rubric_id: id } });
+      if (!rubric) {
+        return res.status(404).json({ message: 'rubric not found' });
+      }
+      const updatedIsDeleted = !rubric.isDelete;
+      await RubricModel.update({ isDelete: updatedIsDeleted }, { where: { rubric_id: id } });
+
+      res.status(200).json({ message: `Toggled isDelete status to ${updatedIsDeleted}` });
+
+
+    } catch (error) {
+      console.error('Error toggling PlO delete statuses:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
+
+  softDeleteMultiple: async (req, res) => {
+    try {
+      const { data } = req.body;
+      const { rubric_id } = data;
+      if (!Array.isArray(rubric_id) || rubric_id.length === 0) {
+        return res.status(400).json({ message: 'No PlO ids provided' });
+      }
+
+      const rubrics = await RubricModel.findAll({ where: { rubric_id: rubric_id } });
+      if (rubrics.length !== rubric_id.length) {
+        return res.status(404).json({ message: 'One or more RubricModels not found' });
+      }
+
+      const updated = await Promise.all(rubrics.map(async (rubric) => {
+        const updatedIsDeleted = !rubric.isDelete;
+        await rubric.update({ isDelete: updatedIsDeleted });
+        return { rubric_id: rubric.rubric_id, isDelete: updatedIsDeleted };
+      }));
+
+      res.json({ message: 'RubricModel delete statuses toggled', updated });
+    } catch (error) {
+      console.error('Error toggling RubricModel delete status:', error);
+      res.status(500).json({ message: 'Server error' });
     }
   },
   GetItemsRubricsByIdRubrics: async (req, res) => {
