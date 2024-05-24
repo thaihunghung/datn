@@ -166,7 +166,7 @@ const router = express.Router();
 router.get('/rubric-item', RubricItemController.index);
 router.post('/rubric-item', RubricItemController.create);
 router.get('/rubric-item/:id', RubricItemController.getByID);
-router.post('/rubric-item/:rubric_id/check-score', RubricItemController.checkScore);
+router.post('/rubric-item/save-check-score', RubricItemController.checkScore);
 
 router.put('/rubric-item/:id', RubricItemController.update);
 router.delete('/rubric-item/:id', RubricItemController.delete);

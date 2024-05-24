@@ -26,9 +26,11 @@ const RubricItemController = {
   },
   checkScore: async (req, res) => {
     try {
-      const { rubric_id } = req.params;
+      
       const { data } = req.body;
-
+      const { rubric_id } = data.data;
+      console.log(data);
+      console.log(rubric_id)
       const RubricsItem = await RubricItemModel.findAll({ where: { rubric_id: rubric_id } });
       const results = await RubricItemModel.findAll({
         attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('score')), 'total_score']],

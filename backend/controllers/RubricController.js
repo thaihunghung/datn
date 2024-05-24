@@ -38,7 +38,7 @@ const RubricController = {
       if (!rubric) {
         return res.status(404).json({ message: 'rubric not found' });
       }
-      res.json(rubric);
+      res.status(200).json(rubric);
     } catch (error) {
       console.error('Error finding rubric:', error);
       res.status(500).json({ message: 'Server error' });

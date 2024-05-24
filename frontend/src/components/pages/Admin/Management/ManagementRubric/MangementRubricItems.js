@@ -5,7 +5,7 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { Table, Tooltip, Button, message } from 'antd';
 import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
+import DropdownAndNavRubricItems from "../../Utils/DropdownAndNav/DropdownAndNavRubricItems";
 
 const MangementRubricItems = (nav) => {
     const { id } = useParams();
@@ -89,7 +89,7 @@ const MangementRubricItems = (nav) => {
             dataIndex: "action",
             render: (_id) => (
                 <div className="flex items-center justify-center w-full gap-2">
-                    <Link to={`/admin/management-rubric/update/${_id}`}>
+                    <Link to={`/admin/management-rubric/${id}/rubric-items/${_id}`}>
                         <Tooltip title="Chỉnh sửa">
                             <Button
                                 isIconOnly
@@ -223,7 +223,7 @@ const MangementRubricItems = (nav) => {
                     }
                 }}
             />
-            <DropdownAndNavRubric />
+            <DropdownAndNavRubricItems />
             <div className="my-5 flex justify-center items-center flex-col sm:flex-col lg:flex-row xl:fex-row">
                 <div className="text-lg leading-8 italic font-bold text-[#FF9908] flex-1 text-justify">Tên học phần:{' '+rubicData.rubricName}</div>
                 <div className="text-lg  leading-8 italic font-bold text-[#FF9908]  flex-1 text-justify">Tên rubric:{' '+rubicData.subjectName}</div>
