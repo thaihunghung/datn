@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const TeacherModel = require('./TeacherModel');
 
-const ClassModel = sequelize.define('Class', {
+const ClassModel = sequelize.define('class', {
   class_id : {
     type: DataTypes.INTEGER,
     primaryKey: true,

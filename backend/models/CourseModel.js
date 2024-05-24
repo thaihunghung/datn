@@ -64,4 +64,20 @@ const CourseModel = sequelize.define('course', {
   tableName: 'courses'
 });
 
+CourseModel.belongsTo(ClassModel, {
+  foreignKey: 'class_id'
+});
+
+CourseModel.belongsTo(TeacherModel, {
+  foreignKey: 'teacher_id'
+});
+
+CourseModel.belongsTo(SubjectModel, {
+  foreignKey: 'subject_id'
+});
+
+CourseModel.belongsTo(SemesterModel, {
+  foreignKey: 'semester_id'
+});
+
 module.exports = CourseModel;

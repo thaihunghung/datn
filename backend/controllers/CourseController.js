@@ -1,10 +1,33 @@
+const ClassModel = require("../models/ClassModel");
 const CourseModel = require("../models/CourseModel");
+const SemesterModel = require("../models/SemesterModel");
+const SubjectModel = require("../models/SubjectModel");
+const TeacherModel = require("../models/TeacherModel");
 
 const CourseController = {
   // Lấy tất cả các khóa học
   index: async (req, res) => {
     try {
-      const courses = await CourseModel.findAll();
+      const courses = await CourseModel.findAll({
+        include: [{
+          model: ClassModel,
+          where: { isDelete: false }
+        },
+        {
+          model: TeacherModel,
+          where: { isDelete: false }
+        },
+        {
+          model: SubjectModel,
+          where: { isDelete: false }
+        },
+        {
+          model: SemesterModel,
+          where: { isDelete: false }
+        }],
+        where: { isDelete: false }
+
+      });
       res.json(courses);
     } catch (error) {
       console.error('Lỗi khi lấy tất cả các khóa học:', error);
@@ -28,7 +51,29 @@ const CourseController = {
   getByID: async (req, res) => {
     try {
       const { id } = req.params;
-      const course = await CourseModel.findOne({ where: { course_id: id } });
+      const course = await CourseModel.findAll({
+        include: [{
+          model: ClassModel,
+          where: { isDelete: false }
+        },
+        {
+          model: TeacherModel,
+          where: { isDelete: false }
+        },
+        {
+          model: SubjectModel,
+          where: { isDelete: false }
+        },
+        {
+          model: SemesterModel,
+          where: { isDelete: false }
+        }],
+        where: {
+          isDelete: false,
+          course_id: id
+         }
+
+      });
       if (!course) {
         return res.status(404).json({ message: 'Không tìm thấy khóa học' });
       }
