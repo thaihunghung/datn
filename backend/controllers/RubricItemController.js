@@ -1,6 +1,7 @@
 const RubricItemModel = require('../models/RubricItemModel');
 const { Sequelize, DataTypes } = require('sequelize');
 const RubricModel = require('../models/RubricModel');
+const QualityLevelsModel = require('../models/QualityLevelsModel');
 
 const RubricItemController = {
   // Get all RubricsItem
@@ -64,7 +65,10 @@ const RubricItemController = {
       if (!rubrics_item) {
         return res.status(404).json({ message: 'rubrics_item not found' });
       }
-      res.json(rubrics_item);
+      const QualityLevels = await QualityLevelsModel.findAll({ where: { rubricsitem_id: id } });
+      rubrics_item.dataValues.QualityLevels = QualityLevels;
+
+      res.status(201).json(rubrics_item);
     } catch (error) {
       console.error('Error finding rubrics_item:', error);
       res.status(500).json({ message: 'Server error' });

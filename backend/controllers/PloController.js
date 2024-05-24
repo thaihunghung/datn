@@ -1,14 +1,16 @@
-const PLO = require('../models/PloModel');
+
 const ProgramModel = require('../models/ProgramModel');
 const ExcelJS = require('exceljs');
 const fs = require('fs');
 const path = require('path');
 const PloModel = require('../models/PloModel');
+const PloCloModel = require('../models/PloCloModel');
+const PoPloModel = require('../models/PoPloModel');
 
 const PloController = {
   index: async (req, res) => {
     try {
-      const plos = await PLO.findAll();
+      const plos = await PloModel.findAll();
       res.status(200).json(plos);
     } catch (error) {
       console.error('Error getting all PLOs:', error);
@@ -23,7 +25,7 @@ const PloController = {
       if (!data) {
         return res.status(400).json({ message: 'No data provided' });
       }
-      const newPLO = await PLO.create(data);
+      const newPLO = await PloModel.create(data);
       res.status(201).json(newPLO);
     } catch (error) {
       console.error('Error creating PLO:', error);
@@ -38,7 +40,7 @@ const PloController = {
       if (!id) {
         return res.status(400).json({ message: 'No ID provided' });
       }
-      const plo = await PLO.findOne({ where: { plo_id: id } });
+      const plo = await PloModel.findOne({ where: { plo_id: id } });
       if (!plo) {
         return res.status(404).json({ message: 'PLO not found' });
       }
@@ -60,7 +62,7 @@ const PloController = {
       if (!data) {
         return res.status(400).json({ message: 'No data provided' });
       }
-      const [updated] = await PLO.update(data, { where: { plo_id: id } });
+      const [updated] = await PloModel.update(data, { where: { plo_id: id } });
       if (!updated) {
         return res.status(404).json({ message: 'PLO not found' });
       }
@@ -78,7 +80,9 @@ const PloController = {
       if (!id) {
         return res.status(400).json({ message: 'No ID provided' });
       }
-      const deleted = await PLO.destroy({ where: { plo_id: id } });
+      await PoPloModel.destroy({ where: { plo_id: id } });
+      await PloCloModel.destroy({where: { plo_id: id } });
+      const deleted = await PloModel.destroy({ where: { plo_id: id } });
       if (!deleted) {
         return res.status(404).json({ message: 'PLO not found' });
       }
@@ -88,11 +92,34 @@ const PloController = {
       res.status(500).json({ message: 'Internal server error' });
     }
   },
-
+  deleteMultiple: async (req, res) => {
+    const { plo_id } = req.query;
+    try {
+      await PloCloModel.destroy({where: { plo_id: plo_id } });
+      await PoPloModel.destroy({ where: { plo_id: plo_id } });
+      const deletedCount = await PloModel.destroy({ where: { plo_id: plo_id } });
+      if (!deletedCount) {
+        return res.status(404).json({ message: 'PLO not found' });
+      }
+      res.json({ message: 'PLO deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting PLO:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
+  isDeleteToTrue: async (req, res) => {
+    try {
+      const pos = await PO.findAll({ where: { isDelete: true } });
+      res.json(pos);
+    } catch (error) {
+      console.error('Error finding deleted POs:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
   // Get PLOs where isDelete is true
   isDeleteTotrue: async (req, res) => {
     try {
-      const plos = await PLO.findAll({ where: { isDelete: true } });
+      const plos = await PloModel.findAll({ where: { isDelete: true } });
       res.status(200).json(plos);
     } catch (error) {
       console.error('Error fetching PLOs:', error);
@@ -103,7 +130,7 @@ const PloController = {
   // Get PLOs where isDelete is false
   isDeleteTofalse: async (req, res) => {
     try {
-      const plos = await PLO.findAll({ where: { isDelete: false } });
+      const plos = await PloModel.findAll({ where: { isDelete: false } });
       res.status(200).json(plos);
     } catch (error) {
       console.error('Error fetching PLOs:', error);
@@ -118,12 +145,12 @@ const PloController = {
       if (!id) {
         return res.status(400).json({ message: 'No ID provided' });
       }
-      const plo = await PLO.findOne({ where: { plo_id: id } });
+      const plo = await PloModel.findOne({ where: { plo_id: id } });
       if (!plo) {
         return res.status(404).json({ message: 'PLO not found' });
       }
       const updatedIsDeleted = !plo.isDelete;
-      await PLO.update({ isDelete: updatedIsDeleted }, { where: { plo_id: id } });
+      await PloModel.update({ isDelete: updatedIsDeleted }, { where: { plo_id: id } });
       res.status(200).json({ message: `isDelete status toggled to ${updatedIsDeleted}` });
     } catch (error) {
       console.error('Error toggling isDelete status:', error);
@@ -133,12 +160,12 @@ const PloController = {
   toggleSoftDeleteById: async (req, res) => {
     try {
       const { id } = req.params;
-      const plo = await PLO.findOne({ where: { plo_id: id } });
+      const plo = await PloModel.findOne({ where: { plo_id: id } });
       if (!plo) {
         return res.status(404).json({ message: 'plo not found' });
       }
       const updatedIsDeleted = !plo.isDelete;
-      await PLO.update({ isDelete: updatedIsDeleted }, { where: { plo_id: id } });
+      await PloModel.update({ isDelete: updatedIsDeleted }, { where: { plo_id: id } });
 
       res.status(200).json({ message: `Toggled isDelete status to ${updatedIsDeleted}` });
 
@@ -157,7 +184,7 @@ const PloController = {
         return res.status(400).json({ message: 'No PlO ids provided' });
       }
 
-      const plos = await PLO.findAll({ where: { plo_id: plo_id } });
+      const plos = await PloModel.findAll({ where: { plo_id: plo_id } });
       if (plos.length !== plo_id.length) {
         return res.status(404).json({ message: 'One or more PLOs not found' });
       }
@@ -199,7 +226,7 @@ const PloController = {
       }
 
       const { id } = data;
-      const pos = await PLO.findAll({ where: { plo_id: id } });
+      const pos = await PloModel.findAll({ where: { plo_id: id } });
 
       if (!pos || pos.length === 0) {
         return res.status(404).json({ message: 'PLOs not found' });

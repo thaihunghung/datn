@@ -1,9 +1,9 @@
-const PO = require('../models/PoModel');
 const ProgramModel = require('../models/ProgramModel');
 const ExcelJS = require('exceljs');
 const fs = require('fs');
 const path = require('path');
 const PoModel = require('../models/PoModel');
+const PoPloModel = require('../models/PoPloModel');
 
 const PoController = {
   index: async (req, res) => {
@@ -64,7 +64,24 @@ const PoController = {
   delete: async (req, res) => {
     try {
       const { id } = req.params;
+      await PoPloModel.destroy({ where: { po_id: id } });
       const deletedCount = await PO.destroy({ where: { po_id: id } });
+      if (!deletedCount) {
+        return res.status(404).json({ message: 'PO not found' });
+      }
+    
+      res.status(200).json({ message: 'PO deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting PO:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
+
+  deleteMultiple: async (req, res) => {
+    const { po_id } = req.query;
+    try {
+      await PoPloModel.destroy({ where: { po_id: po_id } });
+      const deletedCount = await PO.destroy({ where: { po_id: po_id } });
       if (!deletedCount) {
         return res.status(404).json({ message: 'PO not found' });
       }
@@ -74,7 +91,6 @@ const PoController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
-
   isDeleteToTrue: async (req, res) => {
     try {
       const pos = await PO.findAll({ where: { isDelete: true } });

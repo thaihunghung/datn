@@ -18,7 +18,7 @@ import DropdownAndNavRubricItems from '../../Utils/DropdownAndNav/DropdownAndNav
 import Tabs from '../../Utils/Tabs/Tabs';
 
 const UpdateRubicItems = (nav) => {
-  const { id } = useParams();
+  const { id, rubric_item_id } = useParams();
   const { Option } = Select;
   const { setCollapsedNav } = nav;
   const [activeTab, setActiveTab] = useState(0);
@@ -28,10 +28,11 @@ const UpdateRubicItems = (nav) => {
   const [DataPlo, setDataPlo] = useState([]);
   const [Chapter, setDataChapter] = useState([]);
   const [DataClo, setDataClo] = useState([]);
-  
+
   const [selectedClo, setSelectedClo] = useState("");
   const [score, setSelectedScore] = useState();
   const [selectedQualityLevel, setSelectedQualityLevel] = useState();
+  const [RubricItems, setRubricItems] = useState({});
 
   const handleScoreChange = (value, option) => {
     setSelectedScore(value);
@@ -51,9 +52,11 @@ const UpdateRubicItems = (nav) => {
     setSelectedClo(value);
   };
 
-  const [editorState, setEditorState] = useState(
-    () => EditorState.createEmpty()
-  );
+  // const [editorState, setEditorState] = useState(
+  //   () => EditorState.createEmpty()
+  // );
+
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   const [convertedContent, setConvertedContent] = useState(null);
 
@@ -64,41 +67,33 @@ const UpdateRubicItems = (nav) => {
         const clo_ids = await axiosAdmin.get(`/subject/${response.data.subject_id}/clo-ids`);
         setDataClo(clo_ids.data)
       }
-
+      
     } catch (error) { }
   }
-  const getAllCloDeleteFalseByRubric = async () => {
+  const getOneRubricItemsById = async () => {
     try {
-      const response = await axiosAdmin.get('/rubric/get-by-user/checkscore');
-      const updatedRubricData = response.data.rubric.map((rubric) => {
-        const status = {
-          status: rubric.RubricItem.length === 0 ? false : true,
-          _id: rubric.rubric_id
-        };
-        return {
-          key: rubric.rubric_id,
-          name: rubric.rubricName,
-          status: status,
-          point: rubric.RubricItem[0]?.total_score ? rubric.RubricItem[0].total_score : 0.0,
-          action: rubric.rubric_id
-        };
-      });
-      //setRubicData(updatedRubricData);
-      console.log(updatedRubricData);
-    } catch (error) {
-      console.error("Error: " + error.message);
-      message.error('Error fetching Rubric data');
-    }
-  };
+      const response = await axiosAdmin.get(`/rubric-item/${rubric_item_id}`);
+      if (response.data.description) {
+        const contentState = convertFromHTML(response.data.description);
+        setEditorState(EditorState.createWithContent(contentState));
+      }
+      setSelectedClo(response.data.clo_id)
+
+      setSelectedScore(response.data.score)
+      setRubricItems(response.data)
+      setSelectedQualityLevel(response.data.QualityLevels.length - 1)
+    } catch (error) { }
+  }
+
   useEffect(() => {
     getOneRubricById()
-    // Set initial values if needed
-    // setSelectedScore(Point)
-    // setSelectedChapter(chapter_id)
-    // setSelectedClo(clo_id)
-    // setSelectedPlo(plo_id)
+    getOneRubricItemsById()
+
   }, []);
 
+
+
+  
   useEffect(() => {
     if (selectedClo) {
       setSelectedPlo(null) 
@@ -130,6 +125,8 @@ const UpdateRubicItems = (nav) => {
       const timer = setTimeout(() => {
         GetChapterByCloID(selectedClo);
         GetPloByCloID(selectedClo);
+        setSelectedPlo(RubricItems.plo_id)
+        setSelectedChapter(RubricItems.chapter_id)
       }, 1000); // 1-second delay
 
       return () => clearTimeout(timer);
@@ -143,59 +140,59 @@ const UpdateRubicItems = (nav) => {
     }
   }, [editorState]);
 
-  const handleSave = async () => {
-    try {
-      const data = {
-        "score": parseFloat(score),
-        "data": {
-          chapter_id: selectedChapter,
-          clo_id: selectedClo,
-          plo_id: selectedPlo,
-          rubric_id: parseInt(id) ,
-          description: convertedContent,
-          score: parseFloat(score)
-        }
-      };
+  // const handleSave = async () => {
+  //   try {
+  //     const data = {
+  //       "score": parseFloat(score),
+  //       "data": {
+  //         chapter_id: selectedChapter,
+  //         clo_id: selectedClo,
+  //         plo_id: selectedPlo,
+  //         rubric_id: parseInt(id) ,
+  //         description: convertedContent,
+  //         score: parseFloat(score)
+  //       }
+  //     };
       
-      const response = await axiosAdmin.post(`/rubric-item/save-check-score`, { data });
-      const rubricsItem_id = response.data.data.rubricsItem_id;
-      if (rubricsItem_id) {
-        const levelElements = document.querySelectorAll(`.qualityLevel`);
-        const dataqualityLevel = [];
+  //     const response = await axiosAdmin.post(`/rubric-item/save-check-score`, { data });
+  //     const rubricsItem_id = response.data.data.rubricsItem_id;
+  //     if (rubricsItem_id) {
+  //       const levelElements = document.querySelectorAll(`.qualityLevel`);
+  //       const dataqualityLevel = [];
 
-        levelElements.forEach(element => {
-          const levels = element.querySelectorAll(`.level > div`);
-          const names = element.querySelectorAll(`.name > div`);
-          const keyNumbers = element.querySelectorAll(`.keyNumber > div`);
+  //       levelElements.forEach(element => {
+  //         const levels = element.querySelectorAll(`.level > div`);
+  //         const names = element.querySelectorAll(`.name > div`);
+  //         const keyNumbers = element.querySelectorAll(`.keyNumber > div`);
 
-          Array.from(levels).forEach((level, index) => {
-            const levelText = level.textContent.trim();
-            const nameText = names[index].textContent.trim();
-            const keyNumberText = keyNumbers[index].textContent.trim();
-            dataqualityLevel.push({ rubricsItem_id: rubricsItem_id, level: levelText, name: nameText, keyNumber: parseFloat(keyNumberText) });
-          });
-        });
+  //         Array.from(levels).forEach((level, index) => {
+  //           const levelText = level.textContent.trim();
+  //           const nameText = names[index].textContent.trim();
+  //           const keyNumberText = keyNumbers[index].textContent.trim();
+  //           dataqualityLevel.push({ rubricsItem_id: rubricsItem_id, level: levelText, name: nameText, keyNumber: parseFloat(keyNumberText) });
+  //         });
+  //       });
 
-        const qualityLevel = {
-          dataqualityLevel
-        };
-        await axiosAdmin.post(`/quality-level`, { qualityLevel });
-      }
+  //       const qualityLevel = {
+  //         dataqualityLevel
+  //       };
+  //       await axiosAdmin.post(`/quality-level`, { qualityLevel });
+  //     }
 
-      if (response.status === 201) {
-        message.success('Rubric item created successfully');
-      } else {
-        message.error(response.data.message);
-      }
+  //     if (response.status === 201) {
+  //       message.success('Rubric item created successfully');
+  //     } else {
+  //       message.error(response.data.message);
+  //     }
 
-    } catch (error) {
-      // If an error occurred during the request (e.g., network error), display a generic error message
-      console.error('Error saving rubric item:', error);
-      message.error('Failed to save: An error occurred');
-    } finally {
-      // Regardless of the outcome, stop the spinner
-    }
-  };
+  //   } catch (error) {
+  //     // If an error occurred during the request (e.g., network error), display a generic error message
+  //     console.error('Error saving rubric item:', error);
+  //     message.error('Failed to save: An error occurred');
+  //   } finally {
+  //     // Regardless of the outcome, stop the spinner
+  //   }
+  // };
 
   const options = [];
   for (let i = 0.5; i <= 2; i += 0.5) {
@@ -206,52 +203,49 @@ const UpdateRubicItems = (nav) => {
     );
   }
 
-  // const handleUpdate = async () => {
-  //   try {
-  //     const data = {
-  //       chapter_id: selectedChapter,
-  //       clo_id: selectedClo,
-  //       plo_id: selectedPlo,
-  //       rubric_id: id,
-  //       description: convertedContent,
-  //       score: score
-  //     };
+  const handleUpdate = async () => {
+    try {
+      const data = {
+        chapter_id: selectedChapter,
+        clo_id: selectedClo,
+        plo_id: selectedPlo,
+        rubric_id: id,
+        description: convertedContent,
+        score: score
+      };
 
-  //     const response = await axiosAdmin.put(`/rubric-item/${id}`, { data: data });
-  //     console.log(response.data);
+      const response = await axiosAdmin.put(`/rubric-item/${id}`, { data: data });
+      console.log(response.data);
 
 
-  //     const levelElements = document.querySelectorAll(`.qualityLevel`)
-  //     const dataqualityLevel = [];
+      const levelElements = document.querySelectorAll(`.qualityLevel`)
+      const dataqualityLevel = [];
 
-  //     levelElements.forEach(element => {
-  //       const levels = element.querySelectorAll(`.level > div`);
-  //       const names = element.querySelectorAll(`.name > div`);
-  //       const keyNumbers = element.querySelectorAll(`.keyNumber > div`);
+      levelElements.forEach(element => {
+        const levels = element.querySelectorAll(`.level > div`);
+        const names = element.querySelectorAll(`.name > div`);
+        const keyNumbers = element.querySelectorAll(`.keyNumber > div`);
 
-  //       Array.from(levels).forEach((level, index) => {
-  //         const levelText = level.textContent.trim();
-  //         const nameText = names[index].textContent.trim();
-  //         const keyNumberText = keyNumbers[index].textContent.trim();
-  //         dataqualityLevel.push({ rubricsItem_id: id, level: levelText, name: nameText, keyNumber: parseFloat(keyNumberText) });
-  //       });
-  //     });
+        Array.from(levels).forEach((level, index) => {
+          const levelText = level.textContent.trim();
+          const nameText = names[index].textContent.trim();
+          const keyNumberText = keyNumbers[index].textContent.trim();
+          dataqualityLevel.push({ rubricsItem_id: id, level: levelText, name: nameText, keyNumber: parseFloat(keyNumberText) });
+        });
+      });
 
-  //     const qualityLevel = {
-  //       dataqualityLevel
-  //     }
-  //     await axiosAdmin.delete(`/quality-level/rubric-item/${id}`);
-  //     console.log(id)
-  //     await axiosAdmin.post(`/quality-level`, { qualityLevel });
-  //     setSelectedQualityLevel()
-  //     successNoti("lưu thành công")
-  //     setSpinning(false);
+      const qualityLevel = {
+        dataqualityLevel
+      }
+      await axiosAdmin.delete(`/quality-level/rubric-item/${id}`);
+      console.log(id)
+      await axiosAdmin.post(`/quality-level`, { qualityLevel });
+      
 
-  //   } catch (error) {
-  //     console.error('Error while saving:', error);
-  //     setSpinning(false);
-  //   }
-  // };
+    } catch (error) {
+      console.error('Error while saving:', error);
+    }
+  };
 
   return (
     <div className='flex w-full flex-col justify-center pb-10 leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7 bg-[#f5f5f5]-500'>
@@ -260,7 +254,7 @@ const UpdateRubicItems = (nav) => {
       <Tabs tabs=
         {[
           {
-            title: 'Tạo mới',
+            title: 'Cập nhật',
             content:
               <div className="w-full  rounded-lg border">
                 <div className='flex flex-col sm:flex-col sm:items-start lg:flex-row  xl:flex-row  justify-center items-center gap-2'>
@@ -342,7 +336,6 @@ const UpdateRubicItems = (nav) => {
                       className="w-full"
                     >
                       <Option value={1}>1 tiêu chí</Option>
-                      <Option value={2}>2 tiêu chí</Option>
                       <Option value={4}>4 tiêu chí</Option>
                     </Select>
                     <div className='w-full overflow-x-auto P-5'>
@@ -405,19 +398,15 @@ const UpdateRubicItems = (nav) => {
                     />
                     <div className='w-full min-w-[250px] sm:min-w-[200px] lg:min-w-[250px] xl:min-w-[250px]'>
                       <div className='w-full mt-5'>
-                        <div>
-                          <Button color="primary" className='w-[200px]' onClick={handleSave}>
-                            <span className='font-bold'>Lưu</span>
-                          </Button>
-                        </div>
-                        {/* ) : (
+                       
+                        
                   <div>
                     <button className='w-[200px] rounded-lg hover:bg-[#FF8077] hover:text-[#FEFEFE] bg-[#FF9908]' onClick={handleUpdate}>
                       <span className='font-bold'>cập nhật</span>
                     </button>
 
                   </div>
-                )} */}
+          
                       </div>
                     </div>
                   </div>

@@ -1,37 +1,90 @@
-// StorePlo.js
+// StoreRubric.js
 
 import { useEffect, useState } from "react";
-import { Button, message } from 'antd';
+import { Link, useLocation } from "react-router-dom";
+import { Table, Tooltip, Button, message } from 'antd';
+import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-import { Table, Tooltip} from 'antd';
-import DropdownAndNavPlo from "../../Utils/DropdownAndNav/DropdownAndNavPlo";
-const StorePlo = (nav) => {
-   
+import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
+
+const StoreRubric = (nav) => {
+    const location = useLocation();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
     const [selectedRow, setSelectedRow] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [poListData, setPosListData] = useState([]);
+
+    const [rubicData, setRubicData] = useState([]);
     const [deleteId, setDeleteId] = useState(null);
 
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: (selectedRowKeys, selectedRows) => {
+            setSelectedRow(selectedRows);
+            setSelectedRowKeys(selectedRowKeys);
+        },
+    };
+
+    const handleUnSelect = () => {
+        setSelectedRowKeys([]);
+        setSelectedRow([]);
+    };
     const columns = [
         {
-            title: "Tên PLO",
+            title: "Tên rubric",
             dataIndex: "name",
             render: (record) => (
-                <div className="text-sm">
+                <div className="text-sm min-w-[100px]">
                     <p className="font-medium">{record}</p>
                 </div>
             ),
         },
         {
-            title: "Mô tả",
-            dataIndex: "description",
+            title: "items",
+            dataIndex: "status",
+            render: (record) => (
+                <div className="text-sm">
+                    {record.status ?
+                        <Link to={`/admin/management-rubric/${record._id}/rubric-items/list`}>
+
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+                            >
+                                <p>Chỉnh sửa</p>
+                            </Button>
+
+                        </Link>
+
+                        :
+                        <Link to={`/admin/management-rubric/${record._id}/rubric-items/create`}>
+
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+                            >
+                                <p>Tạo mới</p>
+                            </Button>
+
+                        </Link>
+
+                    }
+                </div>
+            ),
+        },
+        {
+            title: "Tổng điểm",
+            dataIndex: "point",
             render: (record) => (
                 <div className="text-sm">
                     <p className="font-medium">{record}</p>
+
                 </div>
             ),
         },
@@ -43,7 +96,7 @@ const StorePlo = (nav) => {
             ),
             dataIndex: "action",
             render: (_id) => (
-                <div className="flex flex-col items-center justify-center w-full gap-2">
+                <div className="flex items-center justify-center w-full gap-2">
                     <Tooltip title="Khôi phục">
                         <Button
                             isIconOnly
@@ -71,97 +124,88 @@ const StorePlo = (nav) => {
 
     ];
 
-    const rowSelection = {
-        selectedRowKeys,
-        onChange: (selectedRowKeys, selectedRows) => {
-            console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-            setSelectedRow(selectedRows);
-            setSelectedRowKeys(selectedRowKeys);
-        },
+    const getAllRubricIsDeleteTrue = async () => {
+        try {
+            const response = await axiosAdmin.get('/rubric/archive/get-by-user/checkscore');
+            const updatedRubricData = response.data.rubric.map((rubric) => {
+                const status = {
+                    status: rubric.RubricItem.length === 0 ? false : true,
+                    _id: rubric.rubric_id
+                };
+                return {
+                    key: rubric.rubric_id,
+                    name: rubric.rubricName,
+                    status: status,
+                    point: rubric.RubricItem[0]?.total_score ? rubric.RubricItem[0].total_score : 0.0,
+                    action: rubric.rubric_id
+                };
+            });
+            setRubicData(updatedRubricData);
+            console.log(updatedRubricData);
+        } catch (error) {
+            console.error("Error: " + error.message);
+            message.error('Error fetching Rubric data');
+        }
     };
-
-    const handleUnSelect = () => {
-        setSelectedRowKeys([]);
-        setSelectedRow([]);
-    };
-    const handleRestore = async () => {
+    
+    const handleDelete = async () => {
         const data = {
-            plo_id: selectedRowKeys,
+            rubric_id: selectedRowKeys,
         }
         try {
-            const response = await axiosAdmin.put('/plo/listId/soft-delete-multiple', { data });
+            const response = await axiosAdmin.delete('/rubric/delete/multiple', { params: data });
             handleUnSelect();
             message.success(response.data.message);
-            getAllPlo()
+            getAllRubricIsDeleteTrue()
         } catch (error) {
-            console.error("Error soft deleting PLOs:", error);
-            message.error('Error soft deleting PLOs');
+            console.error("Error soft deleting rubrics:", error);
+            message.error('Error soft deleting rubrics');
+        }
+    };
+
+    
+    const handleDeleteById = async (_id) => {
+        try {
+            const response = await axiosAdmin.delete(`/rubric/${_id}`);
+            handleUnSelect();
+            message.success(response.data.message);
+            getAllRubricIsDeleteTrue()
+        } catch (error) {
+
+            console.error(`Error toggling delete for rubric with ID ${_id}:`, error);
+            message.error(`Error toggling delete for rubric with ID ${_id}`);
+        }
+    };
+
+    const handleRestore = async () => {
+        const data = {
+            rubric_id: selectedRowKeys,
+        };
+        try {
+            const response = await axiosAdmin.put('/rubric/listId/soft-delete-multiple', { data });
+            getAllRubricIsDeleteTrue();
+            handleUnSelect();
+            message.success(response.data.message);
+        } catch (error) {
+            console.error("Error update rubrics:", error);
+            message.error('Error update rubrics');
         }
     };
 
     const handleRestoreById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/plo/${_id}/toggle-soft-delete`);
-            handleUnSelect();
-            message.success(response.data.message);
-            getAllPlo()
-        } catch (error) {
-
-            console.error(`Error toggling soft delete for PLO with ID ${_id}:`, error);
-            message.error(`Error toggling soft delete for PLO with ID ${_id}`);
-        }
-    };
-
-    const getAllPlo = async () => {
-        try {
-            const response = await axiosAdmin.get('/plo/isDelete/true');
-            const updatedPloData = response.data.map((plo) => {
-                return {
-                    key: plo.plo_id,
-                    name: plo.ploName,
-                    description: plo.description,
-                    isDeleted: plo.isDelete,
-                    action: plo.plo_id,
-                };
-            });
-            setPosListData(updatedPloData);
-            console.log(response.data);
-        } catch (error) {
-            console.error("Error: " + error.message);
-            message.error('Error fetching PLO data');
-        }
-    };
-
-    const handleDelete = async () => {
-        const data = {
-            plo_id: selectedRowKeys,
-        };
-        console.log(data);
-        try {
-            const response = await axiosAdmin.put('/plo/delete/multiple', { params: data });
-            await getAllPlo();
+            const response = await axiosAdmin.put(`/rubric/${_id}/toggle-soft-delete`);
+            await getAllRubricIsDeleteTrue();
             handleUnSelect();
             message.success(response.data.message);
         } catch (error) {
-            console.error("Error soft deleting PLOs:", error);
-            message.error('Error soft deleting PLOs');
-        }
-    };
-
-    const handleDeleteById = async (_id) => {
-        try {
-            const response = await axiosAdmin.put(`/plo/${_id}`);
-            await getAllPlo();
-            handleUnSelect();
-            message.success(response.data.message);
-        } catch (error) {
-            console.error(`Error toggling soft delete for PLO with ID ${_id}:`, error);
-            message.error(`Error toggling soft delete for PLO with ID ${_id}`);
+            console.error(`Error toggling update for rubric with ID ${_id}:`, error);
+            message.error(`Error toggling update for rubric with ID ${_id}`);
         }
     };
 
     useEffect(() => {
-        getAllPlo()
+        getAllRubricIsDeleteTrue()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -177,7 +221,7 @@ const StorePlo = (nav) => {
     }, []);
 
     return (
-        <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
+        <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7 bg-[#f5f5f5]-500">
             <ConfirmAction
                 onOpenChange={onOpenChange}
                 isOpen={isOpen}
@@ -191,18 +235,18 @@ const StorePlo = (nav) => {
                     }
                 }}
             />
-            <DropdownAndNavPlo />
-            <div className="w-full my-5 px-5">
+            <DropdownAndNavRubric />
+            <div className="w-full my-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
                         <p className="text-sm font-medium">
                             <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
-                            Đã chọn {selectedRow.length} po
+                            Đã chọn {selectedRow.length} rubric
                         </p>
                         <div className="flex items-center gap-2">
 
-                            <Tooltip
-                                title={`Khôi phục ${selectedRowKeys.length} po`}
+                        <Tooltip
+                                title={`Khôi phục ${selectedRowKeys.length} rubric`}
                                 getPopupContainer={() =>
                                     document.querySelector(".Quick__Option")
                                 }
@@ -212,7 +256,7 @@ const StorePlo = (nav) => {
                                 </Button>
                             </Tooltip>
                             <Tooltip
-                                title={`Xoá vĩnh viễn ${selectedRowKeys.length} po`}
+                                title={`Xoá vĩnh viễn ${selectedRowKeys.length} rubric`}
                                 getPopupContainer={() =>
                                     document.querySelector(".Quick__Option")
                                 }
@@ -242,7 +286,7 @@ const StorePlo = (nav) => {
                         </div>
                     </div>
                 )}
-                <div className="w-full ">
+                <div className="w-full overflow-auto">
                     <Table className="table-po text-[#fefefe]"
                         bordered
                         loading={loading}
@@ -251,7 +295,7 @@ const StorePlo = (nav) => {
                             ...rowSelection,
                         }}
                         columns={columns}
-                        dataSource={poListData}
+                        dataSource={rubicData}
                     />
                 </div>
             </div>
@@ -259,8 +303,8 @@ const StorePlo = (nav) => {
     );
 }
 
+export default StoreRubric;
 
-export default StorePlo;
 function ConfirmAction(props) {
     const { isOpen, onOpenChange, onConfirm } = props;
     const handleOnOKClick = (onClose) => {
@@ -300,7 +344,7 @@ function ConfirmAction(props) {
                         <ModalHeader>Cảnh báo</ModalHeader>
                         <ModalBody>
                             <p className="text-[16px]">
-                                xóa vĩnh viễn, tiếp tục thao tác?
+                                Rubric sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
                             </p>
                         </ModalBody>
                         <ModalFooter>

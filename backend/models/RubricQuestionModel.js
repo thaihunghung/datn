@@ -41,5 +41,6 @@ const MapRubricQuestionModel = sequelize.define('MapRubricQuestion', {
   updatedAt: 'updatedAt',
   tableName: 'map_rubric_questions'
 });
+MapRubricQuestionModel.belongsTo(RubricModel, { foreignKey: 'rubric_id' });
 
 module.exports = MapRubricQuestionModel;
