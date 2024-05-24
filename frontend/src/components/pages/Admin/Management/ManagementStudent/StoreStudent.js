@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Button, Select, Tooltip, Input, Space, Table } from 'antd';
 import { Link } from "react-router-dom";
-import { DeleteFilled, EditFilled, RedoOutlined, SearchOutlined } from '@ant-design/icons';
+import { DeleteOutlined, RedoOutlined, SearchOutlined } from '@ant-design/icons';
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import {
   Modal,
@@ -12,13 +12,14 @@ import {
   ModalFooter, useDisclosure
 } from "@nextui-org/react";
 import './Student.css'
-const StoreStudent = (nav) => {
-  const { setCollapsedNav } = nav;
+const StoreStudent = (props) => {
+  const { setCollapsedNav, successNoti } = props;
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [studentData, setStudentData] = useState([]);
 
 
   const [deleteId, setDeleteId] = useState(null);
+  const [toggleId, setToggleId] = useState(null);
   const allStudentIsDelete = async () => {
     try {
       const student = await axiosAdmin.get('/student/isDelete/true');
@@ -44,20 +45,23 @@ const StoreStudent = (nav) => {
     };
   }
 
-  const handleDeleteProgram = async (id) => {
+  const handleDeleteStudent = async (id) => {
     try {
       await axiosAdmin.delete(`/student/${id}`);
-
+      allStudentIsDelete();
+      successNoti("Xóa sinh viên thành công");
     } catch (err) {
       console.log("Error: " + err.message);
     };
   }
 
-  const hangleChangeidDelete = async (id) => {
+  const handleChangeIdDelete = async (id) => {
     try {
       const response = await axiosAdmin.put(`/student/isDelete/${id}`);
       if (response) {
+        allStudentIsDelete();
         console.log(response.data.message);
+        successNoti("Khôi phục sinh viên thành công");
       }
     } catch (err) {
       console.log("Error: " + err.message);
@@ -204,12 +208,15 @@ const StoreStudent = (nav) => {
           <Tooltip title="Khôi phục sinh viên này">
             <Button onClick={() => {
               onOpen();
-              setDeleteId(record.key);
+              setToggleId(record.key);
               console.log("delete", record.key);
             }} icon={<RedoOutlined />} />
           </Tooltip>
           <Tooltip title="Xóa vĩnh viễn">
-            <Button icon={<EditFilled />} href="#" />
+            <Button icon={<DeleteOutlined />} onClick={() => {
+              onOpen();
+              setDeleteId(record.key);
+            }} />
           </Tooltip>
 
         </Space>
@@ -227,16 +234,24 @@ const StoreStudent = (nav) => {
         <ConfirmAction
           onOpenChange={onOpenChange}
           isOpen={isOpen}
+          message={toggleId ?
+            "Sinh viên này sẽ khôi phục lại, bạn có muốn tiếp tục thao tác?" :
+            "Sinh viên này sẽ được xóa vĩnh viễn, bạn có muốn tiếp tục thao tác?"
+          }
           onConfirm={() => {
-            if (deleteId) {
-              hangleChangeidDelete(deleteId);
+            if (toggleId) {
+              handleChangeIdDelete(toggleId);
+              setDeleteId(null);
+            }
+            else {
+              handleDeleteStudent(deleteId);
               setDeleteId(null);
             }
           }}
         />
         <div>
           <div className="w-fit flex justify-start text-base font-bold rounded-lg mb-5">
-            <Link to={"/admin/student"} className="rounded-lg bg-blue-600">
+            <Link to={"/admin/student"} className="rounded-lg bg-blue-600 text-white">
               <div className="p-5 text-white rounded-lg">
                 DS Sinh viên
               </div>
@@ -281,7 +296,7 @@ const StoreStudent = (nav) => {
 
 export default StoreStudent;
 function ConfirmAction(props) {
-  const { isOpen, onOpenChange, onConfirm } = props;
+  const { isOpen, onOpenChange, onConfirm, message } = props;
   const handleOnOKClick = (onClose) => {
     onClose();
     if (typeof onConfirm === 'function') {
@@ -319,7 +334,7 @@ function ConfirmAction(props) {
             <ModalHeader>Cảnh báo</ModalHeader>
             <ModalBody>
               <p className="text-[16px]">
-                Sinh viên này sẽ khôi phục lại, tiếp tục thao tác?
+                {message}
               </p>
             </ModalBody>
             <ModalFooter>

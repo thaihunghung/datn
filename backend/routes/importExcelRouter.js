@@ -29,12 +29,13 @@ const upload = multer({ storage: storage });
 router.post('/program', upload.any(), ProgramsController.processSaveTemplate);
 router.post('/po', upload.any(), PoController.processSaveTemplatePo);
 router.post('/plo', upload.any(), PloController.processSaveTemplatePlo);
-router.post('/student', upload.any(), StudentController.saveStudent);
+router.post('/student', upload.any(), StudentController.saveStudentExcel);
 router.post('/clo', upload.any(), CloController.processSaveTemplateClo);
 router.post('/chapter', upload.any(), ChapterController.processSaveTemplateChapter);
 router.post('/subject', upload.any(), SubjectController.processSaveTemplateSubject);
 
 router.put('/program/update', upload.any(), CsvUpdateController.updateFormProgram);
+router.put('/student/update', upload.any(), StudentController.updateStudentsFromExcel);
 router.put('/po/update', upload.any(), PoController.processUpdateTemplatePo);
 router.put('/plo/update', upload.any(), PloController.processUpdateTemplatePlo);
 router.put('/clo/update', upload.any(), CloController.processUpdateTemplateClo);

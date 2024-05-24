@@ -41,14 +41,19 @@ import StoreChapter from '../components/pages/Admin/Management/ManagementSubject
 import UpdateSubject from '../components/pages/Admin/Management/ManagementSubject/UpdateSubject';
 import StoreSubject from '../components/pages/Admin/Management/ManagementSubject/StoreSubject';
 import CreateSubject from '../components/pages/Admin/Management/ManagementSubject/CreateSubject';
-import MangementRubricItems from '../components/pages/Admin/Management/ManagementRubric/MangementRubricItems';
+import Class from '../components/pages/Admin/Management/ManagementClass/Class';
+import UpdateClass from '../components/pages/Admin/Management/ManagementClass/UpdateClass';
+import StoreClass from '../components/pages/Admin/Management/ManagementClass/StoreClass';
+import UpdateClassById from '../components/pages/Admin/Management/ManagementClass/UpdateClassById';
+import CreateClass from '../components/pages/Admin/Management/ManagementClass/CreateClass';
+import Course from '../components/pages/Admin/Management/ManagementCourse/Course';
+
 
 function Admin(props) {
 
   const [collapsedNav, setCollapsedNav] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [spinning, setSpinning] = useState(false);
-
   const { user } = props;
 
   const successNoti = (msg) => {
@@ -56,6 +61,7 @@ function Admin(props) {
       type: 'success',
       content: msg,
     });
+    console.log("scsc");
   };
   const errorNoti = (msg) => {
     messageApi.open({
@@ -66,6 +72,7 @@ function Admin(props) {
 
   return (
     <div className="Admin flex flex-col sm:flex-row lg:flex-row xl:flex-row  h-[100vh] bg-[#FEFEFE]">
+      {contextHolder}
       <Spin spinning={spinning} fullscreen />
       <Nav collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} setSpinning={setSpinning} user={user}/>
       <div className='Admin-Content flex-1 h-full overflow-auto p-2 sm:p-5 sm:px-7 lg:p-5 lg:px-2 xl:p-5 xl:px-2'>
@@ -127,6 +134,13 @@ function Admin(props) {
           <Route path="/student/update/:id" element={<UpdateStudentById collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/student/store" element={<StoreStudent collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
+          <Route path="/class" element={<Class collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
+          <Route path="/class/create" element={<CreateClass collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/class/update" element={<UpdateClass collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/class/update/:id" element={<UpdateClassById collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/class/store" element={<StoreClass collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+
+          <Route path="/course" element={<Course collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           
         </Routes> 
       </div>

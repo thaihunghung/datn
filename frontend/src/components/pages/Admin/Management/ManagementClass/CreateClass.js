@@ -1,4 +1,3 @@
-// CreateStudent.js
 import { useEffect, useState } from "react";
 import { Input } from "@nextui-org/react";
 import { UploadOutlined, DownOutlined } from '@ant-design/icons';
@@ -15,7 +14,7 @@ import {
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
 
-const CreateStudent = (nav) => {
+const CreateClass = (nav) => {
     const { setCollapsedNav, successNoti } = nav;
 
     const [activeTab, setActiveTab] = useState(0);
@@ -132,32 +131,34 @@ const CreateStudent = (nav) => {
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
             <div>
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/student"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS Sinh viên
-                        </div>
-                    </Link>
-                    <Link to={"/admin/student/store"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Kho lưu trữ
-                        </div>
-                    </Link>
-                    <Link to={"/admin/student/create"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Thêm sinh viên
-                        </div>
-                    </Link>
-                    <Link to={"/admin/student/update"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Cập nhật
-                        </div>
-                    </Link>
-                    {/* <Link to={"/admin/student/po-plo"}>
-            <div className="p-5 hover:bg-slate-600 hover:text-white">
-              PO-PLO
-            </div>
-          </Link> */}
+                <div>
+                    <div className="w-fit flex justify-start text-base font-bold rounded-lg mb-5">
+                        <Link to={"/admin/class"} >
+                            <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
+                                DS Các lớp
+                            </div>
+                        </Link>
+                        <Link to={"/admin/class/store"}>
+                            <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
+                                Kho lưu trữ
+                            </div>
+                        </Link>
+                        <Link to={"/admin/class/create"} className="rounded-lg bg-blue-600 text-white">
+                            <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
+                                Thêm class
+                            </div>
+                        </Link>
+                        <Link to={"/admin/class/update"}>
+                            <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
+                                Cập nhật
+                            </div>
+                        </Link>
+                        {/* <Link to={"/admin/class/po-plo"}>
+                            <div className="p-5 hover:bg-slate-600 hover:text-white">
+                                PO-PLO
+                            </div>
+                        </Link> */}
+                    </div>
                 </div>
             </div>
             <div className="w-full mt-5 rounded-lg">
@@ -296,7 +297,7 @@ const CreateStudent = (nav) => {
 }
 
 
-export default CreateStudent;
+export default CreateClass;
 
 function ConfirmAction(props) {
     const { isOpen, onOpenChange, onConfirm } = props;

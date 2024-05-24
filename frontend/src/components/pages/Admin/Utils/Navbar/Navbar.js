@@ -102,8 +102,10 @@ function Nav(props) {
         },
         { text: "Rubric", link: "/admin/management-rubric/list", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
         { text: "Sinh viên", link: "/admin/student", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
+        { text: "Lớp", link: "/admin/class", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
+        { text: "Lớp môn học", link: "/admin/course", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
     ];
-    
+
     useEffect(() => {
         onAuthStateChanged(auth, async (user) => {
             setCurrentUser(auth);
@@ -143,7 +145,7 @@ function Nav(props) {
         setCollapsedNav(!collapsedNav);
     };
     return (
-        <> 
+        <>
             <div className="block sm:hidden lg:hidden xl:hidden">
                 <Navbar disableAnimation isBordered>
                     <NavbarContent className="sm:hidden" justify="start">

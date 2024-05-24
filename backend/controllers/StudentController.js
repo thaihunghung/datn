@@ -1,6 +1,4 @@
 const StudentModel = require("../models/StudentModel");
-const { filterDescription, filterDescriptionHaveid } = require('../utils/filter');
-const json2csv = require('json2csv').parse;
 const fs = require('fs');
 const sequelize = require("../config/database");
 const ExcelJS = require('exceljs');
@@ -45,7 +43,6 @@ const StudentController = {
   },
   getAllWithClass: async (req, res) => {
     try {
-      // Lấy thông tin sinh viên
       const students = await StudentModel.findAll({
         include: [{
           model: ClassModel,
@@ -65,13 +62,21 @@ const StudentController = {
   getByID: async (req, res) => {
     try {
       const { id } = req.params;
-      const studentDetails = await StudentModel.findOne({ where: { student_id: id } });
-      if (!studentDetails) {
-        return res.status(404).json({ message: 'Không tìm thấy sinh viên' });
+      const students = await StudentModel.findAll({
+        include: [{
+          model: ClassModel,
+          attributes: ['classCode']
+        }],
+        attributes: ['student_id', 'class_id', 'studentCode','date_of_birth', 'email', 'name', 'isDelete'],
+        where:
+          { student_id: id, isDelete: false }
+      });
+      if (!students) {
+        return res.status(404).json({ message: 'Không tìm thấy students' });
       }
-      res.json(studentDetails);
+      res.json(students);
     } catch (error) {
-      console.error('Lỗi khi tìm kiếm sinh viên:', error);
+      console.error('Lỗi tìm kiếm students:', error);
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
@@ -153,39 +158,9 @@ const StudentController = {
       res.status(500).json({ message: 'Lỗi máy chủ' });
     }
   },
-
-  // getFormStudent: async (req, res) => {
-  //   try {
-  //     const Description = await StudentModel.describe();
-
-  //     console.log(Description);
-  //     const filteredStudent = filterDescription(Description, "Student")
-  //     if (!Description) {
-  //       return res.status(404).json({ message: 'Không tìm thấy mô tả Student' });
-  //     }
-
-  //     const csvData = json2csv(filteredStudent);
-  //     fs.writeFileSync('student.csv', csvData, 'utf8');
-  //     res.download('student.csv', 'student.csv', (err) => {
-  //       if (err) {
-  //         console.error('Lỗi khi gửi tệp:', err);
-  //         res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
-  //       } else {
-  //         fs.unlinkSync('student.csv');
-  //       }
-  //     });
-  //   } catch (error) {
-  //     console.error('Error get form Student:', error);
-  //     res.status(500).json({ message: 'Internal server error' });
-  //   }
-  // },
-
   getFormStudent: async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Students Form');
-
-
-    const CodeClass = await ClassModel.findAll({ attributes: ['classCode'] }, { where: { isDelete: true } });
 
     worksheet.columns = [
       { header: 'Mã lớp', key: 'classCode', width: 15 },
@@ -194,35 +169,80 @@ const StudentController = {
       { header: 'Email', key: 'email', width: 30 },
     ];
 
-    // const cellA19 = worksheet.getCell('G1');
-    // cellA19.value = 'Các mã lớp';
-    // for (let row = 2; row <= CodeClass.length; row++) {
-    //   for (let col = 1; col <= 1; col++) {
-    //     const cell = worksheet.getCell(row, 7);
-    //     cell.value = CodeClass[row-2].classCode;
-    //   }
-    // }
-
-    const worksheetData = workbook.addWorksheet('Description');
-
-    worksheetData.columns = [
-      { header: 'Mã lớp', key: 'classCode', width: 15 }
-    ];
-
-    for (let row = 2; row <= CodeClass.length; row++) {
-      for (let col = 1; col <= 1; col++) {
-        const cell = worksheetData.getCell(row, 1);
-        cell.value = CodeClass[row - 2].classCode;
-      }
-    }
-
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename="StudentsForm.xlsx"');
     await workbook.xlsx.write(res);
     res.end();
   },
+  getFormStudentWithData: async (req, res) => {
+    try {
+      const { data } = req.body;
 
-  saveStudent: async (req, res) => {
+      if (!data || !Array.isArray(data.id) || data.id.length === 0) {
+        return res.status(400).json({ error: 'Invalid or missing id array' });
+      }
+
+      const { id } = data;
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Students Form');
+
+      const students = await StudentModel.findAll({
+        include: [{
+          model: ClassModel,
+          attributes: ['classCode']
+        }],
+        attributes: ['student_id', 'class_id', 'studentCode', 'email', 'name', 'isDelete'],
+        where: {
+          isDelete: false,
+          student_id: id
+        }
+      });
+
+      worksheet.columns = [
+        { header: 'id', key: 'id', width: 15 },
+        { header: 'Mã lớp', key: 'classCode', width: 15 },
+        { header: 'Tên SV', key: 'name', width: 32 },
+        { header: 'MSSV', key: 'studentCode', width: 20 },
+        { header: 'Email', key: 'email', width: 30 }
+      ];
+
+      students.forEach(student => {
+        worksheet.addRow({
+          id: student.student_id,
+          classCode: student.Class.classCode,
+          name: student.name,
+          studentCode: student.studentCode,
+          email: student.email
+        });
+      });
+
+      await worksheet.protect('yourpassword', {
+        selectLockedCells: true,
+        selectUnlockedCells: true
+      });
+
+      worksheet.eachRow((row, rowNumber) => {
+        row.eachCell((cell, colNumber) => {
+          if (colNumber === 1 ) {
+            cell.protection = { locked: true };
+          } else {
+            cell.protection = { locked: false };
+          }
+        });
+      });
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename="StudentsForm.xlsx"');
+      await workbook.xlsx.write(res);
+      res.end();
+    } catch (error) {
+      console.error('Error generating Excel file:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  },
+
+  saveStudentExcel: async (req, res) => {
     console.log("dc");
     if (req.files) {
       console.log("dc1");
@@ -235,25 +255,54 @@ const StudentController = {
       const worksheet = workbook.getWorksheet(1);
 
       const insertPromises = [];
+      const emailsSet = new Set();
+      const studentCodesSet = new Set();
+
       worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
-        if (rowNumber !== 1) { // bỏ hàng đầu
-          const emailCell = row.getCell(4);
-          let email = emailCell.value;
+        if (rowNumber !== 1) { // bỏ dòng đầu
+          let email = row.getCell(4).value;
+          let studentCode = row.getCell(3).value;
+
           if (email && typeof email === 'object' && email.hasOwnProperty('text')) {
             email = email.text;
           }
 
+          if (!email || emailsSet.has(email)) {
+            console.error(`Duplicate or invalid email found at row ${rowNumber}: ${email}`);
+            return; // Skip this row
+          }
+
+          if (!studentCode || studentCodesSet.has(studentCode)) {
+            console.error(`Duplicate or invalid studentCode found at row ${rowNumber}: ${studentCode}`);
+            return; // Skip this row
+          }
+
+          emailsSet.add(email);
+          studentCodesSet.add(studentCode);
+
           const sql = `INSERT INTO students (class_id, name, studentCode, email)
-                       VALUES ((SELECT class_id FROM classes WHERE classCode = ?), ?, ?, ?)`;
+                 VALUES ((SELECT class_id FROM classes WHERE classCode = ?), ?, ?, ?)`;
           const values = [
             row.getCell(1).value,
             row.getCell(2).value,
-            row.getCell(3).value,
+            studentCode,
             email,
           ];
-          insertPromises.push(sequelize.query(sql, { replacements: values }));
+          insertPromises.push(sequelize.query(sql, { replacements: values })
+            .catch(error => {
+              console.error(`Error inserting row ${rowNumber}: ${error.message}`);
+            }));
         }
       });
+
+      Promise.all(insertPromises)
+        .then(() => {
+          console.log('All rows inserted successfully');
+        })
+        .catch(error => {
+          console.error('Error inserting rows:', error);
+        });
+
 
       await Promise.all(insertPromises);
       console.log('All data has been inserted into the database!');
@@ -262,6 +311,57 @@ const StudentController = {
       res.status(200).json({ message: "Dữ liệu đã được lưu thành công vào cơ sở dữ liệu." });
     } else {
       res.status(400).send('No file uploaded.');
+    }
+  },
+  updateStudentsFromExcel: async (req, res) => {
+    if (!req.files || !req.files.length) {
+      return res.status(400).json({ message: 'No file uploaded.' });
+    }
+
+    try {
+      const uploadDirectory = path.join(__dirname, '../uploads');
+      const filename = req.files[0].filename;
+      const filePath = path.join(uploadDirectory, filename);
+
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.readFile(filePath);
+      const worksheet = workbook.getWorksheet('Students Form');
+
+      const studentUpdates = [];
+
+      worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber > 1) { // Skip header row
+          const studentData = {
+            student_id: row.getCell('A').value,
+            classCode: row.getCell('B').value,
+            name: row.getCell('C').value,
+            studentCode: row.getCell('D').value,
+            email: row.getCell('E').value
+          };
+          studentUpdates.push(studentData);
+        }
+      });
+
+      for (const studentData of studentUpdates) {
+        const student = await StudentModel.findByPk(studentData.student_id);
+        if (student) {
+          const classModel = await ClassModel.findOne({ where: { classCode: studentData.classCode } });
+          if (classModel) {
+            student.class_id = classModel.class_id;
+          }
+          student.name = studentData.name;
+          student.studentCode = studentData.studentCode;
+          student.email = studentData.email;
+          await student.save();
+        }
+      }
+
+      fs.unlinkSync(filePath); // Clean up the uploaded file
+
+      res.status(200).json({ message: 'Students updated successfully' });
+    } catch (error) {
+      console.error('Error updating students from Excel file:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   }
 };

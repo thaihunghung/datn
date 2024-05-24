@@ -139,12 +139,14 @@ const router = express.Router();
 router.get('/class', ClassController.index);
 router.post('/class', ClassController.create);
 router.get('/class/:id', ClassController.getByID);
+router.get('/class-teacher', ClassController.getAllWithTeacher);
 
 router.put('/class/:id', ClassController.update);
 router.delete('/class/:id', ClassController.delete);
 
 router.get('/class/isDelete/true', ClassController.isDeleteTotrue);
 router.get('/class/isDelete/false', ClassController.isDeleteTofalse);
+router.post('/class/templates/update', ClassController.getExcelWithData);
 
 router.put('/class/isDelete/:id', ClassController.IsDelete);
 module.exports = router;

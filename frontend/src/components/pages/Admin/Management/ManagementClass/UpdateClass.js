@@ -1,15 +1,13 @@
-// UpdateStudent.js
-
 import { useEffect, useState, useRef } from "react";
 import { UploadOutlined, SearchOutlined } from '@ant-design/icons';
 import { Table, Upload, Tooltip, Divider, Steps, Button, Collapse, Space, Input } from 'antd';
 import { Link } from "react-router-dom";
-import "./Student.css"
+import "./Class.css"
 import { useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
 
-const UpdateStudent = (nav) => {
+const UpdateClass = (nav) => {
     const { setCollapsedNav, successNoti } = nav;
     const { onOpen } = useDisclosure();
     const [activeTab, setActiveTab] = useState(0);
@@ -17,7 +15,7 @@ const UpdateStudent = (nav) => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const [studentData, setStudentData] = useState([]);
+    const [classData, setClassData] = useState([]);
     const [current, setCurrent] = useState(0);
     const onChangexxx = (nameP) => {
         console.log('onChange:', nameP);
@@ -94,53 +92,95 @@ const UpdateStudent = (nav) => {
             text
     });
 
+    const getAllStudent = async () => {
+        try {
+            const classes = await axiosAdmin.get('/class-teacher');
+            console.log("class delete", classes.data);
+      
+            const newClasses = classes.data.map((classes) => {
+              return {
+                key: classes.class_id,
+                teacher_id: classes.teacher_id,
+                className: classes.className,
+                classCode: classes.classCode,
+                nameTeacher: classes.teacher.name,
+                created_at: classes.createdAt,
+                updated_at: classes.updatedAt,
+                // action: student.student_id,
+              };
+            });
+      
+            setClassData(newClasses);
+            console.log("ssss", classData);
+          } catch (err) {
+            console.log("Error: " + err.message);
+          };
+    }
+
     const columns = [
         {
-            title: (
-                <Tooltip title="Thông tin chi tiết về sinh viên">
-                    Tên sinh viên
-                </Tooltip>
-            ),
-            dataIndex: 'name',
-            key: 'name',
-            width: '40%',
-            ...getColumnSearchProps('name'),
-            // render: (text) => (              //tooltip từng dòng của cột
-            //   <Tooltip title="Thông tin chi tiết">
-            //     {text}
-            //   </Tooltip>
-            // ),
-        },
-        {
-            title: 'Mã số sinh viên',
-            dataIndex: 'studentCode',
-            key: 'studentCode',
-            width: '30%',
-            ...getColumnSearchProps('studentCode'),
-            sorter: (a, b) => parseInt(a.studentCode) - parseInt(b.studentCode),// cần quan tâm kiểu dữ liệu
-            sortDirections: ['descend', 'ascend'],
-        },
-        {
+            title: 'STT',
+            dataIndex: 'key',
+            align: 'center',
+            width: '8%'
+          },
+          {
             title: 'Mã lớp',
             dataIndex: 'classCode',
             key: 'classCode',
+            align: 'center',
             filters: [
-                {
-                    text: '2020',
-                    value: "DA20",
-                },
-                {
-                    text: '2021',
-                    value: 'DA21',
-                },
+              {
+                text: 'Năm học 2017',
+                value: "DA17",
+              },
+              {
+                text: 'Năm học 2018',
+                value: 'DA18',
+              },
+              {
+                text: 'Năm học 2019',
+                value: "DA19",
+              },
+              {
+                text: 'Năm học 2020',
+                value: 'DA20',
+              }, {
+                text: 'Năm học 2021',
+                value: 'DA21',
+              },
             ],
             onFilter: (value, record) => record.classCode.startsWith(value),
             filterSearch: true,
             // ...getColumnSearchProps('classCode'), 
-            width: '20%',
+            width: '17%',
             // sorter: (a, b) => a.classCode - b.classCode,
             // sortDirections: ['descend', 'ascend'],
-        },
+          },
+          {
+            title: 'Tên lớp',
+            dataIndex: 'className',
+            key: 'className',
+            ...getColumnSearchProps('className'),
+            sorter: (a, b) => parseInt(a.className) - parseInt(b.className),// cần quan tâm kiểu dữ liệu
+            sortDirections: ['descend', 'ascend'],
+            width: '40%',
+          },
+          {
+            title: 'Tên giáo viên cố vấn',
+            dataIndex: 'nameTeacher',
+            key: 'nameTeacher',
+            ...getColumnSearchProps('nameTeacher'),
+            render: (value, record) => (
+              <Link to={`teacher/${record.teacher_id}`}>
+                <Tooltip title="Click để xem thông tin chi tiết">
+                  {record.nameTeacher}
+                </Tooltip>
+              </Link>
+            ),
+            align: 'center',
+            width: '30%',
+          },
     ];
 
     const rowSelection = {
@@ -156,37 +196,13 @@ const UpdateStudent = (nav) => {
         setSelectedRowKeys([]);
         setSelectedRow([]);
     };
-    const getAllStudent = async () => {
-        try {
-            const student = await axiosAdmin.get('/student-class');
-            console.log("ssssâ", student.data);
-
-            const newStudents = student.data.map((student) => {
-                return {
-                    key: student.student_id,
-                    name: student.name,
-                    studentCode: student.studentCode,
-                    class_id: student.class_id,
-                    classCode: student.Class.classCode,
-                    email: student.email,
-                    created_at: student.createdAt,
-                    updated_at: student.updatedAt,
-                    // action: student.student_id,
-                };
-            });
-
-            setStudentData(newStudents);
-            console.log("ssss", studentData);
-        } catch (err) {
-            console.log("Error: " + err.message);
-        };
-    }
+    
 
 
     const handleDownloadStudent = async () => {
         try {
             if (selectedRowKeys.length === 0) {
-                alert('Please select at least one student ID');
+                alert('Vui lòng chọn');
                 return;
             }
             const data = {
@@ -194,7 +210,7 @@ const UpdateStudent = (nav) => {
             }
 
             console.log(data);
-            const response = await axiosAdmin.post('/student/templates/update', { data: data }, {
+            const response = await axiosAdmin.post('/class/templates/update', { data: data }, {
                 responseType: 'blob'
             });
 
@@ -248,32 +264,32 @@ const UpdateStudent = (nav) => {
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
             <div>
-                <div className="w-fit flex border justify-start text-base font-bold rounded-lg">
-                    <Link to={"/admin/student"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            DS Sinh viên
+                <div className="w-fit flex justify-start text-base font-bold rounded-lg mb-5">
+                    <Link to={"/admin/class"}>
+                        <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
+                            DS Các lớp
                         </div>
                     </Link>
-                    <Link to={"/admin/student/store"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
+                    <Link to={"/admin/class/store"}>
+                        <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
                             Kho lưu trữ
                         </div>
                     </Link>
-                    <Link to={"/admin/student/create"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
-                            Thêm sinh viên
+                    <Link to={"/admin/class/create"}>
+                        <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
+                            Thêm class
                         </div>
                     </Link>
-                    <Link to={"/admin/student/update"}>
-                        <div className="p-5 hover:bg-slate-600 hover:text-white">
+                    <Link to={"/admin/class/update"} className="rounded-lg bg-blue-600 text-white">
+                        <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
                             Cập nhật
                         </div>
                     </Link>
-                    {/* <Link to={"/admin/student/po-plo"}>
-            <div className="p-5 hover:bg-slate-600 hover:text-white">
-              PO-PLO
-            </div>
-          </Link> */}
+                    {/* <Link to={"/admin/class/po-plo"}>
+                        <div className="p-5 hover:bg-slate-600 hover:text-white">
+                            PO-PLO
+                        </div>
+                    </Link> */}
                 </div>
             </div>
             <div className="w-full my-5">
@@ -327,9 +343,10 @@ const UpdateStudent = (nav) => {
                                     rowSelection={{
                                         type: "checkbox",
                                         ...rowSelection,
+                                        columnWidth: 32,
                                     }}
                                     columns={columns}
-                                    dataSource={studentData}
+                                    dataSource={classData}
                                 />
                             </div>
                         </div>
@@ -428,7 +445,7 @@ const UpdateStudent = (nav) => {
 }
 
 
-export default UpdateStudent;
+export default UpdateClass;
 
 function Tabs({ tabs, activeTab, setActiveTab }) {
 
