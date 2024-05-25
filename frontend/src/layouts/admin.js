@@ -51,6 +51,7 @@ import MangementRubricItems from '../components/pages/Admin/Management/Managemen
 import CreateRubicItems from '../components/pages/Admin/Management/ManagementRubric/CreateRubicItems';
 import UpdateRubicItems from '../components/pages/Admin/Management/ManagementRubric/UpdateRubicItems';
 import StoreRubric from '../components/pages/Admin/Management/ManagementRubric/StoreRubric';
+import View from '../components/pages/Admin/Management/ManagementRubric/View';
 
 
 function Admin(props) {
@@ -130,6 +131,7 @@ function Admin(props) {
           <Route path="/management-rubric/:id/rubric-items/create" element={<CreateRubicItems collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-rubric/:id/rubric-items/store" element={<UpdateRubic collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-rubric/:id/rubric-items/:rubric_item_id" element={<UpdateRubicItems collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/management-rubric/:id/rubric-items/template" element={<View collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
           
           <Route path="/student" element={<Student collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />

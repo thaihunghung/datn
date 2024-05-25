@@ -50,7 +50,6 @@ const DropdownAndNavProgram = () => {
           </DropdownMenu>
         </Dropdown>
       </div>
-
       <div className="hidden sm:hidden lg:block xl:block">
         <div className="flex border justify-start text-base font-bold rounded-lg">
           <Link to={`/admin/management-program/description`}>

@@ -73,9 +73,9 @@ const RubricController = {
       }
 
       const  rubricItems =  await RubricItemModel.findAll({ where: { rubric_id: rubric.rubric_id } });
-      for (const id of rubricItems) {
-        await QualityLevelsModel.destroy({ where: { rubricsItem_id: id } });
-        await RubricItemModel.destroy({ where: { rubricsItem_id: id } });
+      for (const RubricItem of rubricItems) {
+        await QualityLevelsModel.destroy({ where: { rubricsItem_id: RubricItem.rubricsItem_id } });
+        await RubricItemModel.destroy({ where: { rubricsItem_id: RubricItem.rubricsItem_id } });
       }
       await MapRubricQuestionModel.destroy({ where: { rubric_id: id } });
       await RubricModel.destroy({ where: { rubric_id: rubric.rubric_id } });
@@ -95,8 +95,8 @@ const RubricController = {
       for (const id of rubricIds) {        
         const RubricItems = await RubricItemModel.findAll({ where: { rubric_id: id } });
         for (const RubricItem of RubricItems) {
-          await QualityLevelsModel.destroy({ where: { rubricsItem_id: RubricItem } });
-          await RubricItemModel.destroy({ where: { rubricsItem_id: RubricItem } });
+          await QualityLevelsModel.destroy({ where: { rubricsItem_id: RubricItem.rubricsItem_id } });
+          await RubricItemModel.destroy({ where: { rubricsItem_id: RubricItem.rubricsItem_id } });
         }
       }
       await MapRubricQuestionModel.destroy({ where: { rubric_id: rubric_id } });

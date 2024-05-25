@@ -8,7 +8,7 @@ const DropdownAndNavRubric = () => {
   const isActive = (path) => location.pathname.startsWith(path);
 
   const items = useMemo(() => [
-    { key: "Danh sách rubric", label: "Danh sách rubric", path: `/admin/management-rubric/list`},
+    { key: "Danh sách rubric", label: "Danh sách rubric", path: `/admin/management-rubric/list` },
     { key: "Kho lưu trữ", label: "Kho lưu trữ", path: `/admin/management-rubric/store` },
     { key: "Tạo mới", label: "Tạo mới", path: `/admin/management-rubric/create` }
   ], []);
@@ -72,17 +72,17 @@ const DropdownAndNavRubric = () => {
       </div>
       <div className="hidden sm:hidden lg:block xl:block">
         <Link to={`/admin/management-rubric/store`}>
-          <Button color="default">
+          <div className="p-5 bg-default-50">
             <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
-          </Button>
+          </div>
         </Link>
       </div>
       <div className="lg:hidden xl:hidden">
         <Link to={`/admin/management-rubric/store`}>
-          <Tooltip title="Kho lưu trữ" color={'#ff9908'}>   
-              <button className="p-1">
+          <Tooltip title="Kho lưu trữ" color={'#ff9908'}>
+            <div className="p-5 bg-default-50">
               <i className="fa-solid fa-trash-can"></i>
-              </button>
+            </div>
           </Tooltip>
         </Link>
       </div>
