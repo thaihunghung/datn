@@ -270,7 +270,65 @@ const RubricController = {
         const [rubricItems, Clos, Chapters, PloClo] = await Promise.all([
           RubricItemModel.findAll({
             where: {
-              rubric_id: rubric.rubric_id,
+              rubric_id: rubric.rubric_id, isDelete: false
+            },
+            include: [{
+              model: CloModel,
+              attributes: ['clo_id', 'cloName', 'description']
+            }, {
+              model: ChapterModel,
+              attributes: ['chapter_id', 'chapterName', 'description']
+            }, {
+              model: PloModel,
+              attributes: ['plo_id', 'ploName', 'description']
+            }]
+          }),
+
+
+          // PloCloModel.findAll({ where: { clo_id: rubric.clo_id } }),
+          CloModel.findAll({ where: { subject_id: rubric.subject_id } }),
+          // ChapterModel.findAll({ where: { subject_id: rubric.subject_id } })
+        ]);
+        // Gán kết quả cho các thuộc tính của rubric
+        const rubricIds = rubricItems.map(rubric => rubric.rubricsItem_id);
+
+        const qualityLevels = await qualityLevelsModel.findAll({ where: { rubricsItem_id: rubricIds } });
+        // Lặp qua mỗi rubricItem
+        for (const rubricItem of rubricItems) {
+          const qualityLevelsForRubricItem = qualityLevels.filter(qualityLevel => qualityLevel.rubricsItem_id === rubricItem.rubricsItem_id);
+          rubricItem.dataValues.qualityLevel = qualityLevelsForRubricItem;
+        }
+        rubric.dataValues.rubricItems = rubricItems;
+        rubric.dataValues.CloData = Clos;
+        //rubric.dataValues.PloCloData = PloClo;
+        //rubric.dataValues.ChapterData = Chapters;
+
+        res.json({ rubric: rubric });
+      } else {
+        console.log('Rubric not found');
+      }
+    } catch (error) {
+      console.error('Error getting all rubrics:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+  
+  GetItemsRubricsByIdRubricsisDeleteTrue: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const rubric = await RubricModel.findOne({
+        where: { rubric_id: id },
+        include: [{
+          model: SubjectModel,
+          attributes: ['subject_id', 'subjectName']
+        }]
+      });
+      if (rubric) {
+
+        const [rubricItems, Clos, Chapters, PloClo] = await Promise.all([
+          RubricItemModel.findAll({
+            where: {
+              rubric_id: rubric.rubric_id, isDelete: true
             },
             include: [{
               model: CloModel,

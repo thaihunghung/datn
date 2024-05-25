@@ -202,6 +202,8 @@ router.get('/rubric/isDelete/true', RubricController.isDeleteTotrue);
 router.get('/rubric/isDelete/false', RubricController.isDeleteTofalse);
 router.put('/rubric/isDelete/:id', RubricController.isdelete);
 router.get('/rubric/:id/items', RubricController.GetItemsRubricsByIdRubrics);
+router.get('/rubric/:id/items-isDelete-true', RubricController.GetItemsRubricsByIdRubricsisDeleteTrue);
+
 //router.get('/rubric/get-by-user/:userId/checkscore', RubricController.GetByUserIdAndCheckScore);
 router.get('/rubric/get-by-user/checkscore', RubricController.GetByUserAndCheckScore);
 router.put('/rubric/listId/soft-delete-multiple', RubricController.softDeleteMultiple);

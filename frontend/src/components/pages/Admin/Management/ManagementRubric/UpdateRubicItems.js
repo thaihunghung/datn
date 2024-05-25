@@ -80,7 +80,8 @@ const UpdateRubicItems = (nav) => {
 
       setSelectedScore(response.data.score)
       setRubricItems(response.data)
-      setSelectedQualityLevel(response.data.QualityLevels.length - 1)
+      console.log(response.data.QualityLevels.length)
+      setSelectedQualityLevel(response.data.QualityLevels.length)
     } catch (error) { }
   }
 
@@ -90,9 +91,6 @@ const UpdateRubicItems = (nav) => {
 
   }, []);
 
-
-
-  
   useEffect(() => {
     if (selectedClo) {
       setSelectedPlo(null) 
@@ -236,10 +234,10 @@ const UpdateRubicItems = (nav) => {
       const qualityLevel = {
         dataqualityLevel
       }
+      console.log(dataqualityLevel);
+
       await axiosAdmin.delete(`/quality-level/rubric-item/${id}`);
-      console.log(id)
       await axiosAdmin.post(`/quality-level`, { qualityLevel });
-      
 
     } catch (error) {
       console.error('Error while saving:', error);
@@ -357,7 +355,7 @@ const UpdateRubicItems = (nav) => {
                       )}
                 
                   
-                      {selectedQualityLevel === 4 && (
+                      {selectedQualityLevel === 3 && (
                         <div className={`qualityLevel border border-gray-300 rounded w-full min-w-[400px] P-2`}>
                           <div className={`flex gap-5 level`}>
                             <div className='flex-1'>Tốt</div>

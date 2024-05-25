@@ -155,7 +155,7 @@ function Nav(props) {
         setCollapsedNav(!collapsedNav);
     };
     return (
-        <div>
+        <div >
             <div className="block sm:hidden lg:hidden xl:hidden">
                 <div className="w-full flex justify-start p-2 border">
                 <div className="Header-mobile-right" onClick={showDrawer}>
@@ -210,7 +210,7 @@ function Nav(props) {
                 </Drawer>
             </div>
 
-            <div className="hidden sm:block lg:block xl:block text-[#FF8077]">
+            <div className="hidden sm:block lg:block xl:block text-[#FF8077] ">
                 <motion.div
                     className={`Admin-Navbar border-r-3 border-[#475569]  flex flex-col w-["200px"] ${collapsedNav ? 'w-[87px]' : ''} h-[100vh]  p-3  justify-between`}
                     initial={{ width: '270px' }}

@@ -67,29 +67,6 @@ const CreateRubicItems = (nav) => {
 
     } catch (error) { }
   }
-  const getAllCloDeleteFalseByRubric = async () => {
-    try {
-      const response = await axiosAdmin.get('/rubric/get-by-user/checkscore');
-      const updatedRubricData = response.data.rubric.map((rubric) => {
-        const status = {
-          status: rubric.RubricItem.length === 0 ? false : true,
-          _id: rubric.rubric_id
-        };
-        return {
-          key: rubric.rubric_id,
-          name: rubric.rubricName,
-          status: status,
-          point: rubric.RubricItem[0]?.total_score ? rubric.RubricItem[0].total_score : 0.0,
-          action: rubric.rubric_id
-        };
-      });
-      //setRubicData(updatedRubricData);
-      console.log(updatedRubricData);
-    } catch (error) {
-      console.error("Error: " + error.message);
-      message.error('Error fetching Rubric data');
-    }
-  };
   useEffect(() => {
     getOneRubricById()
     // Set initial values if needed
@@ -179,6 +156,9 @@ const CreateRubicItems = (nav) => {
         const qualityLevel = {
           dataqualityLevel
         };
+        console.log("hi");
+
+        console.log(dataqualityLevel);
         await axiosAdmin.post(`/quality-level`, { qualityLevel });
       }
 

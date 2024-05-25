@@ -1,21 +1,24 @@
-// StoreRubric.js
+// StoreRubicItems.js
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Table, Tooltip, Button, message } from 'antd';
 import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
+import DropdownAndNavRubricItems from "../../Utils/DropdownAndNav/DropdownAndNavRubricItems";
 
-const StoreRubric = (nav) => {
-    const { setCollapsedNav } = nav;
+const StoreRubicItems = (nav) => {
+    const { id } = useParams();
+    const { setCollapsedNav} = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const [selectedRow, setSelectedRow] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const [rubicData, setRubicData] = useState([]);
+    const [rubicItemsData, setRubicItemsData] = useState([]);
+    const [rubicData, setRubicData] = useState({});
+
     const [deleteId, setDeleteId] = useState(null);
 
     const rowSelection = {
@@ -32,53 +35,47 @@ const StoreRubric = (nav) => {
     };
     const columns = [
         {
-            title: "Tên rubric",
-            dataIndex: "name",
+            title: "Tên CLO",
+            dataIndex: "cloName",
+            render: (record) => (
+                <Tooltip color={"#FF9908"}
+                    title={record.description}>
+                    <div className="text-sm min-w-[100px]">
+                        <p className="font-medium">{record.cloName}</p>
+                    </div>
+                </Tooltip>
+            ),
+        },
+        {
+            title: "Tên PLO",
+            dataIndex: "ploName",
             render: (record) => (
                 <div className="text-sm min-w-[100px]">
-                    <p className="font-medium">{record}</p>
+                    <Tooltip color={"#FF9908"}
+                        title={record.description}>
+                        <p className="font-medium">{record.ploName}</p>
+                    </Tooltip>
                 </div>
             ),
         },
         {
-            title: "items",
-            dataIndex: "status",
+            title: "Tên Chapter",
+            dataIndex: "chapterName",
             render: (record) => (
-                <div className="text-sm">
-                    {record.status ?
-                        <Link to={`/admin/management-rubric/${record._id}/rubric-items/list`}>
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
-                            >
-                                <p>Chỉnh sửa</p>
-                            </Button>
-
-                        </Link>
-                        :
-                        <Link to={`/admin/management-rubric/${record._id}/rubric-items/create`}>
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
-                            >
-                                <p>Tạo mới</p>
-                            </Button>
-                        </Link>
-                    }
+                <div className="text-sm min-w-[100px]">
+                    <Tooltip color={"#FF9908"}
+                        title={record.description}>
+                        <p className="font-medium">{record.chapterName}</p>
+                    </Tooltip>
                 </div>
             ),
         },
         {
-            title: "Tổng điểm",
-            dataIndex: "point",
+            title: "Điểm",
+            dataIndex: "score",
             render: (record) => (
                 <div className="text-sm">
                     <p className="font-medium">{record}</p>
-
                 </div>
             ),
         },
@@ -112,94 +109,110 @@ const StoreRubric = (nav) => {
                             <i className="fa-solid fa-trash-can"></i>
                         </Button>
                     </Tooltip>
+
                 </div>
             ),
         },
 
     ];
 
-    const getAllRubricIsDeleteTrue = async () => {
+    const GetRubicAndItemsById = async () => {
         try {
-            const response = await axiosAdmin.get('/rubric/archive/get-by-user/checkscore');
-            const updatedRubricData = response.data.rubric.map((rubric) => {
-                const status = {
-                    status: rubric.RubricItem.length === 0 ? false : true,
-                    _id: rubric.rubric_id
+            const response = await axiosAdmin.get(`/rubric/${id}/items-isDelete-true`);
+            const rubric = response.data?.rubric || {};
+    
+            const RubricData = {
+                rubricName: rubric?.rubricName || 'Unknown',
+                subjectName: rubric?.subject?.subjectName || 'Unknown',
+            };
+            console.log(RubricData);
+    
+            const updatedRubricData = rubric?.rubricItems?.map((item) => {
+                const clo = {
+                    cloName: item?.CLO?.cloName || 'Unknown',
+                    description: item?.CLO?.description || 'No description',
+                };
+                const plo = {
+                    ploName: item?.PLO?.ploName || 'Unknown',
+                    description: item?.PLO?.description || 'No description',
+                };
+                const chapter = {
+                    chapterName: item?.Chapter?.chapterName || 'Unknown',
+                    description: item?.Chapter?.description || 'No description',
                 };
                 return {
-                    key: rubric.rubric_id,
-                    name: rubric.rubricName,
-                    status: status,
-                    point: rubric.RubricItem[0]?.total_score ? rubric.RubricItem[0].total_score : 0.0,
-                    action: rubric.rubric_id
+                    key: item?.rubricsItem_id || 'Unknown',
+                    cloName: clo,
+                    ploName: plo,
+                    chapterName: chapter,
+                    score: item.score,
+                    action: item?.rubricsItem_id || 'Unknown',
                 };
-            });
-            setRubicData(updatedRubricData);
-            console.log(updatedRubricData);
+            }) || [];
+    
+            setRubicItemsData(updatedRubricData);
+            setRubicData(RubricData);
         } catch (error) {
             console.error("Error: " + error.message);
             message.error('Error fetching Rubric data');
         }
     };
-    
-    const handleDelete = async () => {
+    const handleRestore = async () => {
         const data = {
-            rubric_id: selectedRowKeys,
-        }
+            rubricsitem_id: selectedRowKeys,
+        };
         try {
-            const response = await axiosAdmin.delete('/rubric/delete/multiple', { params: data });
+            const response = await axiosAdmin.put('/rubric-item/listId/soft-delete-multiple', { data });
+            await GetRubicAndItemsById();
             handleUnSelect();
             message.success(response.data.message);
-            getAllRubricIsDeleteTrue()
         } catch (error) {
-            console.error("Error soft deleting rubrics:", error);
-            message.error('Error soft deleting rubrics');
+            console.error("Error soft deleting rubricsitems:", error);
+            message.error('Error soft deleting rubricsitems');
+        }
+    };
+
+    const handleRestoreById = async (_id) => {
+        try {
+            const response = await axiosAdmin.put(`/rubric-item/${_id}/toggle-soft-delete`);
+            await GetRubicAndItemsById();
+            handleUnSelect();
+            message.success(response.data.message);
+        } catch (error) {
+            console.error(`Error toggling soft delete for rubricsitem with ID ${_id}:`, error);
+            message.error(`Error toggling soft delete for rubricsitem with ID ${_id}`);
+        }
+    };
+
+    const handleDelete = async () => {
+        const data = {
+            rubricsitem_id: selectedRowKeys,
+        }
+        try {
+            const response = await axiosAdmin.delete('/rubric-item/delete/multiple', { params: data });
+            handleUnSelect();
+            message.success(response.data.message);
+            GetRubicAndItemsById()
+        } catch (error) {
+            console.error("Error soft deleting rubric-items:", error);
+            message.error('Error soft deleting rubric-items');
         }
     };
 
     
     const handleDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.delete(`/rubric/${_id}`);
+            const response = await axiosAdmin.delete(`/rubric-item/${_id}`);
             handleUnSelect();
             message.success(response.data.message);
-            getAllRubricIsDeleteTrue()
+            GetRubicAndItemsById()
         } catch (error) {
-
-            console.error(`Error toggling delete for rubric with ID ${_id}:`, error);
-            message.error(`Error toggling delete for rubric with ID ${_id}`);
+            console.error(`Error toggling delete for rubric-item with ID ${_id}:`, error);
+            message.error(`Error toggling delete for rubric-item with ID ${_id}`);
         }
     };
-
-    const handleRestore = async () => {
-        const data = {
-            rubric_id: selectedRowKeys,
-        };
-        try {
-            const response = await axiosAdmin.put('/rubric/listId/soft-delete-multiple', { data });
-            getAllRubricIsDeleteTrue();
-            handleUnSelect();
-            message.success(response.data.message);
-        } catch (error) {
-            console.error("Error update rubrics:", error);
-            message.error('Error update rubrics');
-        }
-    };
-
-    const handleRestoreById = async (_id) => {
-        try {
-            const response = await axiosAdmin.put(`/rubric/${_id}/toggle-soft-delete`);
-            await getAllRubricIsDeleteTrue();
-            handleUnSelect();
-            message.success(response.data.message);
-        } catch (error) {
-            console.error(`Error toggling update for rubric with ID ${_id}:`, error);
-            message.error(`Error toggling update for rubric with ID ${_id}`);
-        }
-    };
-
     useEffect(() => {
-        getAllRubricIsDeleteTrue()
+        GetRubicAndItemsById()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -229,18 +242,25 @@ const StoreRubric = (nav) => {
                     }
                 }}
             />
-            <DropdownAndNavRubric />
-            <div className="w-full my-5">
+            <DropdownAndNavRubricItems />
+            <div className="my-5 flex justify-center items-center flex-col sm:flex-col lg:flex-row xl:fex-row">
+                <div className="text-lg leading-8 italic font-bold text-[#FF9908] flex-1 text-justify">Tên học phần:{' '+rubicData.rubricName}</div>
+                <div className="text-lg  leading-8 italic font-bold text-[#FF9908]  flex-1 text-justify">Tên rubric:{' '+rubicData.subjectName}</div>
+            </div>
+            <div className="mb-5 w-fit p-2 bg-[#475569] rounded-lg">
+                <p className="text-lg text-[#fefefe] text-left">Danh sách</p>
+            </div>
+            <div className="w-full">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
                         <p className="text-sm font-medium">
                             <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
-                            Đã chọn {selectedRow.length} rubric
+                            Đã chọn {selectedRow.length} rubric items
                         </p>
                         <div className="flex items-center gap-2">
 
                         <Tooltip
-                                title={`Khôi phục ${selectedRowKeys.length} rubric`}
+                                title={`Khôi phục ${selectedRowKeys.length} rubric items`}
                                 getPopupContainer={() =>
                                     document.querySelector(".Quick__Option")
                                 }
@@ -250,7 +270,7 @@ const StoreRubric = (nav) => {
                                 </Button>
                             </Tooltip>
                             <Tooltip
-                                title={`Xoá vĩnh viễn ${selectedRowKeys.length} rubric`}
+                                title={`Xoá vĩnh viễn ${selectedRowKeys.length} rubric items`}
                                 getPopupContainer={() =>
                                     document.querySelector(".Quick__Option")
                                 }
@@ -289,7 +309,7 @@ const StoreRubric = (nav) => {
                             ...rowSelection,
                         }}
                         columns={columns}
-                        dataSource={rubicData}
+                        dataSource={rubicItemsData}
                     />
                 </div>
             </div>
@@ -297,7 +317,7 @@ const StoreRubric = (nav) => {
     );
 }
 
-export default StoreRubric;
+export default StoreRubicItems;
 
 function ConfirmAction(props) {
     const { isOpen, onOpenChange, onConfirm } = props;
