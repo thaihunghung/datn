@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Breadcrumb, Card, Col, Pagination, Row } from "antd";
-import { axiosAdmin } from "../../../../../service/AxiosAdmin"; // Adjust the import path as necessary
-import './Course.css'
+import { Card, Col, Row, Pagination, Typography, Breadcrumb } from "antd";
 import { Link } from "react-router-dom";
+import { axiosAdmin } from "../../../../../service/AxiosAdmin"; // Adjust the import path as necessary
 
+const { Title } = Typography;
 
 const Course = (props) => {
   const { setCollapsedNav, successNoti } = props;
@@ -11,6 +11,13 @@ const Course = (props) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6); // Number of cards per page
   const [totalCourses, setTotalCourses] = useState(0);
+
+  const getAcronym = (phrase) => {
+    return phrase
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase())
+      .join('');
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -31,7 +38,7 @@ const Course = (props) => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await axiosAdmin.get("/course");
+        const response = await axiosAdmin.get("/course-course-enrollment");
         setCourses(response.data);
         setTotalCourses(response.data.length);
       } catch (err) {
@@ -52,7 +59,7 @@ const Course = (props) => {
   const currentCourses = courses.slice(indexOfFirstCourse, indexOfLastCourse);
 
   return (
-    <div>
+    <>
       <Breadcrumb
         style={{
           fontSize: '18px',
@@ -62,27 +69,37 @@ const Course = (props) => {
         <Breadcrumb.Item>
           <Link to="/admin">Home</Link>
         </Breadcrumb.Item>
-        <Breadcrumb.Item>Course</Breadcrumb.Item>
+        <Breadcrumb.Item>List</Breadcrumb.Item>
+        <Breadcrumb.Item>App</Breadcrumb.Item>
       </Breadcrumb>
-      <div>Tiêu đề</div>
+      <Title level={2}>Course List</Title>
       <div className="grid grid-cols-1 gap-4 m-3 md:grid-cols-2 lg:grid-cols-3">
         {currentCourses.map((course) => (
-          <div
-            key={course.course_id}
-          >
+          <div key={course.course_id}>
             <Card
-              className="min-h-80 text-[#AF84DD]"
-              title={
-                <div style={{ whiteSpace: 'normal' }}>
-                  {`${course.subject.subjectName} - ${course.semester.descriptionShort}`}
+              bordered={false}
+              style={{ wordWrap: 'break-word' }}
+              cover={
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '150px',
+                  backgroundColor: '#f5f5f5',
+                  fontSize: '64px',
+                  color: '#1890ff'
+                }}>
+                  {getAcronym(course.subject.subjectName)}
                 </div>
               }
-
             >
+              <div className="font-black">
+                {`${course.subject.subjectName} - ${course.semester.descriptionShort}`}
+              </div>
               <p><strong>Class:</strong> {course.class.className}</p>
-              <p><strong>Giáo viên:</strong> {course.teacher.name}</p>
-              <p><strong>Học kì:</strong> {course.semester.descriptionShort}</p>
-              {/* <p><strong>Credits:</strong> {course.subject.numberCredits}</p> */}
+              <p><strong>Teacher:</strong> {course.teacher.name}</p>
+              <p><strong>Semester:</strong> {course.semester.descriptionShort}</p>
+              <p><strong>Số học sinh:</strong> {course.enrollmentCount}</p>
               {/* <p><strong>Description:</strong> {course.subject.description}</p> */}
             </Card>
           </div>
@@ -95,7 +112,7 @@ const Course = (props) => {
         onChange={handlePageChange}
         style={{ marginTop: '16px', textAlign: 'center' }}
       />
-    </div>
+    </>
   );
 };
 
