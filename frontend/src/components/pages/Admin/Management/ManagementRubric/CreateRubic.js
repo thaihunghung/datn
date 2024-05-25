@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Input } from "@nextui-org/react";
-import { Button,Select, message, Tooltip } from 'antd';
+import { Button,Select, message } from 'antd';
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import Tabs from "../../Utils/Tabs/Tabs";
 import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";

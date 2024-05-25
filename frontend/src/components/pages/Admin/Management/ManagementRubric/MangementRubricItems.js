@@ -1,7 +1,7 @@
 // MangementRubricItems.js
 
 import { useEffect, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Table, Tooltip, Button, message } from 'antd';
 import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
@@ -9,8 +9,7 @@ import DropdownAndNavRubricItems from "../../Utils/DropdownAndNav/DropdownAndNav
 
 const MangementRubricItems = (nav) => {
     const { id } = useParams();
-    const location = useLocation();
-    const { setCollapsedNav, successNoti, errorNoti, setSpinning } = nav;
+    const { setCollapsedNav} = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const [selectedRow, setSelectedRow] = useState([]);
@@ -119,9 +118,6 @@ const MangementRubricItems = (nav) => {
 
     ];
 
-    const [data, setData] = useState([]);
-    const [CloData, setCloData] = useState([]);
-    const [ChapterData, setChapterData] = useState([]);
     const GetRubicAndItemsById = async () => {
         try {
             const response = await axiosAdmin.get(`/rubric/${id}/items`);

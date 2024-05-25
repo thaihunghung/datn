@@ -20,7 +20,6 @@ import Tabs from '../../Utils/Tabs/Tabs';
 const UpdateRubicItems = (nav) => {
   const { id, rubric_item_id } = useParams();
   const { Option } = Select;
-  const { setCollapsedNav } = nav;
   const [activeTab, setActiveTab] = useState(0);
 
   const [selectedChapter, setSelectedChapter] = useState("");

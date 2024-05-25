@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+
 import { Input } from "@nextui-org/react";
-import { UploadOutlined } from '@ant-design/icons';
-import { Upload, Divider, Steps, Button, message } from 'antd';
-import { Link, useLocation } from "react-router-dom";
+import { Button, message } from 'antd';
 import { EditorState } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import { convertToHTML } from 'draft-convert';
-import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import CustomUpload from "../../CustomUpload/CustomUpload";
 import DropdownAndNavProgram from "../../Utils/DropdownAndNav/DropdownAndNavProgram";
+import DownloadAndUpload from "../../Utils/DownloadAndUpload/DownloadAndUpload";
+import Tabs from "../../Utils/Tabs/Tabs";
 
 const CreateProgram = (nav) => {
-    const location = useLocation();
-    const isActive = (path) => location.pathname.startsWith(path);
     const { setCollapsedNav } = nav;
 
     const [activeTab, setActiveTab] = useState(0);
@@ -43,7 +42,9 @@ const CreateProgram = (nav) => {
             message.error('Error saving data');
         }
     };
-
+    const handleOnChangeTextName = (nameP) => {
+        setCurrent(nameP);
+    };
     const handleDownloadProgram = async () => {
         try {
             const response = await axiosAdmin.get('program/form/excel', {
@@ -133,52 +134,7 @@ const CreateProgram = (nav) => {
                     {
                         title: 'Excels',
                         content: (
-                            <div className="w-full rounded-lg">
-                                <div className='w-full flex justify-center items-center'>
-                                    <div className='w-full flex flex-col px-2 sm:gap-5 sm:justify-center h-fix sm:px-5 lg:px-5 xl:px-5 sm:flex-row lg:flex-col xl:flex-col gap-[20px]'>
-                                        <div className='px-10 hidden sm:hidden lg:block xl:block'>
-                                            <Divider />
-                                            <Steps current={current} onChange={setCurrent} items={[
-                                                { title: 'Bước 1', description: 'Tải về form' },
-                                                { title: 'Bước 2', description: 'Tải lại form' },
-                                                { title: 'Bước 3', description: 'Chờ phản hồi' }
-                                            ]} />
-                                        </div>
-                                        <div className='hidden sm:block lg:hidden xl:hidden w-[50%]'>
-                                            <Divider />
-                                            <Steps current={current} onChange={setCurrent} direction="vertical" items={[
-                                                { title: 'Bước 1', description: 'Tải về form' },
-                                                { title: 'Bước 2', description: 'Tải lại form' },
-                                                { title: 'Bước 3', description: 'Chờ phản hồi' }
-                                            ]} />
-                                        </div>
-                                        <div className='flex flex-col w-full sm:flex-col sm:w-full lg:flex-row xl:flex-row justify-around'>
-                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-start items-center'>
-                                                <div className='p-10 w-full mt-10 h-fix sm:h-fix lg:min-h-[250px] xl:min-h-[250px] border-[#475569] border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
-                                                    <p className='w-full text-center'>Tải Mẫu</p>
-                                                    <Button className='w-full bg-primary flex items-center justify-center p-5 rounded-lg' onClick={handleDownloadProgram}>
-                                                        Tải xuống mẫu
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-center items-center'>
-                                                <div className='p-10 w-full mt-10 sm:h-fix lg:min-h-[250px] xl:min-h-[250px] border-[#475569] border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
-                                                    <p className='w-full text-center'>Gửi lại mẫu</p>
-                                                    <Upload {...props}>
-                                                        <Button icon={<UploadOutlined />} className='text-center items-center rounded-lg px-10 h-[40px]'>Select File</Button>
-                                                    </Upload>
-                                                </div>
-                                            </div>
-                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
-                                                <div className='p-10 w-full mt-10 sm:h-fix lg:min-h-[250px] xl:min-h-[250px] border-[#475569] border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
-                                                    <p className='w-full text-center'>Lưu Dữ liệu</p>
-                                                    <CustomUpload endpoint={'program'} method={'POST'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <DownloadAndUpload props={props} handleDownload={handleDownloadProgram} handleOnChangeTextName={handleOnChangeTextName} endpoint={'program'} method={'POST'} current={current}  setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
                         )
                     }
                 ]} activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -189,28 +145,3 @@ const CreateProgram = (nav) => {
 
 export default CreateProgram;
 
-function Tabs({ tabs, activeTab, setActiveTab }) {
-    return (
-        <div>
-            <table className="mb-2">
-                <tbody>
-                    <tr className="tab-buttons border-collapse border-[#020401] border">
-                        {tabs.map((tab, index) => (
-                            <td key={index}>
-                                <button
-                                    onClick={() => setActiveTab(index)}
-                                    className={`${index === activeTab ? 'active bg-[#475569] text-[#FEFEFE] font-bold' : ' text-[#020401]'} text-base border p-2 px-7`}
-                                >
-                                    {tab.title}
-                                </button>
-                            </td>
-                        ))}
-                    </tr>
-                </tbody>
-            </table>
-            <div className="tab-content">
-                {tabs[activeTab].content}
-            </div>
-        </div>
-    );
-}

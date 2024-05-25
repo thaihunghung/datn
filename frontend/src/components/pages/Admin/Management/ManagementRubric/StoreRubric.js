@@ -1,14 +1,13 @@
 // StoreRubric.js
 
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Table, Tooltip, Button, message } from 'antd';
 import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
 
 const StoreRubric = (nav) => {
-    const location = useLocation();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -48,7 +47,6 @@ const StoreRubric = (nav) => {
                 <div className="text-sm">
                     {record.status ?
                         <Link to={`/admin/management-rubric/${record._id}/rubric-items/list`}>
-
                             <Button
                                 isIconOnly
                                 variant="light"
@@ -59,10 +57,8 @@ const StoreRubric = (nav) => {
                             </Button>
 
                         </Link>
-
                         :
                         <Link to={`/admin/management-rubric/${record._id}/rubric-items/create`}>
-
                             <Button
                                 isIconOnly
                                 variant="light"
@@ -71,9 +67,7 @@ const StoreRubric = (nav) => {
                             >
                                 <p>Tạo mới</p>
                             </Button>
-
                         </Link>
-
                     }
                 </div>
             ),

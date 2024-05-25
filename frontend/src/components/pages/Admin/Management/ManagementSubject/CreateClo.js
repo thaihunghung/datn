@@ -1,26 +1,28 @@
-// CreateClo.js
-
 import { useEffect, useState } from "react";
-import { Input } from "@nextui-org/react";
-import { UploadOutlined } from '@ant-design/icons';
-import { Upload, Divider, Steps, Button, message, Tooltip } from 'antd';
-
 import { useParams } from "react-router-dom";
-import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import CustomUpload from "../../CustomUpload/CustomUpload";
+
+import { Input } from "@nextui-org/react";
+import { Button, message } from 'antd';
+
+
+
+import DownloadAndUpload from "../../Utils/DownloadAndUpload/DownloadAndUpload";
 import DropdownAndNavClo from "../../Utils/DropdownAndNav/DropdownAndNavClo";
+import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import Tabs from "../../Utils/Tabs/Tabs";
 
 const CreateClo = (nav) => {
     const { setCollapsedNav } = nav;
     const { id } = useParams();
     const [fileList, setFileList] = useState([]);
-
     const [activeTab, setActiveTab] = useState(0);
-
-
     const [cloName, setcloName] = useState("");
     const [Description, setDescription] = useState("");
+    const [current, setCurrent] = useState(0);
+
+    const handleOnChangeTextName = (nameP) => {
+        setCurrent(nameP);
+    };
 
     const handleSave = async () => {
         try {
@@ -41,8 +43,6 @@ const CreateClo = (nav) => {
             message.error('Error saving data');
         }
     }
-
-    const [current, setCurrent] = useState(0);
 
     const handleDownloadPo = async () => {
         try {
@@ -131,53 +131,7 @@ const CreateClo = (nav) => {
                         {
                             title: 'Nhập liệu CSV',
                             content:
-                                <div className="w-full h-[1000px] rounded-lg">
-                                    <div className=' w-full flex justify-center items-center'>
-                                        <div className='w-full  flex flex-col px-2  sm:gap-5 sm:justify-center h-fix sm:px-5 lg:px-5 xl:px-5 sm:flex-row  lg:flex-col  xl:flex-col  gap-[20px]'>
-                                            <div className='px-10 hidden sm:hidden lg:block xl:block'>
-                                                <Divider />
-                                                <Steps current={current} onChange={setCurrent} items={[
-                                                    { title: 'Bước 1', description: 'Tải về form' },
-                                                    { title: 'Bước 2', description: 'Tải lại form' },
-                                                    { title: 'Bước 3', description: 'Chờ phản hồi' }
-                                                ]} />
-                                            </div>
-                                            <div className='hidden sm:block lg:hidden xl:hidden w-[50%]'>
-                                                <Divider />
-                                                <Steps current={current} onChange={setCurrent} items={[
-                                                    { title: 'Bước 1', description: 'Tải về form' },
-                                                    { title: 'Bước 2', description: 'Tải lại form' },
-                                                    { title: 'Bước 3', description: 'Chờ phản hồi' }
-                                                ]} />
-                                            </div>
-
-                                            <div className='flex flex-col w-full  sm:flex-col sm:w-full lg:flex-row xl:flex-row justify-around'>
-                                                <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%]  flex justify-start items-center'>
-                                                    <div className='p-10 w-full mt-10 h-fix sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center  gap-5 rounded-lg'>
-                                                        <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
-                                                        <Button className='w-full bg-primary flex items-center justify-center  p-5 rounded-lg' onClick={handleDownloadPo}>
-                                                            <scan>Tải xuống mẫu </scan>
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                                <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-center items-center'>
-                                                    <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
-                                                        <div><p className='w-full text-center'>Gửi lại mẫu</p></div>
-                                                        <Upload {...props} >
-                                                            <Button icon={<UploadOutlined />} className='text-center items-center rounded-lg px-10 h-[40px]'>Select File</Button>
-                                                        </Upload>
-                                                    </div>
-                                                </div>
-                                                <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
-                                                    <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
-                                                        <div><p className='w-full text-center'>Lưu Dữ liệu</p></div>
-                                                        <CustomUpload endpoint={'clo'} method={'POST'} Data={parseInt(id)} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <DownloadAndUpload props={props} endpoint={'clo'} method={'POST'} Data={parseInt(id)} handleDownload={handleDownloadPo} handleOnChangeTextName={handleOnChangeTextName} current={current} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
                         }
                     ]}
                     activeTab={activeTab} setActiveTab={setActiveTab}
