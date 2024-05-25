@@ -35,7 +35,7 @@ const Student = (props) => {
           name: student.name,
           studentCode: student.studentCode,
           class_id: student.class_id,
-          classCode: student.Class.classCode,
+          classCode: student.class.classCode,
           email: student.email,
           created_at: student.createdAt,
           updated_at: student.updatedAt,
