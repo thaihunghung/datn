@@ -49,7 +49,7 @@ function Nav(props) {
     ];
 
     const navTab = [
-        { text: "Tổng quan", link: "/admin", icon: <i className={`fa-solid fa-house mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
+        { text: "Tổng quan", link: "/admin", icon: <i className={`text-[FF8077] fa-solid fa-house mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
         { text: "Chấm điểm", link: "/admin/management-point", icon: <i className={`fa-solid fa-feather-pointed mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
         {
             text: "Programs",
@@ -209,9 +209,9 @@ function Nav(props) {
                     </NavbarMenu>
                 </Navbar>
             </div>
-            <div className="hidden sm:block lg:block xl:block text-[#FEFEFE]">
+            <div className="hidden sm:block lg:block xl:block text-[#FF8077]">
                 <motion.div
-                    className={`Admin-Navbar flex flex-col w-["200px"] ${collapsedNav ? 'w-[87px]' : ''} h-[100vh] bg-[#ff8077]  p-3  justify-between`}
+                    className={`Admin-Navbar border-r-3 border-[#475569]  flex flex-col w-["200px"] ${collapsedNav ? 'w-[87px]' : ''} h-[100vh]  p-3  justify-between`}
                     initial={{ width: '270px' }}
                     animate={{ width: collapsedNav ? '100px' : '200px' }}
                     transition={{ duration: 0.4 }}
@@ -233,7 +233,7 @@ function Nav(props) {
                             </motion.div>
                             <Tooltip title={collapsedNav ? 'Mở rộng' : 'Thu gọn'} placement="right">
                                 <Button isIconOnly variant="light" radius="full" onClick={handleToggleNav}>
-                                    {collapsedNav ? <i className="fa-solid fa-chevron-right text-[white]"></i> : <i className="fa-solid fa-chevron-left text-[white]"></i>}
+                                    {collapsedNav ? <i className="fa-solid fa-chevron-right text-[#475569]"></i> : <i className="fa-solid fa-chevron-left text-[#475569]"></i>}
                                 </Button>
                             </Tooltip>
                         </div>
@@ -248,7 +248,7 @@ function Nav(props) {
                                                     <Link
                                                         to={tab.link}
                                                         onClick={() => toggleSubmenu(null)}
-                                                        className={`text-base w-full h-[37px] text-[#020401] font-medium p-3 py-2 rounded-lg flex justify-${collapsedNav ? 'center' : 'between'} items-center group/tab ${setActive(tab.link)}`}
+                                                        className={`text-base w-full h-[37px] text-[#475569] font-bold p-3 py-2 rounded-lg flex justify-${collapsedNav ? 'center' : 'between'} items-center group/tab ${setActive(tab.link)}`}
                                                     >
                                                         <p className="flex items-center">
                                                             {tab.icon}
@@ -268,7 +268,7 @@ function Nav(props) {
                                                             toggleSubmenu(tab.text);
                                                             open();
                                                         }}
-                                                        className={`cursor-pointer text-[#020401] font-medium ${location.pathname.startsWith(tab.link) ? setActive(tab.link) : ''} text-base w-full h-[37px] p-3 py-2 rounded-lg flex justify-${collapsedNav ? 'center' : 'between'} items-center`}
+                                                        className={`cursor-pointer text-[#475569] font-bold ${location.pathname.startsWith(tab.link) ? setActive(tab.link) : ''} text-base w-full h-[37px] p-3 py-2 rounded-lg flex justify-${collapsedNav ? 'center' : 'between'} items-center`}
                                                     >
                                                         <p className="flex items-center">
                                                             <span className="text">{tab.icon}</span>
@@ -304,7 +304,7 @@ function Nav(props) {
                                                                 <Link
                                                                     key={index}
                                                                     to={submenuItem.link}
-                                                                    className={`cursor-pointer text-sm text-[#020401] font-medium w-full p-2 pl-5 rounded-lg flex justify-start items-center 
+                                                                    className={`cursor-pointer text-sm text-[#475569] font-bold w-full p-2 pl-5 rounded-lg flex justify-start items-center 
                                                                     ${submenuIsActive ? 'Admin_tab-active' : ''}`}
                                                                 >
                                                                     {submenuItem.text}

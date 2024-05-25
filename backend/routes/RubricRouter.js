@@ -198,8 +198,6 @@ router.put('/rubric/:id', RubricController.update);
 router.delete('/rubric/:id', RubricController.delete);
 router.delete('/rubric/delete/multiple', RubricController.deleteMultiple);
 
-
-
 router.get('/rubric/isDelete/true', RubricController.isDeleteTotrue);
 router.get('/rubric/isDelete/false', RubricController.isDeleteTofalse);
 router.put('/rubric/isDelete/:id', RubricController.isdelete);
@@ -209,9 +207,6 @@ router.get('/rubric/get-by-user/checkscore', RubricController.GetByUserAndCheckS
 router.put('/rubric/listId/soft-delete-multiple', RubricController.softDeleteMultiple);
 router.get('/rubric/archive/get-by-user/checkscore', RubricController.GetisDeleteTotrueByUserAndCheckScore);
 
-
-
 router.put('/rubric/:id/toggle-soft-delete', RubricController.toggleSoftDeleteById);
-
 // /rubrics/get-by-user/:userId/checkscore  vậy mới đúng
 module.exports = router;
