@@ -135,6 +135,11 @@ const CreateRubicItems = (nav) => {
       };
       
       const response = await axiosAdmin.post(`/rubric-item/save-check-score`, { data });
+      if (response.status === 201) {
+        message.success('Rubric item created successfully');
+      } else if (response.status === 400) {
+        message.error(response.data.message);
+      }
       const rubricsItem_id = response.data.data.rubricsItem_id;
       if (rubricsItem_id) {
         const levelElements = document.querySelectorAll(`.qualityLevel`);
@@ -162,11 +167,7 @@ const CreateRubicItems = (nav) => {
         await axiosAdmin.post(`/quality-level`, { qualityLevel });
       }
 
-      if (response.status === 201) {
-        message.success('Rubric item created successfully');
-      } else {
-        message.error(response.data.message);
-      }
+      
 
     } catch (error) {
       // If an error occurred during the request (e.g., network error), display a generic error message

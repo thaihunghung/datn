@@ -38,7 +38,7 @@ const RubricItemController = {
       if (length > 0) {
         const results = await RubricItemModel.findAll({
           attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('score')), 'total_score']],
-          where: { rubric_id: rubric_id }
+          where: { rubric_id: rubric_id, isDelete: false }
         });
 
         const rubricScores = results.map(result => ({
@@ -50,13 +50,13 @@ const RubricItemController = {
         console.log('totalScore' + totalScore);
         if (totalScore <= 10) {
           const newRubric = await RubricItemModel.create(data.data);
-          res.status(201).json({ success: true, message: "Rubric item created successfully", data: newRubric });
+          res.status(201).json({ message: "Rubric item created successfully", data: newRubric });
         } else {
-          res.status(400).json({ success: false, message: "Failed to save: Total score exceeds 10" });
+          res.status(400).json({ message: "Failed to save: Total score exceeds 10" });
         }
       } else {
         const newRubric = await RubricItemModel.create(data.data);
-        res.status(201).json({ success: true, message: "Rubric item created successfully", data: newRubric });
+        res.status(201).json({ message: "Rubric item created successfully", data: newRubric });
 
       }
     } catch (error) {

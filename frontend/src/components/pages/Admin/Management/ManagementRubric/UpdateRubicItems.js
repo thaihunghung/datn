@@ -80,8 +80,8 @@ const UpdateRubicItems = (nav) => {
 
       setSelectedScore(response.data.score)
       setRubricItems(response.data)
-      console.log(response.data.QualityLevels.length)
-      setSelectedQualityLevel(response.data.QualityLevels.length)
+      console.log(response.data.QualityLevels)
+      setSelectedQualityLevel(response.data.QualityLevels.length-1)
     } catch (error) { }
   }
 
@@ -211,7 +211,7 @@ const UpdateRubicItems = (nav) => {
         score: score
       };
 
-      const response = await axiosAdmin.put(`/rubric-item/${id}`, { data: data });
+      const response = await axiosAdmin.put(`/rubric-item/${rubric_item_id}`, { data: data });
       console.log(response.data);
 
 
@@ -227,7 +227,7 @@ const UpdateRubicItems = (nav) => {
           const levelText = level.textContent.trim();
           const nameText = names[index].textContent.trim();
           const keyNumberText = keyNumbers[index].textContent.trim();
-          dataqualityLevel.push({ rubricsItem_id: id, level: levelText, name: nameText, keyNumber: parseFloat(keyNumberText) });
+          dataqualityLevel.push({ rubricsItem_id: rubric_item_id, level: levelText, name: nameText, keyNumber: parseFloat(keyNumberText) });
         });
       });
 
@@ -355,7 +355,7 @@ const UpdateRubicItems = (nav) => {
                       )}
                 
                   
-                      {selectedQualityLevel === 3 && (
+                      {selectedQualityLevel === 4 && (
                         <div className={`qualityLevel border border-gray-300 rounded w-full min-w-[400px] P-2`}>
                           <div className={`flex gap-5 level`}>
                             <div className='flex-1'>Tốt</div>
