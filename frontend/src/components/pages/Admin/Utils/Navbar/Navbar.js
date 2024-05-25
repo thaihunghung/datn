@@ -1,17 +1,27 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, signInWithGoogle, signOut } from "../../../../../service/firebase";
-import { User, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection, ScrollShadow, Button, Navbar, NavbarBrand, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, NavbarContent, NavbarItem } from "@nextui-org/react";
+import { User, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection, ScrollShadow, Button } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { Tooltip } from "antd";
 import { motion } from "framer-motion";
+import { Drawer, Menu } from "antd";
 
+import './Header.css'
 function Nav(props) {
     const { collapsedNav, setCollapsedNav, setSpinning } = props;
     const navigate = useNavigate();
     const location = useLocation();
     const isActive = (path) => location.pathname.startsWith(path);
+    const [openMobileMenu, setOpenMobileMenu] = useState(false);
 
+    const showDrawer = () => {
+        setOpenMobileMenu(true);
+    };
+
+    const onClose = () => {
+        setOpenMobileMenu(false);
+    };
     const [submenuVisible, setSubmenuVisible] = useState({});
     const [currentUser, setCurrentUser] = useState(null);
 
@@ -145,70 +155,61 @@ function Nav(props) {
         setCollapsedNav(!collapsedNav);
     };
     return (
-        <>
+        <div>
             <div className="block sm:hidden lg:hidden xl:hidden">
-                <Navbar disableAnimation isBordered>
-                    <NavbarContent className="sm:hidden" justify="start">
-                        <NavbarMenuToggle />
-                    </NavbarContent>
-                    <NavbarContent className="sm:hidden pr-3" justify="center">
-                        <NavbarBrand>
-                            <p className="font-bold text-inherit">SET</p>
-                        </NavbarBrand>
-                    </NavbarContent>
-                    <NavbarContent className="hidden sm:flex gap-4" justify="center">
-                        <NavbarBrand>
-                            <p className="font-bold text-inherit">SET</p>
-                        </NavbarBrand>
-                        <NavbarItem>
-                            <Link color="foreground" to="/features">Features</Link>
-                        </NavbarItem>
-                        <NavbarItem isActive>
-                            <Link to="/customers" aria-current="page" color="warning">Customers</Link>
-                        </NavbarItem>
-                        <NavbarItem>
-                            <Link color="foreground" to="/integrations">Integrations</Link>
-                        </NavbarItem>
-                    </NavbarContent>
-                    <NavbarContent justify="end">
-                        <NavbarItem className="hidden lg:flex">
-                            <Link to="/login">Login</Link>
-                        </NavbarItem>
-                        <NavbarItem>
-                            <Button as={Link} color="warning" to="/signup" variant="flat">
-                                Sign Up
-                            </Button>
-                        </NavbarItem>
-                    </NavbarContent>
-                    <NavbarMenu>
-                        {menuItems.map((item, index) => (
-                            <NavbarMenuItem key={`${item.label}-${index}`}>
-                                <Link
-                                    className="w-[60%]"
-                                    color={index === 2 ? "warning" : index === menuItems.length - 1 ? "danger" : "foreground"}
-                                    to={item.path}
-                                    size="lg"
-                                >
-                                    {item.label}
-                                </Link>
-                                {item.submenu && (
-                                    <div className="submenu">
-                                        {item.submenu.map((subItem, subIndex) => (
-                                            <Link
-                                                key={`${subItem.label}-${subIndex}`}
-                                                className="submenu-item"
-                                                to={subItem.path}
-                                            >
-                                                {subItem.label}
+                <div className="w-full flex justify-start p-2 border">
+                <div className="Header-mobile-right" onClick={showDrawer}>
+                    <i className="fa-solid fa-bars"></i>
+                </div>
+                </div>
+                <Drawer
+                    title={ <span className="text-[#FF8077] text-base font-bold">Menu</span>}
+                    placement="left"
+                    onClose={onClose}
+                    open={openMobileMenu}
+                    className="w-full"
+                >
+                    <Menu mode="inline">
+                        {navTab.map((item, index) => (
+                            item.submenu ? (
+                                <Menu.SubMenu key={index} title={<span className="text-[#020401] text-base font-medium">  
+                                <span className="text-[#FF8077] text-base font-bold mr-3">
+                                {item.icon}
+                                </span>
+                                <span className="text-[#020401] text-base font-medium">
+                                {item.text}
+                               
+                                </span></span>}>
+                                    {item.submenu.map((subItem, subIndex) => (
+                                        <Menu.Item key={`${index}-${subIndex}`}>
+                                            <Link to={subItem.link} onClick={onClose}>
+                                                <span className="text-[#020401] text-base font-medium">{subItem.text}</span>
                                             </Link>
-                                        ))}
-                                    </div>
-                                )}
-                            </NavbarMenuItem>
+                                        </Menu.Item>
+                                    ))}
+                                </Menu.SubMenu>
+                            ) : (
+                                <Menu.Item key={index}>
+                                    <Link to={item.link} onClick={onClose}>
+                                    
+                                    <span className="text-[#FF8077] text-base font-bold mr-3">
+                                        {item.icon}
+                                       
+                                        </span>
+                                        <span className="text-[#020401] text-base font-medium">
+                                        {item.text}
+                                       
+                                        </span>
+
+                                        
+                                    </Link>
+                                </Menu.Item>
+                            )
                         ))}
-                    </NavbarMenu>
-                </Navbar>
+                    </Menu>
+                </Drawer>
             </div>
+
             <div className="hidden sm:block lg:block xl:block text-[#FF8077]">
                 <motion.div
                     className={`Admin-Navbar border-r-3 border-[#475569]  flex flex-col w-["200px"] ${collapsedNav ? 'w-[87px]' : ''} h-[100vh]  p-3  justify-between`}
@@ -337,6 +338,7 @@ function Nav(props) {
                                         <DropdownItem key="profile" className="h-14 gap-2">
                                             <div className="flex flex-col">
                                                 <p className="font-semibold">{currentUser?.currentUser?.displayName}</p>
+                                                
                                                 <p className="text-xs text-default-400">{currentUser?.currentUser?.email}</p>
                                             </div>
                                         </DropdownItem>
@@ -353,7 +355,7 @@ function Nav(props) {
                     </div>
                 </motion.div>
             </div>
-        </>
+        </div>
     );
 }
 
