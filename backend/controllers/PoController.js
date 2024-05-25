@@ -8,7 +8,7 @@ const PoPloModel = require('../models/PoPloModel');
 const PoController = {
   index: async (req, res) => {
     try {
-      const pos = await PO.findAll({
+      const pos = await PoModel.findAll({
         include: {
           model: ProgramModel,
           attributes: ['program_id', 'programName']
@@ -16,7 +16,7 @@ const PoController = {
       });
       res.json(pos);
     } catch (error) {
-      console.error('Error getting all POs:', error);
+      console.error('Error getting all PoModels:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
   },
@@ -24,10 +24,10 @@ const PoController = {
   create: async (req, res) => {
     try {
       const { data } = req.body;
-      const newPO = await PO.create(data);
-      res.status(201).json({ message: 'PO created successfully', data: newPO });
+      const newPoModel = await PoModel.create(data);
+      res.status(201).json({ message: 'PoModel created successfully', data: newPoModel });
     } catch (error) {
-      console.error('Error creating PO:', error);
+      console.error('Error creating PoModel:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
@@ -35,13 +35,13 @@ const PoController = {
   getByID: async (req, res) => {
     try {
       const { id } = req.params;
-      const po = await PO.findOne({ where: { po_id: id } });
+      const po = await PoModel.findOne({ where: { po_id: id } });
       if (!po) {
-        return res.status(404).json({ message: 'PO not found' });
+        return res.status(404).json({ message: 'PoModel not found' });
       }
       res.json(po);
     } catch (error) {
-      console.error('Error finding PO:', error);
+      console.error('Error finding PoModel:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
@@ -50,13 +50,13 @@ const PoController = {
     try {
       const { id } = req.params;
       const { data } = req.body;
-      const [updated] = await PO.update(data, { where: { po_id: id } });
+      const [updated] = await PoModel.update(data, { where: { po_id: id } });
       if (!updated) {
-        return res.status(404).json({ message: 'PO not found' });
+        return res.status(404).json({ message: 'PoModel not found' });
       }
-      res.json({ message: 'PO updated successfully' });
+      res.json({ message: 'PoModel updated successfully' });
     } catch (error) {
-      console.error('Error updating PO:', error);
+      console.error('Error updating PoModel:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
@@ -65,14 +65,14 @@ const PoController = {
     try {
       const { id } = req.params;
       await PoPloModel.destroy({ where: { po_id: id } });
-      const deletedCount = await PO.destroy({ where: { po_id: id } });
+      const deletedCount = await PoModel.destroy({ where: { po_id: id } });
       if (!deletedCount) {
-        return res.status(404).json({ message: 'PO not found' });
+        return res.status(404).json({ message: 'PoModel not found' });
       }
     
-      res.status(200).json({ message: 'PO deleted successfully' });
+      res.status(200).json({ message: 'PoModel deleted successfully' });
     } catch (error) {
-      console.error('Error deleting PO:', error);
+      console.error('Error deleting PoModel:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
@@ -81,32 +81,32 @@ const PoController = {
     const { po_id } = req.query;
     try {
       await PoPloModel.destroy({ where: { po_id: po_id } });
-      const deletedCount = await PO.destroy({ where: { po_id: po_id } });
+      const deletedCount = await PoModel.destroy({ where: { po_id: po_id } });
       if (!deletedCount) {
-        return res.status(404).json({ message: 'PO not found' });
+        return res.status(404).json({ message: 'PoModel not found' });
       }
-      res.json({ message: 'PO deleted successfully' });
+      res.json({ message: 'PoModel deleted successfully' });
     } catch (error) {
-      console.error('Error deleting PO:', error);
+      console.error('Error deleting PoModel:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
   isDeleteToTrue: async (req, res) => {
     try {
-      const pos = await PO.findAll({ where: { isDelete: true } });
+      const pos = await PoModel.findAll({ where: { isDelete: true } });
       res.json(pos);
     } catch (error) {
-      console.error('Error finding deleted POs:', error);
+      console.error('Error finding deleted PoModels:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
 
   isDeleteToFalse: async (req, res) => {
     try {
-      const pos = await PO.findAll({ where: { isDelete: false } });
+      const pos = await PoModel.findAll({ where: { isDelete: false } });
       res.json(pos);
     } catch (error) {
-      console.error('Error finding active POs:', error);
+      console.error('Error finding active PoModels:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
@@ -114,18 +114,18 @@ const PoController = {
   toggleSoftDeleteById: async (req, res) => {
     try {
       const { id } = req.params;
-      const po = await PO.findOne({ where: { po_id: id } });
+      const po = await PoModel.findOne({ where: { po_id: id } });
       if (!po) {
         return res.status(404).json({ message: 'po not found' });
       }
       const updatedIsDeleted = !po.isDelete;
-      await PO.update({ isDelete: updatedIsDeleted }, { where: { po_id: id } });
+      await PoModel.update({ isDelete: updatedIsDeleted }, { where: { po_id: id } });
 
       res.status(200).json({ message: `Toggled isDelete status to ${updatedIsDeleted}` });
 
 
     } catch (error) {
-      console.error('Error toggling PO delete statuses:', error);
+      console.error('Error toggling PoModel delete statuses:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
@@ -135,12 +135,12 @@ const PoController = {
       const { data } = req.body;
       const { po_id } = data;
       if (!Array.isArray(po_id) || po_id.length === 0) {
-        return res.status(400).json({ message: 'No PO ids provided' });
+        return res.status(400).json({ message: 'No PoModel ids provided' });
       }
 
-      const pos = await PO.findAll({ where: { po_id: po_id } });
+      const pos = await PoModel.findAll({ where: { po_id: po_id } });
       if (pos.length !== po_id.length) {
-        return res.status(404).json({ message: 'One or more POs not found' });
+        return res.status(404).json({ message: 'One or more PoModels not found' });
       }
 
       const updatedPos = await Promise.all(pos.map(async (po) => {
@@ -149,20 +149,20 @@ const PoController = {
         return { po_id: po.po_id, isDelete: updatedIsDeleted };
       }));
 
-      res.json({ message: 'PO delete statuses toggled', updatedPos });
+      res.json({ message: 'PoModel delete statuses toggled', updatedPos });
     } catch (error) {
-      console.error('Error toggling PO delete status:', error);
+      console.error('Error toggling PoModel delete status:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
 
   getFormPost: async (req, res) => {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('PO');
+    const worksheet = workbook.addWorksheet('PoModel');
 
     worksheet.columns = [
       { header: 'Mã chương trình', key: 'program_id', width: 20 },
-      { header: 'Tên PO', key: 'poName', width: 20 },
+      { header: 'Tên PoModel', key: 'poName', width: 20 },
       { header: 'Mô tả', key: 'description', width: 30 },
     ];
 
@@ -180,19 +180,19 @@ const PoController = {
       }
 
       const { id } = data;
-      const pos = await PO.findAll({ where: { po_id: id } });
+      const pos = await PoModel.findAll({ where: { po_id: id } });
 
       if (!pos || pos.length === 0) {
-        return res.status(404).json({ message: 'POs not found' });
+        return res.status(404).json({ message: 'PoModels not found' });
       }
 
       const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('PO');
+      const worksheet = workbook.addWorksheet('PoModel');
 
       worksheet.columns = [
         { header: 'Mã po (int)', key: 'po_id', width: 20 },
         { header: 'Mã chương trình (int)', key: 'program_id', width: 20 },
-        { header: 'Tên PO', key: 'poName', width: 20 },
+        { header: 'Tên PoModel', key: 'poName', width: 20 },
         { header: 'Mô tả', key: 'description', width: 30 },
       ];
 
@@ -226,7 +226,7 @@ const PoController = {
       await workbook.xlsx.write(res);
       res.status(200).end();
     } catch (error) {
-      console.error('Error generating PO update form:', error);
+      console.error('Error generating PoModel update form:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
@@ -247,7 +247,7 @@ const PoController = {
       return res.status(500).json({ message: 'Error reading the uploaded file' });
     }
 
-    const worksheet = workbook.getWorksheet('PO');
+    const worksheet = workbook.getWorksheet('PoModel');
     const jsonData = [];
 
     worksheet.eachRow((row, rowNumber) => {
@@ -287,7 +287,7 @@ const PoController = {
       return res.status(500).json({ message: 'Error reading the uploaded file' });
     }
 
-    const worksheet = workbook.getWorksheet('PO');
+    const worksheet = workbook.getWorksheet('PoModel');
     const updateData = [];
     worksheet.eachRow((row, rowNumber) => {
       if (rowNumber > 1) {
@@ -314,13 +314,13 @@ const PoController = {
         );
 
         if (updatedRows[0] === 0) {
-          console.warn(`No PO found with ID ${data.po_id} for update`);
+          console.warn(`No PoModel found with ID ${data.po_id} for update`);
         }
       }));
 
-      return res.status(200).json({ message: 'POs updated successfully' });
+      return res.status(200).json({ message: 'PoModels updated successfully' });
     } catch (error) {
-      console.error('Error updating POs:', error);
+      console.error('Error updating PoModels:', error);
       return res.status(500).json({ message: 'Server error' });
     }
   },

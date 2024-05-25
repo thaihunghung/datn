@@ -138,7 +138,7 @@ const StorePlo = (nav) => {
         };
         console.log(data);
         try {
-            const response = await axiosAdmin.put('/plo/delete/multiple', { params: data });
+            const response = await axiosAdmin.delete('/plo/delete/multiple', { params: data });
             await getAllPlo();
             handleUnSelect();
             message.success(response.data.message);
@@ -150,7 +150,7 @@ const StorePlo = (nav) => {
 
     const handleDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/plo/${_id}`);
+            const response = await axiosAdmin.delete(`/plo/${_id}`);
             await getAllPlo();
             handleUnSelect();
             message.success(response.data.message);

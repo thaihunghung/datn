@@ -140,7 +140,7 @@ const ManagePo = (nav) => {
         };
         console.log(data)
         try {
-            const response = await axiosAdmin.put('/po/delete/multiple', { params: data });
+            const response = await axiosAdmin.put('/po/listId/soft-delete-multiple', { data: data });
             await getAllPo();
             handleUnSelect();
             message.success(response.data.message); 
@@ -149,10 +149,10 @@ const ManagePo = (nav) => {
             message.error('Error soft deleting POs'); 
         }
     };
-    
+
     const handleSoftDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/po/${_id}`);
+            const response = await axiosAdmin.put(`/po/${_id}/toggle-soft-delete`);
             await getAllPo();
             handleUnSelect();
             message.success(response.data.message); 
@@ -244,12 +244,12 @@ const ManagePo = (nav) => {
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
                         <p className="text-sm font-medium">
                             <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
-                            Đã chọn {selectedRow.length} bài viết
+                            Đã chọn {selectedRow.length} Po
                         </p>
                         <div className="flex items-center gap-2">
 
                             <Tooltip
-                                title={`Xoá ${selectedRowKeys.length} bài viết`}
+                                title={`Xoá ${selectedRowKeys.length} Po`}
                                 getPopupContainer={() =>
                                     document.querySelector(".Quick__Option")
                                 }
