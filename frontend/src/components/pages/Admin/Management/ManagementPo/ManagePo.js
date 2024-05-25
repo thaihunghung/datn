@@ -194,7 +194,6 @@ const ManagePo = (nav) => {
         fileList,
     };
 
-    const description = 'This is a description.';
     useEffect(() => {
         getAllPo()
         const handleResize = () => {
@@ -267,8 +266,8 @@ const ManagePo = (nav) => {
                         </div>
                     </div>
                 )}
-                <div className="w-full ">
-                    <Table className="table-po text-[#fefefe]"
+                <div className="w-full overflow-auto">
+                    <Table className="min-w-[400px] sm:min-w-[400px] lg:min-w-full xl:min-w-full table-po text-[#fefefe]"
                         bordered
                         loading={loading}
                         rowSelection={{

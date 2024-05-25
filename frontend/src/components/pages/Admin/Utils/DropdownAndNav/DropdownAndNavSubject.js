@@ -29,7 +29,7 @@ const DropdownAndNavSubject = () => {
     }
   };
   return (
-    <div className="flex justify-between px-5 w-full items-center">
+    <div className="flex justify-between w-full items-center">
       <div className="flex gap-2 justify-center items-center lg:hidden xl:hidden">
         <Dropdown>
           <DropdownTrigger>

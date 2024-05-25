@@ -206,7 +206,7 @@ const ManagementRubric = (nav) => {
     }, []);
 
     return (
-        <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7 bg-[#f5f5f5]-500">
+        <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7">
             <ConfirmAction
                 onOpenChange={onOpenChange}
                 isOpen={isOpen}

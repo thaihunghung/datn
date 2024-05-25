@@ -242,8 +242,8 @@ const StorePlo = (nav) => {
                         </div>
                     </div>
                 )}
-                <div className="w-full ">
-                    <Table className="table-po text-[#fefefe]"
+                <div className="w-full overflow-auto">
+                    <Table className="table-po min-w-[400px] sm:min-w-[400px] lg:min-w-full xl:min-w-full text-[#fefefe]"
                         bordered
                         loading={loading}
                         rowSelection={{
