@@ -1,50 +1,84 @@
+// StoreRubric.js
 
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-
+import { Link } from "react-router-dom";
 import { Table, Tooltip, Button, message } from 'antd';
-import { useDisclosure, Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
-
-
-import DropdownAndNavChapter from "../../Utils/DropdownAndNav/DropdownAndNavChapter";
-import DownloadAndUpload from "../../Utils/DownloadAndUpload/DownloadAndUpload";
+import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import Tabs from "../../Utils/Tabs/Tabs";
+import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
 
-const Chapter = (nav) => {
-    const { id } = useParams();
+const StoreRubric = (nav) => {
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [activeTab, setActiveTab] = useState(0);
+
     const [selectedRow, setSelectedRow] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [poListData, setPosListData] = useState([]);
-    const [current, setCurrent] = useState(0);
+
+    const [rubicData, setRubicData] = useState([]);
     const [deleteId, setDeleteId] = useState(null);
 
-
-    const handleOnChangeTextName = (nameP) => {
-        setCurrent(nameP);
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: (selectedRowKeys, selectedRows) => {
+            setSelectedRow(selectedRows);
+            setSelectedRowKeys(selectedRowKeys);
+        },
     };
 
-    const [fileList, setFileList] = useState([]);
+    const handleUnSelect = () => {
+        setSelectedRowKeys([]);
+        setSelectedRow([]);
+    };
     const columns = [
         {
-            title: "Tên Chương",
+            title: "Tên rubric",
             dataIndex: "name",
             render: (record) => (
-                <div className="text-sm">
+                <div className="text-sm min-w-[100px]">
                     <p className="font-medium">{record}</p>
                 </div>
             ),
         },
         {
-            title: "Mô tả",
-            dataIndex: "description",
+            title: "items",
+            dataIndex: "status",
+            render: (record) => (
+                <div className="text-sm">
+                    {record.status ?
+                        <Link to={`/admin/management-rubric/${record._id}/rubric-items/list`}>
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+                            >
+                                <p>Chỉnh sửa</p>
+                            </Button>
+
+                        </Link>
+                        :
+                        <Link to={`/admin/management-rubric/${record._id}/rubric-items/create`}>
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+                            >
+                                <p>Tạo mới</p>
+                            </Button>
+                        </Link>
+                    }
+                </div>
+            ),
+        },
+        {
+            title: "Tổng điểm",
+            dataIndex: "point",
             render: (record) => (
                 <div className="text-sm">
                     <p className="font-medium">{record}</p>
+
                 </div>
             ),
         },
@@ -57,143 +91,115 @@ const Chapter = (nav) => {
             dataIndex: "action",
             render: (_id) => (
                 <div className="flex items-center justify-center w-full gap-2">
-                    <Link to={`/admin/management-subject/${id}/chapter/update/${_id}`}>
-                        <Tooltip title="Chỉnh sửa">
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
-                            >
-                                <i className="fa-solid fa-pen"></i>
-                            </Button>
-                        </Tooltip>
-                    </Link>
-
-
-                    <Tooltip title="Xoá">
+                    <Tooltip title="Khôi phục">
                         <Button
                             isIconOnly
                             variant="light"
                             radius="full"
-                            size="sm"
+                            onClick={() => handleRestoreById(_id)}
+                        >
+                            <i className="fa-solid fa-clock-rotate-left"></i>
+                        </Button>
+                    </Tooltip>
+                    <Tooltip title="Xoá vĩnh viễn">
+                        <Button
+                            isIconOnly
+                            variant="light"
+                            radius="full"
+                            color="danger"
                             onClick={() => { onOpen(); setDeleteId(_id); }}
                         >
                             <i className="fa-solid fa-trash-can"></i>
                         </Button>
                     </Tooltip>
-
                 </div>
             ),
         },
 
     ];
 
-    const rowSelection = {
-        selectedRowKeys,
-        onChange: (selectedRowKeys, selectedRows) => {
-            //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-            setSelectedRow(selectedRows);
-            setSelectedRowKeys(selectedRowKeys);
-        },
-    };
-
-    const handleUnSelect = () => {
-        setSelectedRowKeys([]);
-        setSelectedRow([]);
-    };
-    const getAllChapter = async () => {
+    const getAllRubricIsDeleteTrue = async () => {
         try {
-            const response = await axiosAdmin.get(`/chapter/subject/${id}`);
-            const updatedPoData = response.data.map((po) => {
+            const response = await axiosAdmin.get('/rubric/archive/get-by-user/checkscore');
+            const updatedRubricData = response.data.rubric.map((rubric) => {
+                const status = {
+                    status: rubric.RubricItem.length === 0 ? false : true,
+                    _id: rubric.rubric_id
+                };
                 return {
-                    key: po.chapter_id,
-                    name: po.chapterName,
-                    description: po.description,
-                    isDeleted: po.isDelete,
-                    action: po.chapter_id,
+                    key: rubric.rubric_id,
+                    name: rubric.rubricName,
+                    status: status,
+                    point: rubric.RubricItem[0]?.total_score ? rubric.RubricItem[0].total_score : 0.0,
+                    action: rubric.rubric_id
                 };
             });
-            setPosListData(updatedPoData);
-            console.log(response.data);
+            setRubicData(updatedRubricData);
+            console.log(updatedRubricData);
         } catch (error) {
             console.error("Error: " + error.message);
-            message.error('Error fetching PO data');
+            message.error('Error fetching Rubric data');
         }
     };
-
-    const handleSoftDelete = async () => {
+    
+    const handleDelete = async () => {
         const data = {
-            chapter_id: selectedRowKeys,
+            rubric_id: selectedRowKeys,
+        }
+        try {
+            const response = await axiosAdmin.delete('/rubric/delete/multiple', { params: data });
+            handleUnSelect();
+            message.success(response.data.message);
+            getAllRubricIsDeleteTrue()
+        } catch (error) {
+            console.error("Error soft deleting rubrics:", error);
+            message.error('Error soft deleting rubrics');
+        }
+    };
+
+    
+    const handleDeleteById = async (_id) => {
+        try {
+            const response = await axiosAdmin.delete(`/rubric/${_id}`);
+            handleUnSelect();
+            message.success(response.data.message);
+            getAllRubricIsDeleteTrue()
+        } catch (error) {
+
+            console.error(`Error toggling delete for rubric with ID ${_id}:`, error);
+            message.error(`Error toggling delete for rubric with ID ${_id}`);
+        }
+    };
+
+    const handleRestore = async () => {
+        const data = {
+            rubric_id: selectedRowKeys,
         };
-        console.log(data)
         try {
-            const response = await axiosAdmin.put('/chapter/listId/soft-delete-multiple', { data });
-            await getAllChapter();
+            const response = await axiosAdmin.put('/rubric/listId/soft-delete-multiple', { data });
+            getAllRubricIsDeleteTrue();
             handleUnSelect();
             message.success(response.data.message);
         } catch (error) {
-            console.error("Error soft deleting POs:", error);
-            message.error('Error soft deleting POs');
+            console.error("Error update rubrics:", error);
+            message.error('Error update rubrics');
         }
     };
 
-    const handleSoftDeleteById = async (_id) => {
+    const handleRestoreById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/chapter/${_id}/toggle-soft-delete`);
-            await getAllChapter();
+            const response = await axiosAdmin.put(`/rubric/${_id}/toggle-soft-delete`);
+            await getAllRubricIsDeleteTrue();
             handleUnSelect();
             message.success(response.data.message);
         } catch (error) {
-            console.error(`Error toggling soft delete for PO with ID ${_id}:`, error);
-            message.error(`Error toggling soft delete for PO with ID ${_id}`);
+            console.error(`Error toggling update for rubric with ID ${_id}:`, error);
+            message.error(`Error toggling update for rubric with ID ${_id}`);
         }
-    };
-
-    const handleDownloadChapter = async () => {
-        try {
-            if (selectedRowKeys.length === 0) {
-                alert('Please select at least one chapter ID');
-                return;
-            }
-            const data = {
-                id: selectedRowKeys
-            }
-            const response = await axiosAdmin.post('/chapter/templates/update', { data: data }, {
-                responseType: 'blob'
-            });
-
-            if (response && response.data) {
-                const url = window.URL.createObjectURL(response.data);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'chapter_update.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-
-                setCurrent(1);
-            }
-        } catch (error) {
-            console.error('Error downloading file:', error);
-        }
-    };
-    const props = {
-        onRemove: (file) => {
-            const index = fileList.indexOf(file);
-            const newFileList = fileList.slice();
-            newFileList.splice(index, 1);
-            setFileList(newFileList);
-        },
-        beforeUpload: (file) => {
-            setFileList([...fileList, file]);
-            return false;
-        },
-        fileList,
     };
 
     useEffect(() => {
-        getAllChapter()
+        getAllRubricIsDeleteTrue()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -209,32 +215,42 @@ const Chapter = (nav) => {
     }, []);
 
     return (
-        <div className="flex w-full flex-col justify-center leading-8 pt-5">
+        <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7 bg-[#f5f5f5]-500">
             <ConfirmAction
                 onOpenChange={onOpenChange}
                 isOpen={isOpen}
                 onConfirm={() => {
                     if (deleteId) {
-                        handleSoftDeleteById(deleteId);
+                        handleDeleteById(deleteId);
                         setDeleteId(null);
                     } else if (selectedRowKeys.length > 0) {
-                        handleSoftDelete();
+                        handleDelete();
                         setSelectedRowKeys([]);
                     }
                 }}
             />
-            <DropdownAndNavChapter />
-            <div className="w-full my-5 px-5">
+            <DropdownAndNavRubric />
+            <div className="w-full my-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
                         <p className="text-sm font-medium">
                             <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
-                            Đã chọn {selectedRow.length} chapter
+                            Đã chọn {selectedRow.length} rubric
                         </p>
                         <div className="flex items-center gap-2">
 
+                        <Tooltip
+                                title={`Khôi phục ${selectedRowKeys.length} rubric`}
+                                getPopupContainer={() =>
+                                    document.querySelector(".Quick__Option")
+                                }
+                            >
+                                <Button isIconOnly variant="light" radius="full" onClick={() => handleRestore()}>
+                                    <i className="fa-solid fa-clock-rotate-left"></i>
+                                </Button>
+                            </Tooltip>
                             <Tooltip
-                                title={`Xoá ${selectedRowKeys.length} chapter`}
+                                title={`Xoá vĩnh viễn ${selectedRowKeys.length} rubric`}
                                 getPopupContainer={() =>
                                     document.querySelector(".Quick__Option")
                                 }
@@ -243,6 +259,7 @@ const Chapter = (nav) => {
                                     <i className="fa-solid fa-trash-can"></i>
                                 </Button>
                             </Tooltip>
+
                             <Tooltip
                                 title="Bỏ chọn"
                                 getPopupContainer={() =>
@@ -263,8 +280,8 @@ const Chapter = (nav) => {
                         </div>
                     </div>
                 )}
-                <div className="w-full h-fit overflow-auto">
-                    <Table className="table-po min-w-[500px] sm:min-w-[500px] lg:min-w-full xl:min-w-full table-auto text-[#fefefe]"
+                <div className="w-full overflow-auto">
+                    <Table className="table-po text-[#fefefe]"
                         bordered
                         loading={loading}
                         rowSelection={{
@@ -272,26 +289,16 @@ const Chapter = (nav) => {
                             ...rowSelection,
                         }}
                         columns={columns}
-                        dataSource={poListData}
+                        dataSource={rubicData}
                     />
                 </div>
             </div>
-            <Tabs tabs=
-                {[
-                    {
-                        title: 'Cập nhật',
-                        content:
-                        <DownloadAndUpload props={props} handleDownload={handleDownloadChapter} handleOnChangeTextName={handleOnChangeTextName} endpoint={'chapter/update'} current={current} LoadData={getAllChapter} Data={parseInt(id)} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
-                    }
-                ]}
-                activeTab={activeTab} setActiveTab={setActiveTab}
-            />
         </div>
     );
 }
 
+export default StoreRubric;
 
-export default Chapter;
 function ConfirmAction(props) {
     const { isOpen, onOpenChange, onConfirm } = props;
     const handleOnOKClick = (onClose) => {
@@ -331,7 +338,7 @@ function ConfirmAction(props) {
                         <ModalHeader>Cảnh báo</ModalHeader>
                         <ModalBody>
                             <p className="text-[16px]">
-                                Chương sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
+                                Rubric sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
                             </p>
                         </ModalBody>
                         <ModalFooter>

@@ -35,9 +35,9 @@ const DropdownAndNavClo = () => {
       <div className="flex gap-2 justify-center items-center lg:hidden xl:hidden">
         <Link to={`/admin/management-subject/list`}>
           <Tooltip title="Quay lại" color={'#ff9908'}>
-            <span className="p-1 flex items-center justify-center"> 
+            <span className="p-1 flex items-center justify-center">
               <i class="fa-solid fa-arrow-left text-xl"></i>
-              </span>
+            </span>
           </Tooltip>
         </Link>
         <Dropdown>
@@ -97,17 +97,17 @@ const DropdownAndNavClo = () => {
       </div>
       <div className="hidden sm:hidden lg:block xl:block">
         <Link to={`/admin/management-subject/${id}/clo/store`}>
-          <Button color="default">
+          <div className="p-5 bg-default-50">
             <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
-          </Button>
+          </div>
         </Link>
       </div>
       <div className="lg:hidden xl:hidden">
         <Link to={`/admin/management-subject/${id}/clo/store`}>
-          <Tooltip title="Kho lưu trữ" color={'#ff9908'}>   
-              <button className="p-1">
+          <Tooltip title="Kho lưu trữ" color={'#ff9908'}>
+            <div className="p-5 bg-default-50">
               <i className="fa-solid fa-trash-can"></i>
-              </button>
+            </div>
           </Tooltip>
         </Link>
       </div>

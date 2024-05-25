@@ -1,47 +1,78 @@
+// MangementRubricItems.js
 
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-
 import { Table, Tooltip, Button, message } from 'antd';
-import { useDisclosure, Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
-
-
-import DropdownAndNavChapter from "../../Utils/DropdownAndNav/DropdownAndNavChapter";
-import DownloadAndUpload from "../../Utils/DownloadAndUpload/DownloadAndUpload";
+import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import Tabs from "../../Utils/Tabs/Tabs";
+import DropdownAndNavRubricItems from "../../Utils/DropdownAndNav/DropdownAndNavRubricItems";
 
-const Chapter = (nav) => {
+const MangementRubricItems = (nav) => {
     const { id } = useParams();
-    const { setCollapsedNav } = nav;
+    const { setCollapsedNav} = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [activeTab, setActiveTab] = useState(0);
+
     const [selectedRow, setSelectedRow] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [poListData, setPosListData] = useState([]);
-    const [current, setCurrent] = useState(0);
+
+    const [rubicItemsData, setRubicItemsData] = useState([]);
+    const [rubicData, setRubicData] = useState({});
+
     const [deleteId, setDeleteId] = useState(null);
 
-
-    const handleOnChangeTextName = (nameP) => {
-        setCurrent(nameP);
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: (selectedRowKeys, selectedRows) => {
+            setSelectedRow(selectedRows);
+            setSelectedRowKeys(selectedRowKeys);
+        },
     };
 
-    const [fileList, setFileList] = useState([]);
+    const handleUnSelect = () => {
+        setSelectedRowKeys([]);
+        setSelectedRow([]);
+    };
     const columns = [
         {
-            title: "Tên Chương",
-            dataIndex: "name",
+            title: "Tên CLO",
+            dataIndex: "cloName",
             render: (record) => (
-                <div className="text-sm">
-                    <p className="font-medium">{record}</p>
+                <Tooltip color={"#FF9908"}
+                    title={record.description}>
+                    <div className="text-sm min-w-[100px]">
+                        <p className="font-medium">{record.cloName}</p>
+                    </div>
+                </Tooltip>
+            ),
+        },
+        {
+            title: "Tên PLO",
+            dataIndex: "ploName",
+            render: (record) => (
+                <div className="text-sm min-w-[100px]">
+                    <Tooltip color={"#FF9908"}
+                        title={record.description}>
+                        <p className="font-medium">{record.ploName}</p>
+                    </Tooltip>
                 </div>
             ),
         },
         {
-            title: "Mô tả",
-            dataIndex: "description",
+            title: "Tên Chapter",
+            dataIndex: "chapterName",
+            render: (record) => (
+                <div className="text-sm min-w-[100px]">
+                    <Tooltip color={"#FF9908"}
+                        title={record.description}>
+                        <p className="font-medium">{record.chapterName}</p>
+                    </Tooltip>
+                </div>
+            ),
+        },
+        {
+            title: "Điểm",
+            dataIndex: "score",
             render: (record) => (
                 <div className="text-sm">
                     <p className="font-medium">{record}</p>
@@ -57,7 +88,7 @@ const Chapter = (nav) => {
             dataIndex: "action",
             render: (_id) => (
                 <div className="flex items-center justify-center w-full gap-2">
-                    <Link to={`/admin/management-subject/${id}/chapter/update/${_id}`}>
+                    <Link to={`/admin/management-rubric/${id}/rubric-items/${_id}`}>
                         <Tooltip title="Chỉnh sửa">
                             <Button
                                 isIconOnly
@@ -69,8 +100,6 @@ const Chapter = (nav) => {
                             </Button>
                         </Tooltip>
                     </Link>
-
-
                     <Tooltip title="Xoá">
                         <Button
                             isIconOnly
@@ -89,111 +118,78 @@ const Chapter = (nav) => {
 
     ];
 
-    const rowSelection = {
-        selectedRowKeys,
-        onChange: (selectedRowKeys, selectedRows) => {
-            //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-            setSelectedRow(selectedRows);
-            setSelectedRowKeys(selectedRowKeys);
-        },
-    };
-
-    const handleUnSelect = () => {
-        setSelectedRowKeys([]);
-        setSelectedRow([]);
-    };
-    const getAllChapter = async () => {
+    const GetRubicAndItemsById = async () => {
         try {
-            const response = await axiosAdmin.get(`/chapter/subject/${id}`);
-            const updatedPoData = response.data.map((po) => {
-                return {
-                    key: po.chapter_id,
-                    name: po.chapterName,
-                    description: po.description,
-                    isDeleted: po.isDelete,
-                    action: po.chapter_id,
+            const response = await axiosAdmin.get(`/rubric/${id}/items`);
+            const rubric = response.data?.rubric || {};
+    
+            const RubricData = {
+                rubricName: rubric?.rubricName || 'Unknown',
+                subjectName: rubric?.subject?.subjectName || 'Unknown',
+            };
+            console.log(RubricData);
+    
+            const updatedRubricData = rubric?.rubricItems?.map((item) => {
+                const clo = {
+                    cloName: item?.CLO?.cloName || 'Unknown',
+                    description: item?.CLO?.description || 'No description',
                 };
-            });
-            setPosListData(updatedPoData);
-            console.log(response.data);
+                const plo = {
+                    ploName: item?.PLO?.ploName || 'Unknown',
+                    description: item?.PLO?.description || 'No description',
+                };
+                const chapter = {
+                    chapterName: item?.Chapter?.chapterName || 'Unknown',
+                    description: item?.Chapter?.description || 'No description',
+                };
+                return {
+                    key: item?.rubricsItem_id || 'Unknown',
+                    cloName: clo,
+                    ploName: plo,
+                    chapterName: chapter,
+                    score: item.score,
+                    action: item?.rubricsItem_id || 'Unknown',
+                };
+            }) || [];
+    
+            setRubicItemsData(updatedRubricData);
+            setRubicData(RubricData);
         } catch (error) {
             console.error("Error: " + error.message);
-            message.error('Error fetching PO data');
+            message.error('Error fetching Rubric data');
         }
     };
+    
 
     const handleSoftDelete = async () => {
         const data = {
-            chapter_id: selectedRowKeys,
+            rubric_id: selectedRowKeys,
         };
-        console.log(data)
         try {
-            const response = await axiosAdmin.put('/chapter/listId/soft-delete-multiple', { data });
-            await getAllChapter();
+            const response = await axiosAdmin.put('/rubric/listId/soft-delete-multiple', { data });
+            await GetRubicAndItemsById();
             handleUnSelect();
             message.success(response.data.message);
         } catch (error) {
-            console.error("Error soft deleting POs:", error);
-            message.error('Error soft deleting POs');
+            console.error("Error soft deleting rubrics:", error);
+            message.error('Error soft deleting rubrics');
         }
     };
 
     const handleSoftDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/chapter/${_id}/toggle-soft-delete`);
-            await getAllChapter();
+            const response = await axiosAdmin.put(`/rubric/${_id}/toggle-soft-delete`);
+            await GetRubicAndItemsById();
             handleUnSelect();
             message.success(response.data.message);
         } catch (error) {
-            console.error(`Error toggling soft delete for PO with ID ${_id}:`, error);
-            message.error(`Error toggling soft delete for PO with ID ${_id}`);
+            console.error(`Error toggling soft delete for rubric with ID ${_id}:`, error);
+            message.error(`Error toggling soft delete for rubric with ID ${_id}`);
         }
-    };
-
-    const handleDownloadChapter = async () => {
-        try {
-            if (selectedRowKeys.length === 0) {
-                alert('Please select at least one chapter ID');
-                return;
-            }
-            const data = {
-                id: selectedRowKeys
-            }
-            const response = await axiosAdmin.post('/chapter/templates/update', { data: data }, {
-                responseType: 'blob'
-            });
-
-            if (response && response.data) {
-                const url = window.URL.createObjectURL(response.data);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'chapter_update.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-
-                setCurrent(1);
-            }
-        } catch (error) {
-            console.error('Error downloading file:', error);
-        }
-    };
-    const props = {
-        onRemove: (file) => {
-            const index = fileList.indexOf(file);
-            const newFileList = fileList.slice();
-            newFileList.splice(index, 1);
-            setFileList(newFileList);
-        },
-        beforeUpload: (file) => {
-            setFileList([...fileList, file]);
-            return false;
-        },
-        fileList,
     };
 
     useEffect(() => {
-        getAllChapter()
+        GetRubicAndItemsById()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -209,7 +205,7 @@ const Chapter = (nav) => {
     }, []);
 
     return (
-        <div className="flex w-full flex-col justify-center leading-8 pt-5">
+        <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7 bg-[#f5f5f5]-500">
             <ConfirmAction
                 onOpenChange={onOpenChange}
                 isOpen={isOpen}
@@ -223,18 +219,25 @@ const Chapter = (nav) => {
                     }
                 }}
             />
-            <DropdownAndNavChapter />
-            <div className="w-full my-5 px-5">
+            <DropdownAndNavRubricItems />
+            <div className="my-5 flex justify-center items-center flex-col sm:flex-col lg:flex-row xl:fex-row">
+                <div className="text-lg leading-8 italic font-bold text-[#FF9908] flex-1 text-justify">Tên học phần:{' '+rubicData.rubricName}</div>
+                <div className="text-lg  leading-8 italic font-bold text-[#FF9908]  flex-1 text-justify">Tên rubric:{' '+rubicData.subjectName}</div>
+            </div>
+            <div className="mb-5 w-fit p-2 bg-[#475569] rounded-lg">
+                <p className="text-lg text-[#fefefe] text-left">Danh sách</p>
+            </div>
+            <div className="w-full">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
                         <p className="text-sm font-medium">
                             <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
-                            Đã chọn {selectedRow.length} chapter
+                            Đã chọn {selectedRow.length} rubric
                         </p>
                         <div className="flex items-center gap-2">
 
-                            <Tooltip
-                                title={`Xoá ${selectedRowKeys.length} chapter`}
+                            <Tooltip 
+                                title={`Xoá ${selectedRowKeys.length} rubric`}
                                 getPopupContainer={() =>
                                     document.querySelector(".Quick__Option")
                                 }
@@ -263,8 +266,8 @@ const Chapter = (nav) => {
                         </div>
                     </div>
                 )}
-                <div className="w-full h-fit overflow-auto">
-                    <Table className="table-po min-w-[500px] sm:min-w-[500px] lg:min-w-full xl:min-w-full table-auto text-[#fefefe]"
+                <div className="w-full overflow-auto">
+                    <Table className="table-po text-[#fefefe]"
                         bordered
                         loading={loading}
                         rowSelection={{
@@ -272,26 +275,16 @@ const Chapter = (nav) => {
                             ...rowSelection,
                         }}
                         columns={columns}
-                        dataSource={poListData}
+                        dataSource={rubicItemsData}
                     />
                 </div>
             </div>
-            <Tabs tabs=
-                {[
-                    {
-                        title: 'Cập nhật',
-                        content:
-                        <DownloadAndUpload props={props} handleDownload={handleDownloadChapter} handleOnChangeTextName={handleOnChangeTextName} endpoint={'chapter/update'} current={current} LoadData={getAllChapter} Data={parseInt(id)} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
-                    }
-                ]}
-                activeTab={activeTab} setActiveTab={setActiveTab}
-            />
         </div>
     );
 }
 
+export default MangementRubricItems;
 
-export default Chapter;
 function ConfirmAction(props) {
     const { isOpen, onOpenChange, onConfirm } = props;
     const handleOnOKClick = (onClose) => {
@@ -331,7 +324,7 @@ function ConfirmAction(props) {
                         <ModalHeader>Cảnh báo</ModalHeader>
                         <ModalBody>
                             <p className="text-[16px]">
-                                Chương sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
+                                Rubric sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
                             </p>
                         </ModalBody>
                         <ModalFooter>

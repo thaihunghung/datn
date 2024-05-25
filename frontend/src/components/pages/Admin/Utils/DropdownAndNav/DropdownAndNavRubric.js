@@ -3,14 +3,14 @@ import { Link, useLocation } from "react-router-dom";
 import { Tooltip } from 'antd';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@nextui-org/react";
 
-const DropdownAndNavProgram = () => {
+const DropdownAndNavRubric = () => {
   const location = useLocation();
   const isActive = (path) => location.pathname.startsWith(path);
 
   const items = useMemo(() => [
-    { key: "Danh sách program", label: "Danh sách program", path: `/admin/management-program/description`},
-    { key: "Tạo mới", label: "Tạo mới", path: `/admin/management-program/create` },
-    { key: "Chỉnh sửa", label: "Chỉnh sửa", path: `/admin/management-program/update` }
+    { key: "Danh sách rubric", label: "Danh sách rubric", path: `/admin/management-rubric/list` },
+    { key: "Kho lưu trữ", label: "Kho lưu trữ", path: `/admin/management-rubric/store` },
+    { key: "Tạo mới", label: "Tạo mới", path: `/admin/management-rubric/create` }
   ], []);
 
   const [selectedItem, setSelectedItem] = useState('');
@@ -29,7 +29,7 @@ const DropdownAndNavProgram = () => {
     }
   };
   return (
-    <div className="flex justify-between mb-5 w-full items-center">
+    <div className="flex justify-between w-full items-center">
       <div className="flex gap-2 justify-center items-center lg:hidden xl:hidden">
         <Dropdown>
           <DropdownTrigger>
@@ -50,35 +50,45 @@ const DropdownAndNavProgram = () => {
           </DropdownMenu>
         </Dropdown>
       </div>
+
       <div className="hidden sm:hidden lg:block xl:block">
         <div className="flex border justify-start text-base font-bold rounded-lg">
-          <Link to={`/admin/management-program/description`}>
+          <Link to={`/admin/management-rubric/list`}>
             <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-              <div className={` ${isActive(`/admin/management-program/description`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                Danh sách program
+              <div className={` ${isActive(`/admin/management-rubric/list`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+                Danh sách rubric
               </div>
             </div>
           </Link>
 
-          <Link to={`/admin/management-program/create`}>
+          <Link to={`/admin/management-rubric/create`}>
             <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-              <div className={` ${isActive(`/admin/management-program/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
+              <div className={` ${isActive(`/admin/management-rubric/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
                 Tạo mới
-              </div>
-            </div>
-          </Link>
-          <Link to={`/admin/management-program/update`}>
-            <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-              <div className={` ${isActive(`/admin/management-program/update`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                Chỉnh sửa
               </div>
             </div>
           </Link>
         </div>
       </div>
+      <div className="hidden sm:hidden lg:block xl:block">
+        <Link to={`/admin/management-rubric/store`}>
+          <div className="p-5 bg-default-50">
+            <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
+          </div>
+        </Link>
+      </div>
+      <div className="lg:hidden xl:hidden">
+        <Link to={`/admin/management-rubric/store`}>
+          <Tooltip title="Kho lưu trữ" color={'#ff9908'}>
+            <div className="p-5 bg-default-50">
+              <i className="fa-solid fa-trash-can"></i>
+            </div>
+          </Tooltip>
+        </Link>
+      </div>
     </div>
   );
 }
 
-export default DropdownAndNavProgram;
+export default DropdownAndNavRubric;
 

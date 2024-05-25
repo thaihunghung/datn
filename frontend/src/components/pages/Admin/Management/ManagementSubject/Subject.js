@@ -266,7 +266,7 @@ const Subject = (nav) => {
   }, []);
 
   return (
-    <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
+    <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7">
       <ConfirmAction
         onOpenChange={onOpenChange}
         isOpen={isOpen}
@@ -282,7 +282,7 @@ const Subject = (nav) => {
       />
 
       <DropdownAndNavSubject/>
-      <div className="w-full my-5 px-5">
+      <div className="w-full my-5">
         {selectedRowKeys.length !== 0 && (
           <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
             <p className="text-sm font-medium">
@@ -339,8 +339,9 @@ const Subject = (nav) => {
 }
 
 export default Subject;
+
 function ConfirmAction(props) {
-  const { isOpen, onOpenChange, onConfirm, datavalue } = props;
+  const { isOpen, onOpenChange, onConfirm } = props;
   const handleOnOKClick = (onClose) => {
     onClose();
     if (typeof onConfirm === 'function') {

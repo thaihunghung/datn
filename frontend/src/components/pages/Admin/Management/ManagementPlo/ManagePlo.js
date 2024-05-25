@@ -1,28 +1,16 @@
 
 import { useEffect, useState } from "react";
-import { UploadOutlined } from '@ant-design/icons';
-import { Table, Upload, Tooltip, Divider, Steps, Button, message } from 'antd';
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./Plo.css"
-import {
-    useDisclosure
-} from "@nextui-org/react";
 
-import {
-    Modal, Chip,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter
-} from "@nextui-org/react";
-
+import { Table, Tooltip, Button, message } from 'antd';
+import { useDisclosure, Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import CustomUpload from "../../CustomUpload/CustomUpload";
 import DropdownAndNavPlo from "../../Utils/DropdownAndNav/DropdownAndNavPlo";
+import DownloadAndUpload from "../../Utils/DownloadAndUpload/DownloadAndUpload";
+import Tabs from "../../Utils/Tabs/Tabs";
 
 const ManagePlo = (nav) => {
-    const location = useLocation();
-    const isActive = (path) => location.pathname.startsWith(path);
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [activeTab, setActiveTab] = useState(0);
@@ -32,9 +20,12 @@ const ManagePlo = (nav) => {
     const [poListData, setPosListData] = useState([]);
     const [current, setCurrent] = useState(0);
     const [deleteId, setDeleteId] = useState(null);
-
-
     const [fileList, setFileList] = useState([]);
+
+    const handleOnChangeTextName = (nameP) => {
+        setCurrent(nameP);
+    };
+
     const columns = [
         {
             title: "Tên PLO",
@@ -110,6 +101,7 @@ const ManagePlo = (nav) => {
         setSelectedRowKeys([]);
         setSelectedRow([]);
     };
+
     const getAllPlo = async () => {
         try {
             const response = await axiosAdmin.get('/plo/isDelete/false');
@@ -157,7 +149,6 @@ const ManagePlo = (nav) => {
             message.error(`Error toggling soft delete for PO with ID ${_id}`); 
         }
     };
-
 
     const handleDownloadPo = async () => {
         try {
@@ -272,8 +263,8 @@ const ManagePlo = (nav) => {
                         </div>
                     </div>
                 )}
-                <div className="w-full ">
-                    <Table className="table-po text-[#fefefe]"
+                <div className="w-full overflow-auto">
+                    <Table className="table-po min-w-[400px] sm:min-w-[400px] lg:min-w-full xl:min-w-full text-[#fefefe]"
                         bordered
                         loading={loading}
                         rowSelection={{
@@ -290,56 +281,7 @@ const ManagePlo = (nav) => {
                     {
                         title: 'Cập nhật bằng CSV',
                         content:
-                            <div className="w-full h-[1000px] rounded-lg">
-                                <div className=' w-full flex justify-center items-center'>
-                                    <div className='w-full  flex flex-col px-2  sm:gap-5 sm:justify-center h-fix sm:px-5 lg:px-5 xl:px-5 sm:flex-row  lg:flex-col  xl:flex-col  gap-[20px]'>
-                                        <div className='px-10 hidden sm:hidden lg:block xl:block'>
-                                            <Divider />
-                                            <Steps current={current} onChange={setCurrent} items={[
-                                                { title: 'Bước 1', description: 'Tải về form' },
-                                                { title: 'Bước 2', description: 'Tải lại form' },
-                                                { title: 'Bước 3', description: 'Chờ phản hồi' }
-                                                ]}
-                                            />
-                                        </div>
-                                        <div className='hidden sm:block lg:hidden xl:hidden w-[50%]'>
-                                            <Divider />
-                                            <Steps current={current} onChange={setCurrent} items={[
-                                                { title: 'Bước 1', description: 'Tải về form' },
-                                                { title: 'Bước 2', description: 'Tải lại form' },
-                                                { title: 'Bước 3', description: 'Chờ phản hồi' }
-                                                ]}
-                                            />
-                                        </div>
-
-                                        <div className='flex flex-col w-full  sm:flex-col sm:w-full lg:flex-row xl:flex-row justify-around'>
-                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%]  flex justify-start items-center'>
-                                                <div className='p-10 w-full mt-10 h-fix sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center  gap-5 rounded-lg'>
-                                                    <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
-                                                    <Button className='w-full bg-primary flex items-center justify-center  p-5 rounded-lg' onClick={handleDownloadPo}>
-                                                        <scan>Tải xuống mẫu </scan>
-                                                    </Button>
-
-                                                </div>
-                                            </div>
-                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-center items-center'>
-                                                <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
-                                                    <div><p className='w-full text-center'>Gửi lại mẫu</p></div>
-                                                    <Upload {...props} >
-                                                        <Button icon={<UploadOutlined />} className='text-center items-center rounded-lg px-10 h-[40px]'>Select File</Button>
-                                                    </Upload>
-                                                </div>
-                                            </div>
-                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
-                                                <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
-                                                    <div><p className='w-full text-center'>Cập nhật Dữ liệu</p></div>
-                                                    <CustomUpload endpoint={'plo/update'} LoadData={getAllPlo} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <DownloadAndUpload props={props} handleDownload={handleDownloadPo} endpoint={'plo/update'} LoadData={getAllPlo} handleOnChangeTextName={handleOnChangeTextName} current={current} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
                     }
                 ]}
                 activeTab={activeTab} setActiveTab={setActiveTab}
@@ -405,34 +347,4 @@ function ConfirmAction(props) {
             </ModalContent>
         </Modal>
     )
-}
-
-function Tabs({ tabs, activeTab, setActiveTab }) {
-
-    const handleTabClick = (index) => {
-        setActiveTab(index);
-    };
-
-    return (
-        <div>
-            <table className="mb-2">
-                <tr className="tab-buttons border-collapse border">
-                    {tabs.map((tab, index) => (
-                        <td>
-                            <button
-                                key={index}
-                                onClick={() => handleTabClick(index)}
-                                className={`${index === activeTab ? 'active ' : ''} ${index === activeTab ? 'bg-gray-800 text-white ' : ''} border p-2 px-7`}
-                            >
-                                {tab.title}
-                            </button>
-                        </td>
-                    ))}
-                </tr>
-            </table>
-            <div className="tab-content">
-                {tabs[activeTab].content}
-            </div>
-        </div>
-    );
 }

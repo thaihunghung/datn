@@ -7,6 +7,7 @@ router.post('/po', PO.create);
 router.get('/po/:id', PO.getByID);
 router.put('/po/:id', PO.update);
 router.delete('/po/:id', PO.delete);
+router.delete('/po/delete/multiple', PO.deleteMultiple);
 
 router.get('/po/isDelete/true', PO.isDeleteToTrue);
 router.get('/po/isDelete/false', PO.isDeleteToFalse);

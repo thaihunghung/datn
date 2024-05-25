@@ -1,50 +1,196 @@
 // ManagementRubric.js
 
 import { useEffect, useState } from "react";
-import { Button } from 'antd';
 import { Link, useLocation } from "react-router-dom";
-
-import {
-    Modal, Chip,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter, useDisclosure
-} from "@nextui-org/react";
+import { Table, Tooltip, Button, message } from 'antd';
+import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
 
 const ManagementRubric = (nav) => {
     const location = useLocation();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
+    const [selectedRow, setSelectedRow] = useState([]);
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+    const [loading, setLoading] = useState(false);
+
     const [rubicData, setRubicData] = useState([]);
     const [deleteId, setDeleteId] = useState(null);
-    const allRubricByUser = async () => {
+
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: (selectedRowKeys, selectedRows) => {
+            setSelectedRow(selectedRows);
+            setSelectedRowKeys(selectedRowKeys);
+        },
+    };
+
+    const handleUnSelect = () => {
+        setSelectedRowKeys([]);
+        setSelectedRow([]);
+    };
+    const columns = [
+        {
+            title: "Tên rubric",
+            dataIndex: "name",
+            render: (record) => (
+                <div className="text-sm min-w-[100px]">
+                    <p className="font-medium">{record}</p>
+                </div>
+            ),
+        },
+        {
+            title: "items",
+            dataIndex: "status",
+            render: (record) => (
+                <div className="text-sm">
+                    {record.status ?
+                        <Link to={`/admin/management-rubric/${record._id}/rubric-items/list`}>
+
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+                            >
+                                <p>Chỉnh sửa</p>
+                            </Button>
+
+                        </Link>
+
+                        :
+                        <Link to={`/admin/management-rubric/${record._id}/rubric-items/create`}>
+
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+                            >
+                                <p>Tạo mới</p>
+                            </Button>
+
+                        </Link>
+
+                    }
+                </div>
+            ),
+        },
+        {
+            title: "Tổng điểm",
+            dataIndex: "point",
+            render: (record) => (
+                <div className="text-sm">
+                    <p className="font-medium">{record}</p>
+
+                </div>
+            ),
+        },
+        {
+            title: (
+                <div className="flex items-center justify-center w-full">
+                    <span>Form</span>
+                </div>
+            ),
+            dataIndex: "action",
+            render: (_id) => (
+                <div className="flex items-center justify-center w-full gap-2">
+                    <Link to={`/admin/management-rubric/update/${_id}`}>
+                        <Tooltip title="Chỉnh sửa">
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+                            >
+                                <i className="fa-solid fa-pen"></i>
+                            </Button>
+                        </Tooltip>
+                    </Link>
+                    <Tooltip title="Xoá">
+                        <Button
+                            isIconOnly
+                            variant="light"
+                            radius="full"
+                            size="sm"
+                            onClick={() => { onOpen(); setDeleteId(_id); }}
+                        >
+                            <i className="fa-solid fa-trash-can"></i>
+                        </Button>
+                    </Tooltip>
+                    <Link to={`/admin/management-rubric/update/${_id}`}>
+                        <Tooltip title="Chấm điểm">
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+                            >
+                                <i className="fa-solid fa-feather-pointed"></i>
+                            </Button>
+                        </Tooltip>
+                    </Link>
+                </div>
+            ),
+        },
+
+    ];
+
+    const getAllRubricIsDeleteFalse = async () => {
         try {
-            const rubric = await axiosAdmin.get('/rubric/get-by-user/checkscore');
-            setRubicData(rubric.data.rubric)
-            console.log(rubric.data.rubric);
-        } catch (err) {
-            console.log("Error: " + err.message);
+            const response = await axiosAdmin.get('/rubric/get-by-user/checkscore');
+            const updatedRubricData = response.data.rubric.map((rubric) => {
+                const status = {
+                    status: rubric.RubricItem.length === 0 ? false : true,
+                    _id: rubric.rubric_id
+                };
+                return {
+                    key: rubric.rubric_id,
+                    name: rubric.rubricName,
+                    status: status,
+                    point: rubric.RubricItem[0]?.total_score ? rubric.RubricItem[0].total_score : 0.0,
+                    action: rubric.rubric_id
+                };
+            });
+            setRubicData(updatedRubricData);
+            console.log(updatedRubricData);
+        } catch (error) {
+            console.error("Error: " + error.message);
+            message.error('Error fetching Rubric data');
+        }
+    };
+
+    const handleSoftDelete = async () => {
+        const data = {
+            rubric_id: selectedRowKeys,
         };
-    }
+        try {
+            const response = await axiosAdmin.put('/rubric/listId/soft-delete-multiple', { data });
+            await getAllRubricIsDeleteFalse();
+            handleUnSelect();
+            message.success(response.data.message);
+        } catch (error) {
+            console.error("Error soft deleting rubrics:", error);
+            message.error('Error soft deleting rubrics');
+        }
+    };
 
-    const hangleChangeidDelete = async (id) => {
-        // try {
-        //     const response = await axiosAdmin.put(`/rubric/isDelete/${id}`);
-        //     if (response) {
-        //         console.log(response.data);
-
-        //         console.log(response.data.message);
-        //     }
-        // } catch (err) {
-        //     console.log("Error: " + err.message);
-        // };
-    }
+    const handleSoftDeleteById = async (_id) => {
+        try {
+            const response = await axiosAdmin.put(`/rubric/${_id}/toggle-soft-delete`);
+            await getAllRubricIsDeleteFalse();
+            handleUnSelect();
+            message.success(response.data.message);
+        } catch (error) {
+            console.error(`Error toggling soft delete for rubric with ID ${_id}:`, error);
+            message.error(`Error toggling soft delete for rubric with ID ${_id}`);
+        }
+    };
 
     useEffect(() => {
-        allRubricByUser()
+        getAllRubricIsDeleteFalse()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -60,86 +206,72 @@ const ManagementRubric = (nav) => {
     }, []);
 
     return (
-        <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
+        <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7">
             <ConfirmAction
                 onOpenChange={onOpenChange}
                 isOpen={isOpen}
                 onConfirm={() => {
                     if (deleteId) {
-                        hangleChangeidDelete(deleteId);
+                        handleSoftDeleteById(deleteId);
                         setDeleteId(null);
+                    } else if (selectedRowKeys.length > 0) {
+                        handleSoftDelete();
+                        setSelectedRowKeys([]);
                     }
                 }}
             />
-            <div>
-                <div className="w-fit flex  justify-start text-base font-bold rounded-lg border-1 border-[#FF8077]">
-                    <Link to={"/admin/management-rubric"}
-                        className={location.pathname.startsWith('/admin/management-rubric') ? "bg-[#475569] text-[#FEFEFE]" : ""}
-                    >
+            <DropdownAndNavRubric />
+            <div className="w-full my-5">
+                {selectedRowKeys.length !== 0 && (
+                    <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
+                        <p className="text-sm font-medium">
+                            <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
+                            Đã chọn {selectedRow.length} rubric
+                        </p>
+                        <div className="flex items-center gap-2">
 
-                        <div className="p-5  hover:bg-slate-600 hover:text-white">
-                            DS rubric
+                            <Tooltip
+                                title={`Xoá ${selectedRowKeys.length} rubric`}
+                                getPopupContainer={() =>
+                                    document.querySelector(".Quick__Option")
+                                }
+                            >
+                                <Button isIconOnly variant="light" radius="full" onClick={onOpen}>
+                                    <i className="fa-solid fa-trash-can"></i>
+                                </Button>
+                            </Tooltip>
+                            <Tooltip
+                                title="Bỏ chọn"
+                                getPopupContainer={() =>
+                                    document.querySelector(".Quick__Option")
+                                }
+                            >
+                                <Button
+                                    isIconOnly
+                                    variant="light"
+                                    radius="full"
+                                    onClick={() => {
+                                        handleUnSelect();
+                                    }}
+                                >
+                                    <i className="fa-solid fa-xmark text-[18px]"></i>
+                                </Button>
+                            </Tooltip>
                         </div>
-                    </Link>
-                    <Link to={"/admin/management-rubric/store"}
-                        className={location.pathname.startsWith('/admin/management-rubric/store') ? "bg-[#475569] text-[#FEFEFE]" : ""}
-                    >
-                        <div className="p-5  hover:bg-slate-600 hover:text-white">
-                            Kho lưu trữ
-                        </div>
-                    </Link>
-                    <Link to={"/admin/management-rubric/create"}
-                        className={location.pathname.startsWith('/admin/management-rubric/create') ? "bg-[#475569] text-[#FEFEFE]" : ""}
-                    >
-                        <div className="p-5  hover:bg-slate-600 hover:text-white">
-                            Tạo rubric
-                        </div>
-                    </Link>
-                    <Link to={"/admin/management-rubric/update"}
-                        className={location.pathname.startsWith('/admin/management-rubric/update') ? "bg-[#475569] text-[#FEFEFE]" : ""}
-                    >
-                        <div className="p-5  hover:bg-slate-600 hover:text-white">
-                            update
-                        </div>
-                    </Link>
+                    </div>
+                )}
+                <div className="w-full overflow-auto">
+                    <Table className="table-po text-[#fefefe]"
+                        bordered
+                        loading={loading}
+                        rowSelection={{
+                            type: "checkbox",
+                            ...rowSelection,
+                        }}
+                        columns={columns}
+                        dataSource={rubicData}
+                    />
                 </div>
-            </div>
-            <div className="w-full border mt-5 rounded-lg">
-                <table className="table-auto border-collapse border w-full">
-                    <tr>
-                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-slate-600 text-white text-center">STT</td>
-                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-slate-600 text-white text-center">Tên rubric</td>
-                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-slate-600 text-white text-center">Trạng thái điểm</td>
-                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-slate-600 text-white text-center">Trạng thái</td>
-                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-slate-600 text-white text-center">Thao tác</td>
-                    </tr>
-                    {rubicData.map((data, i) => (
-                        <tr key={i}>
-                            <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">{i + 1}</td>
-                            <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">{data.rubricName}</td>
-                            {
-                                (data.RubricItem === null || data.RubricItem.length === 0) ? (
-                                    <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">Chưa có items rubric</td>
-                                ) : (
-                                    data.RubricItem[0].total_score === 10 ? (
-                                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">Đủ điểm</td>
-                                    ) : (
-                                        <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2">Chưa đủ điểm</td>
-                                    )
-                                )
-                            }
-                            <td className="p-2 border-1 sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 flex justify-center">
-                                <div className="flex gap-1 flex-col sm:flex-col lg:flex-row xl:flex-row">
-                                    <div className="bg-blue-500 w-[120px] hover:bg-blue-700 text-white  text-center font-bold p-1 rounded">
-                                        <Link to={`update/${data.rubric_id}`} className="w-full h-full">Cập nhật</Link></div>
-                                    <div className="bg-red-500 w-[120px] hover:bg-red-700 text-white text-center font-bold p-1 rounded">
-                                        <button onClick={() => { onOpen(); setDeleteId(data.rubric_id); }} className="w-full h-full">Xóa</button>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
-                </table>
             </div>
         </div>
     );
@@ -151,7 +283,6 @@ function ConfirmAction(props) {
     const { isOpen, onOpenChange, onConfirm } = props;
     const handleOnOKClick = (onClose) => {
         onClose();
-        console.log('thanđ');
         if (typeof onConfirm === 'function') {
             onConfirm();
         }
@@ -187,7 +318,7 @@ function ConfirmAction(props) {
                         <ModalHeader>Cảnh báo</ModalHeader>
                         <ModalBody>
                             <p className="text-[16px]">
-                                Chương trình sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
+                                Rubric sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
                             </p>
                         </ModalBody>
                         <ModalFooter>

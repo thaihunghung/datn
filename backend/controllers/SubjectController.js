@@ -56,16 +56,20 @@ const SubjectController = {
     try {
       const { id } = req.params;
       const clos = await CloModel.findAll({
-        where: { subject_id: id },
-        attributes: ['clo_id']
+        where: { subject_id: id, isDelete: false },
+        attributes: ['clo_id','cloName', 'description']
       });
 
       if (clos.length === 0) {
         return res.status(404).json({ message: 'No CLOs found for the given subject ID' });
       }
 
-      const cloIds = clos.map(clo => clo.clo_id);
-      res.status(200).json(cloIds);
+      const cloData = clos.map(clo => ({
+        clo_id: clo.clo_id,
+        cloName: clo.cloName,
+        description: clo.description
+      }));
+      res.status(200).json(cloData);
     } catch (error) {
       console.error('Error fetching CLOs by subject ID:', error);
       res.status(500).json({ message: 'An error occurred while fetching CLOs' });
@@ -76,8 +80,8 @@ const SubjectController = {
     try {
       const { id } = req.params;
       const Chapters = await ChapterModel.findAll({
-        where: { subject_id: id },
-        attributes: ['chapter_id']
+        where: { subject_id: id, isDelete: false },
+        attributes: ['chapter_id','chapterName', 'description']
       });
 
       if (Chapters.length === 0) {

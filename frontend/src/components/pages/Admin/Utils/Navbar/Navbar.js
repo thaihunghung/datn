@@ -100,7 +100,7 @@ function Nav(props) {
             icon: <i className={`fa-solid fa-star mr-${collapsedNav ? "0" : "3"} w-4`}></i>,
             link: "/admin/management-subject/list"
         },
-        { text: "Rubric", link: "/admin/management-rubric", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
+        { text: "Rubric", link: "/admin/management-rubric/list", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
         { text: "Sinh viên", link: "/admin/student", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
         { text: "Lớp", link: "/admin/class", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
         { text: "Lớp môn học", link: "/admin/course", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
@@ -248,7 +248,7 @@ function Nav(props) {
                                                     <Link
                                                         to={tab.link}
                                                         onClick={() => toggleSubmenu(null)}
-                                                        className={`text-base w-full h-[37px] text-[#fefefe] p-3 py-2 rounded-lg flex justify-${collapsedNav ? 'center' : 'between'} items-center group/tab ${setActive(tab.link)}`}
+                                                        className={`text-base w-full h-[37px] text-[#020401] font-medium p-3 py-2 rounded-lg flex justify-${collapsedNav ? 'center' : 'between'} items-center group/tab ${setActive(tab.link)}`}
                                                     >
                                                         <p className="flex items-center">
                                                             {tab.icon}
@@ -268,7 +268,7 @@ function Nav(props) {
                                                             toggleSubmenu(tab.text);
                                                             open();
                                                         }}
-                                                        className={`cursor-pointer text-[#fefefe] ${location.pathname.startsWith(tab.link) ? setActive(tab.link) : ''} text-base w-full h-[37px] p-3 py-2 rounded-lg flex justify-${collapsedNav ? 'center' : 'between'} items-center`}
+                                                        className={`cursor-pointer text-[#020401] font-medium ${location.pathname.startsWith(tab.link) ? setActive(tab.link) : ''} text-base w-full h-[37px] p-3 py-2 rounded-lg flex justify-${collapsedNav ? 'center' : 'between'} items-center`}
                                                     >
                                                         <p className="flex items-center">
                                                             <span className="text">{tab.icon}</span>
@@ -304,7 +304,7 @@ function Nav(props) {
                                                                 <Link
                                                                     key={index}
                                                                     to={submenuItem.link}
-                                                                    className={`cursor-pointer text-sm text-[#FEFEFE] w-full p-2 pl-5 rounded-lg flex justify-start items-center 
+                                                                    className={`cursor-pointer text-sm text-[#020401] font-medium w-full p-2 pl-5 rounded-lg flex justify-start items-center 
                                                                     ${submenuIsActive ? 'Admin_tab-active' : ''}`}
                                                                 >
                                                                     {submenuItem.text}

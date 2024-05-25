@@ -136,13 +136,12 @@ const StorePo = (nav) => {
         }
     };
 
-    const handleSoftDelete = async () => {
+    const handleDelete = async () => {
         const data = {
             po_id: selectedRowKeys,
         };
-        console.log(data);
         try {
-            const response = await axiosAdmin.put('/po/listId/soft-delete-multiple', { data: data });
+            const response = await axiosAdmin.delete('/po/delete/multiple', { params: data });
             await getAllPo();
             handleUnSelect();
             message.success(response.data.message);
@@ -152,9 +151,9 @@ const StorePo = (nav) => {
         }
     };
 
-    const handleSoftDeleteById = async (_id) => {
+    const handleDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/po/${_id}/toggle-soft-delete`);
+            const response = await axiosAdmin.delete(`/po/${_id}`);
             await getAllPo();
             handleUnSelect();
             message.success(response.data.message);
@@ -187,10 +186,10 @@ const StorePo = (nav) => {
                 isOpen={isOpen}
                 onConfirm={() => {
                     if (deleteId) {
-                        handleSoftDeleteById(deleteId);
+                        handleDeleteById(deleteId);
                         setDeleteId(null);
                     } else if (selectedRowKeys.length > 0) {
-                        handleSoftDelete();
+                        handleDelete();
                         setSelectedRowKeys([]);
                     }
                 }}
@@ -246,8 +245,8 @@ const StorePo = (nav) => {
                         </div>
                     </div>
                 )}
-                <div className="w-full ">
-                    <Table className="table-po text-[#fefefe]"
+                <div className="w-full overflow-auto">
+                    <Table className="table-po min-w-[400px] sm:min-w-[400px] lg:min-w-full xl:min-w-full text-[#fefefe]"
                         bordered
                         loading={loading}
                         rowSelection={{

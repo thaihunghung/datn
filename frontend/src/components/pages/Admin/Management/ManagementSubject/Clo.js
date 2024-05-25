@@ -1,18 +1,17 @@
 import { useEffect, useState } from "react";
-import { UploadOutlined } from '@ant-design/icons';
-import { Table, Upload, Tooltip, Divider, Steps, message, Button } from 'antd';
-import { Link, useLocation, useParams } from "react-router-dom";
-import { useDisclosure } from "@nextui-org/react";
-import {
-    Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter
-} from "@nextui-org/react";
-import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import CustomUpload from "../../CustomUpload/CustomUpload";
+import { Link, useParams } from "react-router-dom";
+
+
+import { Table, Tooltip, message, Button } from 'antd';
+import { useDisclosure, Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
+
+import DownloadAndUpload from "../../Utils/DownloadAndUpload/DownloadAndUpload";
 import DropdownAndNavClo from "../../Utils/DropdownAndNav/DropdownAndNavClo";
+import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import Tabs from "../../Utils/Tabs/Tabs";
 
+
 const Clo = (nav) => {
-    const location = useLocation();
     const { id } = useParams();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -24,7 +23,6 @@ const Clo = (nav) => {
     const [poListData, setPosListData] = useState([]);
     const [current, setCurrent] = useState(0);
     const [deleteId, setDeleteId] = useState(null);
-    const [selectedItem, setSelectedItem] = useState("Danh sách CLO");
     const [fileList, setFileList] = useState([]);
 
     const handleOnChangeTextName = (nameP) => {
@@ -260,50 +258,7 @@ const Clo = (nav) => {
                     {
                         title: 'Cập nhật',
                         content:
-                            <div className="w-full rounded-lg">
-                                <div className=' w-full flex justify-center items-center'>
-                                    <div className='w-full  flex flex-col px-2  sm:gap-5 sm:justify-center h-fix sm:px-5 lg:px-5 xl:px-5 sm:flex-col  lg:flex-col  xl:flex-col  gap-[20px]'>
-                                        <div className='px-10 hidden sm:hidden lg:block xl:block'>
-                                            <Divider />
-                                            <Steps
-                                                current={current}
-                                                onChange={handleOnChangeTextName}
-                                                items={[
-                                                    { title: 'Bước 1', description: 'Tải về form' },
-                                                    { title: 'Bước 2', description: 'Tải lại form' },
-                                                    { title: 'Bước 3', description: 'Chờ phản hồi' }
-                                                ]}
-                                            />
-                                        </div>
-
-                                        <div className='flex flex-col gap-5 justify-center items-center w-full  sm:flex-col sm:w-full lg:flex-row xl:flex-row'>
-                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%]  flex justify-start items-center'>
-                                                <div className='p-10 w-full mt-10 h-fix sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center  gap-5 rounded-lg'>
-                                                    <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
-                                                    <Button className='w-full bg-primary flex items-center justify-center  p-5 rounded-lg' onClick={handleDownloadPo}>
-                                                        <scan>Tải xuống mẫu </scan>
-                                                    </Button>
-
-                                                </div>
-                                            </div>
-                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-center items-center'>
-                                                <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
-                                                    <div><p className='w-full text-center'>Gửi lại mẫu</p></div>
-                                                    <Upload {...props} >
-                                                        <Button icon={<UploadOutlined />} className='text-center items-center rounded-lg px-10 h-[40px]'>Select File</Button>
-                                                    </Upload>
-                                                </div>
-                                            </div>
-                                            <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%] flex justify-end items-center'>
-                                                <div className='p-10 w-full mt-10 sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center gap-5 rounded-lg'>
-                                                    <div><p className='w-full text-center'>Cập nhật Dữ liệu</p></div>
-                                                    <CustomUpload endpoint={'clo/update'} LoadData={getAllClo} Data={parseInt(id)}  setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <DownloadAndUpload props={props} endpoint={'clo/update'} LoadData={getAllClo} Data={parseInt(id)} handleDownload={handleDownloadPo} handleOnChangeTextName={handleOnChangeTextName} current={current} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
                     }
                 ]}
                 activeTab={activeTab} setActiveTab={setActiveTab}
