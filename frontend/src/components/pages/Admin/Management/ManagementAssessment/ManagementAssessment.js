@@ -4,7 +4,7 @@ import { Table, Tooltip, Button, message } from 'antd';
 import { Link } from "react-router-dom";
 import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Chip } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import DropdownAndNavSubject from "../../Utils/DropdownAndNav/DropdownAndNavSubject";
+import DropdownAndNavGrading from "../../Utils/DropdownAndNav/DropdownAndNavGrading";
 
 const ManagementAssessment = (nav) => {
   const { setCollapsedNav } = nav;
@@ -98,7 +98,7 @@ const ManagementAssessment = (nav) => {
   };
   const getAllAssessmentIsDeleteFalse  = async () => {
     try {
-      const response = await axiosAdmin.get('/assessment/get-by-user/1');
+      const response = await axiosAdmin.get('/assessment/get-by-user/2');
       const updatedPoData = response.data.map((subject) => {
         return {
           key: subject.assessment_id,
@@ -176,7 +176,7 @@ const ManagementAssessment = (nav) => {
         }}
       />
 
-      <DropdownAndNavSubject/>
+      <DropdownAndNavGrading/>
       <div className="w-full my-5">
         {selectedRowKeys.length !== 0 && (
           <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">

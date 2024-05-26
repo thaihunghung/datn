@@ -47,6 +47,24 @@ const RubricController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+
+  getBySubject: async (req, res) => {
+    try {
+      const { subject_id } = req.params;
+      const subject = await SubjectModel.findOne({ where: { subject_id: subject_id } });
+      if (!subject) {
+        return res.status(404).json({ message: 'Subject not found' });
+      }
+      const rubric = await RubricModel.findAll({ where: { subject_id: subject_id } });
+      if (!rubric) {
+        return res.status(404).json({ message: 'rubric not found' });
+      }
+      res.status(200).json(rubric);
+    } catch (error) {
+      console.error('Error finding rubric:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  }, 
   // Update rubric
   update: async (req, res) => {
     try {

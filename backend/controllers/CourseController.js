@@ -135,6 +135,22 @@ const CourseController = {
     }
   },
 
+  getByIDTeacher: async (req, res) => {
+    try {
+      const { id_teacher } = req.params;
+      const courses = await CourseModel.findAll({ where: { teacher_id: id_teacher, isDelete: false }});
+      if (!courses || courses.length === 0) {
+        return res.status(404).json({ message: 'Không tìm thấy khóa học' });
+      }
+ 
+      res.json({course: courses});
+    } catch (error) {
+      console.error('Lỗi khi tìm kiếm khóa học:', error);
+      res.status(500).json({ message: 'Lỗi máy chủ' });
+    }
+  },
+  
+
   getByIdWithCourseEnrollment: async (req, res) => {
     try {
       const { id } = req.params;

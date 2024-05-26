@@ -3,6 +3,10 @@ const AssessmentModel = require('../models/AssessmentModel');
 const CourseModel = require('../models/CourseModel');
 const UserModel = require('../models/UserModel');
 
+const ExcelJS = require('exceljs');
+const fs = require('fs');
+const path = require('path');
+
 const AssessmentsController = {
   index: async (req, res) => {
     try {
@@ -66,10 +70,10 @@ const AssessmentsController = {
     try {
       const { data } = req.body;
       console.log(data);
-      const newProgram = await AssessmentModel.create(data);
-      res.json(newProgram);
+      const Assessment = await AssessmentModel.create(data);
+      res.json(Assessment);
     } catch (error) {
-      console.error('Lỗi tạo chương trình:', error);
+      console.error('Lỗi tạo Assessment:', error);
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
@@ -154,6 +158,64 @@ const AssessmentsController = {
     } catch (error) {
       console.error('Lỗi cập nhật trạng thái isDelete:', error);
       res.status(500).json({ message: 'Lỗi server' });
+    }
+  },
+
+  processSaveTemplateAssessment: async (req, res) => {
+    if (!req.files) {
+      return res.status(400).send('No file uploaded.');
+    }
+    
+    const requestData = JSON.parse(req.body.data);
+
+    // Tạo một object mới với thuộc tính course_id
+    //console.log(requestData);
+    
+    // try {
+    //   const subject = await SubjectModel.findByPk(subject_id);
+    //   if (!subject) {
+    //     return res.status(404).json({ message: 'Subject not found' });
+    //   }
+    // } catch (error) {
+    //   console.error('Error fetching subject:', error);
+    //   return res.status(500).json({ message: 'Error fetching subject from the database' });
+    // }
+    const uploadDirectory = path.join(__dirname, '../uploads');
+    const filename = req.files[0].filename;
+    const filePath = path.join(uploadDirectory, filename);
+
+    const workbook = new ExcelJS.Workbook();
+    try {
+      await workbook.xlsx.readFile(filePath);
+    } catch (error) {
+      return res.status(500).json({ message: 'Error reading the uploaded file' });
+    }
+
+    const worksheet = workbook.getWorksheet('Students Form');
+    const jsonData = [];
+
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber > 1) {
+        jsonData.push({
+          user_id: 2,
+          teacher_id: 2,
+          course_id: requestData.course_id,
+          rubric_id: requestData.rubric_id,
+          description: requestData.description,
+          place: requestData.place,
+          date: requestData.date,
+          student_id: row.getCell(1).value,
+        });
+      }
+    });
+
+    fs.unlinkSync(filePath);
+    try {
+      const createdAssessment = await AssessmentModel.bulkCreate(jsonData);
+      res.status(201).json({ message: 'Data saved successfully', data: createdAssessment });
+    } catch (error) {
+      console.error('Error saving data to the database:', error);
+      res.status(500).json({ message: 'Error saving data to the database' });
     }
   },
 };

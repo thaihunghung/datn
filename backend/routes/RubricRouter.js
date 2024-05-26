@@ -194,6 +194,8 @@ const router = express.Router();
 router.get('/rubric', RubricController.index);
 router.post('/rubric', RubricController.create);
 router.get('/rubric/:id', RubricController.getByID);
+router.get('/rubric/getBySubject/:subject_id', RubricController.getBySubject);
+
 router.put('/rubric/:id', RubricController.update);
 router.delete('/rubric/:id', RubricController.delete);
 router.delete('/rubric/delete/multiple', RubricController.deleteMultiple);

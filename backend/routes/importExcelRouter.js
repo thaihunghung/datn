@@ -4,7 +4,6 @@ const fs = require('fs');
 const router = express.Router();
 
 const path = require('path');
-const { CsvSaveController, CsvUpdateController } = require('../controllers/CsvSaveController');
 const StudentController = require('../controllers/StudentController');
 const ProgramsController = require('../controllers/ProgramsController');
 const PoController = require('../controllers/PoController');
@@ -12,6 +11,7 @@ const PloController = require('../controllers/PloController');
 const CloController = require('../controllers/CloController');
 const ChapterController = require('../controllers/ChapterController');
 const SubjectController = require('../controllers/SubjectController');
+const AssessmentsController = require('../controllers/AssessmentsController');
 
 const uploadDirectory = path.join(__dirname, '../uploads');
 
@@ -33,8 +33,8 @@ router.post('/student', upload.any(), StudentController.saveStudentExcel);
 router.post('/clo', upload.any(), CloController.processSaveTemplateClo);
 router.post('/chapter', upload.any(), ChapterController.processSaveTemplateChapter);
 router.post('/subject', upload.any(), SubjectController.processSaveTemplateSubject);
+router.post('/assessment', upload.any(), AssessmentsController.processSaveTemplateAssessment);
 
-router.put('/program/update', upload.any(), CsvUpdateController.updateFormProgram);
 router.put('/student/update', upload.any(), StudentController.updateStudentsFromExcel);
 router.put('/po/update', upload.any(), PoController.processUpdateTemplatePo);
 router.put('/plo/update', upload.any(), PloController.processUpdateTemplatePlo);
