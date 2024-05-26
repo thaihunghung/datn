@@ -32,7 +32,8 @@ const AssessmentsController = {
         attributes: [
           'course_id',
           [Sequelize.fn('COUNT', Sequelize.col('assessment_id')), 'assessmentCount'],
-          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('student_id'))), 'studentCount']
+          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('student_id'))), 'studentCount'],
+          [Sequelize.fn('SUM', Sequelize.literal('CASE WHEN score = 0 THEN 1 ELSE 0 END')), 'zeroScoreCount']
         ],
         group: ['course_id'],
         // include: [
@@ -42,17 +43,17 @@ const AssessmentsController = {
         //   }
         // ]
       });
-
+  
       if (assessments.length === 0) {
         return res.status(404).json({ message: 'No assessments found for this user' });
       }
-
+  
       const result = assessments.map(assessment => ({
         course_id: assessment.course_id,
-
         user_id: userId,
         assessmentCount: assessment.dataValues.assessmentCount,
-        studentCount: assessment.dataValues.studentCount
+        studentCount: assessment.dataValues.studentCount,
+        zeroScoreCount: assessment.dataValues.zeroScoreCount
       }));
 
       res.status(200).json(result);

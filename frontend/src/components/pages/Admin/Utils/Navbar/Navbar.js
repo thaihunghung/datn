@@ -45,7 +45,7 @@ function Nav(props) {
 
     const navTab = [
         { text: "Tổng quan", link: "/admin", icon: <i className={`text-[FF8077] fa-solid fa-house mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
-        { text: "Chấm điểm", link: "/admin/management-point", icon: <i className={`fa-solid fa-feather-pointed mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
+        { text: "Chấm điểm", link: "/admin/management-grading", icon: <i className={`fa-solid fa-feather-pointed mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
         {
             text: "Programs",
             icon: <i className={`fa-solid fa-gear mr-${collapsedNav ? "0" : "3"} w-4`}></i>,
