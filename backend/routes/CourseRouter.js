@@ -138,8 +138,11 @@ const router = express.Router();
  */
 
 router.get('/course', CourseController.index);
-router.post('/course', CourseController.create);
 router.get('/course/:id', CourseController.getByID);
+router.get('/course/course-enrollment/:id', CourseController.getByIdWithCourseEnrollment);
+router.get('/course-course-enrollment', CourseController.getAllWithCourseEnrollment);
+
+router.post('/course', CourseController.create);
 router.put('/course/:id', CourseController.update);
 router.delete('/course/:id', CourseController.delete);
 

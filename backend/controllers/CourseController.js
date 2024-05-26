@@ -1,10 +1,36 @@
+const ClassModel = require("../models/ClassModel");
+const CourseEnrollmentModel = require("../models/CourseEnrollmentModel");
 const CourseModel = require("../models/CourseModel");
+const SemesterModel = require("../models/SemesterModel");
+const SubjectModel = require("../models/SubjectModel");
+const TeacherModel = require("../models/TeacherModel");
+const { Sequelize } = require('sequelize');
 
 const CourseController = {
+
   // Lấy tất cả các khóa học
   index: async (req, res) => {
     try {
-      const courses = await CourseModel.findAll();
+      const courses = await CourseModel.findAll({
+        include: [{
+          model: ClassModel,
+          where: { isDelete: false }
+        },
+        {
+          model: TeacherModel,
+          where: { isDelete: false }
+        },
+        {
+          model: SubjectModel,
+          where: { isDelete: false }
+        },
+        {
+          model: SemesterModel,
+          where: { isDelete: false }
+        }],
+        where: { isDelete: false }
+
+      });
       res.json(courses);
     } catch (error) {
       console.error('Lỗi khi lấy tất cả các khóa học:', error);
@@ -24,15 +50,131 @@ const CourseController = {
     }
   },
 
+  getAllWithCourseEnrollment: async (req, res) => {
+    try {
+
+      console.log("dc nha");
+      const courses = await CourseModel.findAll({
+        attributes: {
+          include: [
+            [Sequelize.literal(`(
+                        SELECT COUNT(*)
+                        FROM course_enrollments AS ce
+                        WHERE ce.course_id = course.course_id
+                        AND ce.isDelete = FALSE
+                    )`), 'enrollmentCount']
+          ]
+        },
+        include: [
+          {
+            model: ClassModel,
+            where: { isDelete: false },
+            required: true
+          },
+          {
+            model: TeacherModel,
+            where: { isDelete: false },
+            required: true
+          },
+          {
+            model: SubjectModel,
+            where: { isDelete: false },
+            required: true
+          },
+          {
+            model: SemesterModel,
+            where: { isDelete: false },
+            required: true
+          }
+        ],
+        where: { isDelete: false }
+      });
+
+      res.json(courses);
+    } catch (error) {
+      console.error('Lỗi khi lấy tất cả các khóa học:', error);
+      res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
+    }
+  },
+
   // Lấy một khóa học theo ID
   getByID: async (req, res) => {
     try {
+      console.log("aaaaa");
       const { id } = req.params;
-      const course = await CourseModel.findOne({ where: { course_id: id } });
+      const course = await CourseModel.findAll({
+        include: [{
+          model: ClassModel,
+          where: { isDelete: false }
+        },
+        {
+          model: TeacherModel,
+          where: { isDelete: false }
+        },
+        {
+          model: SubjectModel,
+          where: { isDelete: false }
+        },
+        {
+          model: SemesterModel,
+          where: { isDelete: false }
+        }],
+        where: {
+          isDelete: false,
+          course_id: id
+        }
+
+      });
       if (!course) {
         return res.status(404).json({ message: 'Không tìm thấy khóa học' });
       }
       res.json(course);
+    } catch (error) {
+      console.error('Lỗi khi tìm kiếm khóa học:', error);
+      res.status(500).json({ message: 'Lỗi máy chủ' });
+    }
+  },
+
+  getByIdWithCourseEnrollment: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const course = await CourseModel.findAll({
+        include: [
+          {
+            model: ClassModel,
+            where: { isDelete: false }
+          },
+          {
+            model: TeacherModel,
+            where: { isDelete: false }
+          },
+          {
+            model: SubjectModel,
+            where: { isDelete: false }
+          },
+          {
+            model: SemesterModel,
+            where: { isDelete: false }
+          }
+        ],
+        where: {
+          isDelete: false,
+          course_id: id
+        }
+      });
+
+      if (!course) {
+        return res.status(404).json({ message: 'Không tìm thấy khóa học' });
+      }
+
+      const enrollmentCount = await CourseEnrollmentModel.count({
+        where: {
+          course_id: id,
+          isDelete: false
+        }
+      });
+
+      res.json({ course, enrollmentCount });
     } catch (error) {
       console.error('Lỗi khi tìm kiếm khóa học:', error);
       res.status(500).json({ message: 'Lỗi máy chủ' });

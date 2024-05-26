@@ -210,7 +210,7 @@ const StudentController = {
       students.forEach(student => {
         worksheet.addRow({
           id: student.student_id,
-          classCode: student.Class.classCode,
+          classCode: student.class.classCode,
           name: student.name,
           studentCode: student.studentCode,
           email: student.email

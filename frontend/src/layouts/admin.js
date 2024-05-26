@@ -51,8 +51,6 @@ import CreateRubicItems from '../components/pages/Admin/Management/ManagementRub
 import UpdateRubicItems from '../components/pages/Admin/Management/ManagementRubric/UpdateRubicItems';
 import StoreRubric from '../components/pages/Admin/Management/ManagementRubric/StoreRubric';
 import View from '../components/pages/Admin/Management/ManagementRubric/View';
-import StoreRubicItems from '../components/pages/Admin/Management/ManagementRubric/StoreRubicItems';
-import ManagementAssessment from '../components/pages/Admin/Management/ManagementAssessment/ManagementAssessment';
 
 
 function Admin(props) {
@@ -150,7 +148,8 @@ function Admin(props) {
           <Route path="/class/store" element={<StoreClass collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
           <Route path="/course" element={<Course collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
-          
+          <Route path="/course/:id" element={<DetailCourse collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+
         </Routes> 
       </div>
     </div>
