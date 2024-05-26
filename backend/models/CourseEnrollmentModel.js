@@ -43,7 +43,7 @@ const CourseEnrollmentModel = sequelize.define('course_enrollment', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'course_enrollment'
+  tableName: 'course_enrollments'
 });
 
 CourseEnrollmentModel.belongsTo(StudentModel, {

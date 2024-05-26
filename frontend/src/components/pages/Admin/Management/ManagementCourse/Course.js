@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card, Col, Row, Pagination, Typography, Breadcrumb } from "antd";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin"; // Adjust the import path as necessary
 
 const { Title } = Typography;
@@ -11,6 +11,7 @@ const Course = (props) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6); // Number of cards per page
   const [totalCourses, setTotalCourses] = useState(0);
+  const navigate = useNavigate();
 
   const getAcronym = (phrase) => {
     return phrase
@@ -92,9 +93,10 @@ const Course = (props) => {
                   {getAcronym(course.subject.subjectName)}
                 </div>
               }
+              onClick={() => navigate(`${course.course_id}`)}
             >
               <div className="font-black">
-                {`${course.subject.subjectName} - ${course.semester.descriptionShort}`}
+                {`${course.subject.subjectName} ${course.class.classCode} - ${course.semester.descriptionShort}`}
               </div>
               <p><strong>Class:</strong> {course.class.className}</p>
               <p><strong>Teacher:</strong> {course.teacher.name}</p>

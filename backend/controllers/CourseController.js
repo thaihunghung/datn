@@ -1,5 +1,5 @@
 const ClassModel = require("../models/ClassModel");
-const CourseEnrollmentModel = require("../models/CourseEnrollment");
+const CourseEnrollmentModel = require("../models/CourseEnrollmentModel");
 const CourseModel = require("../models/CourseModel");
 const SemesterModel = require("../models/SemesterModel");
 const SubjectModel = require("../models/SubjectModel");
@@ -100,6 +100,7 @@ const CourseController = {
   // Lấy một khóa học theo ID
   getByID: async (req, res) => {
     try {
+      console.log("aaaaa");
       const { id } = req.params;
       const course = await CourseModel.findAll({
         include: [{
