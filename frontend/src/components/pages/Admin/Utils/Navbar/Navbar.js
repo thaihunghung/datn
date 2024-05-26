@@ -43,21 +43,6 @@ function Nav(props) {
         return location.pathname === href ? 'Admin_tab-active' : '';
     };
 
-    const menuItems = [
-        { label: "Tổng quan", path: "/admin" },
-        { label: "Chấm điểm", path: "/admin/management-point" },
-        {
-            label: "About",
-            path: "/about",
-            submenu: [
-                { label: "Our Team", path: "/about/team" },
-                { label: "Our Story", path: "/about/story" }
-            ]
-        },
-        { label: "Rubric", path: "/admin/management-rubric" },
-        { label: "Sinh viên", path: "/admin/student" }
-    ];
-
     const navTab = [
         { text: "Tổng quan", link: "/admin", icon: <i className={`text-[FF8077] fa-solid fa-house mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
         { text: "Chấm điểm", link: "/admin/management-point", icon: <i className={`fa-solid fa-feather-pointed mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
@@ -98,9 +83,9 @@ function Nav(props) {
                 },
                 {
                     text: (<><i className="fa-solid fa-minus mr-3"></i>PO_PLO</>),
-                    link: "/admin/po-plo",
+                    link: "/admin/management-program/po-plo",
                     active: [
-                        "/admin/po-plo",
+                        "/admin/management-program/po-plo",
                     ]
                 }
             ]

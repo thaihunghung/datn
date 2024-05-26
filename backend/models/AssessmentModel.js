@@ -3,6 +3,8 @@ const sequelize = require('../config/database');
 const RubricModel = require('./RubricModel');
 const CourseModel = require('./CourseModel');
 const UserModel = require('./UserModel');
+const TeacherModel = require('./TeacherModel');
+const StudentModel = require('./StudentModel');
 
 const AssessmentModel = sequelize.define('Assessment', {
   assessment_id: {
@@ -10,7 +12,7 @@ const AssessmentModel = sequelize.define('Assessment', {
     primaryKey: true,
     autoIncrement: true
   },
-
+  
   user_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -23,16 +25,16 @@ const AssessmentModel = sequelize.define('Assessment', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: UserModel,
-      key: 'user_id'
+      model: TeacherModel,
+      key: 'teacher_id'
     }
   },
   student_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: UserModel,
-      key: 'user_id'
+      model: StudentModel,
+      key: 'student_id'
     }
   },
   rubric_id: {
@@ -83,5 +85,10 @@ const AssessmentModel = sequelize.define('Assessment', {
   updatedAt: 'updatedAt',
   tableName: 'assessments'
 });
+AssessmentModel.belongsTo(UserModel, { foreignKey: 'user_id' });
+AssessmentModel.belongsTo(TeacherModel, { foreignKey: 'teacher_id' });
+AssessmentModel.belongsTo(StudentModel, { foreignKey: 'student_id' });
+AssessmentModel.belongsTo(RubricModel, { foreignKey: 'rubric_id' });
+AssessmentModel.belongsTo(CourseModel, { foreignKey: 'course_id' });
 
 module.exports = AssessmentModel;

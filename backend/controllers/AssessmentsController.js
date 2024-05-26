@@ -1,4 +1,7 @@
+const { Op, Sequelize } = require('sequelize');
 const AssessmentModel = require('../models/AssessmentModel');
+const CourseModel = require('../models/CourseModel');
+const UserModel = require('../models/UserModel');
 
 const AssessmentsController = {
   index: async (req, res) => {
@@ -17,7 +20,47 @@ const AssessmentsController = {
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
+  GetByUser: async (req, res) => {
+    try {
+      const userId = parseInt(req.params.user_id);
+      console.log(userId);
+      const assessments = await AssessmentModel.findAll({
+        where: {
+          user_id: userId,
+          isDelete: false
+        },
+        attributes: [
+          'course_id',
+          [Sequelize.fn('COUNT', Sequelize.col('assessment_id')), 'assessmentCount'],
+          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('student_id'))), 'studentCount']
+        ],
+        group: ['course_id'],
+        // include: [
+        //   {
+        //     model: CourseModel,
+        //     attributes: ['course_name']
+        //   }
+        // ]
+      });
 
+      if (assessments.length === 0) {
+        return res.status(404).json({ message: 'No assessments found for this user' });
+      }
+
+      const result = assessments.map(assessment => ({
+        course_id: assessment.course_id,
+
+        user_id: userId,
+        assessmentCount: assessment.dataValues.assessmentCount,
+        studentCount: assessment.dataValues.studentCount
+      }));
+
+      res.status(200).json(result);
+    } catch (error) {
+      console.error('Error fetching assessments:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
   create: async (req, res) => {
     try {
       const { data } = req.body;
