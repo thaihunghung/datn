@@ -1,6 +1,8 @@
 
 import { useEffect, useState } from "react";
 import { Table, Tooltip, Button, message } from 'antd';
+import { Flex, Progress } from 'antd';
+
 import { Link } from "react-router-dom";
 import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Chip } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
@@ -22,29 +24,53 @@ const ManagementAssessment = (nav) => {
       title: "Số lượng sv",
       dataIndex: "studentCount",
       render: (record) => (
-          <div className="text-sm min-w-[100px]">
-              <p className="font-medium">{record}</p>
-          </div>
+        <div className="text-sm min-w-[100px]">
+          <p className="font-medium">{record}</p>
+        </div>
       ),
     },
     {
       title: "Số lượng sv",
       dataIndex: "zeroScoreCount",
       render: (record) => (
-          <div className="text-sm min-w-[100px]">
-              <p className="font-medium">{record}</p>
-          </div>
+        <div className="text-sm min-w-[100px]">
+          <p className="font-medium">{record}</p>
+        </div>
       ),
     },
-    {  
+    {
       title: "Số lượng cần đánh giá",
       dataIndex: "assessmentCount",
       render: (record) => (
-          <div className="text-sm min-w-[100px]">
-              <p className="font-medium">{record}</p>
-          </div>
+        <div className="text-sm min-w-[100px]">
+          <p className="font-medium">{record}</p>
+        </div>
       ),
     },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      render: (record) => (
+        <div className="text-sm min-w-[100px]">
+          <Flex vertical gap="middle">
+            <Progress
+              percent={record.zeroScoreCount/ record.assessmentCount}
+              status="active"
+              strokeColor={{
+                from: '#108ee9',
+                to: '#87d068',
+              }}
+            />
+          </Flex>
+        </div>
+      ),
+    },
+
+     
+
+
+
+
     {
       title: (
         <div className="flex items-center justify-center w-full">
@@ -96,20 +122,26 @@ const ManagementAssessment = (nav) => {
     setSelectedRowKeys([]);
     setSelectedRow([]);
   };
-  const getAllAssessmentIsDeleteFalse  = async () => {
+
+  const getAllAssessmentIsDeleteFalse = async () => {
     try {
       const response = await axiosAdmin.get('/assessment/get-by-user/2');
       const updatedPoData = response.data.map((subject) => {
+        const status = {
+          assessmentCount: subject.assessmentCount,
+          zeroScoreCount: subject.zeroScoreCount 
+        }
         return {
           key: subject.assessment_id,
           assessmentCount: subject.assessmentCount,
-          studentCount: subject.studentCount, 
+          studentCount: subject.studentCount,
           zeroScoreCount: subject.zeroScoreCount,
+          status: status,
           action: subject.assessment_id
         };
       });
       setSubjects(updatedPoData);
-      console.log(response.data);
+      console.log(updatedPoData);
     } catch (error) {
       console.error("Error: " + error.message);
       message.error('Error fetching PO data');
@@ -123,7 +155,7 @@ const ManagementAssessment = (nav) => {
     console.log(data)
     try {
       const response = await axiosAdmin.put('/subject/listId/soft-delete-multiple', { data });
-      await getAllAssessmentIsDeleteFalse ();
+      await getAllAssessmentIsDeleteFalse();
       handleUnSelect();
       message.success(response.data.message);
     } catch (error) {
@@ -135,7 +167,7 @@ const ManagementAssessment = (nav) => {
   const handleSoftDeleteById = async (_id) => {
     try {
       const response = await axiosAdmin.put(`/subject/${_id}/toggle-soft-delete`);
-      await getAllAssessmentIsDeleteFalse ();
+      await getAllAssessmentIsDeleteFalse();
       handleUnSelect();
       message.success(response.data.message);
     } catch (error) {
@@ -145,7 +177,7 @@ const ManagementAssessment = (nav) => {
   };
 
   useEffect(() => {
-    getAllAssessmentIsDeleteFalse ()
+    getAllAssessmentIsDeleteFalse()
     const handleResize = () => {
       if (window.innerWidth < 1024) {
         setCollapsedNav(true);
@@ -176,7 +208,7 @@ const ManagementAssessment = (nav) => {
         }}
       />
 
-      <DropdownAndNavGrading/>
+      <DropdownAndNavGrading />
       <div className="w-full my-5">
         {selectedRowKeys.length !== 0 && (
           <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
@@ -274,7 +306,7 @@ function ConfirmAction(props) {
             <ModalHeader>Cảnh báo</ModalHeader>
             <ModalBody>
               <p className="text-[16px]">
-              Subject sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
+                Subject sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
 
               </p>
             </ModalBody>
