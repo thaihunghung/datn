@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Card, Button, Typography, List, notification } from "antd";
+import { Link, useParams } from "react-router-dom";
+import { Card, Button, Typography, List, notification, Breadcrumb } from "antd";
 import { axiosAdmin } from "../../../../../../service/AxiosAdmin";
 
 const { Title } = Typography;
@@ -84,6 +84,20 @@ const DetailCourse = () => {
 
   return (
     <div>
+      <Breadcrumb
+        style={{
+          fontSize: '18px',
+          margin: '16px 16px',
+        }}
+      >
+        <Breadcrumb.Item>
+          <Link to="/admin">Home</Link>
+        </Breadcrumb.Item>
+        <Breadcrumb.Item>
+        <Link to="/admin/course">Course</Link>
+        </Breadcrumb.Item>
+        <Breadcrumb.Item>Chi tiết</Breadcrumb.Item>
+      </Breadcrumb>
       <Title level={2}>{course.subject.subjectName}</Title>
       <Card>
         <p><strong>Class:</strong> {course.class.className}</p>

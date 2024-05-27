@@ -43,6 +43,8 @@ const CourseEnrollmentController = {
       const { data } = req.body;
       const { id } = data;
 
+      console.log("req", data);
+
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Students Form');
 
