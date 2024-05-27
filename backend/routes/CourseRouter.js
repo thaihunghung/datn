@@ -139,6 +139,7 @@ const router = express.Router();
 
 router.get('/course', CourseController.index);
 router.get('/course/:id', CourseController.getByID);
+router.get('/course/getByTeacher/:id_teacher', CourseController.getByIDTeacher);
 router.get('/course/course-enrollment/:id', CourseController.getByIdWithCourseEnrollment);
 router.get('/course-course-enrollment', CourseController.getAllWithCourseEnrollment);
 

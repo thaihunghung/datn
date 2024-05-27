@@ -80,7 +80,8 @@ const UpdateRubicItems = (nav) => {
 
       setSelectedScore(response.data.score)
       setRubricItems(response.data)
-      setSelectedQualityLevel(response.data.QualityLevels.length - 1)
+      console.log(response.data.QualityLevels)
+      setSelectedQualityLevel(response.data.QualityLevels.length-1)
     } catch (error) { }
   }
 
@@ -90,9 +91,6 @@ const UpdateRubicItems = (nav) => {
 
   }, []);
 
-
-
-  
   useEffect(() => {
     if (selectedClo) {
       setSelectedPlo(null) 
@@ -213,7 +211,7 @@ const UpdateRubicItems = (nav) => {
         score: score
       };
 
-      const response = await axiosAdmin.put(`/rubric-item/${id}`, { data: data });
+      const response = await axiosAdmin.put(`/rubric-item/${rubric_item_id}`, { data: data });
       console.log(response.data);
 
 
@@ -229,17 +227,17 @@ const UpdateRubicItems = (nav) => {
           const levelText = level.textContent.trim();
           const nameText = names[index].textContent.trim();
           const keyNumberText = keyNumbers[index].textContent.trim();
-          dataqualityLevel.push({ rubricsItem_id: id, level: levelText, name: nameText, keyNumber: parseFloat(keyNumberText) });
+          dataqualityLevel.push({ rubricsItem_id: rubric_item_id, level: levelText, name: nameText, keyNumber: parseFloat(keyNumberText) });
         });
       });
 
       const qualityLevel = {
         dataqualityLevel
       }
+      console.log(dataqualityLevel);
+
       await axiosAdmin.delete(`/quality-level/rubric-item/${id}`);
-      console.log(id)
       await axiosAdmin.post(`/quality-level`, { qualityLevel });
-      
 
     } catch (error) {
       console.error('Error while saving:', error);

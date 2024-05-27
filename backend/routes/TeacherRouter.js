@@ -138,12 +138,13 @@ const router = express.Router();
  */
 
 router.get('/teacher', TeacherController.index);
+router.get('/teacher/getByUser/:user_id', TeacherController.getByUser);
+
+
 router.post('/teacher', TeacherController.create);
 router.get('/teacher/:id', TeacherController.getByID);
-
 router.put('/teacher/:id', TeacherController.update);
 router.delete('/teacher/:id', TeacherController.delete);
-
 router.get('/teacher/isDelete/true', TeacherController.isDeleteTotrue);
 router.get('/teacher/isDelete/false', TeacherController.isDeleteTofalse);
 router.put('/teacher/isDelete/:id', TeacherController.isDelete);

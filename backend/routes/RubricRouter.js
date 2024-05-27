@@ -194,24 +194,23 @@ const router = express.Router();
 router.get('/rubric', RubricController.index);
 router.post('/rubric', RubricController.create);
 router.get('/rubric/:id', RubricController.getByID);
+router.get('/rubric/getBySubject/:subject_id', RubricController.getBySubject);
+
 router.put('/rubric/:id', RubricController.update);
 router.delete('/rubric/:id', RubricController.delete);
 router.delete('/rubric/delete/multiple', RubricController.deleteMultiple);
-
-
 
 router.get('/rubric/isDelete/true', RubricController.isDeleteTotrue);
 router.get('/rubric/isDelete/false', RubricController.isDeleteTofalse);
 router.put('/rubric/isDelete/:id', RubricController.isdelete);
 router.get('/rubric/:id/items', RubricController.GetItemsRubricsByIdRubrics);
+router.get('/rubric/:id/items-isDelete-true', RubricController.GetItemsRubricsByIdRubricsisDeleteTrue);
+
 //router.get('/rubric/get-by-user/:userId/checkscore', RubricController.GetByUserIdAndCheckScore);
 router.get('/rubric/get-by-user/checkscore', RubricController.GetByUserAndCheckScore);
 router.put('/rubric/listId/soft-delete-multiple', RubricController.softDeleteMultiple);
 router.get('/rubric/archive/get-by-user/checkscore', RubricController.GetisDeleteTotrueByUserAndCheckScore);
 
-
-
 router.put('/rubric/:id/toggle-soft-delete', RubricController.toggleSoftDeleteById);
-
 // /rubrics/get-by-user/:userId/checkscore  vậy mới đúng
 module.exports = router;

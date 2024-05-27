@@ -39,6 +39,20 @@ const TeacherController = {
     }
   },
 
+  getByUser: async (req, res) => {
+    try {
+      const { user_id } = req.params;
+      const teacherDetail = await TeacherModel.findOne({ where: { user_id: user_id } });
+      if (!teacherDetail) {
+        return res.status(404).json({ message: 'Không tìm thấy giáo viên' });
+      }
+      res.json(teacherDetail);
+    } catch (error) {
+      console.error('Lỗi khi tìm kiếm giáo viên:', error);
+      res.status(500).json({ message: 'Lỗi server' });
+    }
+  },
+
   // Cập nhật thông tin của một giáo viên dựa trên ID
   update: async (req, res) => {
     try {

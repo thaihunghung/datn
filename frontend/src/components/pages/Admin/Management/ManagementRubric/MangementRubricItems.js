@@ -160,31 +160,30 @@ const MangementRubricItems = (nav) => {
         }
     };
     
-
     const handleSoftDelete = async () => {
         const data = {
-            rubric_id: selectedRowKeys,
+            rubricsitem_id: selectedRowKeys,
         };
         try {
-            const response = await axiosAdmin.put('/rubric/listId/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/rubric-item/listId/soft-delete-multiple', { data });
             await GetRubicAndItemsById();
             handleUnSelect();
             message.success(response.data.message);
         } catch (error) {
-            console.error("Error soft deleting rubrics:", error);
-            message.error('Error soft deleting rubrics');
+            console.error("Error soft deleting rubricsitems:", error);
+            message.error('Error soft deleting rubricsitems');
         }
     };
 
     const handleSoftDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/rubric/${_id}/toggle-soft-delete`);
+            const response = await axiosAdmin.put(`/rubric-item/${_id}/toggle-soft-delete`);
             await GetRubicAndItemsById();
             handleUnSelect();
             message.success(response.data.message);
         } catch (error) {
-            console.error(`Error toggling soft delete for rubric with ID ${_id}:`, error);
-            message.error(`Error toggling soft delete for rubric with ID ${_id}`);
+            console.error(`Error toggling soft delete for rubricsitem with ID ${_id}:`, error);
+            message.error(`Error toggling soft delete for rubricsitem with ID ${_id}`);
         }
     };
 

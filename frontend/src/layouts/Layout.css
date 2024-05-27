@@ -6,6 +6,7 @@
 }
 
 .Admin_tab-active{
-    background-color: rgb(71 85 105);
+    /* background-color: rgb(71 85 105); */
+    border: 4px solid #FF8077;
 }
 

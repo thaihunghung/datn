@@ -170,6 +170,10 @@ router.post('/rubric-item/save-check-score', RubricItemController.checkScore);
 
 router.put('/rubric-item/:id', RubricItemController.update);
 router.delete('/rubric-item/:id', RubricItemController.delete);
+router.delete('/rubric-item/delete/multiple', RubricItemController.deleteMultiple);
+
+router.put('/rubric-item/listId/soft-delete-multiple', RubricItemController.softDeleteMultiple);
+router.put('/rubric-item/:id/toggle-soft-delete', RubricItemController.toggleSoftDeleteById);
 
 router.get('/rubric-item/isDelete/true', RubricItemController.isDeleteTotrue);
 router.get('/rubric-item/isDelete/false', RubricItemController.isDeleteTofalse);

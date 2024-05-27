@@ -1,17 +1,27 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, signInWithGoogle, signOut } from "../../../../../service/firebase";
-import { User, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection, ScrollShadow, Button, Navbar, NavbarBrand, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, NavbarContent, NavbarItem } from "@nextui-org/react";
+import { User, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection, ScrollShadow, Button } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { Tooltip } from "antd";
 import { motion } from "framer-motion";
+import { Drawer, Menu } from "antd";
 
+import './Header.css'
 function Nav(props) {
     const { collapsedNav, setCollapsedNav, setSpinning } = props;
     const navigate = useNavigate();
     const location = useLocation();
     const isActive = (path) => location.pathname.startsWith(path);
+    const [openMobileMenu, setOpenMobileMenu] = useState(false);
 
+    const showDrawer = () => {
+        setOpenMobileMenu(true);
+    };
+
+    const onClose = () => {
+        setOpenMobileMenu(false);
+    };
     const [submenuVisible, setSubmenuVisible] = useState({});
     const [currentUser, setCurrentUser] = useState(null);
 
@@ -33,24 +43,9 @@ function Nav(props) {
         return location.pathname === href ? 'Admin_tab-active' : '';
     };
 
-    const menuItems = [
-        { label: "Tổng quan", path: "/admin" },
-        { label: "Chấm điểm", path: "/admin/management-point" },
-        {
-            label: "About",
-            path: "/about",
-            submenu: [
-                { label: "Our Team", path: "/about/team" },
-                { label: "Our Story", path: "/about/story" }
-            ]
-        },
-        { label: "Rubric", path: "/admin/management-rubric" },
-        { label: "Sinh viên", path: "/admin/student" }
-    ];
-
     const navTab = [
-        { text: "Tổng quan", link: "/admin", icon: <i className={`fa-solid fa-house mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
-        { text: "Chấm điểm", link: "/admin/management-point", icon: <i className={`fa-solid fa-feather-pointed mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
+        { text: "Tổng quan", link: "/admin", icon: <i className={`text-[FF8077] fa-solid fa-house mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
+        { text: "Chấm điểm", link: "/admin/management-grading/list", icon: <i className={`fa-solid fa-feather-pointed mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
         {
             text: "Programs",
             icon: <i className={`fa-solid fa-gear mr-${collapsedNav ? "0" : "3"} w-4`}></i>,
@@ -88,9 +83,9 @@ function Nav(props) {
                 },
                 {
                     text: (<><i className="fa-solid fa-minus mr-3"></i>PO_PLO</>),
-                    link: "/admin/po-plo",
+                    link: "/admin/management-program/po-plo",
                     active: [
-                        "/admin/po-plo",
+                        "/admin/management-program/po-plo",
                     ]
                 }
             ]
@@ -145,73 +140,64 @@ function Nav(props) {
         setCollapsedNav(!collapsedNav);
     };
     return (
-        <>
+        <div >
             <div className="block sm:hidden lg:hidden xl:hidden">
-                <Navbar disableAnimation isBordered>
-                    <NavbarContent className="sm:hidden" justify="start">
-                        <NavbarMenuToggle />
-                    </NavbarContent>
-                    <NavbarContent className="sm:hidden pr-3" justify="center">
-                        <NavbarBrand>
-                            <p className="font-bold text-inherit">SET</p>
-                        </NavbarBrand>
-                    </NavbarContent>
-                    <NavbarContent className="hidden sm:flex gap-4" justify="center">
-                        <NavbarBrand>
-                            <p className="font-bold text-inherit">SET</p>
-                        </NavbarBrand>
-                        <NavbarItem>
-                            <Link color="foreground" to="/features">Features</Link>
-                        </NavbarItem>
-                        <NavbarItem isActive>
-                            <Link to="/customers" aria-current="page" color="warning">Customers</Link>
-                        </NavbarItem>
-                        <NavbarItem>
-                            <Link color="foreground" to="/integrations">Integrations</Link>
-                        </NavbarItem>
-                    </NavbarContent>
-                    <NavbarContent justify="end">
-                        <NavbarItem className="hidden lg:flex">
-                            <Link to="/login">Login</Link>
-                        </NavbarItem>
-                        <NavbarItem>
-                            <Button as={Link} color="warning" to="/signup" variant="flat">
-                                Sign Up
-                            </Button>
-                        </NavbarItem>
-                    </NavbarContent>
-                    <NavbarMenu>
-                        {menuItems.map((item, index) => (
-                            <NavbarMenuItem key={`${item.label}-${index}`}>
-                                <Link
-                                    className="w-[60%]"
-                                    color={index === 2 ? "warning" : index === menuItems.length - 1 ? "danger" : "foreground"}
-                                    to={item.path}
-                                    size="lg"
-                                >
-                                    {item.label}
-                                </Link>
-                                {item.submenu && (
-                                    <div className="submenu">
-                                        {item.submenu.map((subItem, subIndex) => (
-                                            <Link
-                                                key={`${subItem.label}-${subIndex}`}
-                                                className="submenu-item"
-                                                to={subItem.path}
-                                            >
-                                                {subItem.label}
+                <div className="w-full flex justify-start p-2 border">
+                <div className="Header-mobile-right" onClick={showDrawer}>
+                    <i className="fa-solid fa-bars"></i>
+                </div>
+                </div>
+                <Drawer
+                    title={ <span className="text-[#FF8077] text-base font-bold">Menu</span>}
+                    placement="left"
+                    onClose={onClose}
+                    open={openMobileMenu}
+                    className="w-full"
+                >
+                    <Menu mode="inline">
+                        {navTab.map((item, index) => (
+                            item.submenu ? (
+                                <Menu.SubMenu key={index} title={<span className="text-[#020401] text-base font-medium">  
+                                <span className="text-[#FF8077] text-base font-bold mr-3">
+                                {item.icon}
+                                </span>
+                                <span className="text-[#020401] text-base font-medium">
+                                {item.text}
+                               
+                                </span></span>}>
+                                    {item.submenu.map((subItem, subIndex) => (
+                                        <Menu.Item key={`${index}-${subIndex}`}>
+                                            <Link to={subItem.link} onClick={onClose}>
+                                                <span className="text-[#020401] text-base font-medium">{subItem.text}</span>
                                             </Link>
-                                        ))}
-                                    </div>
-                                )}
-                            </NavbarMenuItem>
+                                        </Menu.Item>
+                                    ))}
+                                </Menu.SubMenu>
+                            ) : (
+                                <Menu.Item key={index}>
+                                    <Link to={item.link} onClick={onClose}>
+                                    
+                                    <span className="text-[#FF8077] text-base font-bold mr-3">
+                                        {item.icon}
+                                       
+                                        </span>
+                                        <span className="text-[#020401] text-base font-medium">
+                                        {item.text}
+                                       
+                                        </span>
+
+                                        
+                                    </Link>
+                                </Menu.Item>
+                            )
                         ))}
-                    </NavbarMenu>
-                </Navbar>
+                    </Menu>
+                </Drawer>
             </div>
-            <div className="hidden sm:block lg:block xl:block text-[#FEFEFE]">
+
+            <div className="hidden sm:block lg:block xl:block text-[#FF8077] ">
                 <motion.div
-                    className={`Admin-Navbar flex flex-col w-["200px"] ${collapsedNav ? 'w-[87px]' : ''} h-[100vh] bg-[#ff8077]  p-3  justify-between`}
+                    className={`Admin-Navbar border-r-3 border-[#475569]  flex flex-col w-["200px"] ${collapsedNav ? 'w-[87px]' : ''} h-[100vh]  p-3  justify-between`}
                     initial={{ width: '270px' }}
                     animate={{ width: collapsedNav ? '100px' : '200px' }}
                     transition={{ duration: 0.4 }}
@@ -233,7 +219,7 @@ function Nav(props) {
                             </motion.div>
                             <Tooltip title={collapsedNav ? 'Mở rộng' : 'Thu gọn'} placement="right">
                                 <Button isIconOnly variant="light" radius="full" onClick={handleToggleNav}>
-                                    {collapsedNav ? <i className="fa-solid fa-chevron-right text-[white]"></i> : <i className="fa-solid fa-chevron-left text-[white]"></i>}
+                                    {collapsedNav ? <i className="fa-solid fa-chevron-right text-[#475569]"></i> : <i className="fa-solid fa-chevron-left text-[#475569]"></i>}
                                 </Button>
                             </Tooltip>
                         </div>
@@ -248,7 +234,7 @@ function Nav(props) {
                                                     <Link
                                                         to={tab.link}
                                                         onClick={() => toggleSubmenu(null)}
-                                                        className={`text-base w-full h-[37px] text-[#020401] font-medium p-3 py-2 rounded-lg flex justify-${collapsedNav ? 'center' : 'between'} items-center group/tab ${setActive(tab.link)}`}
+                                                        className={`text-base w-full h-[37px] text-[#475569] font-bold p-3 py-2 rounded-lg flex justify-${collapsedNav ? 'center' : 'between'} items-center group/tab ${setActive(tab.link)}`}
                                                     >
                                                         <p className="flex items-center">
                                                             {tab.icon}
@@ -268,7 +254,7 @@ function Nav(props) {
                                                             toggleSubmenu(tab.text);
                                                             open();
                                                         }}
-                                                        className={`cursor-pointer text-[#020401] font-medium ${location.pathname.startsWith(tab.link) ? setActive(tab.link) : ''} text-base w-full h-[37px] p-3 py-2 rounded-lg flex justify-${collapsedNav ? 'center' : 'between'} items-center`}
+                                                        className={`cursor-pointer text-[#475569] font-bold ${location.pathname.startsWith(tab.link) ? setActive(tab.link) : ''} text-base w-full h-[37px] p-3 py-2 rounded-lg flex justify-${collapsedNav ? 'center' : 'between'} items-center`}
                                                     >
                                                         <p className="flex items-center">
                                                             <span className="text">{tab.icon}</span>
@@ -304,7 +290,7 @@ function Nav(props) {
                                                                 <Link
                                                                     key={index}
                                                                     to={submenuItem.link}
-                                                                    className={`cursor-pointer text-sm text-[#020401] font-medium w-full p-2 pl-5 rounded-lg flex justify-start items-center 
+                                                                    className={`cursor-pointer text-sm text-[#475569] font-bold w-full p-2 pl-5 rounded-lg flex justify-start items-center 
                                                                     ${submenuIsActive ? 'Admin_tab-active' : ''}`}
                                                                 >
                                                                     {submenuItem.text}
@@ -337,6 +323,7 @@ function Nav(props) {
                                         <DropdownItem key="profile" className="h-14 gap-2">
                                             <div className="flex flex-col">
                                                 <p className="font-semibold">{currentUser?.currentUser?.displayName}</p>
+                                                
                                                 <p className="text-xs text-default-400">{currentUser?.currentUser?.email}</p>
                                             </div>
                                         </DropdownItem>
@@ -353,7 +340,7 @@ function Nav(props) {
                     </div>
                 </motion.div>
             </div>
-        </>
+        </div>
     );
 }
 

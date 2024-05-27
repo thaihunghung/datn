@@ -220,12 +220,9 @@ const PloController = {
 
   getFormUpdate: async (req, res) => {
     try {
-      const { data } = req.body;
-      if (!data || !data.id) {
-        return res.status(400).json({ message: 'Invalid input data. Expected format: { data: { id: [1, 2, 3] } }' });
-      }
 
-      const { id } = data;
+      const { id } = req.body.data;
+        console.log(id);
       const pos = await PloModel.findAll({ where: { plo_id: id } });
 
       if (!pos || pos.length === 0) {

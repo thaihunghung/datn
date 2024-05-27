@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, json } from "react-router-dom";
 import "./Plo.css"
 
 import { Table, Tooltip, Button, message } from 'antd';
@@ -54,20 +54,20 @@ const ManagePlo = (nav) => {
             dataIndex: "action",
             render: (_id) => (
                 <div className="flex flex-col items-center justify-center w-full gap-2">
-                    
-               
+
+
                     <Link to={`/admin/management-po/update/${_id}`}>
-    <Tooltip title="Chỉnh sửa">
-        <Button
-            isIconOnly
-            variant="light"
-            radius="full"
-            size="sm"
-        >
-            <i className="fa-solid fa-pen"></i>
-        </Button>
-    </Tooltip>
-</Link>
+                        <Tooltip title="Chỉnh sửa">
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+                            >
+                                <i className="fa-solid fa-pen"></i>
+                            </Button>
+                        </Tooltip>
+                    </Link>
 
 
                     <Tooltip title="Xoá">
@@ -121,32 +121,32 @@ const ManagePlo = (nav) => {
             message.error('Error fetching PO data');
         }
     };
-    
+
     const handleSoftDelete = async () => {
         const data = {
             plo_id: selectedRowKeys,
         };
         console.log(data)
         try {
-            const response = await axiosAdmin.put('/plo/listId/soft-delete-multiple', { data});
+            const response = await axiosAdmin.put('/plo/listId/soft-delete-multiple', {'data': JSON.stringify(data)});
             await getAllPlo();
             handleUnSelect();
-            message.success(response.data.message); 
+            message.success(response.data.message);
         } catch (error) {
             console.error("Error soft deleting POs:", error);
-            message.error('Error soft deleting POs'); 
+            message.error('Error soft deleting POs');
         }
     };
-    
+
     const handleSoftDeleteById = async (_id) => {
         try {
             const response = await axiosAdmin.put(`/plo/${_id}/toggle-soft-delete`);
             await getAllPlo();
             handleUnSelect();
-            message.success(response.data.message); 
+            message.success(response.data.message);
         } catch (error) {
             console.error(`Error toggling soft delete for PO with ID ${_id}:`, error);
-            message.error(`Error toggling soft delete for PO with ID ${_id}`); 
+            message.error(`Error toggling soft delete for PO with ID ${_id}`);
         }
     };
 
@@ -159,7 +159,10 @@ const ManagePlo = (nav) => {
             const data = {
                 id: selectedRowKeys
             }
-            const response = await axiosAdmin.post('/plo/templates/update', { data: data }, {
+
+            ///bug,,,,,,,,,,,,,,,,,,,,,,
+            
+            const response = await axiosAdmin.post('/plo/templates/update', {'data': JSON.stringify(data)}, {
                 responseType: 'blob'
             });
 

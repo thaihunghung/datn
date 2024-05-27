@@ -139,6 +139,7 @@ const assessmentsController = require('../controllers/AssessmentsController');
  */
 
 router.get('/assessment', assessmentsController.index);
+router.get('/assessment/get-by-user/:user_id', assessmentsController.GetByUser);
 router.post('/assessment', assessmentsController.create);
 
 router.get('/assessment/:id', assessmentsController.getByID);

@@ -67,29 +67,6 @@ const CreateRubicItems = (nav) => {
 
     } catch (error) { }
   }
-  const getAllCloDeleteFalseByRubric = async () => {
-    try {
-      const response = await axiosAdmin.get('/rubric/get-by-user/checkscore');
-      const updatedRubricData = response.data.rubric.map((rubric) => {
-        const status = {
-          status: rubric.RubricItem.length === 0 ? false : true,
-          _id: rubric.rubric_id
-        };
-        return {
-          key: rubric.rubric_id,
-          name: rubric.rubricName,
-          status: status,
-          point: rubric.RubricItem[0]?.total_score ? rubric.RubricItem[0].total_score : 0.0,
-          action: rubric.rubric_id
-        };
-      });
-      //setRubicData(updatedRubricData);
-      console.log(updatedRubricData);
-    } catch (error) {
-      console.error("Error: " + error.message);
-      message.error('Error fetching Rubric data');
-    }
-  };
   useEffect(() => {
     getOneRubricById()
     // Set initial values if needed
@@ -158,6 +135,11 @@ const CreateRubicItems = (nav) => {
       };
       
       const response = await axiosAdmin.post(`/rubric-item/save-check-score`, { data });
+      if (response.status === 201) {
+        message.success('Rubric item created successfully');
+      } else if (response.status === 400) {
+        message.error(response.data.message);
+      }
       const rubricsItem_id = response.data.data.rubricsItem_id;
       if (rubricsItem_id) {
         const levelElements = document.querySelectorAll(`.qualityLevel`);
@@ -179,14 +161,13 @@ const CreateRubicItems = (nav) => {
         const qualityLevel = {
           dataqualityLevel
         };
+        console.log("hi");
+
+        console.log(dataqualityLevel);
         await axiosAdmin.post(`/quality-level`, { qualityLevel });
       }
 
-      if (response.status === 201) {
-        message.success('Rubric item created successfully');
-      } else {
-        message.error(response.data.message);
-      }
+      
 
     } catch (error) {
       // If an error occurred during the request (e.g., network error), display a generic error message

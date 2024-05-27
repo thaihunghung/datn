@@ -4,51 +4,60 @@ const RubricModel = require('../models/RubricModel');
 const QualityLevelsModel = require('../models/QualityLevelsModel');
 
 const RubricItemController = {
-  // Get all RubricsItem
+
   index: async (req, res) => {
     try {
       const RubricsItem = await RubricItemModel.findAll();
-      res.json(RubricsItem);
+      res.status(200).json(RubricsItem);
     } catch (error) {
       console.error('Error getting all RubricsItem:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
   },
-  // Create a new rubrics_item
+
   create: async (req, res) => {
     try {
       const { data } = req.body;
       const newrubric = await RubricItemModel.create(data);
-      res.json(newrubric);
+      res.status(201).json(newrubric);
     } catch (error) {
       console.error('Error creating rubrics_item:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
+
   checkScore: async (req, res) => {
     try {
-      
       const { data } = req.body;
       const { rubric_id } = data.data;
       console.log(data);
-      console.log(rubric_id)
-      const RubricsItem = await RubricItemModel.findAll({ where: { rubric_id: rubric_id } });
-      const results = await RubricItemModel.findAll({
-        attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('score')), 'total_score']],
-        where: { rubric_id: rubric_id }
-      });
+      console.log(rubric_id);
 
-      const rubricScores =await results.map(result => ({
-        total_score: result.dataValues.total_score
-      }));
-      //console.log("rubricScores",data)
-      const totalScore = parseFloat(rubricScores[0].total_score) + parseFloat(data.score);
-      //console.log('newValue',totalScore);
-      if (totalScore <= 10) {
-        const newRubric = await RubricItemModel.create(data.data);
-        res.status(201).json({ success: true, message: "Rubric item created successfully", data: newRubric });
+      const RubricsItem = await RubricItemModel.findAll({ where: { rubric_id: rubric_id, isDelete: false } });
+      const length = RubricsItem.length;
+      if (length > 0) {
+        const results = await RubricItemModel.findAll({
+          attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('score')), 'total_score']],
+          where: { rubric_id: rubric_id, isDelete: false }
+        });
+
+        const rubricScores = results.map(result => ({
+          total_score: result.dataValues.total_score
+        }));
+
+        const totalScore = parseFloat(rubricScores[0].total_score) + parseFloat(data.score);
+
+        console.log('totalScore' + totalScore);
+        if (totalScore <= 10) {
+          const newRubric = await RubricItemModel.create(data.data);
+          res.status(201).json({ message: "Rubric item created successfully", data: newRubric });
+        } else {
+          res.status(400).json({ message: "Failed to save: Total score exceeds 10" });
+        }
       } else {
-        res.status(400).json({ success: false, message: "Failed to save: Total score exceeds 10" });
+        const newRubric = await RubricItemModel.create(data.data);
+        res.status(201).json({ message: "Rubric item created successfully", data: newRubric });
+
       }
     } catch (error) {
       console.error('Error creating rubrics_item:', error);
@@ -56,8 +65,6 @@ const RubricItemController = {
     }
   },
 
-
-  // Get rubrics_item by ID
   getByID: async (req, res) => {
     try {
       const { id } = req.params;
@@ -68,13 +75,13 @@ const RubricItemController = {
       const QualityLevels = await QualityLevelsModel.findAll({ where: { rubricsitem_id: id } });
       rubrics_item.dataValues.QualityLevels = QualityLevels;
 
-      res.status(201).json(rubrics_item);
+      res.status(200).json(rubrics_item);
     } catch (error) {
       console.error('Error finding rubrics_item:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
-  // Update rubrics_item
+
   update: async (req, res) => {
     try {
       const { id } = req.params;
@@ -83,51 +90,64 @@ const RubricItemController = {
       if (!rubrics_item) {
         return res.status(404).json({ message: 'rubrics_item not found' });
       }
-      const updatedrubric = await RubricItemModel.update(data, { where: { rubricsitem_id: id } });
-      res.json({ message: `Successfully updated rubrics_item with ID: ${id}` });
+      await RubricItemModel.update(data, { where: { rubricsitem_id: id } });
+      res.status(200).json({ message: `Successfully updated rubrics_item with ID: ${id}` });
     } catch (error) {
       console.error('Error updating rubrics_item:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
-  // Delete rubrics_item
+
   delete: async (req, res) => {
     try {
       const { id } = req.params;
+      await QualityLevelsModel.destroy({ where: { rubricsitem_id: id } });
       await RubricItemModel.destroy({ where: { rubricsitem_id: id } });
-      res.json({ message: 'Successfully deleted rubrics_item' });
+      res.status(200).json({ message: 'Successfully deleted rubrics_item' });
     } catch (error) {
       console.error('Error deleting rubrics_item:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
-  // Get RubricsItem with isDelete = true
+
+  deleteMultiple: async (req, res) => {
+    const { rubricsitem_id } = req.query;
+    try {
+      await QualityLevelsModel.destroy({ where: { rubricsitem_id: rubricsitem_id } });
+      await RubricItemModel.destroy({ where: { rubricsitem_id: rubricsitem_id } });
+      res.status(200).json({ message: 'Xóa nhiều rubrics_items thành công' });
+    } catch (error) {
+      console.error('Lỗi khi xóa nhiều rubrics_items:', error);
+      res.status(500).json({ message: 'Lỗi server nội bộ' });
+    }
+  },
+
   isDeleteTotrue: async (req, res) => {
     try {
       const RubricsItem = await RubricItemModel.findAll({ where: { isDelete: true } });
       if (!RubricsItem) {
         return res.status(404).json({ message: 'No RubricsItem found' });
       }
-      res.json(RubricsItem);
+      res.status(200).json(RubricsItem);
     } catch (error) {
       console.error('Error finding RubricsItem with isDelete true:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
-  // Get RubricsItem with isDelete = false
+
   isDeleteTofalse: async (req, res) => {
     try {
       const RubricsItem = await RubricItemModel.findAll({ where: { isDelete: false } });
       if (!RubricsItem) {
         return res.status(404).json({ message: 'No RubricsItem found' });
       }
-      res.json(RubricsItem);
+      res.status(200).json(RubricsItem);
     } catch (error) {
       console.error('Error finding RubricsItem with isDelete false:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
-  // Toggle isDelete status of a rubrics_item
+
   isdelete: async (req, res) => {
     try {
       const { id } = req.params;
@@ -138,9 +158,101 @@ const RubricItemController = {
       }
       const updatedIsDeleted = !rubrics_item.isDelete;
       await RubricItemModel.update({ isDelete: updatedIsDeleted }, { where: { rubricsitem_id: id } });
-      res.json({ message: `Successfully toggled isDelete status to ${updatedIsDeleted}` });
+      res.status(200).json({ message: `Successfully toggled isDelete status to ${updatedIsDeleted}` });
     } catch (error) {
       console.error('Error updating isDelete status:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
+
+  toggleSoftDeleteById: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const RubricItem = await RubricItemModel.findOne({ where: { rubricsitem_id: id } });
+      if (!RubricItem) {
+        return res.status(404).json({ message: 'RubricItem not found' });
+      }
+
+      if (RubricItem.isDelete) {
+        const results = await RubricItemModel.findAll({
+          attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('score')), 'total_score']],
+          where: { rubric_id: RubricItem.rubric_id, isDelete: false }
+        });
+
+        const rubricScores = results.map(result => ({
+          total_score: result.dataValues.total_score
+        }));
+
+        const totalScore = parseFloat(rubricScores[0].total_score) + parseFloat(RubricItem.score);
+        console.log('diem', RubricItem.rubric_id);
+        if (totalScore <= 10) {
+          const updatedIsDeleted = !RubricItem.isDelete;
+          await RubricItemModel.update({ isDelete: updatedIsDeleted }, { where: { rubricsitem_id: id } });
+          res.status(200).json({ message: `Toggled isDelete status to ${updatedIsDeleted}` });
+        } else {
+          res.status(400).json({ success: false, message: "Failed to save: Total score exceeds 10" });
+        }
+      } else {
+        const updatedIsDeleted = !RubricItem.isDelete;
+        await RubricItemModel.update({ isDelete: updatedIsDeleted }, { where: { rubricsitem_id: id } });
+        res.status(200).json({ message: `Toggled isDelete status to ${updatedIsDeleted}` });
+      }
+    } catch (error) {
+      console.error('Error toggling RubricItemModel delete statuses:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
+
+  softDeleteMultiple: async (req, res) => {
+    try {
+      const { data } = req.body;
+      const { rubricsitem_id } = data;
+      if (!Array.isArray(rubricsitem_id) || rubricsitem_id.length === 0) {
+        return res.status(400).json({ message: 'No RubricItemModel ids provided' });
+      }
+
+      const RubricItems = await RubricItemModel.findAll({ where: { rubricsitem_id: rubricsitem_id } });
+      if (RubricItems.length !== rubricsitem_id.length) {
+        return res.status(404).json({ message: 'One or more RubricItemModels not found' });
+      }
+
+      const rubricId = RubricItems[0].rubric_id;
+      const anyItemIsDelete = RubricItems.some(item => item.isDelete);
+
+      if (anyItemIsDelete) {
+        let totalArrayScore = 0;
+        for (const rubricItem of RubricItems) {
+          totalArrayScore += parseFloat(rubricItem.score);
+        }
+
+        const result = await RubricItemModel.findOne({
+          attributes: [[Sequelize.fn('SUM', Sequelize.col('score')), 'total_score']],
+          where: { rubric_id: rubricId, isDelete: false }
+        });
+
+        const currentTotalScore = parseFloat(result.dataValues.total_score || 0);
+        const newTotalScore = currentTotalScore + totalArrayScore;
+
+        if (newTotalScore <= 10) {
+          const updatedRubricItems = await Promise.all(RubricItems.map(async (RubricItem) => {
+            const updatedIsDeleted = !RubricItem.isDelete;
+            await RubricItem.update({ isDelete: updatedIsDeleted });
+            return { rubricsitem_id: RubricItem.rubricsitem_id, isDelete: updatedIsDeleted };
+          }));
+          res.status(200).json({ message: 'RubricItemModel delete statuses toggled', updatedRubricItems });
+        } else {
+          res.status(400).json({ success: false, message: "Failed to save: Total score exceeds 10" });
+        }
+      } else {
+        const updatedRubricItems = await Promise.all(RubricItems.map(async (RubricItem) => {
+          const updatedIsDeleted = !RubricItem.isDelete;
+          await RubricItem.update({ isDelete: updatedIsDeleted });
+          return { rubricsitem_id: RubricItem.rubricsitem_id, isDelete: updatedIsDeleted };
+        }));
+        res.status(200).json({ message: 'RubricItemModel delete statuses toggled', updatedRubricItems });
+      }
+    } catch (error) {
+      console.error('Error toggling RubricItemModel delete status:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },

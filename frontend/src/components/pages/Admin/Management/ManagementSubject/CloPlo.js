@@ -19,7 +19,7 @@ const CloPlo = (nav) => {
         try {
             const response = await axiosAdmin.get(`/clo/subject/${id}`);
 
-            //console.log(response.data);
+            // console.log(response.data);
             setClos(response.data);
         } catch (error) {
             console.error('Error fetching POs:', error);
@@ -30,7 +30,7 @@ const CloPlo = (nav) => {
         try {
             const response = await axiosAdmin.get(`/subject/${id}/clo-ids`);
             setCloArr(response.data);
-            //console.log(response.data);
+            console.log(response.data);
             //message.success('CLOs fetched successfully.');
         } catch (error) {
             console.error('Error fetching CLOs:', error);
