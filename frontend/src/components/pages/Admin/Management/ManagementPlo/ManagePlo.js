@@ -159,8 +159,6 @@ const ManagePlo = (nav) => {
             const data = {
                 id: selectedRowKeys
             }
-
-            ///bug,,,,,,,,,,,,,,,,,,,,,,
             
             const response = await axiosAdmin.post('/plo/templates/update', {'data': JSON.stringify(data)}, {
                 responseType: 'blob'

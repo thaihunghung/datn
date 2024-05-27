@@ -54,7 +54,7 @@ const ManagementAssessment = (nav) => {
         <div className="text-sm min-w-[100px]">
           <Flex vertical gap="middle">
             <Progress
-              percent={record.zeroScoreCount/ record.assessmentCount}
+              percent={record.zeroScoreCount / record.assessmentCount}
               status="active"
               strokeColor={{
                 from: '#108ee9',
@@ -65,12 +65,6 @@ const ManagementAssessment = (nav) => {
         </div>
       ),
     },
-
-     
-
-
-
-
     {
       title: (
         <div className="flex items-center justify-center w-full">
