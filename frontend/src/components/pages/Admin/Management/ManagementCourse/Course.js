@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Card, Col, Row, Pagination, Typography, Breadcrumb } from "antd";
 import { Link, useNavigate } from "react-router-dom";
+import { EditOutlined, EllipsisOutlined, SettingOutlined } from '@ant-design/icons';
 import { axiosAdmin } from "../../../../../service/AxiosAdmin"; // Adjust the import path as necessary
+import './Course.css'
+import Meta from "antd/es/card/Meta";
 
 const { Title } = Typography;
 
@@ -74,35 +77,45 @@ const Course = (props) => {
         <Breadcrumb.Item>App</Breadcrumb.Item>
       </Breadcrumb>
       <Title level={2}>Course List</Title>
-      <div className="grid grid-cols-1 gap-4 m-3 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 m-5">
         {currentCourses.map((course) => (
           <div key={course.course_id}>
             <Card
-              bordered={false}
-              style={{ wordWrap: 'break-word' }}
-              cover={
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '150px',
-                  backgroundColor: '#f5f5f5',
-                  fontSize: '64px',
-                  color: '#1890ff'
-                }}>
-                  {getAcronym(course.subject.subjectName)}
-                </div>
-              }
-              onClick={() => navigate(`${course.course_id}`)}
+              className="flex flex-col"
+              bordered={true}
+              actions={[
+                <SettingOutlined key="setting" />,
+                <EditOutlined key="edit" />,
+                <EllipsisOutlined key="ellipsis" />,
+              ]}
             >
-              <div className="font-black">
-                {`${course.subject.subjectName} ${course.class.classCode} - ${course.semester.descriptionShort}`}
-              </div>
-              <p><strong>Class:</strong> {course.class.className}</p>
-              <p><strong>Teacher:</strong> {course.teacher.name}</p>
-              <p><strong>Semester:</strong> {course.semester.descriptionShort}</p>
-              <p><strong>Số học sinh:</strong> {course.enrollmentCount}</p>
-              {/* <p><strong>Description:</strong> {course.subject.description}</p> */}
+              <Meta
+                avatar={
+                  <Link to={`${course.course_id}`}>
+                    <div className="flex items-center justify-center h-[150px] w-[200px] bg-gray-200 text-[44px] text-[#1890ff]
+                                          
+                    ">
+                      {getAcronym(course.subject.subjectName)}
+                    </div>
+                  </Link>
+                }
+                title={
+                  <div className="font-semibold text-xl mb-3 font-serif text-left">
+                    <Link to={`${course.course_id}`}>
+                      {`${course.courseName}`}
+                    </Link>
+                  </div>
+                }
+                description={
+                  <div className="text-left text-base">
+                    <p><strong>Class:</strong> {course.class.className}</p>
+                    <p><strong>Teacher:</strong> {course.teacher.name}</p>
+                    <p><strong>Semester:</strong> {course.semester.descriptionShort}</p>
+                    <p><strong>Số học sinh:</strong> {course.enrollmentCount}</p>
+                    {/* <p><strong>Description:</strong> {course.subject.description}</p> */}
+                  </div>
+                }
+              />
             </Card>
           </div>
         ))}

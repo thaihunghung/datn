@@ -43,6 +43,10 @@ const CourseModel = sequelize.define('course', {
       key: 'semester_id' 
     }
   },
+  courseName: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
   isDelete: {
     type: DataTypes.TINYINT,
     defaultValue: 0
