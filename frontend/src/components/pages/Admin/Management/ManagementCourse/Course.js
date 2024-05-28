@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Col, Row, Pagination, Typography, Breadcrumb, Modal, Form, Input, Button } from "antd";
+import { Card, Pagination, Typography, Breadcrumb, Modal, Form, Input, Button, Select } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { EditOutlined, EllipsisOutlined, SettingOutlined } from '@ant-design/icons';
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
@@ -7,6 +7,7 @@ import './Course.css';
 import Meta from "antd/es/card/Meta";
 
 const { Title } = Typography;
+const { Option } = Select;
 
 const Course = (props) => {
   const { setCollapsedNav, successNoti } = props;
@@ -20,6 +21,11 @@ const Course = (props) => {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const navigate = useNavigate();
   const [form] = Form.useForm();
+
+  const [classes, setClasses] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [semesters, setSemesters] = useState([]);
 
   const getAcronym = (phrase) => {
     return phrase
@@ -44,6 +50,7 @@ const Course = (props) => {
     };
   }, [setCollapsedNav]);
 
+  //get course list
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -57,7 +64,47 @@ const Course = (props) => {
       }
     };
 
+    const fetchClasses = async () => {
+      try {
+        const response = await axiosAdmin.get("/class");
+        setClasses(response.data);
+      } catch (err) {
+        console.error("Error fetching classes: ", err.message);
+      }
+    };
+
+    const fetchTeachers = async () => {
+      try {
+        const response = await axiosAdmin.get("/teacher");
+        setTeachers(response.data);
+      } catch (err) {
+        console.error("Error fetching teachers: ", err.message);
+      }
+    };
+
+    const fetchSubjects = async () => {
+      try {
+        const response = await axiosAdmin.get("/subject");
+        setSubjects(response.data);
+      } catch (err) {
+        console.error("Error fetching subjects: ", err.message);
+      }
+    };
+
+    const fetchSemesters = async () => {
+      try {
+        const response = await axiosAdmin.get("/semester");
+        setSemesters(response.data);
+      } catch (err) {
+        console.error("Error fetching semesters: ", err.message);
+      }
+    };
+
     fetchCourses();
+    fetchClasses();
+    fetchTeachers();
+    fetchSubjects();
+    fetchSemesters();
   }, [successNoti]);
 
   const handlePageChange = (page, pageSize) => {
@@ -71,10 +118,12 @@ const Course = (props) => {
       setIsSettingModalVisible(true);
     } else if (type === 'edit') {
       form.setFieldsValue({
+        course_id: course.course_id,
         courseName: course.courseName,
-        className: course.class.className,
-        teacherName: course.teacher.name,
-        semesterDescription: course.semester.descriptionShort,
+        class_id: course.class.class_id,
+        teacher_id: course.teacher.teacher_id,
+        subject_id: course.subject.subject_id,
+        semester_id: course.semester.semester_id,
         enrollmentCount: course.enrollmentCount,
         subjectDescription: course.subject.description,
       });
@@ -91,19 +140,47 @@ const Course = (props) => {
     setSelectedCourse(null);
   };
 
+  const handleDownload = async () => {
+    try {
+      const data = {
+        id: selectedCourse.course_id
+      }
+
+      const response = await axiosAdmin.post('/course-enrollment/templates/data', { data: data }, {
+        responseType: 'blob'
+      });
+
+      if (response && response.data) {
+        const url = window.URL.createObjectURL(response.data);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'student.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  }
+
+  const handleDelete = async () => {
+
+  }
+
   const handleEditSubmit = async (values) => {
     try {
-      await axiosAdmin.put(`/course/${selectedCourse.course_id}`, {
-        ...selectedCourse,
+      const data = {
         courseName: values.courseName,
-        class: { ...selectedCourse.class, className: values.className },
-        teacher: { ...selectedCourse.teacher, name: values.teacherName },
-        semester: { ...selectedCourse.semester, descriptionShort: values.semesterDescription },
-        enrollmentCount: values.enrollmentCount,
-        subject: { ...selectedCourse.subject, description: values.subjectDescription },
-      });
+        class_id: values.class_id,
+        teacher_id: values.teacher_id,
+        subject_id: values.subject_id,
+        semester_id: values.semester_id,
+      }
+      console.log("data", data);
+      await axiosAdmin.put(`/course/${selectedCourse.course_id}`, { data: data });
       successNoti('Update Successful', 'The course has been updated successfully.');
-      // Refresh course list
+      // Refresh
       const response = await axiosAdmin.get("/course-course-enrollment");
       setCourses(response.data);
       setTotalCourses(response.data.length);
@@ -136,7 +213,6 @@ const Course = (props) => {
         {currentCourses.map((course) => (
           <div key={course.course_id}>
             <Card
-              className="flex flex-col"
               bordered={true}
               actions={[
                 <SettingOutlined key="setting" onClick={() => showModal('setting', course)} />,
@@ -145,31 +221,36 @@ const Course = (props) => {
               ]}
             >
               <Meta
+                className="flex flex-col md:flex-row"
                 avatar={
                   <Link to={`${course.course_id}`}>
-                    <div className="flex items-center justify-center h-[150px] w-[200px] bg-gray-200 text-[44px] text-[#1890ff]">
+                    <div className="flex flex-col items-center justify-center h-[85px] w-full bg-gray-200 text-[24px] text-[#1890ff]
+                      lg:h-[135px] lg:w-[180px] lg:text-[36px]
+                      md:h-[120px] md:w-[150px] md:text-[32px]
+                      ms:h-[100px] ms:w-[130px] ms:text-[28px]
+                      ">
                       {getAcronym(course.subject.subjectName)}
                     </div>
                   </Link>
                 }
                 title={
-                  <div className="font-semibold text-xl mb-3 font-serif text-left">
+                  <div className="font-semibold text-xl font-serif text-left ml-0 mt-0 sm:m-4">
                     <Link to={`${course.course_id}`}>
-                      {`${course.courseName}`}
+                      <p className="text-wrap">{`${course.courseName}`}</p>
                     </Link>
                   </div>
                 }
                 description={
-                  <div className="text-left text-base">
+                  <div className="text-left text-base ml-0 sm:ml-4">
                     <p><strong>Class:</strong> {course.class.className}</p>
                     <p><strong>Teacher:</strong> {course.teacher.name}</p>
                     <p><strong>Semester:</strong> {course.semester.descriptionShort}</p>
                     <p><strong>Số học sinh:</strong> {course.enrollmentCount}</p>
-                    {/* <p><strong>Description:</strong> {course.subject.description}</p> */}
                   </div>
                 }
               />
             </Card>
+
           </div>
         ))}
       </div>
@@ -180,7 +261,7 @@ const Course = (props) => {
         onChange={handlePageChange}
         style={{ marginTop: '16px', textAlign: 'center' }}
       />
-      
+
       <Modal
         title="Settings"
         visible={isSettingModalVisible}
@@ -198,7 +279,7 @@ const Course = (props) => {
           </div>
         )}
       </Modal>
-      
+
       <Modal
         title="Edit Course"
         visible={isEditModalVisible}
@@ -218,40 +299,56 @@ const Course = (props) => {
             <Input />
           </Form.Item>
           <Form.Item
-            name="className"
-            label="Class Name"
-            rules={[{ required: true, message: 'Please enter the class name' }]}
+            name="class_id"
+            label="Class"
+            rules={[{ required: true, message: 'Please select the class' }]}
           >
-            <Input />
+            <Select>
+              {classes.map((cls) => (
+                <Option key={cls.class_id} value={cls.class_id}>{cls.className}</Option>
+              ))}
+            </Select>
           </Form.Item>
           <Form.Item
-            name="teacherName"
-            label="Teacher Name"
-            rules={[{ required: true, message: 'Please enter the teacher name' }]}
+            name="teacher_id"
+            label="Teacher"
+            rules={[{ required: true, message: 'Please select the teacher' }]}
           >
-            <Input />
+            <Select>
+              {teachers.map((teacher) => (
+                <Option key={teacher.teacher_id} value={teacher.teacher_id}>{teacher.name}</Option>
+              ))}
+            </Select>
           </Form.Item>
           <Form.Item
-            name="semesterDescription"
-            label="Semester Description"
-            rules={[{ required: true, message: 'Please enter the semester description' }]}
+            name="subject_id"
+            label="Subject"
+            rules={[{ required: true, message: 'Please select the subject' }]}
           >
-            <Input />
+            <Select>
+              {subjects.map((subject) => (
+                <Option key={subject.subject_id} value={subject.subject_id}>{subject.subjectName}</Option>
+              ))}
+            </Select>
           </Form.Item>
           <Form.Item
-            name="enrollmentCount"
-            label="Number of Students"
-            rules={[{ required: true, message: 'Please enter the number of students' }]}
+            name="semester_id"
+            label="Semester"
+            rules={[{ required: true, message: 'Please select the semester' }]}
           >
-            <Input type="number" />
+            <Select>
+              {semesters.map((semester) => (
+                <Option key={semester.semester_id} value={semester.semester_id}>{semester.descriptionShort}</Option>
+              ))}
+            </Select>
           </Form.Item>
-          <Form.Item
+          {/* <Form.Item
             name="subjectDescription"
             label="Subject Description"
             rules={[{ required: true, message: 'Please enter the subject description' }]}
           >
             <Input.TextArea />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item>
             <Button type="primary" htmlType="submit">
               Save Changes
@@ -259,14 +356,41 @@ const Course = (props) => {
           </Form.Item>
         </Form>
       </Modal>
-      
+
       <Modal
         title="More Options"
         visible={isEllipsisModalVisible}
         onCancel={handleCancel}
         footer={null}
+        className="custom-modal"
       >
-        <p>More options for {selectedCourse?.courseName}</p>
+        <p className="text-base m-4">Tải danh sách học sinh đã đăng ký lớp học</p>
+        <div className="flex justify-between mt-4">
+          <button
+            className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 w-5/12"
+            onClick={handleDownload}
+          >
+            Download
+          </button>
+        </div>
+        <p className="text-base m-4">Thêm học sinh đăng ký lớp học</p>
+        <div className="flex justify-between mt-4">
+          <button
+            className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 w-5/12"
+            onClick={handleDownload}
+          >
+            Download
+          </button>
+        </div>
+        <p className="text-base m-4">Ẩn lớp {selectedCourse?.courseName}</p>
+        <div>
+          <button
+            className="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-700 w-5/12"
+            onClick={handleDelete}
+          >
+            Delete
+          </button>
+        </div>
       </Modal>
     </>
   );
