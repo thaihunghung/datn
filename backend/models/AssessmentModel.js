@@ -12,10 +12,6 @@ const AssessmentModel = sequelize.define('Assessment', {
     primaryKey: true,
     autoIncrement: true
   },
-<<<<<<< HEAD
-=======
-
->>>>>>> 896b1f6f7c749279681e534ad72c721d1eb28bb3
   user_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
