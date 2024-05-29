@@ -30,29 +30,27 @@ const RubricItemController = {
     try {
       const { data } = req.body;
       const { rubric_id } = data.data;
-      console.log(data);
-      console.log(rubric_id);
 
       const RubricsItem = await RubricItemModel.findAll({ where: { rubric_id: rubric_id, isDelete: false } });
       const length = RubricsItem.length;
       if (length > 0) {
         const results = await RubricItemModel.findAll({
-          attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('score')), 'total_score']],
+          attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('maxScore')), 'total_maxScore']],
           where: { rubric_id: rubric_id, isDelete: false }
         });
 
         const rubricScores = results.map(result => ({
-          total_score: result.dataValues.total_score
+          total_maxScore: result.dataValues.total_maxScore
         }));
 
-        const totalScore = parseFloat(rubricScores[0].total_score) + parseFloat(data.score);
+        const totalScore = parseFloat(rubricScores[0].total_maxScore) + parseFloat(data.maxScore);
 
         console.log('totalScore' + totalScore);
         if (totalScore <= 10) {
           const newRubric = await RubricItemModel.create(data.data);
           res.status(201).json({ message: "Rubric item created successfully", data: newRubric });
         } else {
-          res.status(400).json({ message: "Failed to save: Total score exceeds 10" });
+          res.status(400).json({ message: "Failed to save: Total maxScore exceeds 10" });
         }
       } else {
         const newRubric = await RubricItemModel.create(data.data);
@@ -175,22 +173,22 @@ const RubricItemController = {
 
       if (RubricItem.isDelete) {
         const results = await RubricItemModel.findAll({
-          attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('score')), 'total_score']],
+          attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('maxScore')), 'total_maxScore']],
           where: { rubric_id: RubricItem.rubric_id, isDelete: false }
         });
 
         const rubricScores = results.map(result => ({
-          total_score: result.dataValues.total_score
+          total_maxScore: result.dataValues.total_maxScore
         }));
 
-        const totalScore = parseFloat(rubricScores[0].total_score) + parseFloat(RubricItem.score);
+        const totalScore = parseFloat(rubricScores[0].total_maxScore) + parseFloat(RubricItem.maxScore);
         console.log('diem', RubricItem.rubric_id);
         if (totalScore <= 10) {
           const updatedIsDeleted = !RubricItem.isDelete;
           await RubricItemModel.update({ isDelete: updatedIsDeleted }, { where: { rubricsitem_id: id } });
           res.status(200).json({ message: `Toggled isDelete status to ${updatedIsDeleted}` });
         } else {
-          res.status(400).json({ success: false, message: "Failed to save: Total score exceeds 10" });
+          res.status(400).json({ success: false, message: "Failed to save: Total maxScore exceeds 10" });
         }
       } else {
         const updatedIsDeleted = !RubricItem.isDelete;
@@ -222,15 +220,15 @@ const RubricItemController = {
       if (anyItemIsDelete) {
         let totalArrayScore = 0;
         for (const rubricItem of RubricItems) {
-          totalArrayScore += parseFloat(rubricItem.score);
+          totalArrayScore += parseFloat(rubricItem.maxScore);
         }
 
         const result = await RubricItemModel.findOne({
-          attributes: [[Sequelize.fn('SUM', Sequelize.col('score')), 'total_score']],
+          attributes: [[Sequelize.fn('SUM', Sequelize.col('maxScore')), 'total_maxScore']],
           where: { rubric_id: rubricId, isDelete: false }
         });
 
-        const currentTotalScore = parseFloat(result.dataValues.total_score || 0);
+        const currentTotalScore = parseFloat(result.dataValues.total_maxScore || 0);
         const newTotalScore = currentTotalScore + totalArrayScore;
 
         if (newTotalScore <= 10) {
@@ -241,7 +239,7 @@ const RubricItemController = {
           }));
           res.status(200).json({ message: 'RubricItemModel delete statuses toggled', updatedRubricItems });
         } else {
-          res.status(400).json({ success: false, message: "Failed to save: Total score exceeds 10" });
+          res.status(400).json({ success: false, message: "Failed to save: Total maxScore exceeds 10" });
         }
       } else {
         const updatedRubricItems = await Promise.all(RubricItems.map(async (RubricItem) => {

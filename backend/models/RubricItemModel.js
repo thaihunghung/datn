@@ -5,7 +5,6 @@ const CloModel = require('./CloModel');
 const RubricModel = require('./RubricModel');
 const PloModel = require('./PloModel');
 
-const QualityLevelsModel = require('./QualityLevelsModel');
 
 const RubricsItemModel = sequelize.define('rubricsItem', {
   rubricsItem_id: {
@@ -49,7 +48,7 @@ const RubricsItemModel = sequelize.define('rubricsItem', {
     type: DataTypes.TEXT,
     defaultValue: null
   },
-  score: {
+  maxScore: {
     type: DataTypes.DOUBLE(8, 2),
     defaultValue: 0
   },

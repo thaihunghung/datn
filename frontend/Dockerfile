@@ -16,7 +16,6 @@ COPY . .
 # Biên dịch ứng dụng ReactJS
 RUN npm run build
 
-# Mở cổng mà ứng dụng sẽ lắng nghe trên container (chúng ta không cần mở cổng này vì ứng dụng ReactJS đã được biên dịch và không chạy server trong container)
 EXPOSE 3000
 
 # Khởi chạy ứng dụng khi container được chạy

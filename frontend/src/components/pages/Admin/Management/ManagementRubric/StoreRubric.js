@@ -1,9 +1,7 @@
-// StoreRubric.js
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Table, Tooltip, Button, message } from 'antd';
-import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { RadioGroup, Radio } from "@nextui-org/react";
 import { Tooltip, Button } from "@nextui-org/react";
 import { Collapse } from 'antd';
+import {Slider} from "@nextui-org/react";
 
 import "./FormPoint.css"
 import { axiosAdmin } from "../../../../service/AxiosAdmin";
@@ -45,7 +46,6 @@ const FormPoint = (nav) => {
       setRubicData(response.data.rubric)
       setRubicItemsData(response.data.rubric.rubricItems)
 
-      console.log(response.data.rubric.rubricItems.qualityLevel)
     } catch (error) {
       console.error('Error fetching rubric data:', error);
       throw error;
@@ -166,7 +166,7 @@ const FormPoint = (nav) => {
             </div>
 
             {/* Right Side */}
-            <div className="w-full sm:w-full lg:w-[45%] xl:w-[40%] text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-[#ff8077]" key={i}>
+            {/* <div className="w-full sm:w-full lg:w-[45%] xl:w-[40%] text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-[#ff8077]" key={i}>
               <div className="pb-10 sm:pb-10 lg:pb-0 xl:pb-0">
                 <div className="w-full flex flex-col border-collapse border border-[#ff8077]">
                   <div className="w-full">
@@ -211,7 +211,7 @@ const FormPoint = (nav) => {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         ))
       }

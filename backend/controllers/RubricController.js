@@ -206,7 +206,7 @@ const RubricController = {
       const rubricIds = rubrics.map(rubric => rubric.rubric_id);
       //console.log(rubricIds);
       const results = await RubricItemModel.findAll({
-        attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('score')), 'total_score']],
+        attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('maxScore')), 'total_score']],
         where: { rubric_id: rubricIds, isDelete: true },
         group: ['rubric_id']
       });
@@ -307,15 +307,7 @@ const RubricController = {
           CloModel.findAll({ where: { subject_id: rubric.subject_id } }),
           // ChapterModel.findAll({ where: { subject_id: rubric.subject_id } })
         ]);
-        // Gán kết quả cho các thuộc tính của rubric
-        const rubricIds = rubricItems.map(rubric => rubric.rubricsItem_id);
 
-        const qualityLevels = await qualityLevelsModel.findAll({ where: { rubricsItem_id: rubricIds } });
-        // Lặp qua mỗi rubricItem
-        for (const rubricItem of rubricItems) {
-          const qualityLevelsForRubricItem = qualityLevels.filter(qualityLevel => qualityLevel.rubricsItem_id === rubricItem.rubricsItem_id);
-          rubricItem.dataValues.qualityLevel = qualityLevelsForRubricItem;
-        }
         rubric.dataValues.rubricItems = rubricItems;
         rubric.dataValues.CloData = Clos;
         //rubric.dataValues.PloCloData = PloClo;

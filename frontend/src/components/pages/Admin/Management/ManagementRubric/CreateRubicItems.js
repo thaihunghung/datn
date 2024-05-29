@@ -31,22 +31,19 @@ const CreateRubicItems = (nav) => {
   
   const [selectedClo, setSelectedClo] = useState("");
   const [score, setSelectedScore] = useState();
-  const [selectedQualityLevel, setSelectedQualityLevel] = useState();
 
   const handleScoreChange = (value, option) => {
     setSelectedScore(value);
-    setSelectedQualityLevel(null)
   };
-  const handleQualityLevelChange = (value, option) => {
-    setSelectedQualityLevel(value);
 
-  };
   const handlePloSelectChange = (value, option) => {
     setSelectedPlo(value);
   };
+
   const handleChapterSelectChange = (value, option) => {
     setSelectedChapter(value);
   };
+
   const handleCloSelectChange = (value, option) => {
     setSelectedClo(value);
   };
@@ -69,11 +66,6 @@ const CreateRubicItems = (nav) => {
   }
   useEffect(() => {
     getOneRubricById()
-    // Set initial values if needed
-    // setSelectedScore(Point)
-    // setSelectedChapter(chapter_id)
-    // setSelectedClo(clo_id)
-    // setSelectedPlo(plo_id)
   }, []);
 
   useEffect(() => {
@@ -123,14 +115,14 @@ const CreateRubicItems = (nav) => {
   const handleSave = async () => {
     try {
       const data = {
-        "score": parseFloat(score),
+        "maxScore": parseFloat(score),
         "data": {
           chapter_id: selectedChapter,
           clo_id: selectedClo,
           plo_id: selectedPlo,
-          rubric_id: parseInt(id) ,
+          rubric_id: parseInt(id),
           description: convertedContent,
-          score: parseFloat(score)
+          maxScore: parseFloat(score)
         }
       };
       
@@ -140,37 +132,7 @@ const CreateRubicItems = (nav) => {
       } else if (response.status === 400) {
         message.error(response.data.message);
       }
-      const rubricsItem_id = response.data.data.rubricsItem_id;
-      if (rubricsItem_id) {
-        const levelElements = document.querySelectorAll(`.qualityLevel`);
-        const dataqualityLevel = [];
-
-        levelElements.forEach(element => {
-          const levels = element.querySelectorAll(`.level > div`);
-          const names = element.querySelectorAll(`.name > div`);
-          const keyNumbers = element.querySelectorAll(`.keyNumber > div`);
-
-          Array.from(levels).forEach((level, index) => {
-            const levelText = level.textContent.trim();
-            const nameText = names[index].textContent.trim();
-            const keyNumberText = keyNumbers[index].textContent.trim();
-            dataqualityLevel.push({ rubricsItem_id: rubricsItem_id, level: levelText, name: nameText, keyNumber: parseFloat(keyNumberText) });
-          });
-        });
-
-        const qualityLevel = {
-          dataqualityLevel
-        };
-        console.log("hi");
-
-        console.log(dataqualityLevel);
-        await axiosAdmin.post(`/quality-level`, { qualityLevel });
-      }
-
-      
-
     } catch (error) {
-      // If an error occurred during the request (e.g., network error), display a generic error message
       console.error('Error saving rubric item:', error);
       message.error('Failed to save: An error occurred');
     } finally {
@@ -186,53 +148,6 @@ const CreateRubicItems = (nav) => {
       </Option>
     );
   }
-
-  // const handleUpdate = async () => {
-  //   try {
-  //     const data = {
-  //       chapter_id: selectedChapter,
-  //       clo_id: selectedClo,
-  //       plo_id: selectedPlo,
-  //       rubric_id: id,
-  //       description: convertedContent,
-  //       score: score
-  //     };
-
-  //     const response = await axiosAdmin.put(`/rubric-item/${id}`, { data: data });
-  //     console.log(response.data);
-
-
-  //     const levelElements = document.querySelectorAll(`.qualityLevel`)
-  //     const dataqualityLevel = [];
-
-  //     levelElements.forEach(element => {
-  //       const levels = element.querySelectorAll(`.level > div`);
-  //       const names = element.querySelectorAll(`.name > div`);
-  //       const keyNumbers = element.querySelectorAll(`.keyNumber > div`);
-
-  //       Array.from(levels).forEach((level, index) => {
-  //         const levelText = level.textContent.trim();
-  //         const nameText = names[index].textContent.trim();
-  //         const keyNumberText = keyNumbers[index].textContent.trim();
-  //         dataqualityLevel.push({ rubricsItem_id: id, level: levelText, name: nameText, keyNumber: parseFloat(keyNumberText) });
-  //       });
-  //     });
-
-  //     const qualityLevel = {
-  //       dataqualityLevel
-  //     }
-  //     await axiosAdmin.delete(`/quality-level/rubric-item/${id}`);
-  //     console.log(id)
-  //     await axiosAdmin.post(`/quality-level`, { qualityLevel });
-  //     setSelectedQualityLevel()
-  //     successNoti("lưu thành công")
-  //     setSpinning(false);
-
-  //   } catch (error) {
-  //     console.error('Error while saving:', error);
-  //     setSpinning(false);
-  //   }
-  // };
 
   return (
     <div className='flex w-full flex-col justify-center pb-10 leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7 bg-[#f5f5f5]-500'>
@@ -313,66 +228,8 @@ const CreateRubicItems = (nav) => {
                     >
                       {options}
                     </Select>
-                    <div className='text-left w-full font-bold'>Chọn dạng Mức độ:</div>
-                    <Select
-
-                      defaultValue="Chọn Mức độ chất lượng"
-                      value={selectedQualityLevel}
-                      onChange={handleQualityLevelChange}
-                      size="large"
-                      className="w-full"
-                    >
-                      <Option value={1}>1 tiêu chí</Option>
-                      <Option value={2}>2 tiêu chí</Option>
-                      <Option value={4}>4 tiêu chí</Option>
-                    </Select>
-                    <div className='w-full overflow-x-auto P-5'>
-                      Mức độ chất lượng:
-                      {selectedQualityLevel === 1 && (
-                        <div className={`qualityLevel border border-gray-300 rounded w-full min-w-[200px] P-2`}>
-                          <div className={`flex gap-5 level`}>
-                            <div className='flex-1'>Tốt</div>
-                            <div className='flex-1'>Yếu</div>
-                          </div>
-                          <div className={`flex gap-5 name`}>
-                            <div className='flex-1'>Đạt</div>
-                            <div className='flex-1'>Chưa Đạt</div>
-                          </div>
-                          <div className={`flex gap-5 keyNumber`}>
-                            <div className='flex-1'>{score}</div>
-                            <div className='flex-1'>0.00</div>
-                          </div>
-                        </div>
-                      )}
-                
-                  
-                      {selectedQualityLevel === 4 && (
-                        <div className={`qualityLevel border border-gray-300 rounded w-full min-w-[400px] P-2`}>
-                          <div className={`flex gap-5 level`}>
-                            <div className='flex-1'>Tốt</div>
-                            <div className='flex-1'>Khá</div>
-                            <div className='flex-1'>TB</div>
-                            <div className='flex-1'>Yếu</div>
-                            <div className='flex-1'>Kém</div>
-                          </div>
-                          <div className={`flex gap-5 name`}>
-                            <div className='flex-1'>Đạt 4</div>
-                            <div className='flex-1'>Đạt 3</div>
-                            <div className='flex-1'>Đạt 2</div>
-                            <div className='flex-1'>Đạt 1</div>
-                            <div className='flex-1'>Đạt 0</div>
-                          </div>
-                          <div className={`flex gap-5 keyNumber`}>
-                            <div className='flex-1'>{score}</div>
-                            <div className='flex-1'>{score * 75 / 100}</div>
-                            <div className='flex-1'>{score * 50 / 100}</div>
-                            <div className='flex-1'>{score * 25 / 100}</div>
-                            <div className='flex-1'>0.00</div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
                   </div>
+
                   <div className='flex flex-1 flex-col w-full sm:w-full items-start p-5 pb-[60px]'>
                     <span className='text-justify font-bold'>
                       Tiều chí:
