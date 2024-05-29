@@ -1,3 +1,4 @@
+const AcademicYearModel = require("../models/AcademicYearModel");
 const ClassModel = require("../models/ClassModel");
 const CourseEnrollmentModel = require("../models/CourseEnrollmentModel");
 const CourseModel = require("../models/CourseModel");
@@ -82,8 +83,15 @@ const CourseController = {
           {
             model: SemesterModel,
             where: { isDelete: false },
-            required: true
-          }
+            required: true,
+            include: [
+              {
+                model: AcademicYearModel,
+                where: { isDelete: false },
+                required: true
+              }
+            ]
+          },
         ],
         where: { isDelete: false },
         order: [['course_id', 'DESC']]
@@ -102,22 +110,45 @@ const CourseController = {
       console.log("aaaaa");
       const { id } = req.params;
       const course = await CourseModel.findAll({
-        include: [{
-          model: ClassModel,
-          where: { isDelete: false }
+        attributes: {
+          include: [
+            [Sequelize.literal(`(
+                        SELECT COUNT(*)
+                        FROM course_enrollments AS ce
+                        WHERE ce.course_id = course.course_id
+                        AND ce.isDelete = FALSE
+                    )`), 'enrollmentCount']
+          ]
         },
-        {
-          model: TeacherModel,
-          where: { isDelete: false }
-        },
-        {
-          model: SubjectModel,
-          where: { isDelete: false }
-        },
-        {
-          model: SemesterModel,
-          where: { isDelete: false }
-        }],
+        include: [
+          {
+            model: ClassModel,
+            where: { isDelete: false },
+            required: true
+          },
+          {
+            model: TeacherModel,
+            where: { isDelete: false },
+            required: true
+          },
+          {
+            model: SubjectModel,
+            where: { isDelete: false },
+            required: true
+          },
+          {
+            model: SemesterModel,
+            where: { isDelete: false },
+            required: true,
+            include: [
+              {
+                model: AcademicYearModel,
+                where: { isDelete: false },
+                required: true
+              }
+            ]
+          },
+        ],
         where: {
           isDelete: false,
           course_id: id

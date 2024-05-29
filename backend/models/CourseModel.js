@@ -48,7 +48,7 @@ const CourseModel = sequelize.define('course', {
     allowNull: false
   },
   courseCode: {
-    type: DataTypes.STRING(6),
+    type: DataTypes.STRING(20),
     allowNull: false,
     unique: true
   },
