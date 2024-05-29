@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Card, Button, Typography, List, notification, Breadcrumb } from "antd";
 import { axiosAdmin } from "../../../../../../service/AxiosAdmin";
-
-const { Title } = Typography;
+import { Table } from "antd";
 
 const DetailCourse = () => {
   const { id } = useParams();
@@ -28,11 +26,7 @@ const DetailCourse = () => {
 
   const handleDownloadStudent = async () => {
     try {
-      
-      const data = {
-        id: id
-      }
-
+      const data = { id: id };
       console.log(data);
       const response = await axiosAdmin.post('/course-enrollment/templates/data', { data: data }, {
         responseType: 'blob'
@@ -62,18 +56,10 @@ const DetailCourse = () => {
         setStudents(response.data);
       } else {
         console.error("Unexpected data format:", response.data);
-        notification.error({
-          message: "Error",
-          description: "Failed to load students.",
-        });
       }
       setLoading(false);
     } catch (err) {
       console.error("Error fetching students: ", err.message);
-      notification.error({
-        message: "Error",
-        description: "Failed to load students.",
-      });
       setLoading(false);
     }
   };
@@ -82,43 +68,78 @@ const DetailCourse = () => {
     return <div>Loading...</div>;
   }
 
+  const columns = [
+    {
+      title: 'STT',
+      key: 'index',
+      render: (text, record, index) => index + 1,
+    },
+    {
+      title: 'Tên sinh viên',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text, record) => record.Student.name,
+    },
+    {
+      title: 'Mã sinh viên',
+      dataIndex: 'studentCode',
+      key: 'studentCode',
+      render: (text, record) => record.Student.studentCode,
+    },
+    {
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
+      render: (text, record) => record.Student.email,
+    },
+    {
+      title: 'Ngày đăng ký',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (text, record) => new Intl.DateTimeFormat('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }).format(new Date(record.createdAt)),
+    },
+  ];
+
   return (
-    <div>
-      <Breadcrumb
-        style={{
-          fontSize: '18px',
-          margin: '16px 16px',
-        }}
+    <div className="p-4">
+      <nav className="text-lg mb-4 text-left">
+        <Link to="/admin" className="text-blue-500 hover:underline">Home</Link>
+        <span> / </span>
+        <Link to="/admin/course" className="text-blue-500 hover:underline">Course</Link>
+        <span> / Chi tiết</span>
+      </nav>
+      <h2 className="text-2xl font-bold mb-4">{course.subject.subjectName}</h2>
+      <div className="flex gap-2 flex-col bg-white p-6 rounded shadow-md text-left">
+        <p><strong>Tên môn học:</strong> {course.courseName}</p>
+        <p><strong>Lớp học:</strong> {course.class.className}</p>
+        <p><strong>Giáo viên giảng dạy:</strong> {course.teacher.name}</p>
+        <p><strong>Năm học:</strong> {course.semester.descriptionShort} - {course.semester.academic_year.description}</p>
+        <p><strong>Số lượng học sinh đăng kí:</strong> {course.enrollmentCount}</p>
+        <p><strong className="text-pretty">Mô tả:</strong> {course.subject.description}</p>
+      </div>
+      
+      <div className="mt-4 border rounded">
+        <Table
+          columns={columns}
+          dataSource={students}
+          loading={loading}
+          rowKey="id_detail_courses"
+          pagination={{ pageSize: 10 }}
+        />
+      </div>
+
+      <button
+        type="button"
+        onClick={handleDownloadStudent}
+        disabled={loading}
+        className="bg-blue-500 text-white py-2 px-4 rounded mt-4 hover:bg-blue-600 disabled:opacity-50"
       >
-        <Breadcrumb.Item>
-          <Link to="/admin">Home</Link>
-        </Breadcrumb.Item>
-        <Breadcrumb.Item>
-        <Link to="/admin/course">Course</Link>
-        </Breadcrumb.Item>
-        <Breadcrumb.Item>Chi tiết</Breadcrumb.Item>
-      </Breadcrumb>
-      <Title level={2}>{course.subject.subjectName}</Title>
-      <Card>
-        <p><strong>Class:</strong> {course.class.className}</p>
-        <p><strong>Teacher:</strong> {course.teacher.name}</p>
-        <p><strong>Semester:</strong> {course.semester.descriptionShort}</p>
-        <p><strong>Credits:</strong> {course.subject.numberCredits}</p>
-        <p><strong>Description:</strong> {course.subject.description}</p>
-      </Card>
-      <Button type="primary" onClick={handleDownloadStudent} loading={loading} style={{ marginTop: '16px' }}>
-        tải excel
-      </Button>
-      <List
-        style={{ marginTop: '16px' }}
-        bordered
-        dataSource={students}
-        renderItem={student => (
-          <List.Item key={student.student_id}>
-            {student.Student.name}
-          </List.Item>
-        )}
-      />
+        tải danh sách
+      </button>
     </div>
   );
 };

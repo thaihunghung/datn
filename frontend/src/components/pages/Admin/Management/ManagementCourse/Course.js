@@ -26,6 +26,7 @@ const Course = (props) => {
   const [teachers, setTeachers] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [semesters, setSemesters] = useState([]);
+  const [academicYears, setAcademicYear] = useState([]);
 
   const getAcronym = (phrase) => {
     return phrase
@@ -100,11 +101,22 @@ const Course = (props) => {
       }
     };
 
+    const fetchAcademicYear = async () => {
+      try {
+        const response = await axiosAdmin.get("/academic-year");
+        setAcademicYear(response.data);
+        console.log(response.data);
+      } catch (err) {
+        console.error("Error fetching academic year: ", err.message);
+      }
+    };
+
     fetchCourses();
     fetchClasses();
     fetchTeachers();
     fetchSubjects();
     fetchSemesters();
+    fetchAcademicYear();
   }, [successNoti]);
 
   const handlePageChange = (page, pageSize) => {
@@ -126,6 +138,9 @@ const Course = (props) => {
         semester_id: course.semester.semester_id,
         enrollmentCount: course.enrollmentCount,
         subjectDescription: course.subject.description,
+        academic_year_id: course.semester.academic_year.academic_year_id,
+        description: course.semester.academic_year.description,
+
       });
       setIsEditModalVisible(true);
     } else if (type === 'ellipsis') {
@@ -169,13 +184,23 @@ const Course = (props) => {
   }
 
   const handleEditSubmit = async (values) => {
+    console.log("vla: ", values);
     try {
+
+      const selectedClass = classes.find(cls => cls.class_id === values.class_id);
+      const selectedSubject = subjects.find(subject => subject.subject_id === values.subject_id);
+
+      if (!selectedClass || !selectedSubject) {
+        throw new Error("Invalid class or subject selection");
+      }
+
       const data = {
         courseName: values.courseName,
         class_id: values.class_id,
         teacher_id: values.teacher_id,
         subject_id: values.subject_id,
         semester_id: values.semester_id,
+        courseCode: `${selectedClass.classCode}-${selectedSubject.subjectCode}`
       }
       console.log("data", data);
       await axiosAdmin.put(`/course/${selectedCourse.course_id}`, { data: data });
@@ -197,17 +222,10 @@ const Course = (props) => {
 
   return (
     <>
-      <Breadcrumb
-        style={{
-          fontSize: '18px',
-          margin: '16px 16px',
-        }}
-      >
-        <Breadcrumb.Item>
-          <Link to="/admin">Home</Link>
-        </Breadcrumb.Item>
-        <Breadcrumb.Item>Course</Breadcrumb.Item>
-      </Breadcrumb>
+      <nav className="text-lg mb-4 text-left">
+        <Link to="/admin" className="text-blue-500 hover:underline">Home</Link>
+        <span> / Course</span>
+      </nav>
       <Title level={2}>Course List</Title>
       <div className="grid grid-cols-1 gap-5 m-5">
         {currentCourses.map((course) => (
@@ -225,7 +243,7 @@ const Course = (props) => {
                 avatar={
                   <Link to={`${course.course_id}`}>
                     <div className="flex flex-col items-center justify-center h-[85px] w-full bg-gray-200 text-[24px] text-[#1890ff]
-                      lg:h-[135px] lg:w-[180px] lg:text-[36px]
+                      lg:h-[160px] lg:w-[200px] lg:text-[36px]
                       md:h-[120px] md:w-[150px] md:text-[32px]
                       ms:h-[100px] ms:w-[130px] ms:text-[28px]
                       ">
@@ -236,15 +254,17 @@ const Course = (props) => {
                 title={
                   <div className="font-semibold text-xl font-serif text-left ml-0 mt-0 sm:m-4">
                     <Link to={`${course.course_id}`}>
-                      <p className="text-wrap">{`${course.courseName}`}</p>
+                      <p className="text-wrap">{`${course.courseCode} ${course.courseName}`}</p>
                     </Link>
                   </div>
                 }
                 description={
                   <div className="text-left text-base ml-0 sm:ml-4">
-                    <p><strong>Class:</strong> {course.class.className}</p>
-                    <p><strong>Teacher:</strong> {course.teacher.name}</p>
-                    <p><strong>Semester:</strong> {course.semester.descriptionShort}</p>
+                    <p><strong>Lớp:</strong> {course.class.className}</p>
+                    <p><strong>Giáo viên giản dạy:</strong> {course.teacher.name}</p>
+                    <p>
+                      <strong>Năm học:</strong> {course.semester.descriptionShort} - {course.semester.academic_year.description}
+                    </p>
                     <p><strong>Số học sinh:</strong> {course.enrollmentCount}</p>
                   </div>
                 }
@@ -270,18 +290,20 @@ const Course = (props) => {
       >
         {selectedCourse && (
           <div>
-            <p><strong>Course Name:</strong> {selectedCourse.courseName}</p>
-            <p><strong>Class:</strong> {selectedCourse.class.className}</p>
-            <p><strong>Teacher:</strong> {selectedCourse.teacher.name}</p>
-            <p><strong>Semester:</strong> {selectedCourse.semester.descriptionShort}</p>
-            <p><strong>Number of Students:</strong> {selectedCourse.enrollmentCount}</p>
-            <p><strong>Description:</strong> {selectedCourse.subject.description}</p>
+            <p><strong>Tên môn học:</strong> {selectedCourse.courseName}</p>
+            <p><strong>Lớp học:</strong> {selectedCourse.class.className}</p>
+            <p><strong>Giáo viên giảng dạy:</strong> {selectedCourse.teacher.name}</p>
+            <p>
+              <strong>Năm học:</strong> {selectedCourse.semester.descriptionShort} - {selectedCourse.semester.academic_year.description}
+            </p>
+            <p><strong>Số lượng học sinh đăng kí:</strong> {selectedCourse.enrollmentCount}</p>
+            <p><strong>Mô tả:</strong> {selectedCourse.subject.description}</p>
           </div>
         )}
       </Modal>
 
       <Modal
-        title="Edit Course"
+        title="Chỉnh sửa nội dung"
         visible={isEditModalVisible}
         onCancel={handleCancel}
         footer={null}
@@ -293,14 +315,14 @@ const Course = (props) => {
         >
           <Form.Item
             name="courseName"
-            label="Course Name"
+            label="Tên môn học"
             rules={[{ required: true, message: 'Please enter the course name' }]}
           >
             <Input />
           </Form.Item>
           <Form.Item
             name="class_id"
-            label="Class"
+            label="Lớp học"
             rules={[{ required: true, message: 'Please select the class' }]}
           >
             <Select>
@@ -311,7 +333,7 @@ const Course = (props) => {
           </Form.Item>
           <Form.Item
             name="teacher_id"
-            label="Teacher"
+            label="Giáo viên giảng dạy"
             rules={[{ required: true, message: 'Please select the teacher' }]}
           >
             <Select>
@@ -322,7 +344,7 @@ const Course = (props) => {
           </Form.Item>
           <Form.Item
             name="subject_id"
-            label="Subject"
+            label="Môn học"
             rules={[{ required: true, message: 'Please select the subject' }]}
           >
             <Select>
@@ -333,7 +355,7 @@ const Course = (props) => {
           </Form.Item>
           <Form.Item
             name="semester_id"
-            label="Semester"
+            label="Học kì"
             rules={[{ required: true, message: 'Please select the semester' }]}
           >
             <Select>
@@ -342,16 +364,20 @@ const Course = (props) => {
               ))}
             </Select>
           </Form.Item>
-          {/* <Form.Item
-            name="subjectDescription"
-            label="Subject Description"
-            rules={[{ required: true, message: 'Please enter the subject description' }]}
+          <Form.Item
+            name="academic_year_id"
+            label="Năm học"
+            rules={[{ required: true, message: 'Please select the semester' }]}
           >
-            <Input.TextArea />
-          </Form.Item> */}
+            <Select>
+              {academicYears.map((academicYear) => (
+                <Option key={academicYear.academic_year_id} value={academicYear.academic_year_id}>{academicYear.description}</Option>
+              ))}
+            </Select>
+          </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Save Changes
+              Lưu thay đổi
             </Button>
           </Form.Item>
         </Form>

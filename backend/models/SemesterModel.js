@@ -34,4 +34,8 @@ const SemesterModel = sequelize.define('semester', {
   updatedAt: 'updatedAt',
 });
 
+SemesterModel.belongsTo(AcademicYearModel, {
+  foreignKey: 'academic_year_id'
+});
+
 module.exports = SemesterModel;
