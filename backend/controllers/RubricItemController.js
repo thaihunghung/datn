@@ -1,7 +1,6 @@
 const RubricItemModel = require('../models/RubricItemModel');
 const { Sequelize, DataTypes } = require('sequelize');
 const RubricModel = require('../models/RubricModel');
-const QualityLevelsModel = require('../models/QualityLevelsModel');
 
 const RubricItemController = {
 

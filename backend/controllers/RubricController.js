@@ -5,10 +5,8 @@ const RubricItemModel = require('../models/RubricItemModel');
 const SubjectModel = require('../models/SubjectModel');
 const CloModel = require('../models/CloModel');
 const ChapterModel = require('../models/ChapterModel');
-const qualityLevelsModel = require('../models/QualityLevelsModel');
 const PloModel = require('../models/PloModel');
-const MapRubricQuestionModel = require('../models/RubricQuestionModel');
-const QualityLevelsModel = require('../models/QualityLevelsModel');
+
 
 
 const RubricController = {
