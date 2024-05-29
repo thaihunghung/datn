@@ -1,13 +1,12 @@
 // UpdateClo.js
 
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import DropdownAndNavClo from "../../Utils/DropdownAndNav/DropdownAndNavClo";
 
 const UpdateClo = (nav) => {
-    const location = useLocation();
     const { id, clo_id } = useParams();
 
     const { setCollapsedNav } = nav;

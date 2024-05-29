@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Tooltip, message, Button } from 'antd';
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavClo from "../../Utils/DropdownAndNav/DropdownAndNavClo";
 const CloPlo = (nav) => {
-    const location = useLocation();
     const { id } = useParams();
     const { setCollapsedNav } = nav;
 
@@ -28,7 +27,7 @@ const CloPlo = (nav) => {
 
     const GetArrCloBySubjectID = async () => {
         try {
-            const response = await axiosAdmin.get(`/subject/${id}/clo-ids`);
+            const response = await axiosAdmin.get(`/subject/${id}/find-clo-ids`);
             setCloArr(response.data);
             console.log(response.data);
             //message.success('CLOs fetched successfully.');
@@ -44,42 +43,13 @@ const CloPlo = (nav) => {
 
     const GetAllPlo = async () => {
         try {
-            const response = await axiosAdmin.get('/plo/isDelete/false');
+            const response = await axiosAdmin.get('/plos/isDelete/false');
             setPlos(response.data)
         } catch (error) {
             console.error('Error fetching PLOs:', error);
         }
     };
     const handleSaveOrDelete = async () => {
-        // let luu = [];
-        // let xoa = [];
-        // luu = compareCloPlos.filter(compareItem => {
-        //     return !poPlos.some(poPloItem => poPloItem.clo_id === compareItem.clo_id && poPloItem.plo_id === compareItem.plo_id);
-        // });
-
-        // xoa = poPlos.filter(poPloItem => {
-        //     return !compareCloPlos.some(compareItem => compareItem.clo_id === poPloItem.clo_id && compareItem.plo_id === poPloItem.plo_id);
-        // });
-
-        // if (luu.length > 0) {
-        //     try {
-        //       const response = await axiosAdmin.clost('/po-plo', { dataSave: luu });
-        //       message.success(response.data.message);
-        //     } catch (error) {
-        //       console.error("Error:", error);
-        //       message.error(error.response?.data?.message || 'Error saving data');
-        //     }
-        //   }
-
-        //   if (xoa.length > 0) {
-        //     try {
-        //       const response = await axiosAdmin.delete('/po-plo', { data: { dataDelete: xoa } });
-        //       message.success(response.data.message);
-        //     } catch (error) {
-        //       console.error("Error:", error);
-        //       message.error(error.response?.data?.message || 'Error deleting data');
-        //     }
-        //   }
         let luu = [];
         let xoa = [];
         luu = comparePloClos.filter(compareItem => {

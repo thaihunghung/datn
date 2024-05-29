@@ -33,6 +33,7 @@ const StoreRubicItems = (nav) => {
         setSelectedRowKeys([]);
         setSelectedRow([]);
     };
+    
     const columns = [
         {
             title: "Tên CLO",
@@ -118,7 +119,7 @@ const StoreRubicItems = (nav) => {
 
     const GetRubicAndItemsById = async () => {
         try {
-            const response = await axiosAdmin.get(`/rubric/${id}/items-isDelete-true`);
+            const response = await axiosAdmin.get(`/rubric/${id}/items/isDelete/true`);
             const rubric = response.data?.rubric || {};
     
             const RubricData = {
@@ -162,7 +163,7 @@ const StoreRubicItems = (nav) => {
             rubricsitem_id: selectedRowKeys,
         };
         try {
-            const response = await axiosAdmin.put('/rubric-item/listId/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/rubric-items/soft-delete-multiple', { data });
             await GetRubicAndItemsById();
             handleUnSelect();
             message.success(response.data.message);
@@ -174,7 +175,7 @@ const StoreRubicItems = (nav) => {
 
     const handleRestoreById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/rubric-item/${_id}/toggle-soft-delete`);
+            const response = await axiosAdmin.put(`/rubric-item/${_id}/soft-delete`);
             await GetRubicAndItemsById();
             handleUnSelect();
             message.success(response.data.message);
@@ -189,7 +190,7 @@ const StoreRubicItems = (nav) => {
             rubricsitem_id: selectedRowKeys,
         }
         try {
-            const response = await axiosAdmin.delete('/rubric-item/delete/multiple', { params: data });
+            const response = await axiosAdmin.delete('/rubric-items/delete/multiple', { params: data });
             handleUnSelect();
             message.success(response.data.message);
             GetRubicAndItemsById()

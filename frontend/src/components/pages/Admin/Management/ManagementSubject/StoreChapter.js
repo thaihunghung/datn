@@ -2,16 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { Button, message } from 'antd';
-import { Link, useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-import { Table, Upload, Tooltip, Divider, Steps } from 'antd';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { Table, Tooltip} from 'antd';
 import DropdownAndNavChapter from "../../Utils/DropdownAndNav/DropdownAndNavChapter";
 
 
 const StoreChapter = (nav) => {
-    const location = useLocation();
-    const isActive = (path) => location.pathname.startsWith(path);
     const { id } = useParams();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -94,7 +92,7 @@ const StoreChapter = (nav) => {
             chapter_id: selectedRowKeys,
         }
         try {
-            const response = await axiosAdmin.put('/chapter/listId/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/chapters/soft-delete-multiple', { data });
             handleUnSelect();
             message.success(response.data.message);
             getAllChapter()
@@ -106,7 +104,7 @@ const StoreChapter = (nav) => {
 
     const handleRestoreById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/chapter/${_id}/toggle-soft-delete`);
+            const response = await axiosAdmin.put(`/chapter/${_id}/soft-delete`);
             handleUnSelect();
             message.success(response.data.message);
             getAllChapter()
@@ -142,7 +140,7 @@ const StoreChapter = (nav) => {
         chapter_id: selectedRowKeys,
       };
       try {
-        const response = await axiosAdmin.delete('/chapter/delete/multiple', { params: data });
+        const response = await axiosAdmin.delete('/chapters/delete/multiple', { params: data });
 
         await getAllChapter();
           handleUnSelect();

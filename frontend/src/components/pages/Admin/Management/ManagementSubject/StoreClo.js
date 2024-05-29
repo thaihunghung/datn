@@ -2,16 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { Button, message } from 'antd';
-import { Link, useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-import { Table, Upload, Tooltip, Divider, Steps } from 'antd';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { Table, Tooltip} from 'antd';
 import DropdownAndNavClo from "../../Utils/DropdownAndNav/DropdownAndNavClo";
 
 
 const StoreClo = (nav) => {
-    const location = useLocation();
-    const isActive = (path) => location.pathname.startsWith(path);
     const { id } = useParams();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -94,7 +92,7 @@ const StoreClo = (nav) => {
             clo_id: selectedRowKeys,
         }
         try {
-            const response = await axiosAdmin.put('/clo/listId/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/clos/soft-delete-multiple', { data });
             handleUnSelect();
             message.success(response.data.message);
             getAllClo()
@@ -106,7 +104,7 @@ const StoreClo = (nav) => {
 
     const handleRestoreById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/clo/${_id}/toggle-soft-delete`);
+            const response = await axiosAdmin.put(`/clo/${_id}/soft-delete`);
             handleUnSelect();
             message.success(response.data.message);
             getAllClo()
@@ -143,7 +141,7 @@ const StoreClo = (nav) => {
       };
       console.log(data)
       try {
-        const response = await axiosAdmin.delete('/clo/delete/multiple', { params: data });
+        const response = await axiosAdmin.delete('/clos/delete/multiple', { params: data });
 
         await getAllClo();
           handleUnSelect();

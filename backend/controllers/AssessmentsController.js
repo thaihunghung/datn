@@ -79,8 +79,8 @@ const AssessmentsController = {
   },
   getByID: async (req, res) => {
     try {
-      const { id } = req.params;
-      const assessment = await AssessmentModel.findOne({ assessment_id: id});
+      const { assessment_id } = req.params;
+      const assessment = await AssessmentModel.findOne({ assessment_id: assessment_id});
       res.json(assessment);
     } catch (error) {
       console.error('Lỗi tìm kiếm chương trình:', error);
@@ -89,9 +89,9 @@ const AssessmentsController = {
   },
   update: async (req, res) => {
     try {
-      const { id } = req.params;
+      const { assessment_id } = req.params;
       const { data } = req.body;
-      const updatedProgram = await AssessmentModel.update(data , { where: { assessment_id: id } });
+      const updatedProgram = await AssessmentModel.update(data , { where: { assessment_id: assessment_id } });
       if (updatedProgram[0] === 0) {
         return res.status(404).json({ message: 'Program not found' });
       }
@@ -103,8 +103,8 @@ const AssessmentsController = {
   },
   delete: async (req, res) => {
     try {
-      const { id } = req.params;
-      await AssessmentModel.destroy({ where: { assessment_id: id } });
+      const { assessment_id } = req.params;
+      await AssessmentModel.destroy({ where: { assessment_id: assessment_id } });
       res.json({ message: 'Xóa chương trình thành công' });
     } catch (error) {
       console.error('Lỗi xóa chương trình:', error);
@@ -139,15 +139,15 @@ const AssessmentsController = {
   },
   isdelete: async (req, res) => {
     try {
-      const { id } = req.params;
-      const assessment = await AssessmentModel.findOne({ where: { assessment_id: id } });
+      const { assessment_id } = req.params;
+      const assessment = await AssessmentModel.findOne({ where: { assessment_id: assessment_id } });
 
       if (!assessment) {
         return res.status(404).json({ message: 'Không tìm thấy chương trình' });
       }
       const updatedIsDeleted = !assessment.isDelete;
       console.log(updatedIsDeleted);
-      AssessmentModel.update({ isDelete: updatedIsDeleted }, { where: { assessment_id: id } })
+      AssessmentModel.update({ isDelete: updatedIsDeleted }, { where: { assessment_id: assessment_id } })
         .then(assessments => {
           console.log(assessments);
         })

@@ -47,7 +47,7 @@ const CreateProgram = (nav) => {
     };
     const handleDownloadProgram = async () => {
         try {
-            const response = await axiosAdmin.get('program/form/excel', {
+            const response = await axiosAdmin.get('program/templates/post', {
                 responseType: 'blob'
             });
 

@@ -118,7 +118,7 @@ const StoreRubric = (nav) => {
 
     const getAllRubricIsDeleteTrue = async () => {
         try {
-            const response = await axiosAdmin.get('/rubric/archive/get-by-user/checkscore');
+            const response = await axiosAdmin.get(`/rubrics/archive/user/${1}/checkscore`);
             const updatedRubricData = response.data.rubric.map((rubric) => {
                 const status = {
                     status: rubric.RubricItem.length === 0 ? false : true,
@@ -145,7 +145,7 @@ const StoreRubric = (nav) => {
             rubric_id: selectedRowKeys,
         }
         try {
-            const response = await axiosAdmin.delete('/rubric/delete/multiple', { params: data });
+            const response = await axiosAdmin.delete('/rubrics/delete/multiple', { params: data });
             handleUnSelect();
             message.success(response.data.message);
             getAllRubricIsDeleteTrue()
@@ -174,7 +174,7 @@ const StoreRubric = (nav) => {
             rubric_id: selectedRowKeys,
         };
         try {
-            const response = await axiosAdmin.put('/rubric/listId/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/rubrics/soft-delete-multiple', { data });
             getAllRubricIsDeleteTrue();
             handleUnSelect();
             message.success(response.data.message);
@@ -186,7 +186,7 @@ const StoreRubric = (nav) => {
 
     const handleRestoreById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/rubric/${_id}/toggle-soft-delete`);
+            const response = await axiosAdmin.put(`/rubric/${_id}/soft-delete`);
             await getAllRubricIsDeleteTrue();
             handleUnSelect();
             message.success(response.data.message);

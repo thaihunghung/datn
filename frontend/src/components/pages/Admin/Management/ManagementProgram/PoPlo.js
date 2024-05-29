@@ -12,7 +12,7 @@ const PoPlo = (nav) => {
 
     const GetAllPo = async () => {
         try {
-            const response = await axiosAdmin.get('/po/isDelete/false');
+            const response = await axiosAdmin.get('/pos/isDelete/false');
             setPos(response.data);
         } catch (error) {
             console.error('Error fetching POs:', error);
@@ -21,7 +21,7 @@ const PoPlo = (nav) => {
 
     const GetAllPlo = async () => {
         try {
-            const response = await axiosAdmin.get('/plo/isDelete/false');
+            const response = await axiosAdmin.get('/plos/isDelete/false');
             setPlos(response.data)
         } catch (error) {
             console.error('Error fetching PLOs:', error);

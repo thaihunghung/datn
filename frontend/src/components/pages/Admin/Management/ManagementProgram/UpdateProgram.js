@@ -5,14 +5,11 @@ import { convertFromHTML, convertToHTML } from 'draft-convert';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { Input, Button } from "@nextui-org/react";
 import { message } from 'antd';
-import { Link, useLocation } from "react-router-dom";
 import "./Program.css"
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavProgram from "../../Utils/DropdownAndNav/DropdownAndNavProgram";
 
 const UpdateProgram = (nav) => {
-    const location = useLocation();
-    const isActive = (path) => location.pathname.startsWith(path);
     const { setCollapsedNav } = nav;
 
     const [activeTab, setActiveTab] = useState(0);

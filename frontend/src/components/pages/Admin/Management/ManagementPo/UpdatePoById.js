@@ -1,20 +1,18 @@
 // UpdatePoById.js
 
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom"; 
+import { Link, useNavigate, useParams } from "react-router-dom"; 
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Switch } from "@nextui-org/react";
-import { Select, Tooltip } from "antd"; 
+import { Select} from "antd"; 
 import DropdownAndNavPo from "../../Utils/DropdownAndNav/DropdownAndNavPo";
 
 const UpdatePoById = (nav) => {
-    const location = useLocation();
-    const isActive = (path) => location.pathname.startsWith(path);
+
     const { id } = useParams();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const [layout, setLayout] = useState("col");
-    const [disableRowLayout, setDisableRowLayout] = useState(false);
+
     const [po_id, setPo_id] = useState("");
     const [po_name, setPo_name] = useState("");
     const [program_id, setProgram_id] = useState();
@@ -73,11 +71,8 @@ const UpdatePoById = (nav) => {
         getAllProgram()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
-                setLayout("col");
                 setCollapsedNav(true);
-                setDisableRowLayout(true);
             } else {
-                setDisableRowLayout(false);
                 setCollapsedNav(false);
             }
             //console.log(window.innerWidth);

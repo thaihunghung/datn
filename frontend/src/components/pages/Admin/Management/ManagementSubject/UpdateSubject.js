@@ -1,13 +1,12 @@
 // UpdateSubject.js
 
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import DropdownAndNavSubject from "../../Utils/DropdownAndNav/DropdownAndNavSubject";
 
 const UpdateSubject = (nav) => {
-    const location = useLocation();
     const { id } = useParams();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -79,6 +78,7 @@ const UpdateSubject = (nav) => {
             window.removeEventListener("resize", handleResize);
         };
     }, [id, setCollapsedNav, onOpen]);
+    
     useEffect(() => {
         onOpen()
         getSubjectByID()

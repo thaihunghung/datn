@@ -120,7 +120,7 @@ const MangementRubricItems = (nav) => {
 
     const GetRubicAndItemsById = async () => {
         try {
-            const response = await axiosAdmin.get(`/rubric/${id}/items`);
+            const response = await axiosAdmin.get(`/rubric/${id}/items/isDelete/false`);
             const rubric = response.data?.rubric || {};
     
             const RubricData = {
@@ -165,7 +165,7 @@ const MangementRubricItems = (nav) => {
             rubricsitem_id: selectedRowKeys,
         };
         try {
-            const response = await axiosAdmin.put('/rubric-item/listId/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/rubric-items/soft-delete-multiple', { data });
             await GetRubicAndItemsById();
             handleUnSelect();
             message.success(response.data.message);
@@ -177,7 +177,7 @@ const MangementRubricItems = (nav) => {
 
     const handleSoftDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/rubric-item/${_id}/toggle-soft-delete`);
+            const response = await axiosAdmin.put(`/rubric-item/${_id}/soft-delete`);
             await GetRubicAndItemsById();
             handleUnSelect();
             message.success(response.data.message);

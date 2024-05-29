@@ -128,7 +128,7 @@ const Chapter = (nav) => {
         };
         console.log(data)
         try {
-            const response = await axiosAdmin.put('/chapter/listId/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/chapters/soft-delete-multiple', { data });
             await getAllChapter();
             handleUnSelect();
             message.success(response.data.message);
@@ -140,7 +140,7 @@ const Chapter = (nav) => {
 
     const handleSoftDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/chapter/${_id}/toggle-soft-delete`);
+            const response = await axiosAdmin.put(`/chapter/${_id}/soft-delete`);
             await getAllChapter();
             handleUnSelect();
             message.success(response.data.message);
