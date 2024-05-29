@@ -12,6 +12,11 @@ const SubjectModel = sequelize.define('subject', {
     type: DataTypes.TEXT,
     allowNull: false
   },
+  subjectCode: {
+    type: DataTypes.STRING(6),
+    allowNull: false,
+    unique: true
+  },
   description: {
     type: DataTypes.TEXT,
     allowNull: false

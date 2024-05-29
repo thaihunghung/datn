@@ -12,9 +12,15 @@ const ClassModel = sequelize.define('class', {
     type: DataTypes.STRING(255),
     allowNull: false
   },
+  classNameShort: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+    unique: true
+  },
   classCode: {
     type: DataTypes.STRING(10),
-    allowNull: false
+    allowNull: false,
+    unique: true
   },
   isDelete: {
     type: DataTypes.TINYINT,
