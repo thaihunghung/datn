@@ -12,7 +12,7 @@ const AssessmentModel = sequelize.define('Assessment', {
     primaryKey: true,
     autoIncrement: true
   },
-  
+
   user_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -52,6 +52,10 @@ const AssessmentModel = sequelize.define('Assessment', {
       model: CourseModel,
       key: 'course_id'
     }
+  },
+  totalScore: {
+    type: DataTypes.DOUBLE(8, 2),
+    defaultValue: 0.00
   },
   description: {
     type: DataTypes.TEXT,

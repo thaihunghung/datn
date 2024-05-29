@@ -1,6 +1,5 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const AcademicYearModel = require('./AcademicYearModel');
 
 const SemesterModel = sequelize.define('semester', {
   semester_id: {
@@ -20,22 +19,12 @@ const SemesterModel = sequelize.define('semester', {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  academic_year_id: { 
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: AcademicYearModel,
-      key: 'academic_year_id' 
-    }
-  },
+  
 }, {
   tableName: 'semesters',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
 });
 
-SemesterModel.belongsTo(AcademicYearModel, {
-  foreignKey: 'academic_year_id'
-});
 
 module.exports = SemesterModel;
