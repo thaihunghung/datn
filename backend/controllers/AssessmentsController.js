@@ -37,7 +37,7 @@ const AssessmentsController = {
           'course_id',
           [Sequelize.fn('COUNT', Sequelize.col('assessment_id')), 'assessmentCount'],
           [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('student_id'))), 'studentCount'],
-          [Sequelize.fn('SUM', Sequelize.literal('CASE WHEN score = 0 THEN 1 ELSE 0 END')), 'zeroScoreCount']
+          [Sequelize.fn('SUM', Sequelize.literal('CASE WHEN totalScore = 0 THEN 1 ELSE 0 END')), 'zeroScoreCount']
         ],
         group: ['course_id'],
         // include: [
