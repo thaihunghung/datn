@@ -8,7 +8,7 @@ router.post('/clo-chapter', CLO_CHAPTER.SaveCloChapter);
 
 router.delete('/clo-chapter', CLO_CHAPTER.DeleteCloChapter);
 
-router.get('/clo-chapter/clo/:clo_id/getChapter', CLO_CHAPTER.GetChapterCloByCloId);
+router.get('/clo-chapter/clo/:clo_id/find-chapter', CLO_CHAPTER.GetChapterCloByCloId);
 
 router.post('/clo-chapter/id_Chapters', CLO_CHAPTER.GetChapterCloByCloIds);
 

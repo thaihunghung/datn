@@ -95,7 +95,7 @@ const CreateSubject = (nav) => {
         return () => {
             window.removeEventListener("resize", handleResize);
         };
-    }, []);
+    }, [setCollapsedNav]);
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">

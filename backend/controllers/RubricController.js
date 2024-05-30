@@ -7,8 +7,6 @@ const CloModel = require('../models/CloModel');
 const ChapterModel = require('../models/ChapterModel');
 const PloModel = require('../models/PloModel');
 
-
-
 const RubricController = {
   // Get all rubrics
   index: async (req, res) => {
@@ -34,8 +32,8 @@ const RubricController = {
   // Get rubric by ID
   getByID: async (req, res) => {
     try {
-      const { id } = req.params;
-      const rubric = await RubricModel.findOne({ where: { rubric_id: id } });
+      const { rubric_id } = req.params;
+      const rubric = await RubricModel.findOne({ where: { rubric_id: rubric_id } });
       if (!rubric) {
         return res.status(404).json({ message: 'rubric not found' });
       }
@@ -66,9 +64,9 @@ const RubricController = {
   // Update rubric
   update: async (req, res) => {
     try {
-      const { id } = req.params;
+      const { rubric_id } = req.params;
       const { data } = req.body;
-      const rubric = await RubricModel.findOne({ where: { rubric_id: id } });
+      const rubric = await RubricModel.findOne({ where: { rubric_id: rubric_id } });
       if (!rubric) {
         return res.status(404).json({ message: 'rubric not found' });
       }
@@ -82,8 +80,8 @@ const RubricController = {
   // Delete rubric
   delete: async (req, res) => {
     try {
-      const { id } = req.params;
-      const rubric = await RubricModel.findOne({ where: { rubric_id: id } });
+      const { rubric_id } = req.params;
+      const rubric = await RubricModel.findOne({ where: { rubric_id: rubric_id } });
       if (!rubric) {
         return res.status(404).json({ message: 'rubric not found' });
       }
@@ -153,14 +151,14 @@ const RubricController = {
   // Toggle isDelete status of a rubric
   isdelete: async (req, res) => {
     try {
-      const { id } = req.params;
-      console.log('isDelete', id);
-      const rubric = await RubricModel.findOne({ where: { rubric_id: id } });
+      const { rubric_id } = req.params;
+      console.log('isDelete', rubric_id);
+      const rubric = await RubricModel.findOne({ where: { rubric_id: rubric_id } });
       if (!rubric) {
         return res.status(404).json({ message: 'rubric not found' });
       }
       const updatedIsDeleted = !rubric.isDelete;
-      await RubricModel.update({ isDelete: updatedIsDeleted }, { where: { rubric_id: id } });
+      await RubricModel.update({ isDelete: updatedIsDeleted }, { where: { rubric_id: rubric_id } });
       res.json({ message: `Successfully toggled isDelete status to ${updatedIsDeleted}` });
     } catch (error) {
       console.error('Error updating isDelete status:', error);
@@ -171,11 +169,12 @@ const RubricController = {
   // const RubricItemModel = require('../models/RubricItemModel');
   GetByUserAndCheckScore: async (req, res) => {
     try {
-      const rubrics = await RubricModel.findAll({ where: { isDelete: false } });
+      const { user_id } = req.params;
+      const rubrics = await RubricModel.findAll({ where: {user_id: user_id, isDelete: false } });
       const rubricIds = rubrics.map(rubric => rubric.rubric_id);
       //console.log(rubricIds);
       const results = await RubricItemModel.findAll({
-        attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('score')), 'total_score']],
+        attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('maxScore')), 'total_score']],
         where: { rubric_id: rubricIds, isDelete: false },
         group: ['rubric_id']
       });
@@ -198,9 +197,12 @@ const RubricController = {
       res.status(500).json({ message: 'Internal server error' });
     }
   },
+
   GetisDeleteTotrueByUserAndCheckScore: async (req, res) => {
     try {
-      const rubrics = await RubricModel.findAll({ where: { isDelete: true } });
+      const { user_id } = req.params;
+
+      const rubrics = await RubricModel.findAll({ where: { user_id: user_id, isDelete: true } });
       const rubricIds = rubrics.map(rubric => rubric.rubric_id);
       //console.log(rubricIds);
       const results = await RubricItemModel.findAll({
@@ -229,13 +231,13 @@ const RubricController = {
   },
   toggleSoftDeleteById: async (req, res) => {
     try {
-      const { id } = req.params;
-      const rubric = await RubricModel.findOne({ where: { rubric_id: id } });
+      const { rubric_id } = req.params;
+      const rubric = await RubricModel.findOne({ where: { rubric_id: rubric_id } });
       if (!rubric) {
         return res.status(404).json({ message: 'rubric not found' });
       }
       const updatedIsDeleted = !rubric.isDelete;
-      await RubricModel.update({ isDelete: updatedIsDeleted }, { where: { rubric_id: id } });
+      await RubricModel.update({ isDelete: updatedIsDeleted }, { where: { rubric_id: rubric_id } });
 
       res.status(200).json({ message: `Toggled isDelete status to ${updatedIsDeleted}` });
 
@@ -273,9 +275,9 @@ const RubricController = {
   },
   GetItemsRubricsByIdRubrics: async (req, res) => {
     try {
-      const { id } = req.params;
+      const { rubric_id } = req.params;
       const rubric = await RubricModel.findOne({
-        where: { rubric_id: id },
+        where: { rubric_id: rubric_id },
         include: [{
           model: SubjectModel,
           attributes: ['subject_id', 'subjectName']
@@ -300,7 +302,6 @@ const RubricController = {
             }]
           }),
 
-
           // PloCloModel.findAll({ where: { clo_id: rubric.clo_id } }),
           CloModel.findAll({ where: { subject_id: rubric.subject_id } }),
           // ChapterModel.findAll({ where: { subject_id: rubric.subject_id } })
@@ -310,7 +311,6 @@ const RubricController = {
         rubric.dataValues.CloData = Clos;
         //rubric.dataValues.PloCloData = PloClo;
         //rubric.dataValues.ChapterData = Chapters;
-
         res.json({ rubric: rubric });
       } else {
         console.log('Rubric not found');
@@ -323,9 +323,9 @@ const RubricController = {
   
   GetItemsRubricsByIdRubricsisDeleteTrue: async (req, res) => {
     try {
-      const { id } = req.params;
+      const { rubric_id } = req.params;
       const rubric = await RubricModel.findOne({
-        where: { rubric_id: id },
+        where: { rubric_id: rubric_id },
         include: [{
           model: SubjectModel,
           attributes: ['subject_id', 'subjectName']

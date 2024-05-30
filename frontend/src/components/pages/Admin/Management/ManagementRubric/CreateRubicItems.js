@@ -58,7 +58,7 @@ const CreateRubicItems = (nav) => {
     try {
       const response = await axiosAdmin.get(`/rubric/${id}`);
       if (response.status === 200) {
-        const clo_ids = await axiosAdmin.get(`/subject/${response.data.subject_id}/clo-ids`);
+        const clo_ids = await axiosAdmin.get(`/subject/${response.data.subject_id}/find-clo-ids`);
         setDataClo(clo_ids.data)
       }
 
@@ -74,7 +74,7 @@ const CreateRubicItems = (nav) => {
       setSelectedChapter(null) 
       const GetChapterByCloID = async (cloId) => {
         try {
-          const response = await axiosAdmin.get(`/clo-chapter/clo/${cloId}/getChapter`);
+          const response = await axiosAdmin.get(`/clo-chapter/clo/${cloId}/find-chapter`);
           console.log("Chapter ID", cloId);
           console.log(response.data);
           setDataChapter(response.data);
@@ -86,7 +86,7 @@ const CreateRubicItems = (nav) => {
 
       const GetPloByCloID = async (cloId) => {
         try {
-          const response = await axiosAdmin.get(`/plo-clo/clo/${cloId}/getPlo`);
+          const response = await axiosAdmin.get(`/plo-clo/clo/${cloId}/find-plo`);
           console.log("PLO ID", cloId);
           console.log(response.data);
           setDataPlo(response.data);
@@ -126,7 +126,7 @@ const CreateRubicItems = (nav) => {
         }
       };
       
-      const response = await axiosAdmin.post(`/rubric-item/save-check-score`, { data });
+      const response = await axiosAdmin.post(`/rubric-item/checkscore`, { data });
       if (response.status === 201) {
         message.success('Rubric item created successfully');
       } else if (response.status === 400) {

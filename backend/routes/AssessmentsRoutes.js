@@ -138,16 +138,16 @@ const assessmentsController = require('../controllers/AssessmentsController');
  *         description: Lỗi server
  */
 
-router.get('/assessment', assessmentsController.index);
-router.get('/assessment/get-by-user/:user_id', assessmentsController.GetByUser);
+router.get('/assessments', assessmentsController.index);
+router.get('/assessments/user/:user_id', assessmentsController.GetByUser);
 router.post('/assessment', assessmentsController.create);
 
-router.get('/assessment/:id', assessmentsController.getByID);
-router.put('/assessment/:id', assessmentsController.update);
-router.delete('/assessment/:id', assessmentsController.delete);
+router.get('/assessment/:assessment_id', assessmentsController.getByID);
+router.put('/assessment/:assessment_id', assessmentsController.update);
+router.delete('/assessment/:assessment_id', assessmentsController.delete);
 
-router.get('/assessment/isDelete/true', assessmentsController.isDeleteTotrue);
-router.get('/assessment/isDelete/false', assessmentsController.isDeleteTofalse);
-router.put('/assessment/isDelete/:id', assessmentsController.isdelete);
+router.get('/assessments/isDelete/true', assessmentsController.isDeleteTotrue);
+router.get('/assessments/isDelete/false', assessmentsController.isDeleteTofalse);
+router.put('/assessment/isDelete/:assessment_id', assessmentsController.isdelete);
 
 module.exports = router;

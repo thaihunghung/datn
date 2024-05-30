@@ -1,14 +1,13 @@
 // ManagementRubric.js
 
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Table, Tooltip, Button, message } from 'antd';
 import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
 
 const ManagementRubric = (nav) => {
-    const location = useLocation();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -140,7 +139,7 @@ const ManagementRubric = (nav) => {
 
     const getAllRubricIsDeleteFalse = async () => {
         try {
-            const response = await axiosAdmin.get('/rubric/get-by-user/checkscore');
+            const response = await axiosAdmin.get(`/rubrics/user/${1}/checkscore`);
             const updatedRubricData = response.data.rubric.map((rubric) => {
                 const status = {
                     status: rubric.RubricItem.length === 0 ? false : true,
@@ -167,7 +166,7 @@ const ManagementRubric = (nav) => {
             rubric_id: selectedRowKeys,
         };
         try {
-            const response = await axiosAdmin.put('/rubric/listId/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/rubrics/soft-delete-multiple', { data });
             await getAllRubricIsDeleteFalse();
             handleUnSelect();
             message.success(response.data.message);
@@ -179,7 +178,7 @@ const ManagementRubric = (nav) => {
 
     const handleSoftDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/rubric/${_id}/toggle-soft-delete`);
+            const response = await axiosAdmin.put(`/rubric/${_id}/soft-delete`);
             await getAllRubricIsDeleteFalse();
             handleUnSelect();
             message.success(response.data.message);

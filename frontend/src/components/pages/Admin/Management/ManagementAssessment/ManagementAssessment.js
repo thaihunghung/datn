@@ -119,7 +119,7 @@ const ManagementAssessment = (nav) => {
 
   const getAllAssessmentIsDeleteFalse = async () => {
     try {
-      const response = await axiosAdmin.get('/assessment/get-by-user/2');
+      const response = await axiosAdmin.get('/assessments/user/2');
       const updatedPoData = response.data.map((subject) => {
         const status = {
           assessmentCount: subject.assessmentCount,
@@ -148,7 +148,7 @@ const ManagementAssessment = (nav) => {
     };
     console.log(data)
     try {
-      const response = await axiosAdmin.put('/subject/listId/soft-delete-multiple', { data });
+      const response = await axiosAdmin.put('/subjects/soft-delete-multiple', { data });
       await getAllAssessmentIsDeleteFalse();
       handleUnSelect();
       message.success(response.data.message);

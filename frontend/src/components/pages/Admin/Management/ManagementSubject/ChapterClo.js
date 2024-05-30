@@ -30,7 +30,7 @@ const ChapterClo = (nav) => {
 
     const GetArrChapterBySubjectID = async () => {
         try {
-            const response = await axiosAdmin.get(`/subject/${id}/chapter-ids`);
+            const response = await axiosAdmin.get(`/subject/${id}/find-chapter-ids`);
             setChapterArr(response.data);
             //console.log(response.data); 
             //message.success('CLOs fetched successfully.');

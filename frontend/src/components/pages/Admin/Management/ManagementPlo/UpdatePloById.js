@@ -1,20 +1,17 @@
 // UpdatePloById.js
 
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom"; 
+import { Link, useNavigate, useParams } from "react-router-dom"; 
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Switch } from "@nextui-org/react";
-import { Select, Tooltip } from "antd"; 
+import { Select } from "antd"; 
 import DropdownAndNavPlo from "../../Utils/DropdownAndNav/DropdownAndNavPlo";
 
 const UpdatePloById = (nav) => {
-    const location = useLocation();
-    const isActive = (path) => location.pathname.startsWith(path);
     const { id } = useParams();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const [layout, setLayout] = useState("col");
-    const [disableRowLayout, setDisableRowLayout] = useState(false);
+
     const [plo_id, setPlo_id] = useState("");
     const [plo_name, setPlo_name] = useState("");
     const [program_id, setProgram_id] = useState();
@@ -61,7 +58,7 @@ const UpdatePloById = (nav) => {
                 isDeleted: isDelete
             }
             console.log(data);
-            const response = await axiosAdmin.put(`/plo/${id}`, { data: data });
+            await axiosAdmin.put(`/plo/${id}`, { data: data });
             onClose(navigate("/admin/management-plo/list"))
         } catch (error) {
             console.error("lỗi", error);
@@ -73,11 +70,8 @@ const UpdatePloById = (nav) => {
         getAllProgram()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
-                setLayout("col");
                 setCollapsedNav(true);
-                setDisableRowLayout(true);
             } else {
-                setDisableRowLayout(false);
                 setCollapsedNav(false);
             }
             //console.log(window.innerWidth);

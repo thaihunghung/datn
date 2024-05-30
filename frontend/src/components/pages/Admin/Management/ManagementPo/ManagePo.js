@@ -105,7 +105,7 @@ const ManagePo = (nav) => {
     };
     const getAllPo = async () => {
         try {
-            const response = await axiosAdmin.get('/po/isDelete/false');
+            const response = await axiosAdmin.get('/pos/isDelete/false');
             const updatedPoData = response.data.map((po) => {
                 return {
                     key: po.po_id,
@@ -129,7 +129,7 @@ const ManagePo = (nav) => {
         };
         console.log(data)
         try {
-            const response = await axiosAdmin.put('/po/listId/soft-delete-multiple', { data: data });
+            const response = await axiosAdmin.put('/pos/soft-delete-multiple', { data: data });
             await getAllPo();
             handleUnSelect();
             message.success(response.data.message);
@@ -141,7 +141,7 @@ const ManagePo = (nav) => {
 
     const handleSoftDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/po/${_id}/toggle-soft-delete`);
+            const response = await axiosAdmin.put(`/po/${_id}/soft-delete`);
             await getAllPo();
             handleUnSelect();
             message.success(response.data.message);

@@ -36,11 +36,11 @@ const PloController = {
   // Get PLO by ID
   getByID: async (req, res) => {
     try {
-      const { id } = req.params;
+      const { plo_id } = req.params;
       if (!id) {
         return res.status(400).json({ message: 'No ID provided' });
       }
-      const plo = await PloModel.findOne({ where: { plo_id: id } });
+      const plo = await PloModel.findOne({ where: { plo_id: plo_id } });
       if (!plo) {
         return res.status(404).json({ message: 'PLO not found' });
       }
@@ -54,15 +54,15 @@ const PloController = {
   // Update PLO
   update: async (req, res) => {
     try {
-      const { id } = req.params;
+      const { plo_id } = req.params;
       const { data } = req.body;
-      if (!id) {
+      if (!plo_id) {
         return res.status(400).json({ message: 'No ID provided' });
       }
       if (!data) {
         return res.status(400).json({ message: 'No data provided' });
       }
-      const [updated] = await PloModel.update(data, { where: { plo_id: id } });
+      const [updated] = await PloModel.update(data, { where: { plo_id: plo_id } });
       if (!updated) {
         return res.status(404).json({ message: 'PLO not found' });
       }
@@ -76,13 +76,13 @@ const PloController = {
   // Delete PLO
   delete: async (req, res) => {
     try {
-      const { id } = req.params;
-      if (!id) {
+      const { plo_id } = req.params;
+      if (!plo_id) {
         return res.status(400).json({ message: 'No ID provided' });
       }
-      await PoPloModel.destroy({ where: { plo_id: id } });
-      await PloCloModel.destroy({where: { plo_id: id } });
-      const deleted = await PloModel.destroy({ where: { plo_id: id } });
+      await PoPloModel.destroy({ where: { plo_id: plo_id } });
+      await PloCloModel.destroy({where: { plo_id: plo_id } });
+      const deleted = await PloModel.destroy({ where: { plo_id: plo_id } });
       if (!deleted) {
         return res.status(404).json({ message: 'PLO not found' });
       }
@@ -159,13 +159,13 @@ const PloController = {
   },
   toggleSoftDeleteById: async (req, res) => {
     try {
-      const { id } = req.params;
-      const plo = await PloModel.findOne({ where: { plo_id: id } });
+      const { plo_id } = req.params;
+      const plo = await PloModel.findOne({ where: { plo_id: plo_id } });
       if (!plo) {
         return res.status(404).json({ message: 'plo not found' });
       }
       const updatedIsDeleted = !plo.isDelete;
-      await PloModel.update({ isDelete: updatedIsDeleted }, { where: { plo_id: id } });
+      await PloModel.update({ isDelete: updatedIsDeleted }, { where: { plo_id: plo_id } });
 
       res.status(200).json({ message: `Toggled isDelete status to ${updatedIsDeleted}` });
 

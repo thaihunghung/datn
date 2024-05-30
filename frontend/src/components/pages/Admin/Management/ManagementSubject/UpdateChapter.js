@@ -1,15 +1,13 @@
 // UpdateClo.js
 
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-import { Tooltip, message, Button } from 'antd';
+import { Button } from 'antd';
 import DropdownAndNavChapter from "../../Utils/DropdownAndNav/DropdownAndNavChapter";
 
 const UpdateChapter = (nav) => {
-    const location = useLocation();
-    const isActive = (path) => location.pathname.startsWith(path);
     const { id, chapter_id } = useParams();
 
     const { setCollapsedNav } = nav;

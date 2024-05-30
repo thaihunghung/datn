@@ -34,8 +34,8 @@ const PoController = {
 
   getByID: async (req, res) => {
     try {
-      const { id } = req.params;
-      const po = await PoModel.findOne({ where: { po_id: id } });
+      const { po_id } = req.params;
+      const po = await PoModel.findOne({ where: { po_id: po_id } });
       if (!po) {
         return res.status(404).json({ message: 'PoModel not found' });
       }
@@ -48,9 +48,9 @@ const PoController = {
 
   update: async (req, res) => {
     try {
-      const { id } = req.params;
+      const { po_id } = req.params;
       const { data } = req.body;
-      const [updated] = await PoModel.update(data, { where: { po_id: id } });
+      const [updated] = await PoModel.update(data, { where: { po_id: po_id } });
       if (!updated) {
         return res.status(404).json({ message: 'PoModel not found' });
       }
@@ -63,9 +63,9 @@ const PoController = {
 
   delete: async (req, res) => {
     try {
-      const { id } = req.params;
-      await PoPloModel.destroy({ where: { po_id: id } });
-      const deletedCount = await PoModel.destroy({ where: { po_id: id } });
+      const { po_id } = req.params;
+      await PoPloModel.destroy({ where: { po_id: po_id } });
+      const deletedCount = await PoModel.destroy({ where: { po_id: po_id } });
       if (!deletedCount) {
         return res.status(404).json({ message: 'PoModel not found' });
       }
@@ -113,13 +113,13 @@ const PoController = {
 
   toggleSoftDeleteById: async (req, res) => {
     try {
-      const { id } = req.params;
-      const po = await PoModel.findOne({ where: { po_id: id } });
+      const { po_id } = req.params;
+      const po = await PoModel.findOne({ where: { po_id: po_id } });
       if (!po) {
         return res.status(404).json({ message: 'po not found' });
       }
       const updatedIsDeleted = !po.isDelete;
-      await PoModel.update({ isDelete: updatedIsDeleted }, { where: { po_id: id } });
+      await PoModel.update({ isDelete: updatedIsDeleted }, { where: { po_id: po_id } });
 
       res.status(200).json({ message: `Toggled isDelete status to ${updatedIsDeleted}` });
 

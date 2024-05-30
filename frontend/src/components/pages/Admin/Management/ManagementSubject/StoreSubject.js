@@ -2,14 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { Button, message } from 'antd';
-import { useLocation } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-import { Table, Upload, Tooltip, Divider, Steps } from 'antd';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { Table, Tooltip} from 'antd';
 import DropdownAndNavSubject from "../../Utils/DropdownAndNav/DropdownAndNavSubject";
 
 const StoreSubject = (nav) => {
-    const location = useLocation();
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [selectedRow, setSelectedRow] = useState([]);
@@ -92,7 +90,7 @@ const StoreSubject = (nav) => {
           };
           console.log(data)
           try {
-            const response = await axiosAdmin.put('/subject/listId/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/subjects/soft-delete-multiple', { data });
             await getAllSubjectIsDeleteTrue();
             handleUnSelect();
             message.success(response.data.message);
@@ -104,7 +102,7 @@ const StoreSubject = (nav) => {
 
     const handleRestoreById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/subject/${_id}/toggle-soft-delete`);
+            const response = await axiosAdmin.put(`/subject/${_id}/soft-delete`);
             await getAllSubjectIsDeleteTrue();
             handleUnSelect();
             message.success(response.data.message);
@@ -116,7 +114,7 @@ const StoreSubject = (nav) => {
 
     const getAllSubjectIsDeleteTrue = async () => {
         try {
-            const response = await axiosAdmin.get(`/subject/isDelete/true`);
+            const response = await axiosAdmin.get(`/subjects/isDelete/true`);
             const updatedSubjectData = response.data.map((subject) => {
                 return {
                     key: subject.subject_id,
@@ -139,7 +137,7 @@ const StoreSubject = (nav) => {
       };
       console.log(data)
       try {
-        const response = await axiosAdmin.delete('/subject/delete/multiple', { params: data });
+        const response = await axiosAdmin.delete('/subjects/delete/multiple', { params: data });
 
         await getAllSubjectIsDeleteTrue();
           handleUnSelect();

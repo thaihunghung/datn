@@ -1,14 +1,12 @@
 
 import { useEffect, useState } from "react";
 import { Table, Tooltip, Button, message } from 'antd';
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Chip } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavSubject from "../../Utils/DropdownAndNav/DropdownAndNavSubject";
 
 const Subject = (nav) => {
-  const location = useLocation();
-  const isActive = (path) => location.pathname.startsWith(path);
   const { setCollapsedNav } = nav;
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -187,7 +185,7 @@ const Subject = (nav) => {
   };
   const getAllSubjectIsDeleteFalse = async () => {
     try {
-      const response = await axiosAdmin.get('/subject/isDelete/false');
+      const response = await axiosAdmin.get('/subjects/isDelete/false');
       const updatedPoData = response.data.map((subject) => {
         const clos = {
           id: subject.subject_id,
@@ -227,7 +225,7 @@ const Subject = (nav) => {
     };
     console.log(data)
     try {
-      const response = await axiosAdmin.put('/subject/listId/soft-delete-multiple', { data });
+      const response = await axiosAdmin.put('/subjects/soft-delete-multiple', { data });
       await getAllSubjectIsDeleteFalse();
       handleUnSelect();
       message.success(response.data.message);
@@ -239,7 +237,7 @@ const Subject = (nav) => {
 
   const handleSoftDeleteById = async (_id) => {
     try {
-      const response = await axiosAdmin.put(`/subject/${_id}/toggle-soft-delete`);
+      const response = await axiosAdmin.put(`/subject/${_id}/soft-delete`);
       await getAllSubjectIsDeleteFalse();
       handleUnSelect();
       message.success(response.data.message);

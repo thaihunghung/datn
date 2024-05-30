@@ -18,7 +18,6 @@ const CreateAssessment = (nav) => {
     const [description, setDescription] = useState("");
     const [place, setPlace] = useState("");
     const [rubric_id, setRubric_id] = useState();
-    const [subject_id, setsubjectId] = useState();
     const [course_id, setCourse_id] = useState();
 
     const [DataRubric, setDataRubric] = useState([]);

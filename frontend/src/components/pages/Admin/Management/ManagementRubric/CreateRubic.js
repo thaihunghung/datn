@@ -38,7 +38,7 @@ const CreateRubic = (nav) => {
     }
     const getAllSubject = async () => {
         try {
-            const response = await axiosAdmin.get(`/subject/isDelete/false`);
+            const response = await axiosAdmin.get(`/subjects/isDelete/false`);
             if (response.data) {
                 setDataSubject(response.data);
             }

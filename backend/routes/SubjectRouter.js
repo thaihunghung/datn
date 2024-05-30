@@ -2,25 +2,25 @@ const express = require('express');
 const SubjectController = require('../controllers/SubjectController');
 const router = express.Router();
 
-
 // Định nghĩa các route cho chương trình
-router.get('/subject', SubjectController.index);
+
+router.get('/subjects', SubjectController.index);
 router.post('/subject', SubjectController.create);
-router.get('/subject/:id', SubjectController.getByID);
-router.get('/subject/:id/clo-ids', SubjectController.getArrayIDCloBySubjectId);
-router.get('/subject/:id/chapter-ids', SubjectController.getArrayIDChapterBySubjectId);
+router.get('/subject/:subject_id', SubjectController.getByID);
+router.get('/subject/:subject_id/find-clo-ids', SubjectController.getArrayIDCloBySubjectId);
+router.get('/subject/:subject_id/find-chapter-ids', SubjectController.getArrayIDChapterBySubjectId);
 
-router.put('/subject/:id', SubjectController.update);
-router.delete('/subject/:id', SubjectController.delete);
-router.delete('/subject/delete/multiple', SubjectController.deleteMultiple);
+router.put('/subject/:subject_id', SubjectController.update);
+router.delete('/subject/:subject_id', SubjectController.delete);
+router.delete('/subjects/delete/multiple', SubjectController.deleteMultiple);
 
-router.get('/subject/isDelete/true', SubjectController.isDeleteTotrue);
-router.get('/subject/isDelete/false', SubjectController.isDeleteTofalse);
+router.get('/subjects/isDelete/true', SubjectController.isDeleteTotrue);
+router.get('/subjects/isDelete/false', SubjectController.isDeleteTofalse);
 
-router.put('/subject/listId/soft-delete-multiple', SubjectController.softDeleteMultiple);
-router.put('/subject/:id/toggle-soft-delete', SubjectController.toggleSoftDeleteById);
-router.put('/subject/isDelete/:id', SubjectController.isDelete);
+router.put('/subjects/soft-delete-multiple', SubjectController.softDeleteMultiple);
+router.put('/subject/:subject_id/soft-delete', SubjectController.toggleSoftDeleteById);
 
 router.get('/subject/templates/post', SubjectController.getFormPost);
 router.post('/subject/templates/update', SubjectController.getFormUpdate);
+
 module.exports = router;

@@ -163,20 +163,21 @@ const router = express.Router();
 //  *         description: Lỗi server
 //  */
 
-router.get('/rubric-item', RubricItemController.index);
+router.get('/rubric-items', RubricItemController.index);
 router.post('/rubric-item', RubricItemController.create);
-router.get('/rubric-item/:id', RubricItemController.getByID);
-router.post('/rubric-item/save-check-score', RubricItemController.checkScore);
+router.get('/rubric-item/:rubricsitem_id', RubricItemController.getByID);
 
-router.put('/rubric-item/:id', RubricItemController.update);
-router.delete('/rubric-item/:id', RubricItemController.delete);
-router.delete('/rubric-item/delete/multiple', RubricItemController.deleteMultiple);
+router.post('/rubric-item/checkscore', RubricItemController.checkScore);
 
-router.put('/rubric-item/listId/soft-delete-multiple', RubricItemController.softDeleteMultiple);
-router.put('/rubric-item/:id/toggle-soft-delete', RubricItemController.toggleSoftDeleteById);
+router.put('/rubric-item/:rubricsitem_id', RubricItemController.update);
+router.delete('/rubric-item/:rubricsitem_id', RubricItemController.delete);
+router.delete('/rubric-items/delete/multiple', RubricItemController.deleteMultiple);
 
-router.get('/rubric-item/isDelete/true', RubricItemController.isDeleteTotrue);
-router.get('/rubric-item/isDelete/false', RubricItemController.isDeleteTofalse);
-router.put('/rubric-item/isDelete/:id', RubricItemController.isdelete);
+router.put('/rubric-items/soft-delete-multiple', RubricItemController.softDeleteMultiple);
+router.put('/rubric-item/:rubricsitem_id/soft-delete', RubricItemController.toggleSoftDeleteById);
+
+router.get('/rubric-items/isDelete/true', RubricItemController.isDeleteTotrue);
+router.get('/rubric-items/isDelete/false', RubricItemController.isDeleteTofalse);
+
 module.exports = router;
 

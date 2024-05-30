@@ -30,17 +30,13 @@ const UpdateRubicItems = (nav) => {
 
   const [selectedClo, setSelectedClo] = useState("");
   const [score, setSelectedScore] = useState();
-  const [selectedQualityLevel, setSelectedQualityLevel] = useState();
+
   const [RubricItems, setRubricItems] = useState({});
 
   const handleScoreChange = (value, option) => {
     setSelectedScore(value);
-    setSelectedQualityLevel(null)
   };
-  const handleQualityLevelChange = (value, option) => {
-    setSelectedQualityLevel(value);
 
-  };
   const handlePloSelectChange = (value, option) => {
     setSelectedPlo(value);
   };
@@ -63,7 +59,7 @@ const UpdateRubicItems = (nav) => {
     try {
       const response = await axiosAdmin.get(`/rubric/${id}`);
       if (response.status === 200) {
-        const clo_ids = await axiosAdmin.get(`/subject/${response.data.subject_id}/clo-ids`);
+        const clo_ids = await axiosAdmin.get(`/subject/${response.data.subject_id}/find-clo-ids`);
         setDataClo(clo_ids.data)
       }
 
@@ -80,8 +76,7 @@ const UpdateRubicItems = (nav) => {
 
       setSelectedScore(response.data.score)
       setRubricItems(response.data)
-      console.log(response.data.QualityLevels)
-      setSelectedQualityLevel(response.data.QualityLevels.length - 1)
+
     } catch (error) { }
   }
 
@@ -97,7 +92,7 @@ const UpdateRubicItems = (nav) => {
       setSelectedChapter(null)
       const GetChapterByCloID = async (cloId) => {
         try {
-          const response = await axiosAdmin.get(`/clo-chapter/clo/${cloId}/getChapter`);
+          const response = await axiosAdmin.get(`/clo-chapter/clo/${cloId}/find-chapter`);
           console.log("Chapter ID", cloId);
           console.log(response.data);
           setDataChapter(response.data);
@@ -109,7 +104,7 @@ const UpdateRubicItems = (nav) => {
 
       const GetPloByCloID = async (cloId) => {
         try {
-          const response = await axiosAdmin.get(`/plo-clo/clo/${cloId}/getPlo`);
+          const response = await axiosAdmin.get(`/plo-clo/clo/${cloId}/find-plo`);
           console.log("PLO ID", cloId);
           console.log(response.data);
           setDataPlo(response.data);

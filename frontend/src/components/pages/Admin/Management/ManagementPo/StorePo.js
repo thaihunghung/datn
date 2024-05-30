@@ -2,16 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Button, message } from 'antd';
-import { Link, useLocation } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-import { Table, Upload, Tooltip, Divider, Steps } from 'antd';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { Table, Tooltip} from 'antd';
 import DropdownAndNavPo from "../../Utils/DropdownAndNav/DropdownAndNavPo";
 
 
 const StorePo = (nav) => {
-    const location = useLocation();
-    const isActive = (path) => location.pathname.startsWith(path);
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [selectedRow, setSelectedRow] = useState([]);
@@ -93,7 +90,7 @@ const StorePo = (nav) => {
             po_id: selectedRowKeys,
         }
         try {
-            const response = await axiosAdmin.put('/po/listId/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/pos/soft-delete-multiple', { data });
             handleUnSelect();
             message.success(response.data.message);
             getAllPo()
@@ -105,7 +102,7 @@ const StorePo = (nav) => {
 
     const handleRestoreById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/po/${_id}/toggle-soft-delete`);
+            const response = await axiosAdmin.put(`/po/${_id}/soft-delete`);
             handleUnSelect();
             message.success(response.data.message);
             getAllPo()
@@ -118,7 +115,7 @@ const StorePo = (nav) => {
 
     const getAllPo = async () => {
         try {
-            const response = await axiosAdmin.get('/po/isDelete/true');
+            const response = await axiosAdmin.get('/pos/isDelete/true');
             const updatedPoData = response.data.map((po) => {
                 return {
                     key: po.po_id,
@@ -141,7 +138,7 @@ const StorePo = (nav) => {
             po_id: selectedRowKeys,
         };
         try {
-            const response = await axiosAdmin.delete('/po/delete/multiple', { params: data });
+            const response = await axiosAdmin.delete('/pos/delete/multiple', { params: data });
             await getAllPo();
             handleUnSelect();
             message.success(response.data.message);

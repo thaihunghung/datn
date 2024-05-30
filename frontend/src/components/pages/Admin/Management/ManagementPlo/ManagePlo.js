@@ -104,7 +104,7 @@ const ManagePlo = (nav) => {
 
     const getAllPlo = async () => {
         try {
-            const response = await axiosAdmin.get('/plo/isDelete/false');
+            const response = await axiosAdmin.get('/plos/isDelete/false');
             const updatedPoData = response.data.map((plo) => {
                 return {
                     key: plo.plo_id,
@@ -128,7 +128,7 @@ const ManagePlo = (nav) => {
         };
         console.log(data)
         try {
-            const response = await axiosAdmin.put('/plo/listId/soft-delete-multiple', {'data': JSON.stringify(data)});
+            const response = await axiosAdmin.put('/plos/soft-delete-multiple', {data: data});
             await getAllPlo();
             handleUnSelect();
             message.success(response.data.message);
@@ -140,7 +140,7 @@ const ManagePlo = (nav) => {
 
     const handleSoftDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/plo/${_id}/toggle-soft-delete`);
+            const response = await axiosAdmin.put(`/plo/${_id}/soft-delete`);
             await getAllPlo();
             handleUnSelect();
             message.success(response.data.message);
@@ -160,7 +160,7 @@ const ManagePlo = (nav) => {
                 id: selectedRowKeys
             }
             
-            const response = await axiosAdmin.post('/plo/templates/update', {'data': JSON.stringify(data)}, {
+            const response = await axiosAdmin.post('/plo/templates/update', {data: data}, {
                 responseType: 'blob'
             });
 

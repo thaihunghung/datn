@@ -9,7 +9,7 @@ const ManageProgram = (nav) => {
 
     const allProgramNotIsDelete = async () => {
         try {
-            const program = await axiosAdmin.get('/program');
+            const program = await axiosAdmin.get('/programs');
             setProgramData(program.data)
             console.log(program.data);
         } catch (error) {

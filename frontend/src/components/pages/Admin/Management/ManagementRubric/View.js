@@ -8,7 +8,7 @@ const View = () => {
     const [RubicItemsData, setRubicItemsData] = useState([]);
     const GetRubricData = async () => {
         try {
-            const response = await axiosAdmin.get(`/rubric/${id}/items`);
+            const response = await axiosAdmin.get(`/rubric/${id}/items/isDelete/false`);
             setRubicItemsData(response.data.rubric.rubricItems);
             console.log(response.data.rubric.rubricItems.qualityLevel);
         } catch (error) {

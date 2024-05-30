@@ -113,7 +113,7 @@ const Clo = (nav) => {
     const handleSoftDelete = async () => {
         const data = { clo_id: selectedRowKeys };
         try {
-            const response = await axiosAdmin.put('/clo/listId/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/clos/soft-delete-multiple', { data });
             await getAllClo();
             handleUnSelect();
             message.success(response.data.message);
@@ -125,7 +125,7 @@ const Clo = (nav) => {
 
     const handleSoftDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/clo/${_id}/toggle-soft-delete`);
+            const response = await axiosAdmin.put(`/clo/${_id}/soft-delete`);
             await getAllClo();
             handleUnSelect();
             message.success(response.data.message);

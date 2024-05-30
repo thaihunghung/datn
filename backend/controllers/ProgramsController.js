@@ -30,8 +30,8 @@ const programController = {
 
   getByID: async (req, res) => {
     try {
-      const { id } = req.params;
-      const program = await ProgramModel.findOne({ where: { program_id: id } });
+      const { program_id } = req.params;
+      const program = await ProgramModel.findOne({ where: { program_id: program_id } });
       if (!program) {
         return res.status(404).json({ message: 'Program not found' });
       }
@@ -44,9 +44,9 @@ const programController = {
 
   update: async (req, res) => {
     try {
-      const { id } = req.params;
+      const { program_id } = req.params;
       const { data } = req.body;
-      const [updatedCount] = await ProgramModel.update(data, { where: { program_id: id } });
+      const [updatedCount] = await ProgramModel.update(data, { where: { program_id: program_id } });
       if (updatedCount === 0) {
         return res.status(404).json({ message: 'Program not found' });
       }
@@ -59,8 +59,8 @@ const programController = {
 
   delete: async (req, res) => {
     try {
-      const { id } = req.params;
-      const deletedCount = await ProgramModel.destroy({ where: { program_id: id } });
+      const { program_id } = req.params;
+      const deletedCount = await ProgramModel.destroy({ where: { program_id: program_id } });
       if (deletedCount === 0) {
         return res.status(404).json({ message: 'Program not found' });
       }
@@ -99,13 +99,13 @@ const programController = {
 
   toggleIsDelete: async (req, res) => {
     try {
-      const { id } = req.params;
-      const program = await ProgramModel.findOne({ where: { program_id: id } });
+      const { program_id } = req.params;
+      const program = await ProgramModel.findOne({ where: { program_id: program_id } });
       if (!program) {
         return res.status(404).json({ message: 'Program not found' });
       }
       const updatedIsDeleted = !program.isDelete;
-      await ProgramModel.update({ isDelete: updatedIsDeleted }, { where: { program_id: id } });
+      await ProgramModel.update({ isDelete: updatedIsDeleted }, { where: { program_id: program_id } });
       res.status(200).json({ message: `Toggled isDelete status to ${updatedIsDeleted}` });
     } catch (error) {
       console.error('Error toggling isDelete status:', error);
