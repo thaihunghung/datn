@@ -2,6 +2,7 @@ const AcademicYearModel = require("../models/AcademicYearModel");
 const ClassModel = require("../models/ClassModel");
 const CourseEnrollmentModel = require("../models/CourseEnrollmentModel");
 const CourseModel = require("../models/CourseModel");
+const SemesterAcademicYearModel = require("../models/SemesterAcademicYearModel");
 const SemesterModel = require("../models/SemesterModel");
 const SubjectModel = require("../models/SubjectModel");
 const TeacherModel = require("../models/TeacherModel");
@@ -26,7 +27,7 @@ const CourseController = {
           where: { isDelete: false }
         },
         {
-          model: SemesterModel,
+          model: SemesterAcademicYearModel,
           where: { isDelete: false }
         }],
         where: { isDelete: false }
@@ -81,10 +82,15 @@ const CourseController = {
             required: true
           },
           {
-            model: SemesterModel,
+            model: SemesterAcademicYearModel,
             where: { isDelete: false },
             required: true,
             include: [
+              {
+                model: SemesterModel,
+                where: { isDelete: false },
+                required: true
+              },
               {
                 model: AcademicYearModel,
                 where: { isDelete: false },
@@ -137,10 +143,15 @@ const CourseController = {
             required: true
           },
           {
-            model: SemesterModel,
+            model: SemesterAcademicYearModel,
             where: { isDelete: false },
             required: true,
             include: [
+              {
+                model: SemesterModel,
+                where: { isDelete: false },
+                required: true
+              },
               {
                 model: AcademicYearModel,
                 where: { isDelete: false },
@@ -199,7 +210,7 @@ const CourseController = {
             where: { isDelete: false }
           },
           {
-            model: SemesterModel,
+            model: SemesterAcademicYearModel,
             where: { isDelete: false }
           }
         ],
@@ -229,14 +240,54 @@ const CourseController = {
 
   // Cập nhật một khóa học
   update: async (req, res) => {
+    const { id } = req.params;
+    const {
+      academic_year_id,
+      class_id,
+      courseCode,
+      courseName,
+      id_semester_academic_year,
+      semester_id,
+      subject_id,
+      teacher_id
+    } = req.body.data;
+  
+    console.log(req.body);
     try {
-      const { id } = req.params;
-      const { data } = req.body;
       const course = await CourseModel.findOne({ where: { course_id: id } });
       if (!course) {
         return res.status(404).json({ message: 'Không tìm thấy khóa học' });
       }
-      await CourseModel.update(data, { where: { course_id: id } });
+  
+      // Kiểm tra sự tồn tại của cặp semester_id và academic_year_id
+      let semesterAcademicYear = await SemesterAcademicYearModel.findOne({
+        where: {
+          semester_id,
+          academic_year_id
+        }
+      });
+  
+      // Nếu không tồn tại, tạo mới
+      if (!semesterAcademicYear) {
+        semesterAcademicYear = await SemesterAcademicYearModel.create({
+          semester_id,
+          academic_year_id,
+          isDelete: 0 // Giả định rằng `isDelete` mặc định là 0
+        });
+      }
+  
+      // Cập nhật khóa học với id_semester_academic_year mới
+      await CourseModel.update({
+        academic_year_id,
+        class_id,
+        courseCode,
+        courseName,
+        id_semester_academic_year: semesterAcademicYear.id_semester_academic_year,
+        semester_id,
+        subject_id,
+        teacher_id
+      }, { where: { course_id: id } });
+   
       res.json({ message: `Cập nhật thành công khóa học có id: ${id}` });
     } catch (error) {
       console.error('Lỗi khi cập nhật khóa học:', error);

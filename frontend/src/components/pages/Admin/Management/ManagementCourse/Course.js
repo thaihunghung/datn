@@ -19,7 +19,6 @@ const Course = (props) => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isEllipsisModalVisible, setIsEllipsisModalVisible] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
-  const navigate = useNavigate();
   const [form] = Form.useForm();
 
   const [classes, setClasses] = useState([]);
@@ -27,6 +26,12 @@ const Course = (props) => {
   const [subjects, setSubjects] = useState([]);
   const [semesters, setSemesters] = useState([]);
   const [academicYears, setAcademicYear] = useState([]);
+  const [filteredCourses, setFilteredCourses] = useState([]);
+  const [filteredClasses, setFilteredClasses] = useState([]);
+  const [filteredSubjects, setFilteredSubjects] = useState([]);
+  const [filteredAcademicYears, setFilteredAcademicYears] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [academicYearSearchText, setAcademicYearSearchText] = useState("");
 
   const getAcronym = (phrase) => {
     return phrase
@@ -57,10 +62,10 @@ const Course = (props) => {
       try {
         const response = await axiosAdmin.get("/course-course-enrollment");
         setCourses(response.data);
+        setFilteredCourses(response.data);
         setTotalCourses(response.data.length);
       } catch (err) {
         console.error("Error fetching courses: ", err.message);
-        // Display an error notification to the user
         successNoti('Error fetching courses', 'Please try again later');
       }
     };
@@ -69,6 +74,7 @@ const Course = (props) => {
       try {
         const response = await axiosAdmin.get("/class");
         setClasses(response.data);
+        setFilteredClasses(response.data);
       } catch (err) {
         console.error("Error fetching classes: ", err.message);
       }
@@ -87,6 +93,7 @@ const Course = (props) => {
       try {
         const response = await axiosAdmin.get("/subject");
         setSubjects(response.data);
+        setFilteredSubjects(response.data);
       } catch (err) {
         console.error("Error fetching subjects: ", err.message);
       }
@@ -105,7 +112,7 @@ const Course = (props) => {
       try {
         const response = await axiosAdmin.get("/academic-year");
         setAcademicYear(response.data);
-        console.log(response.data);
+        setFilteredAcademicYears(response.data);
       } catch (err) {
         console.error("Error fetching academic year: ", err.message);
       }
@@ -135,12 +142,12 @@ const Course = (props) => {
         class_id: course.class.class_id,
         teacher_id: course.teacher.teacher_id,
         subject_id: course.subject.subject_id,
-        semester_id: course.semester.semester_id,
         enrollmentCount: course.enrollmentCount,
         subjectDescription: course.subject.description,
-        academic_year_id: course.semester.academic_year.academic_year_id,
-        description: course.semester.academic_year.description,
-
+        id_semester_academic_year: course.id_semester_academic_year,
+        semester_id: course.SemesterAcademicYear.semester.semester_id,
+        academic_year_id: course.SemesterAcademicYear.academic_year.academic_year_id,
+        description: course.SemesterAcademicYear.academic_year.description,
       });
       setIsEditModalVisible(true);
     } else if (type === 'ellipsis') {
@@ -183,9 +190,50 @@ const Course = (props) => {
 
   }
 
+  const handleSearchCourse = (value) => {
+    const filtered = courses.filter(course =>
+      course.courseName.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredCourses(filtered);
+  };
+
+  const handleSearchClass = (value) => {
+    const filtered = classes.filter(cls =>
+      cls.className.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredClasses(filtered);
+  };
+
+  const handleSearchSubject = (value) => {
+    const filtered = subjects.filter(subject =>
+      subject.subjectName.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredSubjects(filtered);
+  };
+
+  const handleSearchAcademicYear = (value) => {
+    setAcademicYearSearchText(value);
+    const filtered = academicYears.filter(option =>
+      option.description.toLowerCase().includes(value.toLowerCase())
+    );
+    if (filtered.length === 0) {
+      filtered.push({
+        academic_year_id: 'create',
+        description: `Năm học "${value}"`
+      });
+    }
+    setFilteredAcademicYears(filtered);
+  };
+
   const handleEditSubmit = async (values) => {
-    console.log("vla: ", values);
     try {
+      let newAcademicYearId = values.academic_year_id;
+      if (newAcademicYearId === 'create') {
+        const newAcademicYear = await axiosAdmin.post('/academic-year', {
+          description: `Năm học ${academicYearSearchText}`
+        });
+        newAcademicYearId = newAcademicYear.data.academic_year_id;
+      }
 
       const selectedClass = classes.find(cls => cls.class_id === values.class_id);
       const selectedSubject = subjects.find(subject => subject.subject_id === values.subject_id);
@@ -200,14 +248,17 @@ const Course = (props) => {
         teacher_id: values.teacher_id,
         subject_id: values.subject_id,
         semester_id: values.semester_id,
-        courseCode: `${selectedClass.classCode}-${selectedSubject.subjectCode}`
+        academic_year_id: newAcademicYearId,
+        id_semester_academic_year: values.id_semester_academic_year,
+        courseCode: `${selectedClass.classCode} - ${selectedSubject.subjectCode}`
       }
-      console.log("data", data);
+
       await axiosAdmin.put(`/course/${selectedCourse.course_id}`, { data: data });
       successNoti('Update Successful', 'The course has been updated successfully.');
       // Refresh
       const response = await axiosAdmin.get("/course-course-enrollment");
       setCourses(response.data);
+      setFilteredCourses(response.data);
       setTotalCourses(response.data.length);
       handleCancel();
     } catch (err) {
@@ -216,9 +267,20 @@ const Course = (props) => {
     }
   };
 
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredCoursesForCards = filteredCourses.filter(course =>
+    course.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    course.courseCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    course.teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    course.class.className.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const indexOfLastCourse = currentPage * pageSize;
   const indexOfFirstCourse = indexOfLastCourse - pageSize;
-  const currentCourses = courses.slice(indexOfFirstCourse, indexOfLastCourse);
+  const currentCourses = filteredCoursesForCards.slice(indexOfFirstCourse, indexOfLastCourse);
 
   return (
     <>
@@ -227,6 +289,14 @@ const Course = (props) => {
         <span> / Course</span>
       </nav>
       <Title level={2}>Course List</Title>
+
+      <Input.Search
+        placeholder="Search courses, class, teacher"
+        value={searchTerm}
+        onChange={handleSearch}
+        style={{ marginBottom: 20 }}
+      />
+
       <div className="grid grid-cols-1 gap-5 m-5">
         {currentCourses.map((course) => (
           <div key={course.course_id}>
@@ -263,7 +333,7 @@ const Course = (props) => {
                     <p><strong>Lớp:</strong> {course.class.className}</p>
                     <p><strong>Giáo viên giản dạy:</strong> {course.teacher.name}</p>
                     <p>
-                      <strong>Năm học:</strong> {course.semester.descriptionShort} - {course.semester.academic_year.description}
+                      <strong>Năm học:</strong> {course.SemesterAcademicYear.semester.descriptionShort} - {course.SemesterAcademicYear.academic_year.description}
                     </p>
                     <p><strong>Số học sinh:</strong> {course.enrollmentCount}</p>
                   </div>
@@ -284,7 +354,7 @@ const Course = (props) => {
 
       <Modal
         title="Settings"
-        visible={isSettingModalVisible}
+        open={isSettingModalVisible}
         onCancel={handleCancel}
         footer={null}
       >
@@ -294,7 +364,7 @@ const Course = (props) => {
             <p><strong>Lớp học:</strong> {selectedCourse.class.className}</p>
             <p><strong>Giáo viên giảng dạy:</strong> {selectedCourse.teacher.name}</p>
             <p>
-              <strong>Năm học:</strong> {selectedCourse.semester.descriptionShort} - {selectedCourse.semester.academic_year.description}
+              <strong>Năm học:</strong> {selectedCourse.SemesterAcademicYear.semester.descriptionShort} - {selectedCourse.SemesterAcademicYear.academic_year.description}
             </p>
             <p><strong>Số lượng học sinh đăng kí:</strong> {selectedCourse.enrollmentCount}</p>
             <p><strong>Mô tả:</strong> {selectedCourse.subject.description}</p>
@@ -304,7 +374,7 @@ const Course = (props) => {
 
       <Modal
         title="Chỉnh sửa nội dung"
-        visible={isEditModalVisible}
+        open={isEditModalVisible}
         onCancel={handleCancel}
         footer={null}
       >
@@ -313,6 +383,14 @@ const Course = (props) => {
           layout="vertical"
           onFinish={handleEditSubmit}
         >
+          <Form.Item
+            name="id_semester_academic_year"
+            label="Mã năm học"
+            rules={[{ required: true, message: 'Please enter the course name' }]}
+            hidden
+          >
+            <Input />
+          </Form.Item>
           <Form.Item
             name="courseName"
             label="Tên môn học"
@@ -325,8 +403,12 @@ const Course = (props) => {
             label="Lớp học"
             rules={[{ required: true, message: 'Please select the class' }]}
           >
-            <Select>
-              {classes.map((cls) => (
+            <Select
+              showSearch
+              onSearch={handleSearchClass}
+              filterOption={false}
+            >
+              {filteredClasses.map((cls) => (
                 <Option key={cls.class_id} value={cls.class_id}>{cls.className}</Option>
               ))}
             </Select>
@@ -347,8 +429,12 @@ const Course = (props) => {
             label="Môn học"
             rules={[{ required: true, message: 'Please select the subject' }]}
           >
-            <Select>
-              {subjects.map((subject) => (
+            <Select
+              showSearch
+              onSearch={handleSearchSubject}
+              filterOption={false}
+            >
+              {filteredSubjects.map((subject) => (
                 <Option key={subject.subject_id} value={subject.subject_id}>{subject.subjectName}</Option>
               ))}
             </Select>
@@ -369,8 +455,12 @@ const Course = (props) => {
             label="Năm học"
             rules={[{ required: true, message: 'Please select the semester' }]}
           >
-            <Select>
-              {academicYears.map((academicYear) => (
+            <Select
+              showSearch
+              onSearch={handleSearchAcademicYear}
+              filterOption={false}
+            >
+              {filteredAcademicYears.map((academicYear) => (
                 <Option key={academicYear.academic_year_id} value={academicYear.academic_year_id}>{academicYear.description}</Option>
               ))}
             </Select>
@@ -385,7 +475,7 @@ const Course = (props) => {
 
       <Modal
         title="More Options"
-        visible={isEllipsisModalVisible}
+        open={isEllipsisModalVisible}
         onCancel={handleCancel}
         footer={null}
         className="custom-modal"

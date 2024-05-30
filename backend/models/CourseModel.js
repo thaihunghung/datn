@@ -3,7 +3,7 @@ const sequelize = require('../config/database');
 const ClassModel = require('./ClassModel');
 const TeacherModel = require('./TeacherModel');
 const SubjectModel = require('./SubjectModel');
-const SemesterModel = require('./SemesterModel');
+const SemesterAcademicYearModel = require('./SemesterAcademicYearModel');
 
 const CourseModel = sequelize.define('course', {
   course_id: {
@@ -35,12 +35,12 @@ const CourseModel = sequelize.define('course', {
       key: 'subject_id' 
     }
   },
-  semester_id: { 
+  id_semester_academic_year: { 
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: SemesterModel,
-      key: 'semester_id' 
+      model: SemesterAcademicYearModel,
+      key: 'id_semester_academic_year' 
     }
   },
   courseName: {
@@ -85,8 +85,8 @@ CourseModel.belongsTo(SubjectModel, {
   foreignKey: 'subject_id'
 });
 
-CourseModel.belongsTo(SemesterModel, {
-  foreignKey: 'semester_id'
+CourseModel.belongsTo(SemesterAcademicYearModel, {
+  foreignKey: 'id_semester_academic_year'
 });
 
 module.exports = CourseModel;

@@ -37,13 +37,13 @@ const SemesterAcademicYearModel = sequelize.define('SemesterAcademicYear', {
   updatedAt: {
     type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
+    defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
   }
 }, {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'semester_academic_year'
+  tableName: 'semester_academic_years'
 });
 
 SemesterAcademicYearModel.belongsTo(SemesterModel, { foreignKey: 'semester_id' });

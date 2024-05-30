@@ -194,7 +194,7 @@ const router = express.Router();
  *         description: Lỗi server
  */
 
-router.get('/student', StudentController.index);
+router.get('/students', StudentController.index);
 router.post('/student', StudentController.create);
 router.get('/student/:id', StudentController.getByID);
 router.get('/student/class/:id', StudentController.getAllByClassId);

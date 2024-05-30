@@ -9,11 +9,11 @@ const AcademicYearModel = sequelize.define('academic_year', {
   },
   startDate: {
     type: DataTypes.DATE,
-    allowNull: false
+    allowNull: true
   },
   endDate: {
     type: DataTypes.DATE,
-    allowNull: false
+    allowNull: true
   },
   description: {
     type: DataTypes.TEXT,

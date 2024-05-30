@@ -117,7 +117,7 @@ const DetailCourse = () => {
         <p><strong>Tên môn học:</strong> {course.courseName}</p>
         <p><strong>Lớp học:</strong> {course.class.className}</p>
         <p><strong>Giáo viên giảng dạy:</strong> {course.teacher.name}</p>
-        <p><strong>Năm học:</strong> {course.semester.descriptionShort} - {course.semester.academic_year.description}</p>
+        <p><strong>Năm học:</strong> {course.semester.descriptionShort}</p>
         <p><strong>Số lượng học sinh đăng kí:</strong> {course.enrollmentCount}</p>
         <p><strong className="text-pretty">Mô tả:</strong> {course.subject.description}</p>
       </div>
