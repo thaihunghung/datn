@@ -1,6 +1,6 @@
 
-import { Link, Route, Routes } from 'react-router-dom';
-import { useState } from "react";
+import { Link, Route, Routes, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
 import { message, Spin } from 'antd';
 
 import ManagePo from '../components/pages/Admin/Management/ManagementPo/ManagePo';
@@ -55,6 +55,7 @@ import ManagementAssessment from '../components/pages/Admin/Management/Managemen
 import StoreRubicItems from '../components/pages/Admin/Management/ManagementRubric/StoreRubicItems';
 import DetailCourse from '../components/pages/Admin/Management/ManagementCourse/DetailCourse/DetailCourse';
 import CreateAssessment from '../components/pages/Admin/Management/ManagementAssessment/CreateAssessment';
+import Login from '../components/pages/Admin/Login/Login';
 
 
 function Admin(props) {
@@ -77,6 +78,16 @@ function Admin(props) {
       content: msg,
     });
   };
+
+
+  // const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   const token = localStorage.getItem('token');
+  //   if (!token) {
+  //     navigate('/login');
+  //   }
+  // }, [navigate]);
 
   return (
     <div className="Admin flex flex-col sm:flex-row lg:flex-row xl:flex-row  h-[100vh] bg-[#FEFEFE]">

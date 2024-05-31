@@ -9,6 +9,7 @@ import {
 import './App.css';
 import Client from "./layouts/Client";
 import Admin from "./layouts/admin";
+import Login from "./components/pages/Admin/Login/Login";
 
 function App() {
     const location = useLocation();
@@ -41,6 +42,7 @@ function App() {
         <div className="App">
             <Routes>
                 <Route path="/*" element={<Client />} />
+                <Route path="/login" element={<Login />} />
                 <Route path="/admin/*" element={<Admin user={user} />} />
                 {/* <Route path="/login" element={<Login setUser={setUser} />} /> */}
             </Routes>
