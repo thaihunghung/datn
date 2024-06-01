@@ -1,12 +1,12 @@
 const bcrypt = require('bcrypt');
 const passport = require('passport');
-const UserModel = require('../models/UserModel');
+const TeacherModel = require('../models/TeacherModel');
 
 const AuthenticateController = {
   register: async (req, res) => {
     const { email, password } = req.body;
     try {
-      const existingUser = await UserModel.findOne({ where: { email } });
+      const existingUser = await TeacherModel.findOne({ where: { email } });
       if (existingUser) {
         return res.status(400).json({ message: 'Email already in use' });
       }
@@ -14,7 +14,7 @@ const AuthenticateController = {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      const newUser = await UserModel.create({ email, password: hashedPassword });
+      const newUser = await TeacherModel.create({ email, password: hashedPassword });
       console.log(`Registered new user: ${newUser.email}`);
       console.log(`Hashed Password: ${hashedPassword}`); // Debug statement
       res.status(201).json(newUser);
