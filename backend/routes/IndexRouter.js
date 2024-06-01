@@ -14,7 +14,6 @@ const academicYearRoute = require('./AcademicYearRouter')
 const studentRoute = require('./StudentRouter')
 const semesterRoute = require('./SemesterRouter')
 const teacherRoute = require('./TeacherRouter')
-const userRoute = require('./UserRouter')
 const chapterRoutes = require('./ChapterRouter');
 const poRoutes = require('./PoRouter');
 const poPloRoutes = require('./Po_PloRouter');
@@ -24,6 +23,7 @@ const rubricItemRoutes = require('./RubricItemRouter');
 const cloChapterRoutes = require('./Clo_ChapterRouter');
 const assessmentsRoutes = require('./AssessmentsRoutes');
 const CourseEnrollmentRoutes = require('./CourseEnrollmentRouter')
+const authRoutes = require('./AuthRoutes')
 
 const pdfRouters = require('./PdfRouter');
 
@@ -31,6 +31,7 @@ const importExcelRouters = require('./importExcelRouter');
 
 //doc
 router.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// router.use('/login', authRoutes)
 
 router.use('/api/admin', programRoutes);  
 router.use('/api/admin', ploRoutes);
@@ -41,7 +42,6 @@ router.use('/api/admin', classRoute);
 router.use('/api/admin', academicYearRoute);
 router.use('/api/admin', studentRoute);
 router.use('/api/admin', teacherRoute);
-router.use('/api/admin', userRoute);
 router.use('/api/admin', semesterRoute);
 router.use('/api/admin', chapterRoutes);
 router.use('/api/admin', poRoutes);

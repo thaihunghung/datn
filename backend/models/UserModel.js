@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+const bcrypt = require('bcrypt');
 
 const UserModel = sequelize.define('user', {
   user_id: {
@@ -12,12 +13,13 @@ const UserModel = sequelize.define('user', {
     allowNull: false
   },
   password: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING(100), // Ensure sufficient length
     allowNull: false
   },
   permission: {
-    type: DataTypes.TINYINT,
-    allowNull: false
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 1
   },
   isBlock: {
     type: DataTypes.TINYINT,
@@ -39,9 +41,13 @@ const UserModel = sequelize.define('user', {
   }
 }, {
   timestamps: true,
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
   tableName: 'users',
+  // hooks: {
+  //   beforeCreate: async (user) => {
+  //     const salt = await bcrypt.genSalt(10);
+  //     user.password = await bcrypt.hash(user.password, salt);
+  //   }
+  // }
 });
 
 module.exports = UserModel;
