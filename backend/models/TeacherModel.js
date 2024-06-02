@@ -17,7 +17,7 @@ const TeacherModel = sequelize.define('teacher', {
     unique: true
   },
   password: {
-    type: DataTypes.STRING(15),
+    type: DataTypes.STRING(255),
     allowNull: false
   },
   typeTeacher: {

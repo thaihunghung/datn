@@ -4,19 +4,25 @@ const TeacherModel = require('../models/TeacherModel');
 
 const AuthenticateController = {
   register: async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, name, teacherCode, typeTeacher } = req.body;
     try {
-      const existingUser = await TeacherModel.findOne({ where: { email } });
+      const existingUser = await TeacherModel.findOne({ where: { teacherCode } });
       if (existingUser) {
         return res.status(400).json({ message: 'Email already in use' });
       }
-
+ 
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      const newUser = await TeacherModel.create({ email, password: hashedPassword });
+      const data = {
+        email,
+        password: hashedPassword,
+        name,
+        teacherCode,
+        typeTeacher
+      }
+      const newUser = await TeacherModel.create(data);
       console.log(`Registered new user: ${newUser.email}`);
-      console.log(`Hashed Password: ${hashedPassword}`); // Debug statement
       res.status(201).json(newUser);
     } catch (error) {
       console.error(`Registration error: ${error.message}`);
@@ -27,19 +33,19 @@ const AuthenticateController = {
   login: (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
       if (err) {
-        console.error(`Login error: ${err.message}`); // Debug statement
+        console.error(`Login error1: ${err.message}`); 
         return res.status(500).json({ message: 'Server error', err });
       }
       if (!user) {
-        console.log('Login failed: Invalid email or password'); // Debug statement
+        console.log('Login failed: Invalid email or password');
         return res.status(400).json({ message: 'Invalid email or password' });
       }
       req.logIn(user, (err) => {
         if (err) {
-          console.error(`Login error: ${err.message}`); // Debug statement
+          console.error(`Login error: ${err.message}`);
           return res.status(500).json({ message: 'Server error', err });
         }
-        console.log(`Login successful for user: ${user.email}`); // Debug statement
+        console.log(`Login successful for user: ${user.name}`);
         res.json({ message: 'Login successful', user });
       });
     })(req, res, next);
