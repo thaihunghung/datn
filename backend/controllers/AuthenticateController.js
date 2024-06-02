@@ -1,5 +1,6 @@
+// controllers/AuthenticateController.js
 const bcrypt = require('bcrypt');
-const passport = require('passport');
+const jwt = require('jsonwebtoken');
 const TeacherModel = require('../models/TeacherModel');
 
 const AuthenticateController = {
@@ -10,7 +11,7 @@ const AuthenticateController = {
       if (existingUser) {
         return res.status(400).json({ message: 'Email already in use' });
       }
- 
+
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -20,7 +21,7 @@ const AuthenticateController = {
         name,
         teacherCode,
         typeTeacher
-      }
+      };
       const newUser = await TeacherModel.create(data);
       console.log(`Registered new user: ${newUser.email}`);
       res.status(201).json(newUser);
@@ -30,31 +31,37 @@ const AuthenticateController = {
     }
   },
 
-  login: (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => {
-      if (err) {
-        console.error(`Login error1: ${err.message}`); 
-        return res.status(500).json({ message: 'Server error', err });
-      }
+  login: async (req, res) => {
+    const { teacherCode, password } = req.body;
+    try {
+      const user = await TeacherModel.findOne({ where: { teacherCode } });
       if (!user) {
-        console.log('Login failed: Invalid email or password');
-        return res.status(400).json({ message: 'Invalid email or password' });
+        return res.status(400).json({ message: 'Invalid teacherCode or password' });
       }
-      req.logIn(user, (err) => {
-        if (err) {
-          console.error(`Login error: ${err.message}`);
-          return res.status(500).json({ message: 'Server error', err });
-        }
-        console.log(`Login successful for user: ${user.name}`);
-        res.json({ message: 'Login successful', user });
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Invalid teacherCode or password' });
+      }
+
+      const payload = { id: user.teacher_id };
+      const accessToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '2m' });
+      const refreshToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '7d' });
+
+      console.log(`Login successful for user: ${user.name}`);
+      res.json({
+        message: 'Login successful',
+        user,
+        accessToken,
+        refreshToken
       });
-    })(req, res, next);
+    } catch (error) {
+      console.error(`Login error: ${error.message}`);
+      res.status(500).json({ message: 'Server error', error });
+    }
   },
 
   getUser: (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: 'Not authenticated' });
-    }
     res.json(req.user);
   }
 };

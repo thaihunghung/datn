@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
-const passport = require('./config/passportConfig');
+const passport = require('./authentication/passport');
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -26,7 +26,6 @@ app.use(session({
   saveUninitialized: true
 }));
 app.use(passport.initialize());
-app.use(passport.session());
 
 app.use(express.static("public"));
 app.use(cors({
