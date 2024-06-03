@@ -56,4 +56,5 @@ const TeacherModel = sequelize.define('teacher', {
 TeacherModel.belongsTo(UserModel, {
   foreignKey: 'user_id'
 });
+
 module.exports = TeacherModel;

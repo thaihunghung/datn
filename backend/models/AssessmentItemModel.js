@@ -29,14 +29,7 @@ const AssessmentItemModel = sequelize.define('AssessmentItem', {
     type: DataTypes.DOUBLE(8,2),
     defaultValue: 0.00
   },
-  date: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  place: {
-    type: DataTypes.TEXT,
-    defaultValue: null
-  },
+  
   isDelete: {
     type: DataTypes.TINYINT,
     defaultValue: 0
