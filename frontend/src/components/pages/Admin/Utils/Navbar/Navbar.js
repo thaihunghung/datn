@@ -1,11 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth, signInWithGoogle, signOut } from "../../../../../service/firebase";
+
 import { User, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection, ScrollShadow, Button } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { Tooltip } from "antd";
 import { motion } from "framer-motion";
 import { Drawer, Menu } from "antd";
+import Cookies from 'js-cookie';
 
 import './Header.css'
 function Nav(props) {
@@ -102,11 +102,16 @@ function Nav(props) {
     ];
 
     useEffect(() => {
-        onAuthStateChanged(auth, async (user) => {
-            setCurrentUser(auth);
-            console.log(auth);
-        });
-    }, []);
+        const userCookie = Cookies.get('user');
+        console.log(userCookie);
+        if (userCookie) {
+        //   const user = JSON.parse(userCookie);
+        //   console.log(user);
+        //   setCurrentUser(user);
+        } else {
+          navigate('/login');
+        }
+      }, [navigate]);
 
     useEffect(() => {
         navTab.forEach((tab) => {
@@ -123,12 +128,10 @@ function Nav(props) {
         });
     }, [location.pathname]);
 
-    const handleLoginWithGoogle = async () => { };
-
     const handleLogout = async () => {
         setSpinning(true);
         try {
-            await signOut(auth);
+            Cookies.remove('user');
             setSpinning(false);
             navigate('/login');
         } catch (err) {
@@ -313,7 +316,7 @@ function Nav(props) {
                                             className="cursor-pointer"
                                             as="button"
                                             src={currentUser?.currentUser?.photoURL || 'https://i.pravatar.cc/150?u=a042581f4e29026024d'}
-                                            name={currentUser?.currentUser?.displayName || 'Username'}
+                                            name={currentUser?.currentUser?.name || 'Username'}
                                             description={currentUser?.currentUser?.email || 'email@gmail.com'}
                                         />
                                     </Button>
@@ -322,7 +325,7 @@ function Nav(props) {
                                     <DropdownSection title="Signed in as">
                                         <DropdownItem key="profile" className="h-14 gap-2">
                                             <div className="flex flex-col">
-                                                <p className="font-semibold">{currentUser?.currentUser?.displayName}</p>
+                                                <p className="font-semibold">{currentUser?.currentUser?.name}</p>
                                                 
                                                 <p className="text-xs text-default-400">{currentUser?.currentUser?.email}</p>
                                             </div>

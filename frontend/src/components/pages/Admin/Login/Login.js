@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Typography, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { axiosAdmin } from '../../../../service/AxiosAdmin';
+import { AxiosClient } from '../../../../service/AxiosClient';
+import Cookies from 'js-cookie';
 
 const { Title } = Typography;
 
@@ -14,12 +15,15 @@ const Login = () => {
     setLoading(true);
     console.log("values", values);
     try {
-      const response = await axiosAdmin.post('/login', values);
-      if (response.data.success) {
+      const response = await AxiosClient.post('/login', values);
+      if (response.data) {
         message.success('Đăng nhập thành công!');
-        // Lưu token hoặc thông tin đăng nhập vào localStorage hoặc context
-        localStorage.setItem('token', response.data.token);
-        // Chuyển hướng tới trang chính
+        // console.log(response.data.user)
+        // Cookies.set('user', response.data.user, {
+        //   expires: 1, // Cookie expires in 1 day
+        //   secure: true, // Cookie is only sent over HTTPS
+        //   sameSite: 'Strict' // Prevents CSRF
+        // });
         navigate('/admin');
       } else {
         message.error('Sai tên đăng nhập hoặc mật khẩu!');
@@ -40,10 +44,10 @@ const Login = () => {
         onFinish={onFinish}
       >
         <Form.Item
-          name="username"
-          rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
+          name="teacherCode"
+          rules={[{ required: true, message: 'Vui lòng nhập mã giáo viên!' }]}
         >
-          <Input prefix={<UserOutlined />} placeholder="Tên đăng nhập" />
+          <Input prefix={<UserOutlined />} placeholder="Mã giáo viên" />
         </Form.Item>
         <Form.Item
           name="password"

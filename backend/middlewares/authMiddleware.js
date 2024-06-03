@@ -12,7 +12,6 @@ module.exports = {
     try {
       const decoded = jwt.verify(token, 'your_jwt_secret');
       const user = await TeacherModel.findByPk(decoded.id);
-
       if (!user) {
         return res.status(401).json({ message: 'Invalid access token' });
       }

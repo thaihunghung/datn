@@ -23,6 +23,8 @@ const rubricItemRoutes = require('./RubricItemRouter');
 const cloChapterRoutes = require('./Clo_ChapterRouter');
 const assessmentsRoutes = require('./AssessmentsRoutes');
 const CourseEnrollmentRoutes = require('./CourseEnrollmentRouter')
+const AuthRoutes = require('./AuthRoutes')
+
 const authRoutes = require('./AuthRoutes')
 
 const pdfRouters = require('./PdfRouter');
@@ -55,7 +57,11 @@ router.use('/api/admin', CourseEnrollmentRoutes);
 router.use('/api/admin', poPloRoutes);
 router.use('/api/admin', ploCloRoutes);
 router.use('/api/admin', pdfRouters);
-
 router.use('/api/admin/importExcel', importExcelRouters);
+router.use('/api', AuthRoutes);
+
+
+
+
 
 module.exports = router;

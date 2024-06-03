@@ -33,6 +33,7 @@ const AuthenticateController = {
 
   login: async (req, res) => {
     const { teacherCode, password } = req.body;
+    console.log(req.body)
     try {
       const user = await TeacherModel.findOne({ where: { teacherCode } });
       if (!user) {
