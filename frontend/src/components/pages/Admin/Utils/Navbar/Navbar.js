@@ -8,6 +8,7 @@ import { Drawer, Menu } from "antd";
 import Cookies from 'js-cookie';
 
 import './Header.css'
+import { AxiosClient } from "../../../../../service/AxiosClient";
 function Nav(props) {
     const { collapsedNav, setCollapsedNav, setSpinning } = props;
     const navigate = useNavigate();
@@ -101,17 +102,26 @@ function Nav(props) {
         { text: "Lớp môn học", link: "/admin/course", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
     ];
 
-    useEffect(() => {
-        const userCookie = Cookies.get('user');
-        console.log(userCookie);
-        if (userCookie) {
-        //   const user = JSON.parse(userCookie);
-        //   console.log(user);
-        //   setCurrentUser(user);
-        } else {
-          navigate('/login');
-        }
-      }, [navigate]);
+    useEffect(() => { 
+        const fetchUser = async () => {
+            try {
+                const response = await AxiosClient.get('/user');
+                const user = response.data;
+                Cookies.set('teacher_id', user.teacher_id, {
+                    expires: 1, // Cookie expires in 1 day
+                    secure: true, // Cookie is only sent over HTTPS
+                    sameSite: 'Strict' // Prevents CSRF
+                });
+                console.log(user);
+                setCurrentUser(user);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                navigate('/login');
+            }
+        };
+
+        fetchUser();
+    }, []);
 
     useEffect(() => {
         navTab.forEach((tab) => {
@@ -131,7 +141,7 @@ function Nav(props) {
     const handleLogout = async () => {
         setSpinning(true);
         try {
-            Cookies.remove('user');
+            Cookies.remove('teacher_id');
             setSpinning(false);
             navigate('/login');
         } catch (err) {
@@ -146,12 +156,12 @@ function Nav(props) {
         <div >
             <div className="block sm:hidden lg:hidden xl:hidden">
                 <div className="w-full flex justify-start p-2 border">
-                <div className="Header-mobile-right" onClick={showDrawer}>
-                    <i className="fa-solid fa-bars"></i>
-                </div>
+                    <div className="Header-mobile-right" onClick={showDrawer}>
+                        <i className="fa-solid fa-bars"></i>
+                    </div>
                 </div>
                 <Drawer
-                    title={ <span className="text-[#FF8077] text-base font-bold">Menu</span>}
+                    title={<span className="text-[#FF8077] text-base font-bold">Menu</span>}
                     placement="left"
                     onClose={onClose}
                     open={openMobileMenu}
@@ -160,14 +170,14 @@ function Nav(props) {
                     <Menu mode="inline">
                         {navTab.map((item, index) => (
                             item.submenu ? (
-                                <Menu.SubMenu key={index} title={<span className="text-[#020401] text-base font-medium">  
-                                <span className="text-[#FF8077] text-base font-bold mr-3">
-                                {item.icon}
-                                </span>
-                                <span className="text-[#020401] text-base font-medium">
-                                {item.text}
-                               
-                                </span></span>}>
+                                <Menu.SubMenu key={index} title={<span className="text-[#020401] text-base font-medium">
+                                    <span className="text-[#FF8077] text-base font-bold mr-3">
+                                        {item.icon}
+                                    </span>
+                                    <span className="text-[#020401] text-base font-medium">
+                                        {item.text}
+
+                                    </span></span>}>
                                     {item.submenu.map((subItem, subIndex) => (
                                         <Menu.Item key={`${index}-${subIndex}`}>
                                             <Link to={subItem.link} onClick={onClose}>
@@ -179,17 +189,17 @@ function Nav(props) {
                             ) : (
                                 <Menu.Item key={index}>
                                     <Link to={item.link} onClick={onClose}>
-                                    
-                                    <span className="text-[#FF8077] text-base font-bold mr-3">
-                                        {item.icon}
-                                       
+
+                                        <span className="text-[#FF8077] text-base font-bold mr-3">
+                                            {item.icon}
+
                                         </span>
                                         <span className="text-[#020401] text-base font-medium">
-                                        {item.text}
-                                       
+                                            {item.text}
+
                                         </span>
 
-                                        
+
                                     </Link>
                                 </Menu.Item>
                             )
@@ -308,37 +318,82 @@ function Nav(props) {
                                 ))}
                             </div>
                         </ScrollShadow>
-                        <div className={`flex w-full h-[45px] justify-${collapsedNav ? 'center' : 'between'} items-center p-3`}>
-                            <Dropdown>
-                                <DropdownTrigger>
-                                    <Button isIconOnly>
-                                        <User
-                                            className="cursor-pointer"
-                                            as="button"
-                                            src={currentUser?.currentUser?.photoURL || 'https://i.pravatar.cc/150?u=a042581f4e29026024d'}
-                                            name={currentUser?.currentUser?.name || 'Username'}
-                                            description={currentUser?.currentUser?.email || 'email@gmail.com'}
-                                        />
-                                    </Button>
-                                </DropdownTrigger>
-                                <DropdownMenu aria-label="Dropdown menu with user actions" variant="flat">
-                                    <DropdownSection title="Signed in as">
-                                        <DropdownItem key="profile" className="h-14 gap-2">
-                                            <div className="flex flex-col">
-                                                <p className="font-semibold">{currentUser?.currentUser?.name}</p>
-                                                
-                                                <p className="text-xs text-default-400">{currentUser?.currentUser?.email}</p>
-                                            </div>
+                        <div className="h-fit">
+                            {currentUser ? (
+                                <Dropdown placement="bottom-start">
+                                    <DropdownTrigger>
+                                        <div className="flex items-center w-full justify-between hover:bg-slate-600 p-3 py-2 rounded-lg">
+                                            <User
+                                                name={
+                                                    !collapsedNav ? (
+                                                        <p className="font-semibold">
+                                                            {currentUser.name}
+                                                        </p>
+                                                    ) : (
+                                                        ""
+                                                    )
+                                                }
+                                                description={
+                                                    !collapsedNav ? currentUser.permission : ""
+                                                }
+                                                avatarProps={{
+                                                    src: currentUser.photoURL,
+                                                }}
+                                                classNames={{
+                                                    base: `${collapsedNav ? "gap-0" : "gap-2"
+                                                        }`,
+                                                }}
+                                            />
+                                            {!collapsedNav ? (
+                                                <i className="fa-solid fa-ellipsis-vertical"></i>
+                                            ) : null}
+                                        </div>
+                                    </DropdownTrigger>
+                                    <DropdownMenu
+                                        aria-label="User Actions"
+                                        classNames={{
+                                            base: "min-w-[230px]",
+                                        }}
+                                    >
+                                        <DropdownItem
+                                            key="profile"
+                                            className="h-14 gap-2"
+                                            isReadOnly
+                                        >
+                                            <p className="font-semibold opacity-50">
+                                                {currentUser?.role === 1
+                                                    ? "Super Admin"
+                                                    : "Admin"}
+                                            </p>
+                                            <p className="font-bold">{currentUser.name}</p>
                                         </DropdownItem>
-                                    </DropdownSection>
-                                    <DropdownSection title="Actions">
-                                        <DropdownItem key="settings">Settings</DropdownItem>
-                                        <DropdownItem key="logout" color="danger" className="flex gap-2" onClick={handleLogout}>
-                                            Log Out
+                                        <DropdownSection showDivider>
+                                            <DropdownItem
+                                                key="settings"
+                                                startContent={
+                                                    <i className="fa-solid fa-gear"></i>
+                                                }
+                                            >
+                                                Cài đặt
+                                            </DropdownItem>
+                                        </DropdownSection>
+                                        <DropdownItem
+                                            key="logout"
+                                            color="danger"
+                                            startContent={
+                                                <i className="fa-solid fa-right-from-bracket"></i>
+                                            }
+                                            onClick={() => {
+                                                handleLogout();
+                                            }}
+                                        >
+                                            Đăng xuất
                                         </DropdownItem>
-                                    </DropdownSection>
-                                </DropdownMenu>
-                            </Dropdown>
+                                    </DropdownMenu>
+                                </Dropdown>
+                            ) : (
+                                <></>
+                            )}
                         </div>
                     </div>
                 </motion.div>

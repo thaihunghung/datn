@@ -18,8 +18,8 @@ const Login = () => {
       const response = await AxiosClient.post('/login', values);
       if (response.data) {
         message.success('Đăng nhập thành công!');
-        // console.log(response.data.user)
-        // Cookies.set('user', response.data.user, {
+        console.log(response.data.user)
+        // Cookies.set('teacher_id', response.data.user.teacher_id, {
         //   expires: 1, // Cookie expires in 1 day
         //   secure: true, // Cookie is only sent over HTTPS
         //   sameSite: 'Strict' // Prevents CSRF
