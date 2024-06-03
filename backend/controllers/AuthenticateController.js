@@ -48,8 +48,14 @@ const AuthenticateController = {
       const accessToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '15m' });
       const refreshToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '7d' });
 
-      // Lưu refresh token vào database
-      await RefreshTokenModel.create({ token: refreshToken, userId: user.teacher_id });
+      // Thu hồi và hết hạn tất cả các refresh token cũ của người dùng
+      await RefreshTokenModel.update(
+        { revoked: true, expired: true },
+        { where: { teacher_id: user.teacher_id } }
+      );
+
+      // Lưu refresh token mới vào database
+      await RefreshTokenModel.create({ token: refreshToken, teacher_id: user.teacher_id });
 
       // Đặt token trong HTTP-only cookies
       res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 15 * 60 * 1000 });
