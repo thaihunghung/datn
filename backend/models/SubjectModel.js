@@ -1,12 +1,21 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const CloModel = require('./CloModel');
+const TeacherModel = require('./TeacherModel');
 
 const SubjectModel = sequelize.define('subject', {
   subject_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
+  },
+  teacher_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: TeacherModel,
+      key: 'teacher_id'
+    }
   },
   subjectName: {
     type: DataTypes.TEXT,
@@ -56,6 +65,10 @@ const SubjectModel = sequelize.define('subject', {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   tableName: 'subjects',
+});
+
+SubjectModel.belongsTo(TeacherModel, {
+  foreignKey: 'teacher_id'
 });
 
 module.exports = SubjectModel;

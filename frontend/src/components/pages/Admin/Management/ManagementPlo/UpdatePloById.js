@@ -114,7 +114,7 @@ const UpdatePloById = (nav) => {
                                     key={program.id}
                                     value={program.id}
                                 >
-                                    {program.program_name}
+                                    {program.programName}
                                 </Select.Option>
                             ))}
                         </Select>

@@ -12,14 +12,6 @@ const AssessmentModel = sequelize.define('Assessment', {
     primaryKey: true,
     autoIncrement: true
   },
-  user_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: UserModel,
-      key: 'user_id'
-    }
-  },
   teacher_id: {
     type: DataTypes.INTEGER,
     allowNull: false,

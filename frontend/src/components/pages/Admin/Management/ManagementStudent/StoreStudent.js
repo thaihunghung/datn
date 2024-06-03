@@ -17,7 +17,6 @@ const StoreStudent = (props) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [studentData, setStudentData] = useState([]);
 
-
   const [deleteId, setDeleteId] = useState(null);
   const [toggleId, setToggleId] = useState(null);
   const allStudentIsDelete = async () => {

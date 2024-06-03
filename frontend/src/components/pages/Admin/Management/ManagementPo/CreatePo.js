@@ -146,7 +146,7 @@ const CreatePo = (nav) => {
                                                     key={program.program_id}
                                                     value={program.program_id}
                                                 >
-                                                    {program.program_name}
+                                                    {program.programName}
                                                 </Select.Option>
                                             ))}
                                         </Select>
