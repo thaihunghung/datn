@@ -65,7 +65,8 @@ const AuthenticateController = {
       console.log(`Đăng nhập thành công cho người dùng: ${user.name}`);
       res.json({
         message: 'Đăng nhập thành công',
-        user
+        accessToken,
+        refreshToken
       });
     } catch (error) {
       console.error(`Lỗi đăng nhập: ${error.message}`);
