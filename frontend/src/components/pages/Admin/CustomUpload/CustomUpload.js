@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, message } from 'antd';
 import { axiosAdmin } from '../../../../service/AxiosAdmin';
 
-const CustomUpload = ({ endpoint, setCurrent, fileList, setFileList, method, LoadData, Data }) => {
+const CustomUpload = ({ endpoint, setCurrent, fileList, setFileList, method, LoadData, Data, teacher }) => {
   const [uploading, setUploading] = useState(false);
   const handleUpload = () => {
     const formData = new FormData();
@@ -10,7 +10,7 @@ const CustomUpload = ({ endpoint, setCurrent, fileList, setFileList, method, Loa
       formData.append('files[]', file);
     });
     formData.append('data', JSON.stringify(Data));
-    console.log(Data);
+    
     setUploading(true);
     const axiosRequest = method === 'POST' ? axiosAdmin.post : axiosAdmin.put;
 

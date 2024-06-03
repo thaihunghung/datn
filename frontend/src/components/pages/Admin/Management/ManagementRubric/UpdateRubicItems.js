@@ -155,6 +155,7 @@ const UpdateRubicItems = (nav) => {
       await axiosAdmin.put(`/rubric-item/${rubric_item_id}`, { data: data });
     } catch (error) {
       console.error('Error while saving:', error);
+
     }
   };
 

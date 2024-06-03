@@ -5,7 +5,7 @@ const Tabs = ({ tabs, activeTab, setActiveTab }) => {
   };
 
   return (
-    <div className="h-fit p-5">
+    <div className="h-fit">
       <table className="mb-2">
         <tr className="tab-buttons border-collapse border">
           {tabs.map((tab, index) => (

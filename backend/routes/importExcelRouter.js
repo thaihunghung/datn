@@ -2,6 +2,8 @@ const express = require('express');
 const multer  = require('multer');
 const fs = require('fs');
 const router = express.Router();
+const { ensureAuthenticated } = require('../middlewares/authMiddleware');
+const passport = require('passport');
 
 const path = require('path');
 const StudentController = require('../controllers/StudentController');
@@ -32,7 +34,7 @@ router.post('/plo', upload.any(), PloController.processSaveTemplatePlo);
 router.post('/student', upload.any(), StudentController.saveStudentExcel);
 router.post('/clo', upload.any(), CloController.processSaveTemplateClo);
 router.post('/chapter', upload.any(), ChapterController.processSaveTemplateChapter);
-router.post('/subject', upload.any(), SubjectController.processSaveTemplateSubject);
+router.post('/subject', ensureAuthenticated, upload.any(), SubjectController.processSaveTemplateSubject);
 router.post('/assessment', upload.any(), AssessmentsController.processSaveTemplateAssessment);
 
 router.put('/student/update', upload.any(), StudentController.updateStudentsFromExcel);

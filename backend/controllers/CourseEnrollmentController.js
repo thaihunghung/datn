@@ -40,6 +40,7 @@ const CourseEnrollmentController = {
   },
   getExcelCourseEnrollmentWithData: async (req, res) => {
     try {
+      console.log('vao')
       const { data } = req.body;
       const { id } = data;
 

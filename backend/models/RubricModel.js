@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const SubjectModel = require('./SubjectModel');
+const TeacherModel = require('./TeacherModel');
 
 const RubricModel = sequelize.define('Rubric', {
   rubric_id: {
@@ -14,6 +15,14 @@ const RubricModel = sequelize.define('Rubric', {
     references: {
       model: SubjectModel,
       key: 'subject_id'
+    }
+  },
+  teacher_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: TeacherModel,
+      key: 'teacher_id'
     }
   },
   rubricName: {
@@ -45,5 +54,6 @@ const RubricModel = sequelize.define('Rubric', {
   tableName: 'rubrics'
 });
 RubricModel.belongsTo(SubjectModel, { foreignKey: 'subject_id' });
+RubricModel.belongsTo(TeacherModel, { foreignKey: 'teacher_id' });
 
 module.exports = RubricModel;

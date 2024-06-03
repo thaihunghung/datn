@@ -25,11 +25,11 @@ const AssessmentsController = {
   },
   GetByUser: async (req, res) => {
     try {
-      const userId = parseInt(req.params.user_id);
-      console.log(userId);
+      const teacherId = parseInt(req.params.teacher_id);
+      console.log(teacherId);
       const assessments = await AssessmentModel.findAll({
         where: {
-          user_id: userId,
+          teacher_id: teacherId,
           isDelete: false
         },
         attributes: [
@@ -53,7 +53,7 @@ const AssessmentsController = {
   
       const result = assessments.map(assessment => ({
         course_id: assessment.course_id,
-        user_id: userId,
+        teacher_id: teacherId,
         assessmentCount: assessment.dataValues.assessmentCount,
         studentCount: assessment.dataValues.studentCount,
         zeroScoreCount: assessment.dataValues.zeroScoreCount

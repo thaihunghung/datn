@@ -1,15 +1,22 @@
 // ManagementRubric.js
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Table, Tooltip, Button, message } from 'antd';
 import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
+import Cookies from "js-cookie";
 
 const ManagementRubric = (nav) => {
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
+    const navigate = useNavigate();
+    const teacher_id = Cookies.get('teacher_id');
+    if (!teacher_id) {
+        navigate('/login');
+    }
 
     const [selectedRow, setSelectedRow] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -139,7 +146,7 @@ const ManagementRubric = (nav) => {
 
     const getAllRubricIsDeleteFalse = async () => {
         try {
-            const response = await axiosAdmin.get(`/rubrics/user/${1}/checkscore`);
+            const response = await axiosAdmin.get(`/rubrics/teacher/${teacher_id}/checkscore`);
             const updatedRubricData = response.data.rubric.map((rubric) => {
                 const status = {
                     status: rubric.RubricItem.length === 0 ? false : true,

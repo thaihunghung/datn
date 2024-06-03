@@ -7,12 +7,15 @@ import DropdownAndNavSubject from "../../Utils/DropdownAndNav/DropdownAndNavSubj
 import DownloadAndUpload from "../../Utils/DownloadAndUpload/DownloadAndUpload";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import Tabs from "../../Utils/Tabs/Tabs";
+import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 const CreateSubject = (nav) => {
     const { setCollapsedNav } = nav;
     const [fileList, setFileList] = useState([]);
     const [activeTab, setActiveTab] = useState(0);
     const [subjectName, setSubjectName] = useState("");
+    const [subjectCode, setSubjectCode] = useState("");
     const [description, setDescription] = useState("");
     const [numberCredit, setNumberCredit] = useState("");
     const [numberCreditsTheory, setNumberCreditsTheory] = useState("");
@@ -23,11 +26,23 @@ const CreateSubject = (nav) => {
     const handleOnChangeTextName = (nameP) => {
         setCurrent(nameP);
     };
-    
+
+    const navigate = useNavigate();
+    const teacher_id = Cookies.get('teacher_id');
+    if (!teacher_id) {
+        navigate('/login');
+    }
+
     const handleSave = async () => {
         try {
+            if (!/^\d{6}$/.test(subjectCode)) {
+                message.error('SubjectCode must be a 6-digit number');
+                return;
+            }
             const data = {
                 subjectName: subjectName,
+                teacher_id: teacher_id,
+                subjectCode: subjectCode,
                 description: description,
                 numberCredits: parseInt(numberCredit),
                 numberCreditsTheory: parseInt(numberCreditsTheory),
@@ -52,6 +67,7 @@ const CreateSubject = (nav) => {
             const response = await axiosAdmin.get('/subject/templates/post', {
                 responseType: 'blob'
             });
+            
 
             if (response && response.data) {
                 const url = window.URL.createObjectURL(response.data);
@@ -98,7 +114,7 @@ const CreateSubject = (nav) => {
     }, [setCollapsedNav]);
 
     return (
-        <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
+        <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7">
             <DropdownAndNavSubject />
             <div className="w-full mt-5 px-5 rounded-lg">
                 <Tabs tabs=
@@ -113,42 +129,51 @@ const CreateSubject = (nav) => {
                                             placeholder="Enter your name subject"
                                             value={subjectName}
                                             onValueChange={setSubjectName}
-                                            className="max-w-xs"
+                                            className="w-full"
                                         />
+
+                                        <Input
+                                            label="Tên subject"
+                                            placeholder="Enter SubjectCode format: '000000'"
+                                            value={subjectCode}
+                                            onValueChange={setSubjectCode}
+                                            className="w-full"
+                                        />
+
                                         <Input
                                             label="Mô tả"
                                             placeholder="Enter your Description"
                                             value={description}
                                             onValueChange={setDescription}
-                                            className="max-w-xs"
+                                            className="w-full"
                                         />
                                         <Input
                                             label="Số tín chỉ"
                                             placeholder="Enter your NumberCredit"
                                             value={numberCredit}
                                             onValueChange={setNumberCredit}
-                                            className="max-w-xs"
+                                            className="w-full"
                                         />
                                         <Input
                                             label="Số tín chỉ lý thuyết"
                                             placeholder="Enter your NumberCreditsTheory"
                                             value={numberCreditsTheory}
                                             onValueChange={setNumberCreditsTheory}
-                                            className="max-w-xs"
+                                            className="w-full"
                                         />
                                         <Input
                                             label="Số tín chỉ thực hành"
                                             placeholder="Enter your NumberCreditsPractice"
                                             value={numberCreditsPractice}
                                             onValueChange={setNumberCreditsPractice}
-                                            className="max-w-xs"
+                                            className="w-full"
                                         />
                                         <Input
                                             label="Loại học phần"
                                             placeholder="Enter your setTypeSubject"
                                             value={typeSubject}
                                             onValueChange={setTypeSubject}
-                                            className="max-w-xs"
+                                            className="w-full"
                                         />
                                         <div className="w-full flex justify-center items-center">
                                             <Button color="primary" onClick={handleSave} className="max-w-[300px] mt-5 px-20">

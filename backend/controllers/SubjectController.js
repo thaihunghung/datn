@@ -7,6 +7,8 @@ const PloCloModel = require("../models/PloCloModel");
 const ExcelJS = require('exceljs');
 const fs = require('fs');
 const path = require('path');
+const TeacherModel = require("../models/TeacherModel");
+const RubricModel = require("../models/RubricModel");
 
 
 const validTypes = [
@@ -95,6 +97,24 @@ const SubjectController = {
     }
   },
 
+  getByrubricsbySubjectId: async (req, res) => {
+    try {
+      const { subject_id } = req.params;
+      const subject = await SubjectModel.findOne({ where: { subject_id: subject_id } });
+      if (!subject) {
+        return res.status(404).json({ message: 'Subject not found' });
+      }
+      const rubric = await RubricModel.findAll({ where: { subject_id: subject_id } });
+      if (!rubric) {
+        return res.status(404).json({ message: 'rubric not found' });
+      }
+      res.status(200).json(rubric);
+    } catch (error) {
+      console.error('Error finding rubric:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
+  
   update: async (req, res) => {
     try {
       const { subject_id } = req.params;
@@ -211,7 +231,45 @@ const SubjectController = {
       res.status(500).json({ message: 'Internal server error' });
     }
   },
+  isDeleteTotrueByteacher: async (req, res) => {
+    try {
+      const { teacher_id } = req.params;
+      const deletedSubjects = await SubjectModel.findAll({ where: { isDelete: true, teacher_id: teacher_id } });
+      res.status(200).json(deletedSubjects);
+    } catch (error) {
+      console.error('Error fetching deleted subjects:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
 
+  isDeleteTofalseByteacher: async (req, res) => {
+    try {
+      const { teacher_id } = req.params;
+      const activeSubjects = await SubjectModel.findAll({
+        where: { isDelete: false, teacher_id: teacher_id}
+      });
+      const subjectIds = activeSubjects.map(subject => subject.subject_id);
+      const Clos = await CloModel.findAll({ where: { subject_id: subjectIds } });
+      const Chapter = await ChapterModel.findAll({ where: { subject_id: subjectIds } });
+
+      for (const subject of activeSubjects) {
+        const closForSubject = Clos.filter(clos => clos.subject_id === subject.subject_id);
+        const ChapterForSubject = Chapter.filter(Chapter => Chapter.subject_id === subject.subject_id);
+        subject.dataValues.CLO = closForSubject;
+        subject.dataValues.CHAPTER = ChapterForSubject;
+      }
+
+      //activeSubjects.dataValues.CLO = Clos;
+      //activeSubjects.dataValues.CHAPTER = Chapter;
+
+      res.status(200).json(activeSubjects);
+    } catch (error) {
+      console.error('Error fetching active subjects:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+
+  
   isDelete: async (req, res) => {
     try {
       const { id } = req.params;
@@ -277,7 +335,8 @@ const SubjectController = {
     const worksheet = workbook.addWorksheet('SUBJECT');
 
     worksheet.columns = [
-      { header: 'Tên Subject', key: 'subjectName', width: 10 },
+      { header: 'Tên Subject', key: 'subjectName', width: 30 },
+      { header: 'subjectCode format:000000', key: 'subjectCode', width: 30 },
       { header: 'Mô tả', key: 'description', width: 30 },
       { header: 'Số tín chỉ', key: 'numberCredits', width: 10 },
       { header: 'STC LT', key: 'numberCreditsTheory', width: 10 },
@@ -310,7 +369,8 @@ const SubjectController = {
 
       worksheet.columns = [
         { header: 'mã subject', key: 'subject_id', width: 10 },
-        { header: 'Tên Subject', key: 'subjectName', width: 20 },
+        { header: 'Tên Subject', key: 'subjectName', width: 30 },
+        { header: 'subjectCode format:000000', key: 'subjectCode', width: 30 },
         { header: 'Mô tả', key: 'description', width: 30 },
         { header: 'Số tín chỉ', key: 'numberCredits', width: 10 },
         { header: 'STC LT', key: 'numberCreditsTheory', width: 10 },
@@ -323,6 +383,7 @@ const SubjectController = {
         worksheet.addRow({
           subject_id: element.subject_id,
           subjectName: element.subjectName,
+          subjectCode: element.subjectCode,
           description: element.description,
           numberCredits: element.numberCredits,
           numberCreditsTheory: element.numberCreditsTheory,
@@ -361,6 +422,14 @@ const SubjectController = {
       return res.status(400).send('No file uploaded.');
     }
 
+    const teacher_id = req.user.teacher_id;
+
+    const teacher = await TeacherModel.findOne({ where: { teacher_id: teacher_id } });
+    if (!teacher) {
+      return res.status(404).json({ message: 'TeacherModels not found' });
+    }
+
+    
     const uploadDirectory = path.join(__dirname, '../uploads');
     const filename = req.files[0].filename;
     const filePath = path.join(uploadDirectory, filename);
@@ -376,10 +445,10 @@ const SubjectController = {
     const jsonData = [];
     worksheet.eachRow((row, rowNumber) => {
       if (rowNumber > 1) {
-        const numberCredits = row.getCell(3).value;
-        const numberCreditsTheory = row.getCell(4).value;
-        const numberCreditsPractice = row.getCell(5).value;
-        const typesubject = row.getCell(6).value;
+        const numberCredits = row.getCell(4).value;
+        const numberCreditsTheory = row.getCell(5).value;
+        const numberCreditsPractice = row.getCell(6).value;
+        const typesubject = row.getCell(7).value;
 
         if (
           isNaN(numberCredits) ||
@@ -396,7 +465,9 @@ const SubjectController = {
 
         jsonData.push({
           subjectName: row.getCell(1).value,
-          description: row.getCell(2).value,
+          subjectCode: row.getCell(2).value,
+          description: row.getCell(3).value,
+          teacher_id: teacher.teacher_id,
           numberCredits,
           numberCreditsTheory,
           numberCreditsPractice,
@@ -420,6 +491,8 @@ const SubjectController = {
       return res.status(400).json({ message: 'No file uploaded.' });
     }
     const subject_id = req.body.data;
+    const teacher_id = req.body.teacher;
+
     try {
       const subject = await SubjectModel.findByPk(subject_id);
       if (!subject) {

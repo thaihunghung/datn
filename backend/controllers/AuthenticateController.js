@@ -75,7 +75,6 @@ const AuthenticateController = {
 
   getUser: async (req, res) => {
     try {
-      console.log('vao');
       const user = await TeacherModel.findByPk(req.user.teacher_id, {
         attributes: ['teacher_id','email', 'permission', 'name', 'teacherCode', 'typeTeacher']
       });
