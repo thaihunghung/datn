@@ -2,7 +2,6 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const RubricModel = require('./RubricModel');
 const CourseModel = require('./CourseModel');
-const UserModel = require('./UserModel');
 const TeacherModel = require('./TeacherModel');
 const StudentModel = require('./StudentModel');
 
@@ -80,7 +79,6 @@ const AssessmentModel = sequelize.define('Assessment', {
   updatedAt: 'updatedAt',
   tableName: 'assessments'
 });
-AssessmentModel.belongsTo(UserModel, { foreignKey: 'user_id' });
 AssessmentModel.belongsTo(TeacherModel, { foreignKey: 'teacher_id' });
 AssessmentModel.belongsTo(StudentModel, { foreignKey: 'student_id' });
 AssessmentModel.belongsTo(RubricModel, { foreignKey: 'rubric_id' });

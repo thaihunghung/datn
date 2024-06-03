@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const UserModel = require('./UserModel');
 
 const TeacherModel = sequelize.define('teacher', {
   teacher_id: {
@@ -8,29 +7,36 @@ const TeacherModel = sequelize.define('teacher', {
     primaryKey: true,
     autoIncrement: true
   },
-  user_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: UserModel,
-      key: 'user_id'
-    }
-  },
   name: {
     type: DataTypes.STRING(255),
     allowNull: false
   },
   email: {
     type: DataTypes.STRING(255),
-    allowNull: false
+    allowNull: false,
+    unique: true
   },
   password: {
-    type: DataTypes.STRING(15),
+    type: DataTypes.STRING(255),
     allowNull: false
   },
   typeTeacher: {
     type: DataTypes.ENUM('GVCV', 'GVGD'),
     allowNull: false
+  },
+  teacherCode: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+    unique: true
+  },
+  permission: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 1
+  },
+  isBlock: {
+    type: DataTypes.TINYINT,
+    defaultValue: 0
   },
   isDelete: {
     type: DataTypes.TINYINT,
@@ -51,10 +57,6 @@ const TeacherModel = sequelize.define('teacher', {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   tableName: 'teachers',
-});
-
-TeacherModel.belongsTo(UserModel, {
-  foreignKey: 'user_id'
 });
 
 module.exports = TeacherModel;

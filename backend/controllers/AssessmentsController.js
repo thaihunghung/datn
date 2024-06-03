@@ -1,7 +1,6 @@
 const { Op, Sequelize } = require('sequelize');
 const AssessmentModel = require('../models/AssessmentModel');
 const CourseModel = require('../models/CourseModel');
-const UserModel = require('../models/UserModel');
 
 const ExcelJS = require('exceljs');
 const fs = require('fs');

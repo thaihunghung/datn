@@ -1,55 +1,92 @@
 const bcrypt = require('bcrypt');
-const passport = require('passport');
-const UserModel = require('../models/UserModel');
+const jwt = require('jsonwebtoken');
+const TeacherModel = require('../models/TeacherModel');
+const RefreshTokenModel = require('../models/RefreshTokenModel'); // Import model RefreshToken
 
 const AuthenticateController = {
   register: async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, name, teacherCode, typeTeacher } = req.body;
     try {
-      const existingUser = await UserModel.findOne({ where: { email } });
+      const existingUser = await TeacherModel.findOne({ where: { teacherCode } });
       if (existingUser) {
-        return res.status(400).json({ message: 'Email already in use' });
+        return res.status(400).json({ message: 'Teacher code đã được sử dụng' });
       }
 
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      const newUser = await UserModel.create({ email, password: hashedPassword });
-      console.log(`Registered new user: ${newUser.email}`);
-      console.log(`Hashed Password: ${hashedPassword}`); // Debug statement
+      const data = {
+        email,
+        password: hashedPassword,
+        name,
+        teacherCode,
+        typeTeacher
+      };
+      const newUser = await TeacherModel.create(data);
+      console.log(`Đã đăng ký người dùng mới: ${newUser.email}`);
       res.status(201).json(newUser);
     } catch (error) {
-      console.error(`Registration error: ${error.message}`);
-      res.status(500).json({ message: 'Server error', error });
+      console.error(`Lỗi đăng ký: ${error.message}`);
+      res.status(500).json({ message: 'Lỗi server', error });
     }
   },
 
-  login: (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => {
-      if (err) {
-        console.error(`Login error: ${err.message}`); // Debug statement
-        return res.status(500).json({ message: 'Server error', err });
-      }
+  login: async (req, res) => {
+    const { teacherCode, password } = req.body;
+    try {
+      const user = await TeacherModel.findOne({ where: { teacherCode } });
       if (!user) {
-        console.log('Login failed: Invalid email or password'); // Debug statement
-        return res.status(400).json({ message: 'Invalid email or password' });
+        return res.status(400).json({ message: 'Teacher code hoặc mật khẩu không đúng' });
       }
-      req.logIn(user, (err) => {
-        if (err) {
-          console.error(`Login error: ${err.message}`); // Debug statement
-          return res.status(500).json({ message: 'Server error', err });
-        }
-        console.log(`Login successful for user: ${user.email}`); // Debug statement
-        res.json({ message: 'Login successful', user });
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Teacher code hoặc mật khẩu không đúng' });
+      }
+
+      const payload = { id: user.teacher_id };
+      const accessToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '15m' });
+      const refreshToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '7d' });
+
+      // Thu hồi và hết hạn tất cả các refresh token cũ của người dùng
+      await RefreshTokenModel.update(
+        { revoked: true, expired: true },
+        { where: { teacher_id: user.teacher_id } }
+      );
+
+      // Lưu refresh token mới vào database
+      await RefreshTokenModel.create({ token: refreshToken, teacher_id: user.teacher_id });
+
+      // Đặt token trong HTTP-only cookies
+      res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 15 * 60 * 1000 });
+      res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
+
+      console.log(`Đăng nhập thành công cho người dùng: ${user.name}`);
+      res.json({
+        message: 'Đăng nhập thành công',
+        user
       });
-    })(req, res, next);
+    } catch (error) {
+      console.error(`Lỗi đăng nhập: ${error.message}`);
+      res.status(500).json({ message: 'Lỗi server', error });
+    }
   },
 
-  getUser: (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: 'Not authenticated' });
+  getUser: async (req, res) => {
+    try {
+      const user = await TeacherModel.findByPk(req.user.id, {
+        attributes: ['email', 'permission', 'name', 'teacherCode', 'typeTeacher']
+      });
+
+      if (!user) {
+        return res.status(404).json({ message: 'Người dùng không tồn tại' });
+      }
+
+      res.json(user);
+    } catch (error) {
+      console.error(`Lỗi lấy thông tin người dùng: ${error.message}`);
+      res.status(500).json({ message: 'Lỗi server', error });
     }
-    res.json(req.user);
   }
 };
 
