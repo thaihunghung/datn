@@ -1,13 +1,21 @@
 
 import { useEffect, useState } from "react";
 import { Table, Tooltip, Button, message } from 'antd';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Chip } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavSubject from "../../Utils/DropdownAndNav/DropdownAndNavSubject";
+import Cookies from 'js-cookie';
 
 const Subject = (nav) => {
   const { setCollapsedNav } = nav;
+
+  const navigate = useNavigate();
+  const teacher_id = Cookies.get('teacher_id');
+  if (!teacher_id) {
+    navigate('/login');
+  }
+
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const [selectedRow, setSelectedRow] = useState([]);
@@ -27,7 +35,15 @@ const Subject = (nav) => {
         </div>
       ),
     },
-
+    {
+      title: "Mã Học phần",
+      dataIndex: "subjectCode",
+      render: (record) => (
+        <div className="text-sm min-w-[100px]">
+          <p className="font-medium">{record}</p>
+        </div>
+      ),
+    },
     {
       title: "CĐR",
       dataIndex: "clos",
@@ -183,9 +199,10 @@ const Subject = (nav) => {
     setSelectedRowKeys([]);
     setSelectedRow([]);
   };
+  
   const getAllSubjectIsDeleteFalse = async () => {
     try {
-      const response = await axiosAdmin.get('/subjects/isDelete/false');
+      const response = await axiosAdmin.get(`/subjects/teacher/${teacher_id}`);
       const updatedPoData = response.data.map((subject) => {
         const clos = {
           id: subject.subject_id,
@@ -201,6 +218,7 @@ const Subject = (nav) => {
         return {
           key: subject.subject_id,
           name: subject.subjectName,
+          subjectCode: subject.subjectCode,
           description: subject.description,
           numberCredits: subject.numberCredits,
           clos: clos,
@@ -247,7 +265,7 @@ const Subject = (nav) => {
     }
   };
 
-  useEffect(() => {
+  useEffect(() => {   
     getAllSubjectIsDeleteFalse()
     const handleResize = () => {
       if (window.innerWidth < 1024) {

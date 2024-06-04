@@ -6,9 +6,18 @@ import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { Table, Tooltip} from 'antd';
 import DropdownAndNavSubject from "../../Utils/DropdownAndNav/DropdownAndNavSubject";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 
 const StoreSubject = (nav) => {
     const { setCollapsedNav } = nav;
+
+    const navigate = useNavigate();
+    const teacher_id = Cookies.get('teacher_id');
+    if (!teacher_id) {
+        navigate('/login');
+    }
+
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [selectedRow, setSelectedRow] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -114,7 +123,7 @@ const StoreSubject = (nav) => {
 
     const getAllSubjectIsDeleteTrue = async () => {
         try {
-            const response = await axiosAdmin.get(`/subjects/isDelete/true`);
+            const response = await axiosAdmin.get(`/subjects/archive/teacher/${teacher_id}`);
             const updatedSubjectData = response.data.map((subject) => {
                 return {
                     key: subject.subject_id,

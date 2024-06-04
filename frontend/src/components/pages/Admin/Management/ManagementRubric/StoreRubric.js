@@ -118,7 +118,7 @@ const StoreRubric = (nav) => {
 
     const getAllRubricIsDeleteTrue = async () => {
         try {
-            const response = await axiosAdmin.get(`/rubrics/archive/user/${1}/checkscore`);
+            const response = await axiosAdmin.get(`/rubrics/archive/teacher/${1}/checkscore`);
             const updatedRubricData = response.data.rubric.map((rubric) => {
                 const status = {
                     status: rubric.RubricItem.length === 0 ? false : true,

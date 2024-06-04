@@ -3,14 +3,21 @@ import { useEffect, useState } from "react";
 import { Table, Tooltip, Button, message } from 'antd';
 import { Flex, Progress } from 'antd';
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Chip } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavGrading from "../../Utils/DropdownAndNav/DropdownAndNavGrading";
+import Cookies from "js-cookie";
 
 const ManagementAssessment = (nav) => {
   const { setCollapsedNav } = nav;
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  
+  const navigate = useNavigate();
+  const teacher_id = Cookies.get('teacher_id');
+  if (!teacher_id) {
+    navigate('/login');
+  }
 
   const [selectedRow, setSelectedRow] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -119,7 +126,7 @@ const ManagementAssessment = (nav) => {
 
   const getAllAssessmentIsDeleteFalse = async () => {
     try {
-      const response = await axiosAdmin.get('/assessments/user/2');
+      const response = await axiosAdmin.get(`/assessments/teacher/${teacher_id}`);
       const updatedPoData = response.data.map((subject) => {
         const status = {
           assessmentCount: subject.assessmentCount,
@@ -138,7 +145,6 @@ const ManagementAssessment = (nav) => {
       console.log(updatedPoData);
     } catch (error) {
       console.error("Error: " + error.message);
-      message.error('Error fetching PO data');
     }
   };
 

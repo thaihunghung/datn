@@ -195,7 +195,6 @@ const router = express.Router();
 router.get('/rubrics', RubricController.index);
 router.post('/rubric', RubricController.create);
 router.get('/rubric/:rubric_id', RubricController.getByID);
-router.get('/subjects/:subject_id/rubrics', RubricController.getBySubject);
 
 router.put('/rubric/:rubric_id', RubricController.update);
 router.delete('/rubric/:rubric_id', RubricController.delete);
@@ -207,8 +206,8 @@ router.get('/rubrics/isDelete/false', RubricController.isDeleteTofalse);
 router.get('/rubric/:rubric_id/items/isDelete/false', RubricController.GetItemsRubricsByIdRubrics);
 router.get('/rubric/:rubric_id/items/isDelete/true', RubricController.GetItemsRubricsByIdRubricsisDeleteTrue);
 
-router.get('/rubrics/user/:user_id/checkscore', RubricController.GetByUserAndCheckScore); 
-router.get('/rubrics/archive/user/:user_id/checkscore', RubricController.GetisDeleteTotrueByUserAndCheckScore);
+router.get('/rubrics/teacher/:teacher_id/checkscore', RubricController.GetByUserAndCheckScore); 
+router.get('/rubrics/archive/teacher/:teacher_id/checkscore', RubricController.GetisDeleteTotrueByUserAndCheckScore);
 
 router.put('/rubrics/soft-delete-multiple', RubricController.softDeleteMultiple);
 router.put('/rubric/:rubric_id/soft-delete', RubricController.toggleSoftDeleteById);
