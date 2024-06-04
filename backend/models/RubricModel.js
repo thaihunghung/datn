@@ -2,7 +2,6 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const SubjectModel = require('./SubjectModel');
 const TeacherModel = require('./TeacherModel');
-const TeacherModel = require('./TeacherModel');
 
 const RubricModel = sequelize.define('Rubric', {
   rubric_id: {

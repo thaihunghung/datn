@@ -35,7 +35,6 @@ app.use(cors({
 
 morgan('combined')
 app.use('/', indexRouter);
-app.use(authRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
