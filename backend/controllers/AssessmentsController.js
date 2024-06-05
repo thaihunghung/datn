@@ -70,16 +70,30 @@ const AssessmentsController = {
         return res.status(404).json({ message: 'No assessments found for this user' });
       }
   
-      const result = assessments.map(assessment => ({
-        course_id: assessment.course_id,
-        //teacher_id: teacherId,
-        description: assessment.description,
-        course: `${assessment.course.courseCode} - ${assessment.course.courseName}`,
-        assessmentCount: assessment.dataValues.assessmentCount,
-        studentCount: assessment.dataValues.studentCount,
-        zeroScoreCount: assessment.dataValues.zeroScoreCount
-      }));
-      // console.log(assessments);
+      const result = assessments.map(assessment => {
+        let status;
+        if (parseInt(assessment.dataValues.zeroScoreCount) === 0) {
+          status = 100;
+        } else if (parseInt(assessment.dataValues.zeroScoreCount) === parseInt(assessment.dataValues.assessmentCount)) {
+          status = 0;
+        } else {
+          status = (parseInt(assessment.dataValues.zeroScoreCount) / parseInt(assessment.dataValues.assessmentCount)) * 100;
+        }
+        
+        return {
+          course_id: assessment.course_id,
+          description: assessment.description,
+          course: `${assessment.course.courseCode} - ${assessment.course.courseName}`,
+          assessmentCount: parseInt(assessment.dataValues.assessmentCount),
+          studentCount: parseInt(assessment.dataValues.studentCount),
+          zeroScoreCount: parseInt(assessment.dataValues.zeroScoreCount),
+          status: status
+        };
+      });
+      
+      
+      
+      console.log(result);
       res.status(200).json(result);
     } catch (error) {
       console.error('Error fetching assessments:', error);
@@ -145,6 +159,20 @@ const AssessmentsController = {
     }
   },
   update: async (req, res) => {
+    try {
+      const { assessment_id } = req.params;
+      const { data } = req.body;
+      const updatedProgram = await AssessmentModel.update(data , { where: { assessment_id: assessment_id } });
+      if (updatedProgram[0] === 0) {
+        return res.status(404).json({ message: 'Program not found' });
+      }
+      res.json(updatedProgram);
+    } catch (error) {
+      console.error('Lỗi cập nhật chương trình:', error);
+      res.status(500).json({ message: 'Lỗi server' });
+    }
+  },
+  updateStotalScore: async (req, res) => {
     try {
       const { assessment_id } = req.params;
       const { data } = req.body;

@@ -69,9 +69,11 @@ const ManagementAssessment = (nav) => {
       dataIndex: "status",
       render: (record) => (
         <div className="text-sm min-w-[100px]">
+
           <Flex vertical gap="middle">
-            <Progress
-              percent={record.zeroScoreCount / record.assessmentCount}
+            <Progress   
+
+              percent={record}
               status="active"
               strokeColor={{
                 from: '#108ee9',
@@ -150,10 +152,6 @@ const ManagementAssessment = (nav) => {
     try {
       const response = await axiosAdmin.get(`/assessments/teacher/${teacher_id}`);
       const updatedPoData = response.data.map((subject) => {
-        const status = {
-          assessmentCount: subject.assessmentCount,
-          zeroScoreCount: subject.zeroScoreCount 
-        }
         const action = {
           _id: subject.assessment_id,
           description: subject.description
@@ -164,7 +162,7 @@ const ManagementAssessment = (nav) => {
           assessmentCount: subject.assessmentCount,
           studentCount: subject.studentCount,
           nameCourse: subject.course,
-          status: status,
+          status: subject.status,
           action: action
         };
       });

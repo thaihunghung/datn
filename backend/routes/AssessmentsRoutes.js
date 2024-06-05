@@ -145,6 +145,8 @@ router.get('/assessments/:description/teacher/:teacher_id', assessmentsControlle
 router.post('/assessment', assessmentsController.create);
 router.get('/assessment/:assessment_id', assessmentsController.getByID);
 router.put('/assessment/:assessment_id', assessmentsController.update);
+router.put('/assessment/:assessment_id/updateStotalScore', assessmentsController.updateStotalScore);
+
 router.delete('/assessment/:assessment_id', assessmentsController.delete);
 
 router.get('/assessments/isDelete/true', assessmentsController.isDeleteTotrue);
