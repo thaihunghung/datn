@@ -3,12 +3,12 @@ import { Tooltip, Button } from "@nextui-org/react";
 import { Collapse } from 'antd';
 import { Slider } from "@nextui-org/react";
 
-import "./FormPoint.css"
-import { axiosAdmin } from "../../../../service/AxiosAdmin";
+import "./FormGrading.css"
+import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import { useNavigate, useParams } from "react-router-dom";
+import Cookies from "js-cookie";
 
-const demoTong = 1
-
-const FormPoint = (nav) => {
+const FormGrading = (nav) => {
   const { setCollapsedNav } = nav;
   const [selectedValues, setSelectedValues] = useState([]);
 
@@ -16,8 +16,14 @@ const FormPoint = (nav) => {
 
   const [RubicItemsData, setRubicItemsData] = useState([]);
   const [StotalScore, setStotalScore] = useState();
+  const { assessment_id, rubric_id } = useParams();
+  const navigate = useNavigate();
+  const teacher_id = Cookies.get('teacher_id');
+  if (!teacher_id) {
+    navigate('/login');
+  }
 
-
+  
   const handleSliderChange = (index, value, rubricsItem_id) => {
 
     setSelectedValues(prevValues => {
@@ -39,7 +45,7 @@ const FormPoint = (nav) => {
   }
   const GetRubricData = async () => {
     try {
-      const response = await axiosAdmin.get(`/rubric/${1}/items/isDelete/false`);
+      const response = await axiosAdmin.get(`/rubric/${rubric_id}/items/isDelete/false`);
       console.log(response.data);
       setRubicData(response.data.rubric)
       setRubicItemsData(response.data.rubric.rubricItems)
@@ -132,14 +138,14 @@ const FormPoint = (nav) => {
         </div>
       </div>
       <div className="w-full flex flex-col p-2 py-0 mb-2  sm:p-5 sm:mb-2 sm:py-0 sm:flex-col lg:flex-row lg:mb-0 xl:flex-row xl:mb-0">
-        <div className="w-full text-justify lg:w-[55%] xl:w-[60%]   flex flex-col sm:flex-col lg:flex-row xl:flex-row">
-          <div className="w-full hidden p-2 bg-[#FF8077] sm:hidden lg:w-[10%] lg:block xl:w-[10%] xl:block  sm:px-0">
-            <p className=" text-[#020401] text-center">PLO</p>
+        <div className="w-full text-justify lg:w-[53%] xl:w-[58%]   flex flex-col sm:flex-col lg:flex-row xl:flex-row">
+          <div className="w-full hidden p-2 bg-[#475569] sm:hidden lg:w-[12%] lg:block xl:w-[12%] xl:block  sm:px-0">
+            <p className=" text-[#020401] text-center font-bold">PLO</p>
           </div>
-          <div className="w-full hidden p-2 bg-[#FF8077] sm:hidden lg:w-[10%] lg:block xl:w-[10%] xl:block  sm:px-0">
-            <p className=" text-[#020401] text-center">CĐR</p>
+          <div className="w-full hidden p-2 bg-[#475569] sm:hidden lg:w-[12%] lg:block xl:w-[12%] xl:block  sm:px-0">
+            <p className=" text-[#020401] text-center font-bold">CĐR</p>
           </div>
-          <div className="w-full p-0 sm:p-0 lg:p-2 xl:p-2 bg-[#FF8077]  ">
+          <div className="w-full p-0 sm:p-0 lg:p-2 xl:p-2 bg-[#475569]  ">
             <p className="text-center font-bold hidden sm:hidden lg:block xl:block text-[#020401] p-5 sm:p-5 lg:p-0 xl:p-0">Tiêu chí</p>
             <p className="text-center font-bold block sm:block lg:hidden xl:hidden text-[#020401] p-5 sm:p-5 lg:p-0 xl:p-0">Chấm điểm</p>
           </div>
@@ -154,12 +160,8 @@ const FormPoint = (nav) => {
         RubicItemsData.map((item, i) => (
           <div className="w-full flex flex-col p-2 py-0 sm:p-5 sm:py-0 sm:flex-col lg:flex-row xl:flex-row" key={item.rubricsItem_id}>
             {/* Left Side */}
-            <div className="w-full rounded-b-lg sm:rounded-b-lg lg:rounded-none xl:rounded-none text-justify lg:w-[55%] xl:w-[60%] border-[1px] sm:border-t-[1px] lg:border-t-0 xl:border-t-0 border-[#ff8077] flex flex-col sm:flex-col lg:flex-row xl:flex-row">
-
-
-
-
-              <div className="w-full hidden sm:hidden lg:block xl:block p-2 lg:w-[10%] xl:w-[10%] border-b-1 sm:border-b-1 border-r-0 sm:border-r-0 sm:px-0 lg:border-r-[1px] lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-[#ff8077]">
+            <div className="w-full rounded-b-lg sm:rounded-b-lg lg:rounded-none xl:rounded-none text-justify lg:w-[53%] xl:w-[57%] border-[1px] sm:border-t-[1px] lg:border-t-0 xl:border-t-0 border-[#ff8077] flex flex-col sm:flex-col lg:flex-row xl:flex-row">
+              <div className="w-full hidden sm:hidden lg:block xl:block p-2 lg:w-[12%] xl:w-[12%] border-b-1 sm:border-b-1 border-r-0 sm:border-r-0 sm:px-0 lg:border-r-[1px] lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-[#ff8077]">
 
                 <div className="flex justify-center items-center h-full w-full p-2">
                   <div className="text-center font-bold sm:font-bold lg:font-normal xl:font-normal text-[#008000] sm:text-[#008000] lg:text-black xl:text-black">
@@ -168,7 +170,7 @@ const FormPoint = (nav) => {
                 </div>
 
               </div>
-              <div className="w-full p-2 lg:w-[10%] xl:w-[10%] border-b-1 
+              <div className="w-full p-2 lg:w-[12%] xl:w-[12%] border-b-1 
               sm:border-b-1 border-r-0 sm:border-r-0 sm:px-0 lg:border-r-[1px] 
               lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-[#ff8077]
               flex justify-center items-center
@@ -317,4 +319,4 @@ const FormPoint = (nav) => {
     </div>
   )
 }
-export default FormPoint
+export default FormGrading

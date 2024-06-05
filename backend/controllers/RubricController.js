@@ -54,8 +54,8 @@ const RubricController = {
       if (!rubric) {
         return res.status(404).json({ message: 'rubric not found' });
       }
-      const updatedrubric = await RubricModel.update(data, { where: { rubric_id: id } });
-      res.json({ message: `Successfully updated rubric with ID: ${id}` });
+      const updatedrubric = await RubricModel.update(data, { where: { rubric_id: rubric_id } });
+      res.json({ message: `Successfully updated rubric with ID: ${rubric_id}` });
     } catch (error) {
       console.error('Error updating rubric:', error);
       res.status(500).json({ message: 'Server error' });
@@ -72,10 +72,8 @@ const RubricController = {
 
       const  rubricItems =  await RubricItemModel.findAll({ where: { rubric_id: rubric.rubric_id } });
       for (const RubricItem of rubricItems) {
-        await QualityLevelsModel.destroy({ where: { rubricsItem_id: RubricItem.rubricsItem_id } });
         await RubricItemModel.destroy({ where: { rubricsItem_id: RubricItem.rubricsItem_id } });
       }
-      await MapRubricQuestionModel.destroy({ where: { rubric_id: id } });
       await RubricModel.destroy({ where: { rubric_id: rubric.rubric_id } });
       res.status(200).json({ message: 'Successfully deleted rubric' });
     } catch (error) {
@@ -84,7 +82,7 @@ const RubricController = {
     }
   },
 
-  //MapRubricQuestionModel chú ý///
+
 
   deleteMultiple: async (req, res) => {
     const { rubric_id } = req.query;
@@ -93,11 +91,9 @@ const RubricController = {
       for (const id of rubricIds) {        
         const RubricItems = await RubricItemModel.findAll({ where: { rubric_id: id } });
         for (const RubricItem of RubricItems) {
-          await QualityLevelsModel.destroy({ where: { rubricsItem_id: RubricItem.rubricsItem_id } });
           await RubricItemModel.destroy({ where: { rubricsItem_id: RubricItem.rubricsItem_id } });
         }
       }
-      await MapRubricQuestionModel.destroy({ where: { rubric_id: rubric_id } });
 
       await RubricModel.destroy({ where: { rubric_id: rubric_id } });
       res.status(200).json({ message: 'Xóa nhiều rubric thành công' });

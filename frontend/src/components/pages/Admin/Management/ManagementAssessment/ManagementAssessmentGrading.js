@@ -2,18 +2,18 @@
 import { useEffect, useState } from "react";
 import { Table, Tooltip, Button, message } from 'antd';
 import { Flex, Progress } from 'antd';
-
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Chip } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavGrading from "../../Utils/DropdownAndNav/DropdownAndNavGrading";
 import Cookies from "js-cookie";
 import slugify from 'slugify';
 
-const ManagementAssessment = (nav) => {
+const ManagementAssessmentGrading = (nav) => {
   const { setCollapsedNav } = nav;
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  
+  const { description } = useParams();
+
   const navigate = useNavigate();
   const teacher_id = Cookies.get('teacher_id');
   if (!teacher_id) {
@@ -29,15 +29,6 @@ const ManagementAssessment = (nav) => {
 
   const columns = [
     {
-      title: "Mã lớp",
-      dataIndex: "nameCourse",
-      render: (record) => (
-        <div className="text-sm min-w-[100px]">
-          <p className="font-medium">{record}</p>
-        </div>
-      ),
-    },
-    {
       title: "Mô tả",
       dataIndex: "description",
       render: (record) => (
@@ -47,38 +38,32 @@ const ManagementAssessment = (nav) => {
       ),
     },
     {
-      title: "Số lượng cần đánh giá",
-      dataIndex: "assessmentCount",
+      title: "Lớp",
+      dataIndex: "class",
       render: (record) => (
         <div className="text-sm min-w-[100px]">
-          <p className="font-medium">{record}</p>
+          <p className="font-medium">{record.classNameShort}</p>
         </div>
       ),
     },
     {
-      title: "Số lượng sv",
-      dataIndex: "studentCount",
+      title: "Sinh viên",
+      dataIndex: "student",
       render: (record) => (
-        <div className="text-sm min-w-[100px]">
-          <p className="font-medium">{record}</p>
+        <div className="text-sm min-w-[100px] flex flex-col">
+          <p className="font-medium">{record.name}</p>
+          <p className="font-medium">{record.studentCode}</p>
+        
         </div>
       ),
     },
+    
     {
-      title: "Trạng thái",
-      dataIndex: "status",
+      title: "Điểm",
+      dataIndex: "totalScore",
       render: (record) => (
         <div className="text-sm min-w-[100px]">
-          <Flex vertical gap="middle">
-            <Progress
-              percent={record.zeroScoreCount / record.assessmentCount}
-              status="active"
-              strokeColor={{
-                from: '#108ee9',
-                to: '#87d068',
-              }}
-            />
-          </Flex>
+          <p className="font-medium">{record}</p>
         </div>
       ),
     },
@@ -91,7 +76,7 @@ const ManagementAssessment = (nav) => {
       dataIndex: "action",
       render: (record) => (
         <div className="flex items-center justify-center w-full gap-2">
-          <Link to={`/admin/management-grading/${slugify(record.description, { lower: true, replacement: '_' })}`}>
+          <Link to={`/admin/management-grading/${slugify(record.description, { lower: true, replacement: '_' })}/student-code/${record.studentCode}/assessment/${record.assessment_id}/rubric/${record.rubric_id}`}>
             <Tooltip title="Chấm điểm">
               <Button
                 isIconOnly
@@ -148,28 +133,30 @@ const ManagementAssessment = (nav) => {
 
   const getAllAssessmentIsDeleteFalse = async () => {
     try {
-      const response = await axiosAdmin.get(`/assessments/teacher/${teacher_id}`);
+      const response = await axiosAdmin.get(`/assessments/${description}/teacher/${teacher_id}`);
+      console.log(response.data);
       const updatedPoData = response.data.map((subject) => {
-        const status = {
-          assessmentCount: subject.assessmentCount,
-          zeroScoreCount: subject.zeroScoreCount 
+        const student = {
+          studentCode: subject.Student.studentCode,
+          name: subject.Student.name
         }
         const action = {
-          _id: subject.assessment_id,
-          description: subject.description
+          assessment_id: subject.assessment_id,
+          rubric_id: subject.rubric_id,
+          description: subject.description,
+          studentCode: subject.Student.studentCode
         }
         return {
           key: subject.assessment_id,
           description: subject.description,
-          assessmentCount: subject.assessmentCount,
-          studentCount: subject.studentCount,
-          nameCourse: subject.course,
-          status: status,
+          totalScore: subject.totalScore,
+          student: student,
+          class: subject.Student.class,
           action: action
         };
       });
       setSubjects(updatedPoData);
-      console.log(updatedPoData);
+      
     } catch (error) {
       console.error("Error: " + error.message);
     }
@@ -283,6 +270,7 @@ const ManagementAssessment = (nav) => {
               type: "checkbox",
               ...rowSelection,
             }}
+            pagination={{ pageSize: 30 }}
             columns={columns}
             dataSource={subjects}
           />
@@ -292,7 +280,7 @@ const ManagementAssessment = (nav) => {
   );
 }
 
-export default ManagementAssessment;
+export default ManagementAssessmentGrading;
 
 function ConfirmAction(props) {
   const { isOpen, onOpenChange, onConfirm } = props;

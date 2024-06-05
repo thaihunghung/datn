@@ -56,6 +56,9 @@ import StoreRubicItems from '../components/pages/Admin/Management/ManagementRubr
 import DetailCourse from '../components/pages/Admin/Management/ManagementCourse/DetailCourse/DetailCourse';
 import CreateAssessment from '../components/pages/Admin/Management/ManagementAssessment/CreateAssessment';
 import Login from '../components/pages/Admin/Login/Login';
+import UpdateRubricById from '../components/pages/Admin/Management/ManagementRubric/UpdateRubricById';
+import ManagementAssessmentGrading from '../components/pages/Admin/Management/ManagementAssessment/ManagementAssessmentGrading';
+import FormGrading from '../components/pages/Admin/Management/ManagementAssessment/FormGrading';
 
 
 function Admin(props) {
@@ -136,13 +139,16 @@ function Admin(props) {
           <Route path="/management-subject/:id/chapter/update/:chapter_id" element={<UpdateChapter collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
           <Route path="/management-grading/list" element={<ManagementAssessment collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/management-grading/:description" element={<ManagementAssessmentGrading collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/management-grading/:description/student-code/:studentCode/assessment/:assessment_id/rubric/:rubric_id" element={<FormGrading collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          
           <Route path="/management-grading/create" element={<CreateAssessment collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-grading" element={<ManagementAssessment collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
           {/* <Route path="/management-point" element={<FormPoint collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} /> */}
           <Route path="/management-rubric/list" element={<ManagementRubric collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-rubric/create" element={<CreateRubic collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
-          {/* <Route path="/management-rubric/update/:id" element={<UpdateRubic collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} /> */}
+          <Route path="/management-rubric/update/:id" element={<UpdateRubricById collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/management-rubric/store" element={<StoreRubric collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
 

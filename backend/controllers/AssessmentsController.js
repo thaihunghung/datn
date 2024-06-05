@@ -1,6 +1,8 @@
 const { Op, Sequelize } = require('sequelize');
 const AssessmentModel = require('../models/AssessmentModel');
 const CourseModel = require('../models/CourseModel');
+const StudentModel = require('../models/StudentModel');
+const ClassModel = require('../models/ClassModel');
 
 const ExcelJS = require('exceljs');
 const fs = require('fs');
@@ -23,6 +25,7 @@ const AssessmentsController = {
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
+
   GetByUser: async (req, res) => {
     try {
       const teacherId = parseInt(req.params.teacher_id);
@@ -34,37 +37,92 @@ const AssessmentsController = {
         },
         attributes: [
           'course_id',
+          'description',
           [Sequelize.fn('COUNT', Sequelize.col('assessment_id')), 'assessmentCount'],
           [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('student_id'))), 'studentCount'],
           [Sequelize.fn('SUM', Sequelize.literal('CASE WHEN totalScore = 0 THEN 1 ELSE 0 END')), 'zeroScoreCount']
         ],
-        group: ['course_id'],
-        // include: [
-        //   {
-        //     model: CourseModel,
-        //     attributes: ['course_name']
-        //   }
-        // ]
+        group: ['course_id', 'description'],
+        include: [{
+          model: CourseModel,
+          attributes: ['courseCode', 'courseName']
+        }]
+
       });
-  
+      const groupedAssessments = assessments.reduce((acc, assessment) => {
+        const key = `${assessment.description}`;
+        if (!acc[key]) {
+          acc[key] = [];
+        }
+        acc[key].push(assessment);
+        return acc;
+      }, {});
+      
+      console.log(groupedAssessments);
+   // attributes: [
+        //   'course_id',
+        
+        // ],
+
+        //group: ['course_id']
+        
       if (assessments.length === 0) {
         return res.status(404).json({ message: 'No assessments found for this user' });
       }
   
       const result = assessments.map(assessment => ({
         course_id: assessment.course_id,
-        teacher_id: teacherId,
+        //teacher_id: teacherId,
+        description: assessment.description,
+        course: `${assessment.course.courseCode} - ${assessment.course.courseName}`,
         assessmentCount: assessment.dataValues.assessmentCount,
         studentCount: assessment.dataValues.studentCount,
         zeroScoreCount: assessment.dataValues.zeroScoreCount
       }));
-
+      // console.log(assessments);
       res.status(200).json(result);
     } catch (error) {
       console.error('Error fetching assessments:', error);
       res.status(500).json({ message: 'Server error' });
     }
   },
+  GetByDescriptionByUser: async (req, res) => {
+    try {
+      const {description, teacher_id} = req.params;
+
+      const normalizedDescription = description.replace(/_/g, ' ');
+      console.log(normalizedDescription);
+
+      const assessments = await AssessmentModel.findAll({
+        where: {
+          teacher_id: parseInt(teacher_id),
+          description: normalizedDescription,
+          isDelete: false
+        },
+        include: [{
+          model: CourseModel,
+          attributes: ['courseCode', 'courseName']
+        },{
+          model: StudentModel,
+          attributes: ['studentCode', 'name', 'class_id'],
+          include: [{
+            model: ClassModel,
+            attributes: ['classNameShort']
+          }]
+        }
+      ]
+      });
+
+
+      console.log(assessments);
+
+      res.status(200).json(assessments);
+    } catch (error) {
+      console.error('Error fetching assessments:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
+  
   create: async (req, res) => {
     try {
       const { data } = req.body;
@@ -196,11 +254,10 @@ const AssessmentsController = {
     worksheet.eachRow((row, rowNumber) => {
       if (rowNumber > 1) {
         jsonData.push({
-          user_id: 2,
-          teacher_id: 2,
+          teacher_id: requestData.teacher_id,
           course_id: requestData.course_id,
           rubric_id: requestData.rubric_id,
-          description: requestData.description,
+          description: `${requestData.description} ${requestData.date}`,
           place: requestData.place,
           date: requestData.date,
           student_id: row.getCell(1).value,

@@ -20,7 +20,7 @@ const StudentModel = sequelize.define('Student', {
     type: DataTypes.STRING(9),
     allowNull: false
   },
-  email: {
+  email: { 
     type: DataTypes.STRING(20),
     allowNull: false
   },

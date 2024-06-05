@@ -72,7 +72,7 @@ const MangementRubricItems = (nav) => {
         },
         {
             title: "Điểm",
-            dataIndex: "score",
+            dataIndex: "maxScore",
             render: (record) => (
                 <div className="text-sm">
                     <p className="font-medium">{record}</p>
@@ -147,7 +147,7 @@ const MangementRubricItems = (nav) => {
                     cloName: clo,
                     ploName: plo,
                     chapterName: chapter,
-                    score: item.score,
+                    maxScore: item.maxScore,
                     action: item?.rubricsItem_id || 'Unknown',
                 };
             }) || [];

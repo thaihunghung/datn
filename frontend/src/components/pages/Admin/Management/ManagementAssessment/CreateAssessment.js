@@ -127,6 +127,16 @@ const CreateAssessment = (nav) => {
         }
     }, [course_id]);
 
+    // useEffect(() => {
+    //     if (selectedDate) {
+    //         const timer = setTimeout(() => {
+    //             setDescription(`${description}_${selectedDate}`)
+    //         }, 100); // 1-second delay
+
+    //         return () => clearTimeout(timer);
+    //     }
+    // }, [selectedDate]);
+    
 
     const [fileList, setFileList] = useState([]);
 
@@ -227,10 +237,6 @@ const CreateAssessment = (nav) => {
                                             </div>
                                         </div>
                                         </div>
-
-                                        
-
-
                                     </div>
                                     <DownloadAndUpload endpoint={'/assessment'} method={'POST'}
                                         props={props}
