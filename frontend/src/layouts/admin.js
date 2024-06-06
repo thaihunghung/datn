@@ -55,11 +55,10 @@ import ManagementAssessment from '../components/pages/Admin/Management/Managemen
 import StoreRubicItems from '../components/pages/Admin/Management/ManagementRubric/StoreRubicItems';
 import DetailCourse from '../components/pages/Admin/Management/ManagementCourse/DetailCourse/DetailCourse';
 import CreateAssessment from '../components/pages/Admin/Management/ManagementAssessment/CreateAssessment';
-import Login from '../components/pages/Admin/Login/Login';
+import Cookies from "js-cookie";
 
 
 function Admin(props) {
-
   const [collapsedNav, setCollapsedNav] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [spinning, setSpinning] = useState(false);
@@ -78,16 +77,6 @@ function Admin(props) {
       content: msg,
     });
   };
-
-
-  // const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   const token = localStorage.getItem('token');
-  //   if (!token) {
-  //     navigate('/login');
-  //   }
-  // }, [navigate]);
 
   return (
     <div className="Admin flex flex-col sm:flex-row lg:flex-row xl:flex-row  h-[100vh] bg-[#FEFEFE]">

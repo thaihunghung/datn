@@ -102,7 +102,7 @@ function Nav(props) {
         { text: "Lớp môn học", link: "/admin/course", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
     ];
 
-    useEffect(() => { 
+    useEffect(() => {
         const fetchUser = async () => {
             try {
                 const response = await AxiosClient.get('/user');
@@ -141,8 +141,9 @@ function Nav(props) {
     const handleLogout = async () => {
         setSpinning(true);
         try {
-            Cookies.remove('teacher_id');
+            const response = await AxiosClient.post(`/logout`);
             setSpinning(false);
+            Cookies.remove('teacher_id');
             navigate('/login');
         } catch (err) {
             console.error(err);

@@ -89,6 +89,27 @@ const AuthenticateController = {
       console.error(`Lỗi lấy thông tin người dùng: ${error.message}`);
       res.status(500).json({ message: 'Lỗi server', error });
     }
+  },
+  logout: async (req, res) => {
+    try {
+      const refreshToken = req.cookies.refreshToken;
+      if (refreshToken) {
+        // Thu hồi refresh token trong cơ sở dữ liệu
+        await RefreshTokenModel.update(
+          { revoked: true },
+          { where: { token: refreshToken } }
+        );
+      }
+
+      // Xóa cookies
+      res.clearCookie('accessToken');
+      res.clearCookie('refreshToken');
+
+      res.json({ message: 'Đăng xuất thành công' });
+    } catch (error) {
+      console.error(`Lỗi đăng xuất: ${error.message}`);
+      res.status(500).json({ message: 'Lỗi server', error });
+    }
   }
 };
 
