@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import {
     AppstoreOutlined,
     MailOutlined,
     SettingOutlined,
 } from "@ant-design/icons";
-
 import './App.css';
 import Client from "./layouts/Client";
 import Admin from "./layouts/admin";
 import Login from "./components/pages/Admin/Login/Login";
+import { getCookie } from './utils/cookieUtils';
 
 function App() {
     const location = useLocation();
     const [showScrollButton, setShowScrollButton] = useState(false);
-    const [user, setUser] = useState();
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -34,6 +34,11 @@ function App() {
         };
     }, []);
 
+    useEffect(() => {
+        const token = getCookie('teacher_id');
+        setIsAuthenticated(!!token);
+    }, []);
+
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
@@ -43,8 +48,7 @@ function App() {
             <Routes>
                 <Route path="/*" element={<Client />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/admin/*" element={<Admin user={user} />} />
-                {/* <Route path="/login" element={<Login setUser={setUser} />} /> */}
+                <Route path="/admin/*" element={isAuthenticated ? <Admin /> : <Navigate to="/login" />} />
             </Routes>
             {showScrollButton && (
                 <div className="scroll-to-top-button" onClick={scrollToTop}>

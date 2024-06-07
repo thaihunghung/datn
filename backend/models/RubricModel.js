@@ -19,7 +19,7 @@ const RubricModel = sequelize.define('Rubric', {
   },
   teacher_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
     references: {
       model: TeacherModel,
       key: 'teacher_id'

@@ -62,7 +62,6 @@ import FormGrading from '../components/pages/Admin/Management/ManagementAssessme
 
 
 function Admin(props) {
-
   const [collapsedNav, setCollapsedNav] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [spinning, setSpinning] = useState(false);
@@ -81,16 +80,6 @@ function Admin(props) {
       content: msg,
     });
   };
-
-
-  // const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   const token = localStorage.getItem('token');
-  //   if (!token) {
-  //     navigate('/login');
-  //   }
-  // }, [navigate]);
 
   return (
     <div className="Admin flex flex-col sm:flex-row lg:flex-row xl:flex-row  h-[100vh] bg-[#FEFEFE]">

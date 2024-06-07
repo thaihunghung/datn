@@ -14,7 +14,7 @@ const StudentController = {
     } catch (error) {
       console.error('Lỗi khi lấy tất cả sinh viên:', error);
       res.status(500).json({ message: 'Lỗi server' });
-    }
+    } 
   },
   getAllByClassId: async (req, res) => {
     try {

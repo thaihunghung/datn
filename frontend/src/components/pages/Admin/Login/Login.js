@@ -19,11 +19,6 @@ const Login = () => {
       if (response.data) {
         message.success('Đăng nhập thành công!');
         console.log(response.data.user)
-        // Cookies.set('teacher_id', response.data.user.teacher_id, {
-        //   expires: 1, // Cookie expires in 1 day
-        //   secure: true, // Cookie is only sent over HTTPS
-        //   sameSite: 'Strict' // Prevents CSRF
-        // });
         navigate('/admin');
       } else {
         message.error('Sai tên đăng nhập hoặc mật khẩu!');

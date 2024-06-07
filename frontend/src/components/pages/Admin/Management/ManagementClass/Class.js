@@ -47,7 +47,7 @@ const Class = (props) => {
     };
   }
 
-  const hangleChangeidDelete = async (id) => {
+  const handleChangeIdDelete = async (id) => {
     try {
       const response = await axiosAdmin.put(`/class/isDelete/${id}`);
       if (response) {
@@ -245,7 +245,7 @@ const Class = (props) => {
           isOpen={isOpen}
           onConfirm={() => {
             if (deleteId) {
-              hangleChangeidDelete(deleteId);
+              handleChangeIdDelete(deleteId);
               setDeleteId(null);
             }
           }}

@@ -11,5 +11,6 @@ router.post('/login', AuthenticateController.login);
 router.post('/token', TokenController.refreshToken); // Thêm route để làm mới token
 router.post('/revoke-token', TokenController.revokeToken); // Thêm route để thu hồi token
 router.get('/user', ensureAuthenticated, AuthenticateController.getUser);
+router.post('/logout', ensureAuthenticated, AuthenticateController.logout);
 
 module.exports = router;

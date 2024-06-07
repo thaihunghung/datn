@@ -14,7 +14,8 @@ const CloController = require('../controllers/CloController');
 const ChapterController = require('../controllers/ChapterController');
 const SubjectController = require('../controllers/SubjectController');
 const AssessmentsController = require('../controllers/AssessmentsController');
-
+const CourseEnrollmentController = require('../controllers/CourseEnrollmentController');
+ 
 const uploadDirectory = path.join(__dirname, '../uploads');
 
 const storage = multer.diskStorage({
@@ -36,6 +37,7 @@ router.post('/clo', upload.any(), CloController.processSaveTemplateClo);
 router.post('/chapter', upload.any(), ChapterController.processSaveTemplateChapter);
 router.post('/subject', ensureAuthenticated, upload.any(), SubjectController.processSaveTemplateSubject);
 router.post('/assessment', upload.any(), AssessmentsController.processSaveTemplateAssessment);
+router.post('/course-enrollment/:id', upload.any(), CourseEnrollmentController.saveExcel);
 
 router.put('/student/update', upload.any(), StudentController.updateStudentsFromExcel);
 router.put('/po/update', upload.any(), PoController.processUpdateTemplatePo);
