@@ -15,14 +15,18 @@ const Login = () => {
     setLoading(true);
     console.log("values", values);
     try {
-      const response = await AxiosClient.post('/login', values);
-      if (response.data) {
+      const login = await AxiosClient.post('/login', values);
+      if (login.data) {
         message.success('Đăng nhập thành công!');
-        console.log(response.data.user)
+      } 
+      const response = await AxiosClient.get('/user');
+      console.log("response", response.data);
+      if (response.data) {
+        console.log(response.data.teacher_id)
+        Cookies.set('teacher_id', response.data.teacher_id , { expires: 2 });
         navigate('/admin');
-      } else {
-        message.error('Sai tên đăng nhập hoặc mật khẩu!');
-      }
+      } 
+     
     } catch (error) {
       console.error('Đăng nhập thất bại:', error);
       message.error('Đăng nhập thất bại, vui lòng thử lại!');
