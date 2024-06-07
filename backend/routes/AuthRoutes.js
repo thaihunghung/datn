@@ -8,8 +8,8 @@ const passport = require('passport');
 
 router.post('/register', AuthenticateController.register);
 router.post('/login', AuthenticateController.login);
-router.post('/token', TokenController.refreshToken); // Thêm route để làm mới token
-router.post('/revoke-token', TokenController.revokeToken); // Thêm route để thu hồi token
+router.post('/refresh-token', TokenController.refreshToken); 
+router.post('/revoke-token', TokenController.revokeToken); 
 router.get('/user', ensureAuthenticated, AuthenticateController.getUser);
 router.post('/logout', ensureAuthenticated, AuthenticateController.logout);
 

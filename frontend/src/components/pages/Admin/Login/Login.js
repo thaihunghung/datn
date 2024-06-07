@@ -7,18 +7,18 @@ import Cookies from 'js-cookie';
 
 const { Title } = Typography;
 
-const Login = () => {
+const Login = ({ onLoginSuccess }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
   const onFinish = async (values) => {
     setLoading(true);
-    console.log("values", values);
     try {
       const response = await AxiosClient.post('/login', values);
       if (response.data) {
         message.success('Đăng nhập thành công!');
-        console.log(response.data.user)
+        Cookies.set('authenticated', 'true', { expires: 1 }); // Expires in 1 day
+        onLoginSuccess();
         navigate('/admin');
       } else {
         message.error('Sai tên đăng nhập hoặc mật khẩu!');

@@ -6,6 +6,8 @@ const TokenController = {
   refreshToken: async (req, res) => {
     const { refreshToken } = req.cookies;
 
+    console.log("refresh token ");
+
     if (!refreshToken) {
       return res.status(400).json({ message: 'Refresh token là bắt buộc' });
     }
@@ -34,10 +36,10 @@ const TokenController = {
       await storedToken.save();
 
       // Lưu refresh token mới vào database
-      await RefreshTokenModel.create({ token: newRefreshToken, userId: user.teacher_id });
+      await RefreshTokenModel.create({ token: newRefreshToken, teacher_id: user.teacher_id });
 
       // Đặt token mới trong HTTP-only cookies
-      res.cookie('accessToken', newAccessToken, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 15 * 60 * 1000 });
+      res.cookie('accessToken', newAccessToken, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge: 15 * 60 * 1000 });
       res.cookie('refreshToken', newRefreshToken, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
 
       res.json({
