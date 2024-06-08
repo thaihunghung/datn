@@ -9,6 +9,7 @@ import Cookies from 'js-cookie';
 
 import './Header.css'
 import { AxiosClient } from "../../../../../service/AxiosClient";
+import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 function Nav(props) {
     const { collapsedNav, setCollapsedNav, setSpinning } = props;
     const navigate = useNavigate();
@@ -103,24 +104,24 @@ function Nav(props) {
     ];
 
     useEffect(() => {
-        // const fetchUser = async () => {
-        //     try {
-        //         const response = await AxiosClient.get('/user');
-        //         const user = response.data;
-        //         Cookies.set('teacher_id', user.teacher_id, {
-        //             expires: 1, // Cookie expires in 1 day
-        //             secure: true, // Cookie is only sent over HTTPS
-        //             sameSite: 'Strict' // Prevents CSRF
-        //         });
-        //         console.log(user);
-        //         setCurrentUser(user);
-        //     } catch (error) {
-        //         console.error('Error fetching user data:', error);
-        //         navigate('/login');
-        //     }
-        // };
+        const fetchUser = async () => {
+            try {
+                const response = await axiosAdmin.get(`${process.env.REACT_APP_API_DOMAIN_CLIENT}/user`);
+                const user = response.data;
+                Cookies.set('teacher_id', user.teacher_id, {
+                    expires: 1, // Cookie expires in 1 day
+                    secure: true, // Cookie is only sent over HTTPS
+                    sameSite: 'Strict' // Prevents CSRF
+                });
+                console.log(user);
+                setCurrentUser(user);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                navigate('/login');
+            }
+        };
 
-        // fetchUser();
+        fetchUser();
     }, []);
 
     useEffect(() => {

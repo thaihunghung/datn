@@ -91,7 +91,7 @@ const Course = (props) => {
 
     const fetchSubjects = async () => {
       try {
-        const response = await axiosAdmin.get("/subject");
+        const response = await axiosAdmin.get("/subjects");
         setSubjects(response.data);
         setFilteredSubjects(response.data);
       } catch (err) {

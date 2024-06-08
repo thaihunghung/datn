@@ -14,14 +14,14 @@ axiosAdmin.interceptors.response.use(
 
             try {
                 // Gọi endpoint /refresh-token để lấy token mới
-                const response = await axios.post(`${process.env.REACT_APP_API_DOMAIN_CLIENT}/refresh-token`);
+                const response = await axios.post(`${process.env.REACT_APP_API_DOMAIN_CLIENT}/refresh-token`, {}, {
+                    withCredentials: true
+                });
+
                 if (response.status === 200) {
                     // Lấy token mới từ response
                     const newAccessToken = response.data.accessToken;
                     
-                    // // Cập nhật access token mới vào cookie (hoặc header tùy thuộc vào cách bạn triển khai)
-                    // document.cookie = `accessToken=${newAccessToken}; path=/; secure; sameSite=Strict`;
-
                     // Cập nhật header Authorization cho request gốc và thử lại request
                     originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
                     return axiosAdmin(originalRequest);
