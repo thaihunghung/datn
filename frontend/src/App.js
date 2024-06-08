@@ -9,7 +9,7 @@ import Cookies from 'js-cookie';
 function App() {
     const location = useLocation();
     const [showScrollButton, setShowScrollButton] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(Cookies.get('authenticated') === 'true');
+    const [isAuthenticated, setIsAuthenticated] = useState(Boolean(Cookies.get('refreshToken')));
 
     useEffect(() => {
         window.scrollTo(0, 0);

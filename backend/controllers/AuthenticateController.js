@@ -60,7 +60,7 @@ const AuthenticateController = {
 
       // Đặt token trong cookies
       res.cookie('accessToken', accessToken, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge: 5 * 60 * 1000 });
-      res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
+      res.cookie('refreshToken', refreshToken, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
 
       console.log(`Đăng nhập thành công cho người dùng: ${user.name}`);
       res.json({

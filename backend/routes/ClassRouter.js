@@ -1,6 +1,7 @@
 const express = require('express');
 const ClassController = require('../controllers/ClassController');
 const router = express.Router();
+const { ensureAuthenticated } = require('../middlewares/authMiddleware');
 
 /**
  * @openapi
@@ -139,7 +140,7 @@ const router = express.Router();
 router.get('/class', ClassController.index);
 router.post('/class', ClassController.create);
 router.get('/class/:id', ClassController.getByID);
-router.get('/class-teacher', ClassController.getAllWithTeacher);
+router.get('/class-teacher', ensureAuthenticated, ClassController.getAllWithTeacher);
 
 router.put('/class/:id', ClassController.update);
 router.delete('/class/:id', ClassController.delete);
