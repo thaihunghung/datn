@@ -59,6 +59,7 @@ import Login from '../components/pages/Admin/Login/Login';
 import UpdateRubricById from '../components/pages/Admin/Management/ManagementRubric/UpdateRubricById';
 import ManagementAssessmentGrading from '../components/pages/Admin/Management/ManagementAssessment/ManagementAssessmentGrading';
 import FormGrading from '../components/pages/Admin/Management/ManagementAssessment/FormGrading';
+import Teacher from '../components/pages/Admin/Management/ManagementTeacher/Teacher';
 
 
 function Admin(props) {
@@ -162,6 +163,8 @@ function Admin(props) {
           <Route path="/course" element={<Course collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           <Route path="/course/:id" element={<DetailCourse collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
+          <Route path="/teacher" element={<Teacher collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          
         </Routes> 
       </div>
     </div>

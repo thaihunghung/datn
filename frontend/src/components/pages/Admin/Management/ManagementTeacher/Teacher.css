@@ -1,0 +1,61 @@
+.ant-table-thead > tr > th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+  text-align: left;
+}
+
+.ant-table-tbody > tr > td {
+  text-align: left;
+}
+
+.ant-btn-primary {
+  background-color: #6699ff;
+  border-color: #6699ff;
+  border-radius: 5px;
+}
+
+.ant-btn-primary:hover {
+  background-color: #5588ee;
+  border-color: #5588ee;
+}
+
+.ant-tag-purple {
+  background-color: #d8b9f4;
+  color: #573a6b;
+  border: none;
+}
+
+.ant-tag-blue {
+  background-color: #a7c7f4;
+  color: #1c3b6b;
+  border: none;
+}
+
+.ant-tag-red {
+  background-color: #f4b9b9;
+  color: #6b1c1c;
+  border: none;
+}
+
+.ant-tag-green {
+  background-color: #b9f4b9;
+  color: #1c6b1c;
+  border: none;
+}
+
+.ant-btn-default {
+  border-radius: 5px;
+}
+
+.ant-btn-default:hover {
+  background-color: #f0f0f0;
+}
+
+.title {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+}
