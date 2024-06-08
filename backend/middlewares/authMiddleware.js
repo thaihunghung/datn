@@ -15,13 +15,13 @@ module.exports = {
       if (!user) {
         return res.status(401).json({ message: 'Invalid access token' });
       }
-
+      console.log(user)
       // Kiểm tra refresh token chưa bị thu hồi và hết hạn
-      const refreshToken = req.cookies.refreshToken;
-      const storedToken = await RefreshTokenModel.findOne({ where: { token: refreshToken, teacher_id: user.teacher_id } });
-      if (!storedToken || storedToken.revoked || storedToken.expired) {
-        return res.status(401).json({ message: 'Invalid refresh token' });
-      }
+      // const refreshToken = req.cookies.refreshToken;
+      // const storedToken = await RefreshTokenModel.findOne({ where: { token: refreshToken, teacher_id: user.teacher_id } });
+      // if (!storedToken || storedToken.revoked || storedToken.expired) {
+      //   return res.status(401).json({ message: 'Invalid refresh token' });
+      // }
 
       req.user = user;
       next();

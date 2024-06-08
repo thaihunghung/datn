@@ -27,7 +27,7 @@ const AssessmentModel = sequelize.define('Assessment', {
       key: 'student_id'
     }
   },
-  rubric_id: {
+  rubric_id: { 
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {

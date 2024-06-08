@@ -6,6 +6,8 @@ import { Button,Select, message } from 'antd';
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import Tabs from "../../Utils/Tabs/Tabs";
 import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
+import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 const CreateRubic = (nav) => {
     const { setCollapsedNav } = nav;
@@ -15,12 +17,17 @@ const CreateRubic = (nav) => {
     const [Comment, setComment] = useState("");
     const [subject_id, setSubject_id] = useState();
     const [DataSubject, setDataSubject] = useState([]);
-
+    const navigate = useNavigate();
+    const teacher_id = Cookies.get('teacher_id');
+    if (!teacher_id) {
+      navigate('/login');
+    }
 
     const handleSave = async () => {
         try {
             const data = {
                 subject_id: subject_id,
+                teacher_id: teacher_id,
                 rubricName: rubricName,
                 comment: Comment,
             }
@@ -38,7 +45,7 @@ const CreateRubic = (nav) => {
     }
     const getAllSubject = async () => {
         try {
-            const response = await axiosAdmin.get(`/subjects/isDelete/false`);
+            const response = await axiosAdmin.get(`/subjects/teacher/${teacher_id}`);
             if (response.data) {
                 setDataSubject(response.data);
             }
@@ -87,12 +94,12 @@ const CreateRubic = (nav) => {
                                                     key={subject.subject_id}
                                                     value={subject.subject_id}
                                                 >
-                                                    {subject.subjectName}
+                                                    {subject.subjectCode}{' - '}{subject.subjectName}
                                                 </Select.Option>
                                             ))}
                                         </Select>
                                         <Input
-                                            label="Name Clo"
+                                            label="Name Rubric"
                                             placeholder="Enter your name Rubric"
                                             value={rubricName}
                                             onValueChange={setRubricName}

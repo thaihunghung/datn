@@ -5,6 +5,7 @@ import { axiosAdmin } from '../../../../service/AxiosAdmin';
 const CustomUpload = ({ endpoint, setCurrent, fileList, setFileList, method, LoadData, Data, teacher }) => {
   const [uploading, setUploading] = useState(false);
   const handleUpload = () => {
+    console.log(Data)
     const formData = new FormData();
     fileList.forEach((file) => {
       formData.append('files[]', file);

@@ -1,67 +1,128 @@
 import React, { useEffect, useState } from "react";
-import { Tooltip, Button } from "@nextui-org/react";
+
+import { Table, Tooltip, Button, message } from 'antd';
+
 import { Collapse } from 'antd';
 import { Slider } from "@nextui-org/react";
 
-import "./FormPoint.css"
-import { axiosAdmin } from "../../../../service/AxiosAdmin";
+import "./FormGrading.css"
+import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import { useNavigate, useParams } from "react-router-dom";
+import Cookies from "js-cookie";
 
-const demoTong = 1
+const FormGrading = (nav) => {
 
-const FormPoint = (nav) => {
-  const { setCollapsedNav } = nav;
-  const [selectedValues, setSelectedValues] = useState([]);
+    const { setCollapsedNav } = nav;
+    
+    const [selectedValues, setSelectedValues] = useState([]); // Initialize as array
+    const [RubicData, setRubicData] = useState([]);
+    const [RubicItemsData, setRubicItemsData] = useState([]);
+    const [totalScore, setTotalScore] = useState(0);
+    const [Check, setCheck] = useState(0);
+    const [defaultValue, setdefaultValue] = useState(0);
 
-  const [RubicData, setRubicData] = useState([]);
 
-  const [RubicItemsData, setRubicItemsData] = useState([]);
-  const [StotalScore, setStotalScore] = useState();
+    
+    const { assessment_id, rubric_id } = useParams();
+    const navigate = useNavigate();
+    const teacher_id = Cookies.get('teacher_id');
+    
+    if (!teacher_id) {
+      navigate('/login');
+    }
+  
+    const handleSliderChange = (index, value, rubricsItem_id) => {
+      setSelectedValues(prevValues => {
+        if (!Array.isArray(prevValues)) {
+          prevValues = [];
+        }
+  
+        const updatedValues = [...prevValues];
+        updatedValues[index] = {
+          assessment_id: assessment_id,
+          rubricsItem_id: rubricsItem_id,
+          maxScore: value,
+          CheckGrading: true,
+        };
+  
+        const newTotalScore = updatedValues.reduce((acc, curr) => {
+          if (curr && typeof curr.maxScore === 'number') {
+            return acc + curr.maxScore;
+          }
+          return acc;
+        }, 0);
+
+        const Check = updatedValues.reduce((acc, curr) => {
+          // Check if curr is an object and CheckGrading is true
+          if (curr && curr.CheckGrading === true) {
+            return acc + 1; // Increment the count by 1
+          }
+          return acc; // Otherwise, return the accumulated count
+        }, 0);
+        setCheck(Check)
+        setTotalScore(newTotalScore);
+        return updatedValues;
+      });
+    };
+  
+    const handleSave = async () => {
+
+      console.log('Updated values', selectedValues);
+      console.log('totalScore', totalScore);
+      try {
+        const data = { totalScore: totalScore }
+        const dataAssessmentItem = selectedValues
+        await axiosAdmin.put(`/assessment/${assessment_id}/updateStotalScore`,{data: data})
+
+        const response =  await axiosAdmin.post(`/assessment-item`, {data: dataAssessmentItem})
+        if(response.status === 201) {
+          message.success('Data saved successfully');
+        }
+      } catch (e) {
+        console.error(e);
+        message.error('Error saving data');
+      }
+    };
 
 
-  const handleSliderChange = (index, value, rubricsItem_id) => {
-
-    setSelectedValues(prevValues => {
-      const updatedValues = [...prevValues];
-
-      updatedValues[index] = {
-        rubricsItem_id: rubricsItem_id,
-        maxScore: value,
+  const setValue = (data) => {
+    const updatedPoData = data.map((subject) => {
+      return {
+        assessment_id: assessment_id,
+        rubricsItem_id: subject.rubricsItem_id,
+        maxScore: 0.0,
+        CheckGrading: false,
       };
-      // Return the updated values
-      return updatedValues
     });
-  };
 
-  const handleSave = () => {
-    console.log('Updated values', selectedValues)
-    const totalMaxScore = selectedValues.reduce((acc, item) => acc + item.maxScore, 0);
-    console.log('Updated totalMaxScore', totalMaxScore)
-  }
+
+    setSelectedValues(updatedPoData);
+
+   }
   const GetRubricData = async () => {
     try {
-      const response = await axiosAdmin.get(`/rubric/${1}/items/isDelete/false`);
+      
+      const response = await axiosAdmin.get(`/rubric/${rubric_id}/items/isDelete/false`);
       console.log(response.data);
       setRubicData(response.data.rubric)
       setRubicItemsData(response.data.rubric.rubricItems)
       const data = response.data.rubric.rubricItems
+      setValue(data)
 
-      const updatedPoData = data.map((subject) => {
-        return {
-          rubricsItem_id: subject.rubricsItem_id,
-          maxScore: 0.0,
-        };
-      });
-
-      setSelectedValues(updatedPoData);
     } catch (error) {
       console.error('Error fetching rubric data:', error);
       throw error;
     }
   };
+  
 
+ 
   useEffect(() => {
+    if (setCheck === 0) {
+      setTotalScore(0);
+      setdefaultValue(0);
+    }
     GetRubricData()
-
     const handleResize = () => {
       if (window.innerWidth < 1200) {
         setCollapsedNav(true);
@@ -76,15 +137,25 @@ const FormPoint = (nav) => {
     };
   }, []);
   return (
-    <div className="w-full p-2 py-0 flex flex-col leading-6 mt-10">
+    <div className="w-full p-2 pb-[100px] py-0 flex flex-col leading-6 mt-10">
 
-      <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 shadow-lg rounded-md border-1 border-slate-300">
+      <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-fit p-4 py-3 shadow-lg rounded-md border-1 border-slate-300">
         <p className="text-sm font-medium">
-          <i className="fa-solid fa-circle-check mr-3 text-emerald-500 "></i>{" "}
-          <span className="mr-2">Tổng điểm: {' ' + StotalScore} </span>
-          <span>Tiêu chí: {selectedValues.length + '/' + RubicItemsData.length}</span>
+          <div className="flex justify-center items-center">
+              <div> <i className="fa-solid fa-circle-check mr-3 text-emerald-500 "></i>
+</div>
+              <div className="flex justify-center items-center gap-1 flex-col sm:flex-row lg:flex-row xl:flex-row">
+              <span className="mr-2">Tổng điểm: {' ' + totalScore} </span>
+
+Tiêu chí: {Check}/{RubicItemsData.length}
+
+
+              </div>
+          </div>
+
+          
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-5">
           <Tooltip
             title="Lưu"
             getPopupContainer={() =>
@@ -99,54 +170,28 @@ const FormPoint = (nav) => {
                 handleSave();
               }}
             >
-              <i className="fa-solid fa-xmark text-[18px]"></i>
-            </Button>
-          </Tooltip>
-          <Tooltip
-            title={`hi hi`}
-            getPopupContainer={() =>
-              document.querySelector(".Quick__Option")
-            }
-          >
-            <Button isIconOnly variant="light" radius="full">
-              <i className="fa-solid fa-trash-can"></i>
-            </Button>
-          </Tooltip>
-          <Tooltip
-            title="Bỏ chọn"
-            getPopupContainer={() =>
-              document.querySelector(".Quick__Option")
-            }
-          >
-            <Button
-              isIconOnly
-              variant="light"
-              radius="full"
-              onClick={() => {
-                // handleSubmit();
-              }}
-            >
-              <i className="fa-solid fa-xmark text-[18px]"></i>
+              <i className="fa-solid fa-floppy-disk text-[18px] "></i>
             </Button>
           </Tooltip>
         </div>
       </div>
       <div className="w-full flex flex-col p-2 py-0 mb-2  sm:p-5 sm:mb-2 sm:py-0 sm:flex-col lg:flex-row lg:mb-0 xl:flex-row xl:mb-0">
         <div className="w-full text-justify lg:w-[55%] xl:w-[60%]   flex flex-col sm:flex-col lg:flex-row xl:flex-row">
-          <div className="w-full hidden p-2 bg-[#FF8077] sm:hidden lg:w-[10%] lg:block xl:w-[10%] xl:block  sm:px-0">
-            <p className=" text-[#020401] text-center">PLO</p>
+          <div className="w-full hidden p-2 bg-[#475569] sm:hidden lg:w-[100px] lg:block xl:w-[100px] xl:block">
+            <p className=" text-[#fefefe] text-center font-bold">PLO</p>
           </div>
-          <div className="w-full hidden p-2 bg-[#FF8077] sm:hidden lg:w-[10%] lg:block xl:w-[10%] xl:block  sm:px-0">
-            <p className=" text-[#020401] text-center">CĐR</p>
+          <div className="w-full hidden p-2 bg-[#475569] sm:hidden lg:w-[100px] lg:block xl:w-[100px] xl:block">
+            <p className=" text-[#fefefe] text-center font-bold">CĐR</p>
           </div>
-          <div className="w-full p-0 sm:p-0 lg:p-2 xl:p-2 bg-[#FF8077]  ">
-            <p className="text-center font-bold hidden sm:hidden lg:block xl:block text-[#020401] p-5 sm:p-5 lg:p-0 xl:p-0">Tiêu chí</p>
-            <p className="text-center font-bold block sm:block lg:hidden xl:hidden text-[#020401] p-5 sm:p-5 lg:p-0 xl:p-0">Chấm điểm</p>
+          <div className="w-full p-0 sm:p-0 lg:p-2 xl:p-2 bg-[#475569]">
+            <p className="text-center font-bold hidden sm:hidden lg:block xl:block text-[#fefefe] p-5 sm:p-5 lg:p-0 xl:p-0">Tiêu chí</p>
+            <p className="text-center font-bold block sm:block lg:hidden xl:hidden text-[#fefefe] p-5 sm:p-5 lg:p-0 xl:p-0">Chấm điểm</p>
           </div>
         </div>
 
-        <div className="hidden w-full bg-[#FF8077] sm:hidden lg:w-[45%]   lg:block xl:block xl:w-[40%] text-justify p-5 pb-0 pt-2">
-          <p className="text-center font-bold  text-[#020401]">Điểm đạt</p>
+
+        <div className="hidden w-full bg-[#475569] sm:hidden lg:w-[45%]   lg:block xl:block xl:w-[40%] text-justify p-5 pb-0 pt-2">
+          <p className="text-center font-bold  text-[#fefefe]">Điểm đạt</p>
         </div>
       </div>
 
@@ -155,11 +200,7 @@ const FormPoint = (nav) => {
           <div className="w-full flex flex-col p-2 py-0 sm:p-5 sm:py-0 sm:flex-col lg:flex-row xl:flex-row" key={item.rubricsItem_id}>
             {/* Left Side */}
             <div className="w-full rounded-b-lg sm:rounded-b-lg lg:rounded-none xl:rounded-none text-justify lg:w-[55%] xl:w-[60%] border-[1px] sm:border-t-[1px] lg:border-t-0 xl:border-t-0 border-[#ff8077] flex flex-col sm:flex-col lg:flex-row xl:flex-row">
-
-
-
-
-              <div className="w-full hidden sm:hidden lg:block xl:block p-2 lg:w-[10%] xl:w-[10%] border-b-1 sm:border-b-1 border-r-0 sm:border-r-0 sm:px-0 lg:border-r-[1px] lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-[#ff8077]">
+              <div className="w-full hidden sm:hidden lg:block xl:block p-2 lg:w-[100px] xl:w-[100px] border-b-1 sm:border-b-1 border-r-0 sm:border-r-0 sm:px-0 lg:border-r-[1px] lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-[#ff8077]">
 
                 <div className="flex justify-center items-center h-full w-full p-2">
                   <div className="text-center font-bold sm:font-bold lg:font-normal xl:font-normal text-[#008000] sm:text-[#008000] lg:text-black xl:text-black">
@@ -168,11 +209,10 @@ const FormPoint = (nav) => {
                 </div>
 
               </div>
-              <div className="w-full p-2 lg:w-[10%] xl:w-[10%] border-b-1 
+              <div className="w-full p-2 lg:w-[100px] xl:w-[100px] border-b-1 
               sm:border-b-1 border-r-0 sm:border-r-0 sm:px-0 lg:border-r-[1px] 
               lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-[#ff8077]
               flex justify-center items-center
-              
               ">
 
 
@@ -215,13 +255,13 @@ const FormPoint = (nav) => {
                 {item.maxScore === 1 && (
                   <Slider
                     size="lg"
-                    label={<span>Điểm số: {item.maxScore} </span>}
+                    label={<span>Điểm tối đa: {item.maxScore} </span>}
                     showTooltip={true}
                     step={0.25}
                     // formatOptions={{style: "percent"}}
                     maxValue={item.maxScore}
                     minValue={0}
-                    defaultValue={0}
+                    defaultValue={defaultValue}
                     className="max-w-md"
                     marks={[
                       {
@@ -253,13 +293,13 @@ const FormPoint = (nav) => {
                 {item.maxScore === 0.5 && (
                   <Slider
                     size="lg"
-                    label={<span>Điểm số: {item.maxScore} </span>}
+                    label={<span>Điểm tối đa: {item.maxScore} </span>}
                     showTooltip={true}
                     step={0.25}
                     // formatOptions={{style: "percent"}}
                     maxValue={item.maxScore}
                     minValue={0}
-                    defaultValue={0}
+                    defaultValue={defaultValue}
                     className="max-w-md"
                     marks={[
                       {
@@ -283,13 +323,13 @@ const FormPoint = (nav) => {
                 {item.maxScore === 0.25 && (
                   <Slider
                     size="lg"
-                    label={<span>Điểm số: {item.maxScore} </span>}
+                    label={<span>Điểm tối đa: {item.maxScore} </span>}
                     showTooltip={true}
                     step={0.25}
                     // formatOptions={{style: "percent"}}
                     maxValue={item.maxScore}
                     minValue={0}
-                    defaultValue={0}
+                    defaultValue={defaultValue}
                     className="max-w-md"
                     marks={[
                       {
@@ -305,9 +345,6 @@ const FormPoint = (nav) => {
 
                   />
                 )}
-
-
-
               </div>
             </div>
           </div>
@@ -317,4 +354,4 @@ const FormPoint = (nav) => {
     </div>
   )
 }
-export default FormPoint
+export default FormGrading
