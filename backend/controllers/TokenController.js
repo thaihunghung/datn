@@ -24,7 +24,7 @@ const TokenController = {
         return res.status(400).json({ message: 'Người dùng không hợp lệ' });
       }
 
-      const payload = { id: user.teacher_id };
+      const payload = { id: user.teacher_id,permission: user.permission  };
       const newAccessToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '5m' });
       const newRefreshToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '7d' });
 

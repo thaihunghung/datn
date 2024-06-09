@@ -1,6 +1,7 @@
 const express = require('express');
 const TeacherController = require('../controllers/TeacherController');
 const router = express.Router();
+const checkPermission = require('../middlewares/permissionMiddleware');
 
 /**
  * @openapi
@@ -137,15 +138,16 @@ const router = express.Router();
  *         description: Lỗi server
  */
 
-router.get('/teacher', TeacherController.index);
+router.get('/teacher',  checkPermission(2), TeacherController.index);
 router.get('/teacher/getByUser/:user_id', TeacherController.getByUser);
 
 
-router.post('/teacher', TeacherController.create);
-router.get('/teacher/:id', TeacherController.getByID);
+router.post('/teacher',checkPermission(3), TeacherController.create);
+router.get('/teacher/:id',checkPermission(3), TeacherController.getByID);
 router.put('/teacher/:id', TeacherController.update);
-router.delete('/teacher/:id', TeacherController.delete);
-router.get('/teacher/isDelete/true', TeacherController.isDeleteTotrue);
-router.get('/teacher/isDelete/false', TeacherController.isDeleteTofalse);
-router.put('/teacher/isDelete/:id', TeacherController.isDelete);
+
+router.patch('/teachers/:id/block', checkPermission(3), TeacherController.blockTeacher);
+router.patch('/teachers/:id/unblock', checkPermission(3), TeacherController.unblockTeacher);
+router.patch('/teachers/:id/delete', checkPermission(3), TeacherController.deleteTeacher);
+router.patch('/teachers/:id/restore', checkPermission(3), TeacherController.restoreTeacher);
 module.exports = router;

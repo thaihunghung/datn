@@ -33,7 +33,6 @@ const AuthenticateController = {
 
   login: async (req, res) => {
     const { teacherCode, password } = req.body;
-    console.log(req.body);
     try {
       const user = await TeacherModel.findOne({ where: { teacherCode } });
       if (!user) {
@@ -45,7 +44,7 @@ const AuthenticateController = {
         return res.status(400).json({ message: 'Teacher code hoặc mật khẩu không đúng' });
       }
 
-      const payload = { id: user.teacher_id };
+      const payload = { id: user.teacher_id,permission: user.permission  };
       const accessToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '5m' });
       const refreshToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '7d' });
 

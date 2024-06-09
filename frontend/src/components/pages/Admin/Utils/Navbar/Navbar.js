@@ -337,7 +337,7 @@ function Nav(props) {
                                                     )
                                                 }
                                                 description={
-                                                    !collapsedNav ? currentUser.permission : ""
+                                                    !collapsedNav ? currentUser.teacherCode : ""
                                                 }
                                                 avatarProps={{
                                                     src: currentUser.photoURL,

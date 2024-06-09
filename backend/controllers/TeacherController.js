@@ -70,57 +70,47 @@ const TeacherController = {
     }
   },
 
-  // Xóa một giáo viên dựa trên ID
-  delete: async (req, res) => {
+  blockTeacher: async (req, res) => {
     try {
-      const { id } = req.params;
-      await TeacherModel.destroy({ where: { teacher_id: id } });
-      res.json({ message: 'Xóa giáo viên thành công' });
+      const teacherId = req.params.id;
+      await TeacherModel.update({ isBlock: 1 }, { where: { teacher_id: teacherId } });
+      res.status(200).json({ message: 'Teacher has been blocked.' });
     } catch (error) {
-      console.error('Lỗi khi xóa giáo viên:', error);
-      res.status(500).json({ message: 'Lỗi server' });
-    }
-  },
-  isDeleteTotrue: async (req, res) => {
-    try {
-      const teachers = await TeacherModel.findAll({ where: { isDelete: true } });
-      if (!teachers) {
-        return res.status(404).json({ message: 'Không tìm thấy teachers' });
-      }
-      res.json(teachers);
-    } catch (error) {
-      console.error('Lỗi tìm kiếm teachers:', error);
-      res.status(500).json({ message: 'Lỗi server' });
+      console.error('Error blocking teacher:', error);
+      res.status(500).json({ message: 'Server error' });
     }
   },
 
-  isDeleteTofalse: async (req, res) => {
+  unblockTeacher: async (req, res) => {
     try {
-      const teachers = await TeacherModel.findAll({ where: { isDelete: false } });
-      if (!teachers) {
-        return res.status(404).json({ message: 'Không tìm thấy teachers' });
-      }
-      res.json(teachers);
+      const teacherId = req.params.id;
+      await TeacherModel.update({ isBlock: 0 }, { where: { teacher_id: teacherId } });
+      res.status(200).json({ message: 'Teacher has been unblocked.' });
     } catch (error) {
-      console.error('Lỗi tìm kiếm teachers:', error);
-      res.status(500).json({ message: 'Lỗi server' });
+      console.error('Error unblocking teacher:', error);
+      res.status(500).json({ message: 'Server error' });
     }
   },
 
-  // Đảo ngược trạng thái isDelete của một lớp học
-  isDelete: async (req, res) => {
+  deleteTeacher: async (req, res) => {
     try {
-      const { id } = req.params;
-      const teachers = await TeacherModel.findOne({ where: { class_id: id } });
-      if (!teachers) {
-        return res.status(404).json({ message: 'Không tìm thấy teachers' });
-      }
-      const updatedIsDeleted = !teachers.isDelete;
-      await TeacherModel.update({ isDelete: updatedIsDeleted }, { where: { class_id: id } });
-      res.json({ message: `Đã đảo ngược trạng thái isDelete thành ${updatedIsDeleted}` });
+      const teacherId = req.params.id;
+      await TeacherModel.update({ isDelete: 1 }, { where: { teacher_id: teacherId } });
+      res.status(200).json({ message: 'Teacher has been deleted.' });
     } catch (error) {
-      console.error('Lỗi khi đảo ngược trạng thái isDelete của teachers:', error);
-      res.status(500).json({ message: 'Lỗi máy chủ' });
+      console.error('Error deleting teacher:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
+
+  restoreTeacher: async (req, res) => {
+    try {
+      const teacherId = req.params.id;
+      await TeacherModel.update({ isDelete: 0 }, { where: { teacher_id: teacherId } });
+      res.status(200).json({ message: 'Teacher has been restored.' });
+    } catch (error) {
+      console.error('Error restoring teacher:', error);
+      res.status(500).json({ message: 'Server error' });
     }
   }
 };

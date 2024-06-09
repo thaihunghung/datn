@@ -1,16 +1,20 @@
-import React, { useEffect, useState } from "react";
-import { Table, Button, Tag, Form, Input, Select, Row, Col, Card, Collapse, Typography } from "antd";
-import { SearchOutlined, FilterOutlined, UpOutlined, DownOutlined } from "@ant-design/icons";
+import React, { useEffect, useState, useRef } from "react";
+import { Table, Button, Tag, Form, Input, Select, Row, Col, Card, Typography, Layout } from "antd";
+import { SearchOutlined, UpOutlined, DownOutlined } from "@ant-design/icons";
 import "./Teacher.css";
 
 const { Option } = Select;
 const { Title } = Typography;
+const { Content } = Layout;
+const { Search } = Input;
 
 const Teacher = (props) => {
   const { setCollapsedNav, successNoti } = props;
   const [filterVisible, setFilterVisible] = useState(false);
+  const [searchMode, setSearchMode] = useState(false);
   const [form] = Form.useForm();
-  const [position, setPosition] = useState('end');
+  const searchInputRef = useRef(null);
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1024) {
@@ -24,12 +28,40 @@ const Teacher = (props) => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [setCollapsedNav]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchInputRef.current && !searchInputRef.current.input.contains(event.target)) {
+        setSearchMode(false);
+      }
+    };
+
+    if (searchMode) {
+      document.addEventListener("mousedown", handleClickOutside);
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [searchMode]);
 
   const handleClearAll = () => {
     form.resetFields();
   };
 
+  const handleSearchMode = () => {
+    setSearchMode(!searchMode);
+  };
+
+  const handleSearch = (event) => {
+    console.log("text ", event.target.value);
+  };
 
   const columns = [
     {
@@ -118,89 +150,103 @@ const Teacher = (props) => {
   ];
 
   return (
-    <div className="">
-       <Title level={2} style={{ textAlign: "center", marginBottom: 20 }}>
-        Danh sách giáo viên
-      </Title>
-      <div className="flex text-left justify-between ml-3 mr-3 mb-5">
-        <div className="flex gap-2">
-          <Button
-            className=""
-            iconPosition={position}
-            icon={filterVisible ? <UpOutlined /> : <DownOutlined />}
-            type="default"
-            onClick={() => setFilterVisible(!filterVisible)}>
-            Filters
-          </Button>
-          <Button type="default" onClick={handleClearAll}>
-            Clear All
-          </Button>
+    <>
+      <div>
+        <div className="">
+          <Title level={2} style={{ textAlign: "center", marginBottom: 20 }}>
+            Danh sách giáo viên
+          </Title>
+          <div className="flex text-left justify-between ml-3 mr-3 mb-5">
+            <div className="flex gap-2">
+              <Button
+                className=""
+                icon={filterVisible ? <UpOutlined /> : <DownOutlined />}
+                type="default"
+                onClick={() => setFilterVisible(!filterVisible)}>
+                Filters
+              </Button>
+              <Button type="default" onClick={handleClearAll}>
+                Clear All
+              </Button>
+            </div>
+            <div>
+          {!searchMode ? (
+            <Button
+              onClick={handleSearchMode}
+              type="primary"
+              icon={<SearchOutlined />}>
+              Search
+            </Button>
+          ) : (
+            <Search
+              ref={searchInputRef}
+              placeholder="input search text"
+              onSearch={handleSearch}
+              enterButton
+              allowClear
+            />
+          )}
         </div>
-        <div>
-          <Button type="primary" icon={<SearchOutlined />}>
-            Search
-          </Button>
+          </div>
+          {filterVisible && (
+            <Card style={{ marginBottom: 20 }}>
+              <Form form={form} layout="vertical">
+                <Row gutter={16}>
+                  <Col span={6}>
+                    <Form.Item label="Customer" name="customer">
+                      <Select placeholder="Select customer">
+                        <Option value="A">Customer 1</Option>
+                        <Option value="B">Customer 2</Option>
+                        <Option value="C">Customer 3</Option>
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                  <Col span={6}>
+                    <Form.Item label="Status" name="status">
+                      <Select placeholder="Select status">
+                        <Option value="awaiting_timesheets">AWAITING TIMESHEETS</Option>
+                        <Option value="awaiting_payment">AWAITING PAYMENT</Option>
+                        <Option value="queried">QUERIED</Option>
+                        <Option value="paid">PAID</Option>
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                  <Col span={6}>
+                    <Form.Item label="Amount From" name="amountFrom">
+                      <Input placeholder="Amount From" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={6}>
+                    <Form.Item label="Amount To" name="amountTo">
+                      <Input placeholder="Amount To" />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Row gutter={16}>
+                  <Col span={6}>
+                    <Form.Item label="Request Type" name="requestType">
+                      <Select placeholder="Select request type">
+                        <Option value="type1">Type 1</Option>
+                        <Option value="type2">Type 2</Option>
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                  <Col span={6}>
+                    <Form.Item>
+                    </Form.Item>
+                  </Col>
+                  <Col span={6}>
+                    <Form.Item>
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </Form>
+            </Card>
+          )}
+          <Table columns={columns} dataSource={data} pagination={true} />
         </div>
       </div>
-      {filterVisible && (
-        <Card style={{ marginBottom: 20 }}>
-          <Form form={form} layout="vertical">
-            <Row gutter={16}>
-              <Col span={6}>
-                <Form.Item label="Customer" name="customer">
-                  <Select placeholder="Select customer">
-                    <Option value="A">Customer 1</Option>
-                    <Option value="B">Customer 2</Option>
-                    <Option value="C">Customer 3</Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item label="Status" name="status">
-                  <Select placeholder="Select status">
-                    <Option value="awaiting_timesheets">AWAITING TIMESHEETS</Option>
-                    <Option value="awaiting_payment">AWAITING PAYMENT</Option>
-                    <Option value="queried">QUERIED</Option>
-                    <Option value="paid">PAID</Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item label="Amount From" name="amountFrom">
-                  <Input placeholder="Amount From" />
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item label="Amount To" name="amountTo">
-                  <Input placeholder="Amount To" />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={16}>
-              <Col span={6}>
-                <Form.Item label="Request Type" name="requestType">
-                  <Select placeholder="Select request type">
-                    <Option value="type1">Type 1</Option>
-                    <Option value="type2">Type 2</Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item>
-
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item>
-
-                </Form.Item>
-              </Col>
-            </Row>
-          </Form>
-        </Card>
-      )}
-      <Table columns={columns} dataSource={data} pagination={false} />
-    </div>
+    </>
   );
 };
 
