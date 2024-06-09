@@ -12,12 +12,9 @@ const AuthenticateController = {
         return res.status(400).json({ message: 'Teacher code đã được sử dụng' });
       }
 
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-
       const data = {
         email,
-        password: hashedPassword,
+        password,
         name,
         teacherCode,
         typeTeacher

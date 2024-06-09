@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+const bcrypt = require('bcrypt');
 
 const TeacherModel = sequelize.define('teacher', {
   teacher_id: {
@@ -57,6 +58,20 @@ const TeacherModel = sequelize.define('teacher', {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   tableName: 'teachers',
+  hooks: {
+    beforeCreate: async (teacher) => {
+      if (teacher.password) {
+        const salt = await bcrypt.genSalt(10);
+        teacher.password = await bcrypt.hash(teacher.password, salt);
+      }
+    },
+    beforeUpdate: async (teacher) => {
+      if (teacher.password) {
+        const salt = await bcrypt.genSalt(10);
+        teacher.password = await bcrypt.hash(teacher.password, salt);
+      }
+    }
+  }
 });
 
 module.exports = TeacherModel;

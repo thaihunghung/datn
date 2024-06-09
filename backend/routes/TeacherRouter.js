@@ -139,11 +139,8 @@ const checkPermission = require('../middlewares/permissionMiddleware');
  */
 
 router.get('/teacher',  checkPermission(2), TeacherController.index);
-router.get('/teacher/getByUser/:user_id', TeacherController.getByUser);
-
-
-router.post('/teacher',checkPermission(3), TeacherController.create);
 router.get('/teacher/:id',checkPermission(3), TeacherController.getByID);
+router.post('/teacher',checkPermission(3), TeacherController.create);
 router.put('/teacher/:id', TeacherController.update);
 
 router.patch('/teachers/:id/block', checkPermission(3), TeacherController.blockTeacher);
