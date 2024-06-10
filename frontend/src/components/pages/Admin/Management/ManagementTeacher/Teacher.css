@@ -1,61 +1,44 @@
+/* 
+#FEFEFE - white
+#FF8077 - pink
+#AF84DD - violet
+#FF9908 - yellow
+#020401 - black
+
+ */
+ .ant-table {
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
 .ant-table-thead > tr > th {
-  background-color: #f5f5f5;
-  font-weight: bold;
-  text-align: left;
+  background-color: #FF8077 !important;
+  color: #fff !important; /* White text */
+  font-weight: bold !important; /* Bold text */
+  text-align: center !important; /* Center-align text */
 }
 
-.ant-table-tbody > tr > td {
-  text-align: left;
+ .ant-table-thead .ant-table-cell {
+  /* background-color: #AF84DD !important; */
+  
 }
 
-.ant-btn-primary {
-  background-color: #6699ff;
-  border-color: #6699ff;
-  border-radius: 5px;
+.ant-steps-item{
+  padding-bottom: 120px;
 }
 
-.ant-btn-primary:hover {
-  background-color: #5588ee;
-  border-color: #5588ee;
+.ant-table-column-title{
+  font-size: 16px !important;
 }
 
-.ant-tag-purple {
-  background-color: #d8b9f4;
-  color: #573a6b;
-  border: none;
+.ant-table-row {
+  transition: background-color 0.3s !important;
 }
 
-.ant-tag-blue {
-  background-color: #a7c7f4;
-  color: #1c3b6b;
-  border: none;
+.ant-table-cell input[type="checkbox"] {
+  accent-color: #AF84DD ;
 }
 
-.ant-tag-red {
-  background-color: #f4b9b9;
-  color: #6b1c1c;
-  border: none;
-}
-
-.ant-tag-green {
-  background-color: #b9f4b9;
-  color: #1c6b1c;
-  border: none;
-}
-
-.ant-btn-default {
-  border-radius: 5px;
-}
-
-.ant-btn-default:hover {
-  background-color: #f0f0f0;
-}
-
-.title {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 28px;
-  font-weight: bold;
-  color: #333;
-  text-align: center;
-  margin-bottom: 20px;
+.ant-table-cell{
+ border: #AF84DD ;
 }

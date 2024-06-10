@@ -39,30 +39,37 @@ const TeacherController = {
   // Tạo một giáo viên mới
   create: async (req, res) => {
     try {
-      const { email, password, name, typeTeacher } = req.body;
-
+      const { email, password, name, typeTeacher, teacherCode } = req.body;
+  
       // Check if the email already exists
       const existingEmail = await TeacherModel.findOne({ where: { email: email } });
       if (existingEmail) {
         return res.status(400).json({ message: 'Email already exists' });
       }
-
-      // Generate a unique 6-digit teacherCode
-      let teacherCode = await generateUniqueTeacherCode();
-
+  
+      let uniqueTeacherCode = teacherCode;
+  
+      if (!teacherCode) {
+        // Generate a unique 6-digit teacherCode if not provided in the request
+        uniqueTeacherCode = await generateUniqueTeacherCode();
+      } else {
+        // Check if the provided teacherCode already exists
+        const existingCode = await TeacherModel.findOne({ where: { teacherCode: teacherCode } });
+        if (existingCode) {
+          return res.status(400).json({ message: 'Teacher code already exists' });
+        }
+      }
+  
       const data = {
         email,
         password,
         name,
-        teacherCode,
+        teacherCode: uniqueTeacherCode,
         typeTeacher
       };
-
+  
       const newTeacher = await TeacherModel.create(data);
-      res.json({
-        message: 'Tạo  giáo viên thành công',
-        teacher_id: newTeacher.newTeacher
-      });
+      res.json(newTeacher);
     } catch (error) {
       console.error('Lỗi khi tạo giáo viên mới:', error);
       res.status(500).json({ message: 'Lỗi server' });

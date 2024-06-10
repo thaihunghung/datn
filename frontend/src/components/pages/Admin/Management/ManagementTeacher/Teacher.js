@@ -1,19 +1,24 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Table, Button, Tag, Form, Input, Select, Row, Col, Card, Typography, Layout } from "antd";
-import { SearchOutlined, UpOutlined, DownOutlined } from "@ant-design/icons";
-import "./Teacher.css";
+import { Table, Button, Input, Modal, Upload, Steps, Spin, Form, Dropdown, Menu, Typography } from "antd";
+import { SearchOutlined, PlusOutlined, UploadOutlined, FilterOutlined, SettingOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import CustomUpload from "../../CustomUpload/CustomUpload";
+import './Teacher.css'
 
-const { Option } = Select;
 const { Title } = Typography;
-const { Content } = Layout;
-const { Search } = Input;
 
 const Teacher = (props) => {
   const { setCollapsedNav, successNoti } = props;
   const [filterVisible, setFilterVisible] = useState(false);
   const [searchMode, setSearchMode] = useState(false);
-  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(true);
+  const [teachers, setTeachers] = useState([]);
+  const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+  const [isUploadModalVisible, setIsUploadModalVisible] = useState(false);
   const searchInputRef = useRef(null);
+  const [permission, setPermission] = useState(1);
+  const [current, setCurrent] = useState(0);
+  const [fileList, setFileList] = useState([]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -51,201 +56,315 @@ const Teacher = (props) => {
     };
   }, [searchMode]);
 
-  const handleClearAll = () => {
-    form.resetFields();
-  };
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      try {
+        const response = await axiosAdmin.get('/teacher');
+        console.log("data", response)
+        setTeachers(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching teacher data:", error);
+        setLoading(false);
+      }
+    };
+    fetchTeachers();
+  }, []);
 
-  const handleSearchMode = () => {
-    setSearchMode(!searchMode);
-  };
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      try {
+        const response = await axiosAdmin.get(`${process.env.REACT_APP_API_DOMAIN_CLIENT}/user`);
+        const user = response.data;
+        console.log("user", user)
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching teacher data:", error);
+        setLoading(false);
+      }
+    };
+    fetchTeachers();
+  }, []);
 
   const handleSearch = (event) => {
     console.log("text ", event.target.value);
   };
 
+  const handleAddClick = () => {
+    setIsAddModalVisible(true);
+  };
+
+  const handleUploadClick = () => {
+    setIsUploadModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setIsAddModalVisible(false);
+    setIsUploadModalVisible(false);
+  };
+
+  const handleFormSubmit = async (values) => {
+    try {
+      await axiosAdmin.post('/teacher', values);
+      successNoti("Teacher added successfully");
+      setIsAddModalVisible(false);
+      // Refetch the teachers data
+      const response = await axiosAdmin.get('/teacher');
+      setTeachers(response.data);
+    } catch (error) {
+      console.error("Error adding teacher:", error);
+    }
+  };
+
+  const handleDownloadStudent = () => {
+    // Function to handle downloading CSV template
+  };
+
+  const onChange = (current) => {
+    setCurrent(current);
+  };
+
+  const propsUpload = {
+    onRemove: (file) => {
+      setFileList((prevFileList) => {
+        const index = prevFileList.indexOf(file);
+        const newFileList = prevFileList.slice();
+        newFileList.splice(index, 1);
+        return newFileList;
+      });
+    },
+    beforeUpload: (file) => {
+      setFileList((prevFileList) => [...prevFileList, file]);
+      return false;
+    },
+    fileList,
+  };
+
   const columns = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
+      title: '',
+      dataIndex: 'checkbox',
+      key: 'checkbox',
+      render: () => <input type="checkbox" />
     },
     {
-      title: "Start Date",
-      dataIndex: "startDate",
-      key: "startDate",
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
     },
     {
-      title: "State",
-      dataIndex: "state",
-      key: "state",
-      render: (text, record) => (
-        <Tag color={record.color}>{record.state}</Tag>
-      ),
+      title: "Teacher Code",
+      dataIndex: "teacherCode",
+      key: "teacherCode",
     },
     {
-      title: "State Age",
-      dataIndex: "stateAge",
-      key: "stateAge",
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
     },
     {
-      title: "Customer",
-      dataIndex: "customer",
-      key: "customer",
+      title: "Permission",
+      dataIndex: "permission",
+      key: "permission",
+    },
+    {
+      title: "Type Teacher",
+      dataIndex: "typeTeacher",
+      key: "typeTeacher",
     },
     {
       title: "",
       key: "action",
       render: (text, record) => (
-        <Button type="primary">Manage Invoice</Button>
+        <>
+          <Button icon={<EditOutlined />} className="mr-2" />
+          <Button icon={<DeleteOutlined />} />
+        </>
       ),
     },
   ];
 
-  const data = [
-    {
-      key: "1",
-      id: "2017W22-1",
-      startDate: "29-05-2017",
-      state: "AWAITING TIMESHEETS",
-      color: "purple",
-      stateAge: "5 hours ago",
-      customer: "Anne Hathaway",
-    },
-    {
-      key: "2",
-      id: "2017W21-1",
-      startDate: "22-05-2017",
-      state: "AWAITING TIMESHEETS",
-      color: "purple",
-      stateAge: "7 hours ago",
-      customer: "Bill Murray",
-    },
-    {
-      key: "3",
-      id: "2017W21-2",
-      startDate: "22-05-2017",
-      state: "AWAITING PAYMENT",
-      color: "blue",
-      stateAge: "8 hours ago",
-      customer: "Theresa May",
-    },
-    {
-      key: "4",
-      id: "2017W20-21",
-      startDate: "22-05-2017",
-      state: "QUERIED",
-      color: "red",
-      stateAge: "3 days ago",
-      customer: "Anthony Hopkins",
-    },
-    {
-      key: "5",
-      id: "2017W20-22",
-      startDate: "18-05-2017",
-      state: "PAID",
-      color: "green",
-      stateAge: "7 days ago",
-      customer: "Albert Einstein",
-    },
-  ];
+  const menu = (
+    <Menu>
+      <Menu.Item key="1">Option 1</Menu.Item>
+      <Menu.Item key="2">Option 2</Menu.Item>
+      <Menu.Item key="3">Option 3</Menu.Item>
+    </Menu>
+  );
 
   return (
     <>
       <div>
-        <div className="">
-          <Title level={2} style={{ textAlign: "center", marginBottom: 20 }}>
+        <div>
+          <Title level={2} className="text-center mb-5">
             Danh sách giáo viên
           </Title>
-          <div className="flex text-left justify-between ml-3 mr-3 mb-5">
+          <div className="flex justify-between mx-3 mb-5">
             <div className="flex gap-2">
               <Button
-                className=""
-                icon={filterVisible ? <UpOutlined /> : <DownOutlined />}
-                type="default"
-                onClick={() => setFilterVisible(!filterVisible)}>
-                Filters
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={handleAddClick}
+              >
+                Add
               </Button>
-              <Button type="default" onClick={handleClearAll}>
-                Clear All
+              <Button
+                icon={<UploadOutlined />}
+                onClick={handleUploadClick}
+              >
+                Upload
               </Button>
+              <Button icon={<FilterOutlined />}>Filter</Button>
+              <Input
+                ref={searchInputRef}
+                placeholder="Search"
+                prefix={<SearchOutlined />}
+                className="w-72 ml-2"
+                onPressEnter={handleSearch}
+                allowClear
+              />
             </div>
             <div>
-          {!searchMode ? (
-            <Button
-              onClick={handleSearchMode}
-              type="primary"
-              icon={<SearchOutlined />}>
-              Search
-            </Button>
-          ) : (
-            <Search
-              ref={searchInputRef}
-              placeholder="input search text"
-              onSearch={handleSearch}
-              enterButton
-              allowClear
-            />
-          )}
-        </div>
+              <Dropdown overlay={menu}>
+                <Button icon={<SettingOutlined />}>Settings</Button>
+              </Dropdown>
+            </div>
           </div>
-          {filterVisible && (
-            <Card style={{ marginBottom: 20 }}>
-              <Form form={form} layout="vertical">
-                <Row gutter={16}>
-                  <Col span={6}>
-                    <Form.Item label="Customer" name="customer">
-                      <Select placeholder="Select customer">
-                        <Option value="A">Customer 1</Option>
-                        <Option value="B">Customer 2</Option>
-                        <Option value="C">Customer 3</Option>
-                      </Select>
-                    </Form.Item>
-                  </Col>
-                  <Col span={6}>
-                    <Form.Item label="Status" name="status">
-                      <Select placeholder="Select status">
-                        <Option value="awaiting_timesheets">AWAITING TIMESHEETS</Option>
-                        <Option value="awaiting_payment">AWAITING PAYMENT</Option>
-                        <Option value="queried">QUERIED</Option>
-                        <Option value="paid">PAID</Option>
-                      </Select>
-                    </Form.Item>
-                  </Col>
-                  <Col span={6}>
-                    <Form.Item label="Amount From" name="amountFrom">
-                      <Input placeholder="Amount From" />
-                    </Form.Item>
-                  </Col>
-                  <Col span={6}>
-                    <Form.Item label="Amount To" name="amountTo">
-                      <Input placeholder="Amount To" />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Row gutter={16}>
-                  <Col span={6}>
-                    <Form.Item label="Request Type" name="requestType">
-                      <Select placeholder="Select request type">
-                        <Option value="type1">Type 1</Option>
-                        <Option value="type2">Type 2</Option>
-                      </Select>
-                    </Form.Item>
-                  </Col>
-                  <Col span={6}>
-                    <Form.Item>
-                    </Form.Item>
-                  </Col>
-                  <Col span={6}>
-                    <Form.Item>
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </Form>
-            </Card>
+          {loading ? (
+            <Spin size="large" className="flex justify-center items-center h-screen" />
+          ) : (
+              <Table
+                columns={columns}
+                dataSource={teachers}
+                pagination={true}
+              />
           )}
-          <Table columns={columns} dataSource={data} pagination={true} />
         </div>
       </div>
+      <Modal title="Add Teacher" visible={isAddModalVisible} onCancel={handleCancel} footer={null}>
+        <Form
+          name="add_teacher"
+          onFinish={handleFormSubmit}
+          layout="vertical"
+        >
+          <Form.Item
+            label="Name"
+            name="name"
+            rules={[{ required: true, message: 'Please input the name!' }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[{ required: true, message: 'Please input the email!' }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Password"
+            name="password"
+            rules={[{ required: true, message: 'Please input the password!' }]}
+          >
+            <Input.Password />
+          </Form.Item>
+          <Form.Item
+            label="Permission"
+            name="permission"
+            initialValue={1}
+          >
+            <Input type="number" />
+          </Form.Item>
+          <Form.Item
+            label="Type Teacher"
+            name="typeTeacher"
+            initialValue="GVGD"
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+      <Modal
+        title="Upload CSV"
+        visible={isUploadModalVisible}
+        onCancel={handleCancel} footer={null}
+      >
+        <div className="flex flex-col items-center w-full m-3 rounded-lg">
+          <div className='w-full grid grid-cols-1 gap-2 justify-center px-2 sm:px-4 lg:px-5 xl:px-5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2'>
+            <div className='hidden lg:block xl:block mt-14'>
+              <Steps
+                direction="vertical"
+                current={current}
+                onChange={onChange}
+                items={[
+                  {
+                    title: 'Bước 1',
+                    description: 'Tải mẫu',
+                  },
+                  {
+                    title: 'Bước 2',
+                    description: 'Upload file',
+                  },
+                  {
+                    title: 'Bước 3',
+                    description: 'Thành công',
+                  },
+                ]}
+              />
+            </div>
+            <div className='hidden sm:block lg:hidden xl:hidden'>
+              <Steps
+                current={current}
+                onChange={onChange}
+                direction="vertical"
+                items={[
+                  {
+                    title: 'Bước 1',
+                    description: 'Tải mẫu',
+                  },
+                  {
+                    title: 'Bước 2',
+                    description: 'Upload file',
+                  },
+                  {
+                    title: 'Bước 3',
+                    description: 'Thành công',
+                  },
+                ]}
+              />
+            </div>
+            <div className='flex flex-col w-full sm:gap-0 sm:w-full lg:flex-col xl:flex-col justify-around'>
+              <div className='w-full'>
+                <div className='p-10 w-full mt-2 h-auto border border-blue-500 flex flex-col items-center justify-center gap-2 rounded-lg'>
+                  <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
+                  <Button className='w-full bg-primary flex items-center justify-center p-5 rounded-lg' onClick={handleDownloadStudent}>
+                    <span>Tải xuống mẫu </span>
+                  </Button>
+                </div>
+              </div>
+              <div className='w-full'>
+                <div className='p-10 w-full mt-2 h-auto border border-blue-500 flex flex-col items-center justify-center gap-2 rounded-lg'>
+                  <div><p className='w-full text-center'>Gửi lại mẫu</p></div>
+                  <Upload {...propsUpload} >
+                    <Button icon={<UploadOutlined />} className='text-center items-center rounded-lg px-10 h-10'>Select File</Button>
+                  </Upload>
+                </div>
+              </div>
+              <div className='w-full'>
+                <div className='p-10 w-full mt-2 h-auto border border-blue-500 flex flex-col items-center justify-center gap-2 rounded-lg'>
+                  <div><p className='w-full text-center'>Lưu Dữ liệu</p></div>
+                  <CustomUpload endpoint={'student'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 };
