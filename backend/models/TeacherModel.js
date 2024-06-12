@@ -66,7 +66,8 @@ const TeacherModel = sequelize.define('teacher', {
       }
     },
     beforeUpdate: async (teacher) => {
-      if (teacher.password) {
+      console.log("teacher", teacher)
+      if (teacher.changed('password')) {
         const salt = await bcrypt.genSalt(10);
         teacher.password = await bcrypt.hash(teacher.password, salt);
       }

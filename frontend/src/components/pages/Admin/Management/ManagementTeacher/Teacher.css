@@ -18,9 +18,8 @@
   text-align: center !important; /* Center-align text */
 }
 
- .ant-table-thead .ant-table-cell {
-  /* background-color: #AF84DD !important; */
-  
+.ant-table-tbody > tr > td {
+  text-align: center; /* Center-align text */
 }
 
 .ant-steps-item{

@@ -6,7 +6,7 @@ const checkPermission = (requiredPermission) => {
       const { accessToken } = req.cookies;
 
       if (!accessToken) {
-        return res.status(400).json({ message: 'token là bắt buộc' });
+        return res.status(401);
       }
 
       const decoded = jwt.verify(accessToken, 'your_jwt_secret');
