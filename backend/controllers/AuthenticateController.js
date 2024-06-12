@@ -33,7 +33,7 @@ const AuthenticateController = {
     try {
       const user = await TeacherModel.findOne({ where: { teacherCode } });
       if (!user) {
-        return res.status(400).json({ message: 'Teacher code hoặc mật khẩu không đúng' });
+        return res.status(400).json({ message: 'Teacher code hoặc mật khẩu không đúng1' });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);

@@ -122,8 +122,8 @@ const UpdateStudent = (nav) => {
         },
         {
             title: 'Mã lớp',
-            dataIndex: 'classCode',
-            key: 'classCode',
+            dataIndex: 'classNameShort',
+            key: 'classNameShort',
             filters: [
                 {
                     text: '2020',
@@ -134,11 +134,11 @@ const UpdateStudent = (nav) => {
                     value: 'DA21',
                 },
             ],
-            onFilter: (value, record) => record.classCode.startsWith(value),
+            onFilter: (value, record) => record.classNameShort.startsWith(value),
             filterSearch: true,
-            // ...getColumnSearchProps('classCode'), 
+            // ...getColumnSearchProps('classNameShort'), 
             width: '20%',
-            // sorter: (a, b) => a.classCode - b.classCode,
+            // sorter: (a, b) => a.classNameShort - b.classNameShort,
             // sortDirections: ['descend', 'ascend'],
         },
     ];
@@ -167,7 +167,8 @@ const UpdateStudent = (nav) => {
                     name: student.name,
                     studentCode: student.studentCode,
                     class_id: student.class_id,
-                    classCode: student.Class.classCode,
+                    classCode: student.class.classCode,
+                    classNameShort: student.class.classNameShort,
                     email: student.email,
                     created_at: student.createdAt,
                     updated_at: student.updatedAt,

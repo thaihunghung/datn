@@ -1,18 +1,19 @@
-import React, { useEffect, useState, useRef } from "react";
-import { Table, Button, Input, Modal, Upload, Steps, Spin, Form, Dropdown, Menu, Typography, Select } from "antd";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { Table, Button, Input, Modal, Upload, Steps, Form, Dropdown, Menu, Typography, Select, Tooltip } from "antd";
 import { SearchOutlined, PlusOutlined, UploadOutlined, FilterOutlined, SettingOutlined, EditOutlined, DeleteOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
+import debounce from 'lodash/debounce';
 import './Teacher.css'
 
 const { Title } = Typography;
 const { Option } = Select;
 
-const Teacher = (props) => {
+const Teacher = React.memo((props) => {
   const { setCollapsedNav, successNoti, errorNoti } = props;
   const [filterVisible, setFilterVisible] = useState(false);
   const [searchMode, setSearchMode] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [teachers, setTeachers] = useState([]);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [isUploadModalVisible, setIsUploadModalVisible] = useState(false);
@@ -23,8 +24,30 @@ const Teacher = (props) => {
   const [permission, setPermission] = useState(1);
   const [current, setCurrent] = useState(0);
   const [fileList, setFileList] = useState([]);
+  const [selectedRow, setSelectedRow] = useState([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalTeachers, setTotalTeachers] = useState(0);
 
   const [form] = Form.useForm();
+
+  const fetchTeachers = useCallback(async (page = 1, size = 10) => {
+    setLoading(true);
+    try {
+      const response = await axiosAdmin.get(`/teacher?page=${page}&size=${size}`);
+      if (response.data.teachers) {
+        setTeachers(response.data.teachers);
+        setTotalTeachers(response.data.total);
+      } else {
+        setTeachers(response.data);
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching teacher data:", error);
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -63,23 +86,12 @@ const Teacher = (props) => {
   }, [searchMode]);
 
   useEffect(() => {
-    const fetchTeachers = async () => {
-      try {
-        const response = await axiosAdmin.get('/teacher');
-        console.log("data", response)
-        setTeachers(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching teacher data:", error);
-        setLoading(false);
-      }
-    };
-    fetchTeachers();
-  }, []);
+    fetchTeachers(currentPage, pageSize);
+  }, [fetchTeachers, currentPage, pageSize]);
 
-  const handleSearch = (event) => {
-    console.log("text ", event.target.value);
-  };
+  const handleSearch = debounce((value) => {
+    console.log("text ", value);
+  }, 300);
 
   const handleAddClick = () => {
     setIsAddModalVisible(true);
@@ -102,14 +114,27 @@ const Teacher = (props) => {
     form.resetFields();
   };
 
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (selectedRowKeys, selectedRows) => {
+      setSelectedRow(selectedRows);
+      setSelectedRowKeys(selectedRowKeys);
+      console.log(`selectedRowKeys: ${selectedRowKeys}`);
+      console.log('selectedRows: ', selectedRows)
+    },
+  };
+
+  const handleUnSelect = () => {
+    setSelectedRowKeys([]);
+    setSelectedRow([]);
+  };
+
   const handleFormSubmit = async (values) => {
     try {
       await axiosAdmin.post('/teacher', values);
       successNoti("Teacher added successfully");
       setIsAddModalVisible(false);
-      // Refetch the teachers data
-      const response = await axiosAdmin.get('/teacher');
-      setTeachers(response.data);
+      fetchTeachers(currentPage, pageSize);
     } catch (error) {
       console.error("Error adding teacher:", error);
       if (error.response && error.response.data && error.response.data.message) {
@@ -126,9 +151,7 @@ const Teacher = (props) => {
       console.log("id", currentTeacher.teacher_id)
       successNoti(res.data.message);
       setIsEditModalVisible(false);
-      // Refetch the teachers data
-      const response = await axiosAdmin.get('/teacher');
-      setTeachers(response.data);
+      fetchTeachers(currentPage, pageSize);
     } catch (error) {
       console.error("Error updating teacher:", error);
       if (error.response && error.response.data && error.response.data.message) {
@@ -139,8 +162,26 @@ const Teacher = (props) => {
     }
   };
 
-  const handleDownloadStudent = () => {
-    // Function to handle downloading CSV template
+  const handleDownloadTemplateExcel = async () => {
+    console.log("vao")
+    try {
+      const response = await axiosAdmin.get('/teacher/template/excel', {
+        responseType: 'blob'
+      });
+
+      if (response && response.data) {
+        const url = window.URL.createObjectURL(response.data);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Teacher.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        setCurrent(1);
+      }
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
   };
 
   const onChange = (current) => {
@@ -164,12 +205,6 @@ const Teacher = (props) => {
   };
 
   const columns = [
-    {
-      title: '',
-      dataIndex: 'checkbox',
-      key: 'checkbox',
-      render: () => <input type="checkbox" />
-    },
     {
       title: "Name",
       dataIndex: "name",
@@ -247,7 +282,7 @@ const Teacher = (props) => {
                 placeholder="Search"
                 prefix={<SearchOutlined />}
                 className="w-72 ml-2"
-                onPressEnter={handleSearch}
+                onChange={(e) => handleSearch(e.target.value)}
                 allowClear
               />
             </div>
@@ -257,18 +292,68 @@ const Teacher = (props) => {
               </Dropdown>
             </div>
           </div>
-          {loading ? (
-            <Spin size="large" className="flex justify-center items-center h-screen" />
-          ) : (
+          <div>
+            {selectedRowKeys.length !== 0 && (
+              <div className="Quick__Option flex justify-between items-center sticky top-0 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
+                <p className="text-sm font-medium">
+                  <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
+                  Đã chọn {selectedRow.length} Teacher
+                </p>
+                <div className="flex items-center gap-2">
+
+                  <Tooltip
+                    title={`Xoá ${selectedRowKeys.length} plo`}
+                    getPopupContainer={() =>
+                      document.querySelector(".Quick__Option")
+                    }
+                  >
+                    <Button isIconOnly variant="light" radius="full">
+                      <i className="fa-solid fa-trash-can"></i>
+                    </Button>
+                  </Tooltip>
+                  <Tooltip
+                    title="Bỏ chọn"
+                    getPopupContainer={() =>
+                      document.querySelector(".Quick__Option")
+                    }
+                  >
+                    <Button
+                      isIconOnly
+                      variant="light"
+                      radius="full"
+                      onClick={() => {
+                        handleUnSelect();
+                      }}
+                    >
+                      <i className="fa-solid fa-xmark text-[18px]"></i>
+                    </Button>
+                  </Tooltip>
+                </div>
+              </div>
+            )}
+
             <Table
+              rowSelection={{
+                type: "checkbox",
+                ...rowSelection,
+              }}
               columns={columns}
-              dataSource={teachers}
-              pagination={true}
+              dataSource={teachers.map(teacher => ({ ...teacher, key: teacher.teacher_id }))}
+              pagination={{
+                current: currentPage,
+                pageSize: pageSize,
+                total: totalTeachers,
+                onChange: (page, pageSize) => {
+                  setCurrentPage(page);
+                  setPageSize(pageSize);
+                },
+              }}
+              loading={loading}
             />
-          )}
+          </div>
         </div>
       </div>
-      <Modal title="Thêm giáo viên mới" visible={isAddModalVisible} onCancel={handleCancel} footer={null}>
+      <Modal title="Thêm giáo viên mới" open={isAddModalVisible} onCancel={handleCancel} footer={null}>
         <Form
           name="add_teacher"
           onFinish={handleFormSubmit}
@@ -372,7 +457,7 @@ const Teacher = (props) => {
           </Form.Item>
         </Form>
       </Modal>
-      <Modal title="Chỉnh sửa giáo viên" visible={isEditModalVisible} onCancel={handleCancel} footer={null}>
+      <Modal title="Chỉnh sửa giáo viên" open={isEditModalVisible} onCancel={handleCancel} footer={null}>
         {currentTeacher && (
           <Form
             form={form}
@@ -463,7 +548,7 @@ const Teacher = (props) => {
       </Modal>
       <Modal
         title="Upload CSV"
-        visible={isUploadModalVisible}
+        open={isUploadModalVisible}
         onCancel={handleCancel} footer={null}
       >
         <div className="flex flex-col items-center w-full m-3 rounded-lg">
@@ -514,7 +599,7 @@ const Teacher = (props) => {
               <div className='w-full'>
                 <div className='p-10 w-full mt-2 h-auto border border-blue-500 flex flex-col items-center justify-center gap-2 rounded-lg'>
                   <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
-                  <Button className='w-full bg-primary flex items-center justify-center p-5 rounded-lg' onClick={handleDownloadStudent}>
+                  <Button className='w-full bg-primary flex items-center justify-center p-5 rounded-lg' onClick={handleDownloadTemplateExcel}>
                     <span>Tải xuống mẫu </span>
                   </Button>
                 </div>
@@ -530,7 +615,7 @@ const Teacher = (props) => {
               <div className='w-full'>
                 <div className='p-10 w-full mt-2 h-auto border border-blue-500 flex flex-col items-center justify-center gap-2 rounded-lg'>
                   <div><p className='w-full text-center'>Lưu Dữ liệu</p></div>
-                  <CustomUpload endpoint={'student'} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
+                  <CustomUpload endpoint={'teacher'} method="POST" setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
                 </div>
               </div>
             </div>
@@ -539,6 +624,6 @@ const Teacher = (props) => {
       </Modal>
     </>
   );
-};
+});
 
 export default Teacher;

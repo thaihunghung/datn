@@ -1,5 +1,9 @@
 const TeacherModel = require("../models/TeacherModel");
 const ExcelJS = require('exceljs');
+const path = require('path');
+const sequelize = require("../config/database");
+const fs = require('fs');
+const bcrypt = require('bcrypt');
 
 const generateUniqueTeacherCode = async () => {
   let isUnique = false;
@@ -20,16 +24,39 @@ const TeacherController = {
   // Lấy tất cả các giáo viên
   index: async (req, res) => {
     try {
-      const teachers = await TeacherModel.findAll(
-        {
+      const { page, size } = req.query;
+
+      if (page && size) {
+        console.log("yyyy")
+
+        const offset = (page - 1) * size;
+        const limit = parseInt(size, 10);
+
+        const { count, rows: teachers } = await TeacherModel.findAndCountAll({
+          attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher'],
+          where: {
+            isDelete: false,
+            isBlock: false
+          },
+          offset: offset,
+          limit: limit
+        });
+
+        return res.json({
+          total: count,
+          teachers: teachers
+        });
+      } else {
+        console.log("xxx")
+        const teachers = await TeacherModel.findAll({
           attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher'],
           where: {
             isDelete: false,
             isBlock: false
           }
-        }
-      );
-      res.json(teachers);
+        });
+        res.json(teachers);
+      }
     } catch (error) {
       console.error('Lỗi khi lấy tất cả các giáo viên:', error);
       res.status(500).json({ message: 'Lỗi server' });
@@ -173,6 +200,7 @@ const TeacherController = {
 
   //excel
   getFormTeacher: async (req, res) => {
+    console.log("vao")
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Danh sách giáo viên');
 
@@ -180,14 +208,14 @@ const TeacherController = {
       { header: 'Mã giáo viên', key: 'teacherCode', width: 15 },
       { header: 'Tên giáo viên', key: 'name', width: 32 },
       { header: 'Email', key: 'email', width: 30 },
-      { header: 'typeTeacher', key: 'email', width: 30 },
     ];
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename="StudentsForm.xlsx"');
+    res.setHeader('Content-Disposition', 'attachment; filename="Teacher.xlsx"');
     await workbook.xlsx.write(res);
     res.end();
   },
+
   getFormTeacherWithData: async (req, res) => {
     try {
       const { data } = req.body;
@@ -214,7 +242,6 @@ const TeacherController = {
         { header: 'Mã giáo viên', key: 'teacherCode', width: 15 },
         { header: 'Tên giáo viên', key: 'name', width: 32 },
         { header: 'Email', key: 'email', width: 30 },
-        { header: 'Loại giáo viên', key: 'typeTeacher', width: 30 },
       ];
 
       students.forEach(student => {
@@ -222,7 +249,7 @@ const TeacherController = {
           teacherCode: student.class.teacherCode,
           name: student.name,
           email: student.email,
-          typeTeacher: student.typeTeacher,
+          // typeTeacher: student.typeTeacher,
         });
       });
 
@@ -235,12 +262,9 @@ const TeacherController = {
       res.status(500).json({ error: 'Internal server error' });
     }
   },
-  saveStudentExcel: async (req, res) => {
-    console.log("dc");
+  saveTeacherExcel: async (req, res) => {
     if (req.files) {
-      console.log("dc1");
       const uploadDirectory = path.join(__dirname, '../uploads');
-
       const filename = req.files[0].filename;
       const filePath = path.join(uploadDirectory, filename);
       const workbook = new ExcelJS.Workbook();
@@ -252,7 +276,7 @@ const TeacherController = {
       const teacherCodesSet = new Set();
 
       worksheet.eachRow({ includeEmpty: false }, async (row, rowNumber) => {
-        if (rowNumber !== 1) { // bỏ dòng đầu
+        if (rowNumber !== 1) { // Skip the header row
           let email = row.getCell(3).value;
           let teacherCode = row.getCell(1).value;
 
@@ -264,25 +288,27 @@ const TeacherController = {
             console.error(`Duplicate or invalid email found at row ${rowNumber}: ${email}`);
             return; // Skip this row
           }
-          
 
           if (!teacherCode || teacherCodesSet.has(teacherCode)) {
             console.error(`Duplicate or invalid teacherCode found at row ${rowNumber}: ${teacherCode}`);
             teacherCode = await generateUniqueTeacherCode();
-            return teacherCode; // return new teacherCode
           }
 
           emailsSet.add(email);
           teacherCodesSet.add(teacherCode);
 
-          const sql = `INSERT INTO teachers (teacherCode, name, email, typeTeacher)
+          const salt = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(teacherCode.toString(), salt);
+
+          const sql = `INSERT INTO teachers (teacherCode, name, email, password)
                  VALUES (?, ?, ?, ?)`;
           const values = [
             teacherCode,
             row.getCell(2).value,
             email,
-            row.getCell(4).value,
+            hashedPassword
           ];
+
           insertPromises.push(sequelize.query(sql, { replacements: values })
             .catch(error => {
               console.error(`Error inserting row ${rowNumber}: ${error.message}`);
@@ -290,19 +316,9 @@ const TeacherController = {
         }
       });
 
-      Promise.all(insertPromises)
-        .then(() => {
-          console.log('All rows inserted successfully');
-        })
-        .catch(error => {
-          console.error('Error inserting rows:', error);
-        });
-
-
       await Promise.all(insertPromises);
       console.log('All data has been inserted into the database!');
       fs.unlinkSync(filePath);  // Remove the uploaded file after processing
-      // res.send('Excel file has been processed and data inserted.');
       res.status(200).json({ message: "Dữ liệu đã được lưu thành công vào cơ sở dữ liệu." });
     } else {
       res.status(400).send('No file uploaded.');

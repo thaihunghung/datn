@@ -141,7 +141,6 @@ function Nav(props) {
     }, [location.pathname]);
 
     const handleLogout = async () => {
-        setSpinning(true);
         try {
             const response = await AxiosClient.post(`/logout`);
             setSpinning(false);

@@ -41,3 +41,13 @@
 .ant-table-cell{
  border: #AF84DD ;
 }
+
+.Quick__Option {
+  position: sticky !important;
+  top: 0;
+  background-color: white;
+  z-index: 50;
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #d1d5db;
+}

@@ -14,7 +14,7 @@ const StudentController = {
     } catch (error) {
       console.error('Lỗi khi lấy tất cả sinh viên:', error);
       res.status(500).json({ message: 'Lỗi server' });
-    } 
+    }
   },
   getAllByClassId: async (req, res) => {
     try {
@@ -46,7 +46,8 @@ const StudentController = {
       const students = await StudentModel.findAll({
         include: [{
           model: ClassModel,
-          attributes: ['classCode'] // Chỉ lấy trường classCode từ bảng lớp
+          attributes: ['classCode', 'classNameShort'],
+          where: { isDelete: false }
         }],
         attributes: ['student_id', 'class_id', 'studentCode', 'email', 'name', 'isDelete'],// Lọc ra các trường cần lấy
         where: { isDelete: false }
@@ -67,7 +68,7 @@ const StudentController = {
           model: ClassModel,
           attributes: ['classCode']
         }],
-        attributes: ['student_id', 'class_id', 'studentCode','date_of_birth', 'email', 'name', 'isDelete'],
+        attributes: ['student_id', 'class_id', 'studentCode', 'date_of_birth', 'email', 'name', 'isDelete'],
         where:
           { student_id: id, isDelete: false }
       });
@@ -224,7 +225,7 @@ const StudentController = {
 
       worksheet.eachRow((row, rowNumber) => {
         row.eachCell((cell, colNumber) => {
-          if (colNumber === 1 ) {
+          if (colNumber === 1) {
             cell.protection = { locked: true };
           } else {
             cell.protection = { locked: false };

@@ -15,6 +15,7 @@ const ChapterController = require('../controllers/ChapterController');
 const SubjectController = require('../controllers/SubjectController');
 const AssessmentsController = require('../controllers/AssessmentsController');
 const CourseEnrollmentController = require('../controllers/CourseEnrollmentController');
+const TeacherController = require('../controllers/TeacherController');
  
 const uploadDirectory = path.join(__dirname, '../uploads');
 
@@ -33,6 +34,7 @@ router.post('/program', upload.any(), ProgramsController.processSaveTemplate);
 router.post('/po', upload.any(), PoController.processSaveTemplatePo);
 router.post('/plo', upload.any(), PloController.processSaveTemplatePlo);
 router.post('/student', upload.any(), StudentController.saveStudentExcel);
+router.post('/teacher', upload.any(), TeacherController.saveTeacherExcel);
 router.post('/clo', upload.any(), CloController.processSaveTemplateClo);
 router.post('/chapter', upload.any(), ChapterController.processSaveTemplateChapter);
 router.post('/subject', ensureAuthenticated, upload.any(), SubjectController.processSaveTemplateSubject);
