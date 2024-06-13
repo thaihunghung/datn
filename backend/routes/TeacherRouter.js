@@ -146,6 +146,7 @@ router.put('/teacher/:id', TeacherController.update);
 router.patch('/teachers/:id/block', checkPermission(3), TeacherController.blockTeacher);
 router.patch('/teachers/:id/unblock', checkPermission(3), TeacherController.unblockTeacher);
 router.patch('/teachers/:id/delete', checkPermission(3), TeacherController.deleteTeacher);
+router.patch('/teachers/deletes', checkPermission(3), TeacherController.deleteTeachers);
 router.patch('/teachers/:id/restore', checkPermission(3), TeacherController.restoreTeacher);
 
 router.get('/teacher/template/excel', TeacherController.getFormTeacher);

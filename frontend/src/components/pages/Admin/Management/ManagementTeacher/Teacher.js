@@ -1,13 +1,36 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { Table, Button, Input, Modal, Upload, Steps, Form, Dropdown, Menu, Typography, Select, Tooltip } from "antd";
-import { SearchOutlined, PlusOutlined, UploadOutlined, FilterOutlined, SettingOutlined, EditOutlined, DeleteOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Tooltip,
+  Chip,
+  User,
+  Button as NextUIButton,
+} from "@nextui-org/react";
+import {
+  SearchOutlined,
+  PlusOutlined,
+  UploadOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import CustomUpload from "../../CustomUpload/CustomUpload";
 import debounce from 'lodash/debounce';
-import './Teacher.css'
+import './Teacher.css';
+import CustomUpload from "../../CustomUpload/CustomUpload";
+import { handleSearch, handleReset, getColumnSearchProps } from '../../../../../Helper/searchHelpers';
+import { Form, Input, Modal, Select, Steps, Upload } from "antd";
 
-const { Title } = Typography;
-const { Option } = Select;
+const statusColorMap = {
+  "GVGD": "success",
+  "GVCV": "warning",
+  "ADMIN": "danger",
+};
 
 const Teacher = React.memo((props) => {
   const { setCollapsedNav, successNoti, errorNoti } = props;
@@ -29,11 +52,12 @@ const Teacher = React.memo((props) => {
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalTeachers, setTotalTeachers] = useState(0);
+  const searchInput = useRef(null);
 
   const [form] = Form.useForm();
+  const { Option } = Select;
 
   const fetchTeachers = useCallback(async (page = 1, size = 10) => {
-    setLoading(true);
     try {
       const response = await axiosAdmin.get(`/teacher?page=${page}&size=${size}`);
       if (response.data.teachers) {
@@ -45,7 +69,6 @@ const Teacher = React.memo((props) => {
       setLoading(false);
     } catch (error) {
       console.error("Error fetching teacher data:", error);
-      setLoading(false);
     }
   }, []);
 
@@ -112,6 +135,10 @@ const Teacher = React.memo((props) => {
     setIsUploadModalVisible(false);
     setIsEditModalVisible(false);
     form.resetFields();
+  };
+
+  const toggleTeacherCodeInput = () => {
+    setShowTeacherCodeInput(!showTeacherCodeInput);
   };
 
   const rowSelection = {
@@ -184,6 +211,54 @@ const Teacher = React.memo((props) => {
     }
   };
 
+  const handleDownloadTemplateExcelWithData = async () => {
+    try {
+      if (selectedRowKeys.length === 0) {
+        alert('Please select at least one teacher ID');
+        return;
+      }
+      const data = {
+        id: selectedRowKeys
+      }
+
+      console.log(data);
+      const response = await axiosAdmin.post('/teacher/template/data', { data: data }, {
+        responseType: 'blob'
+      });
+
+      if (response && response.data) {
+        const url = window.URL.createObjectURL(response.data);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Teacher.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        setCurrent(1);
+        handleUnSelect();
+      }
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  }
+
+  const handleSoftDelete = async () => {
+    try {
+      if (selectedRowKeys.length === 0) {
+        alert('Please select at least one teacher ID');
+        return;
+      }
+      const data = {
+        id: selectedRowKeys
+      }
+
+      await axiosAdmin.patch('/teachers/deletes', { data: data });
+      successNoti("Chuyển vào thùng rác thành công")
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  }
+
   const onChange = (current) => {
     setCurrent(current);
   };
@@ -206,77 +281,92 @@ const Teacher = React.memo((props) => {
 
   const columns = [
     {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
+      name: "Name",
+      uid: "name",
     },
     {
-      title: "Teacher Code",
-      dataIndex: "teacherCode",
-      key: "teacherCode",
+      name: "Teacher Code",
+      uid: "teacherCode",
     },
     {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
+      name: "Email",
+      uid: "email",
     },
     {
-      title: "Permission",
-      dataIndex: "permission",
-      key: "permission",
+      name: "Permission",
+      uid: "permission",
     },
     {
-      title: "Type Teacher",
-      dataIndex: "typeTeacher",
-      key: "typeTeacher",
+      name: "Type Teacher",
+      uid: "typeTeacher",
     },
     {
-      title: "",
-      key: "action",
-      render: (text, record) => (
-        <>
-          <Button icon={<EditOutlined />} className="mr-2" onClick={() => handleEditClick(record)} />
-          <Button icon={<DeleteOutlined />} />
-        </>
-      ),
-    },
+      name: "Actions",
+      uid: "actions",
+    }
   ];
 
-  const menu = (
-    <Menu>
-      <Menu.Item key="1">Option 1</Menu.Item>
-      <Menu.Item key="2">Option 2</Menu.Item>
-      <Menu.Item key="3">Option 3</Menu.Item>
-    </Menu>
-  );
-
-  const toggleTeacherCodeInput = () => {
-    setShowTeacherCodeInput(!showTeacherCodeInput);
+  const renderCell = (teacher, columnKey) => {
+    const cellValue = teacher[columnKey];
+    switch (columnKey) {
+      case "name":
+        return (
+          <User
+            avatarProps={{ radius: "lg" }}
+            description={teacher.teacherCode}
+            name={teacher.name}
+          />
+        );
+      case "permission":
+        return (
+          <Chip color={statusColorMap[teacher.typeTeacher]} size="sm" variant="flat">
+            {cellValue}
+          </Chip>
+        );
+      case "actions":
+        return (
+          <div className="flex items-center gap-2">
+            <Tooltip content="Edit">
+              <span className="cursor-pointer" onClick={() => handleEditClick(teacher)}>
+                <EditOutlined />
+              </span>
+            </Tooltip>
+            <Tooltip content="Delete">
+              <span className="cursor-pointer">
+                <DeleteOutlined />
+              </span>
+            </Tooltip>
+          </div>
+        );
+      default:
+        return cellValue;
+    }
   };
 
   return (
     <>
       <div>
         <div>
-          <Title level={2} className="text-center mb-5">
+          <h2 className="text-center mb-5">
             Danh sách giáo viên
-          </Title>
+          </h2>
           <div className="flex justify-between mx-3 mb-5">
-            <div className="flex gap-2">
-              <Button
-                type="primary"
+            <div className="flex justify-between gap-5">
+              <NextUIButton
+                color="primary"
                 icon={<PlusOutlined />}
                 onClick={handleAddClick}
               >
                 Add
-              </Button>
-              <Button
+              </NextUIButton>
+              <NextUIButton
                 icon={<UploadOutlined />}
                 onClick={handleUploadClick}
               >
                 Upload
-              </Button>
-              <Button icon={<FilterOutlined />}>Filter</Button>
+              </NextUIButton>
+            </div>
+            <div className="order-last">
               <Input
                 ref={searchInputRef}
                 placeholder="Search"
@@ -285,11 +375,6 @@ const Teacher = React.memo((props) => {
                 onChange={(e) => handleSearch(e.target.value)}
                 allowClear
               />
-            </div>
-            <div>
-              <Dropdown overlay={menu}>
-                <Button icon={<SettingOutlined />}>Settings</Button>
-              </Dropdown>
             </div>
           </div>
           <div>
@@ -300,56 +385,59 @@ const Teacher = React.memo((props) => {
                   Đã chọn {selectedRow.length} Teacher
                 </p>
                 <div className="flex items-center gap-2">
+                  <Tooltip
+                    content={`Tải file excel ${selectedRowKeys.length} giáo viên`}
+                  >
+                    <NextUIButton
+                      onClick={() => handleDownloadTemplateExcelWithData()}
+                    >
+                      <i className="fa-solid fa-download"></i>
+                    </NextUIButton>
+                  </Tooltip>
 
                   <Tooltip
-                    title={`Xoá ${selectedRowKeys.length} plo`}
-                    getPopupContainer={() =>
-                      document.querySelector(".Quick__Option")
-                    }
+                    content={`Xoá ${selectedRowKeys.length} giáo viên`}
                   >
-                    <Button isIconOnly variant="light" radius="full">
+                    <NextUIButton
+                      onClick={() => handleSoftDelete()}
+                    >
                       <i className="fa-solid fa-trash-can"></i>
-                    </Button>
+                    </NextUIButton>
                   </Tooltip>
-                  <Tooltip
-                    title="Bỏ chọn"
-                    getPopupContainer={() =>
-                      document.querySelector(".Quick__Option")
-                    }
-                  >
-                    <Button
-                      isIconOnly
-                      variant="light"
-                      radius="full"
+                  <Tooltip content="Bỏ chọn">
+                    <NextUIButton
                       onClick={() => {
                         handleUnSelect();
                       }}
                     >
                       <i className="fa-solid fa-xmark text-[18px]"></i>
-                    </Button>
+                    </NextUIButton>
                   </Tooltip>
                 </div>
               </div>
             )}
 
             <Table
-              rowSelection={{
-                type: "checkbox",
-                ...rowSelection,
-              }}
-              columns={columns}
-              dataSource={teachers.map(teacher => ({ ...teacher, key: teacher.teacher_id }))}
-              pagination={{
-                current: currentPage,
-                pageSize: pageSize,
-                total: totalTeachers,
-                onChange: (page, pageSize) => {
-                  setCurrentPage(page);
-                  setPageSize(pageSize);
-                },
-              }}
-              loading={loading}
-            />
+              aria-label="Teacher table"
+              css={{ minWidth: "100%" }}
+              selectionMode="multiple"
+              onSelectionChange={setSelectedRowKeys}
+            >
+              <TableHeader columns={columns}>
+                {(column) => (
+                  <TableColumn key={column.uid}>{column.name}</TableColumn>
+                )}
+              </TableHeader>
+              <TableBody items={teachers}>
+                {(teacher) => (
+                  <TableRow key={teacher.teacher_id}>
+                    {(columnKey) => (
+                      <TableCell>{renderCell(teacher, columnKey)}</TableCell>
+                    )}
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
         </div>
       </div>
@@ -369,7 +457,7 @@ const Teacher = React.memo((props) => {
           </Form.Item>
 
           <Form.Item>
-            <Button
+            <NextUIButton
               type="text"
               onClick={toggleTeacherCodeInput}>
               {showTeacherCodeInput ?
@@ -377,7 +465,7 @@ const Teacher = React.memo((props) => {
                 :
                 "Mã giáo viên tự động "
               }
-            </Button>
+            </NextUIButton>
           </Form.Item>
           {showTeacherCodeInput && (
             <Form.Item
@@ -451,9 +539,9 @@ const Teacher = React.memo((props) => {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit">
+            <NextUIButton type="primary" htmlType="submit">
               Submit
-            </Button>
+            </NextUIButton>
           </Form.Item>
         </Form>
       </Modal>
@@ -539,9 +627,9 @@ const Teacher = React.memo((props) => {
             </Form.Item>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit">
+              <NextUIButton type="primary" htmlType="submit">
                 Submit
-              </Button>
+              </NextUIButton>
             </Form.Item>
           </Form>
         )}
@@ -599,16 +687,16 @@ const Teacher = React.memo((props) => {
               <div className='w-full'>
                 <div className='p-10 w-full mt-2 h-auto border border-blue-500 flex flex-col items-center justify-center gap-2 rounded-lg'>
                   <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
-                  <Button className='w-full bg-primary flex items-center justify-center p-5 rounded-lg' onClick={handleDownloadTemplateExcel}>
+                  <NextUIButton className='w-full bg-primary flex items-center justify-center p-5 rounded-lg' onClick={handleDownloadTemplateExcel}>
                     <span>Tải xuống mẫu </span>
-                  </Button>
+                  </NextUIButton>
                 </div>
               </div>
               <div className='w-full'>
                 <div className='p-10 w-full mt-2 h-auto border border-blue-500 flex flex-col items-center justify-center gap-2 rounded-lg'>
                   <div><p className='w-full text-center'>Gửi lại mẫu</p></div>
                   <Upload {...propsUpload} >
-                    <Button icon={<UploadOutlined />} className='text-center items-center rounded-lg px-10 h-10'>Select File</Button>
+                    <NextUIButton icon={<UploadOutlined />} className='text-center items-center rounded-lg px-10 h-10'>Select File</NextUIButton>
                   </Upload>
                 </div>
               </div>

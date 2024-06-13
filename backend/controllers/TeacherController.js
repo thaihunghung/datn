@@ -187,6 +187,29 @@ const TeacherController = {
     }
   },
 
+  deleteTeachers: async (req, res) => {
+    try {
+      const { data } = req.body; // Extract data from the request body
+      const { id } = data; // Extract the array of IDs from data
+
+      if (!Array.isArray(id) || id.length === 0) {
+          return res.status(400).json({ message: 'Invalid data format. Expected an array of IDs.' });
+      }
+
+      console.log('Deleting teachers with IDs:', id); // Debugging log
+
+      await TeacherModel.update(
+          { isDelete: 1 },
+          { where: { teacher_id: id } }
+      ); 
+
+      res.status(200).json({ message: 'Teachers have been deleted.' });
+  } catch (error) {
+      console.error('Error deleting teachers:', error);
+      res.status(500).json({ message: 'Server error' });
+  }
+  },
+
   restoreTeacher: async (req, res) => {
     try {
       const teacherId = req.params.id;
@@ -227,14 +250,14 @@ const TeacherController = {
       const { id } = data;
 
       const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('Students Form');
+      const worksheet = workbook.addWorksheet('Teacher');
 
-      const students = await TeacherModel.findAll({
-        attributes: ['teacher_id', 'teacherCode', 'studentCode', 'email', 'name', 'isDelete'],
+      const teachers = await TeacherModel.findAll({
+        attributes: ['teacher_id', 'teacherCode', 'email', 'name', 'typeTeacher'],
         where: {
           isDelete: false,
           isBlock: false,
-          student_id: id
+          teacher_id: id
         }
       });
 
@@ -242,19 +265,20 @@ const TeacherController = {
         { header: 'Mã giáo viên', key: 'teacherCode', width: 15 },
         { header: 'Tên giáo viên', key: 'name', width: 32 },
         { header: 'Email', key: 'email', width: 30 },
+        { header: 'Loại giáo viên', key: 'typeTeacher', width: 20 },
       ];
 
-      students.forEach(student => {
+      teachers.forEach(teacher => {
         worksheet.addRow({
-          teacherCode: student.class.teacherCode,
-          name: student.name,
-          email: student.email,
-          // typeTeacher: student.typeTeacher,
+          teacherCode: teacher.teacherCode.toString(),
+          name: teacher.name,
+          email: teacher.email,
+          typeTeacher: teacher.typeTeacher,
         });
       });
 
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.setHeader('Content-Disposition', 'attachment; filename="StudentsForm.xlsx"');
+      res.setHeader('Content-Disposition', 'attachment; filename="Teacher.xlsx"');
       await workbook.xlsx.write(res);
       res.end();
     } catch (error) {
