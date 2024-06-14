@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Table,
   TableHeader,
@@ -6,179 +6,271 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Tooltip,
+  Input,
+  Button,
+  DropdownTrigger,
+  Dropdown,
+  DropdownMenu,
+  DropdownItem,
   Chip,
   User,
-  Button as NextUIButton,
+  Pagination,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Select,
+  SelectItem,
+  Divider,
+  Tooltip,
 } from "@nextui-org/react";
-import {
-  SearchOutlined,
-  PlusOutlined,
-  UploadOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  InfoCircleOutlined,
-} from "@ant-design/icons";
+import axios from "axios";
+import { columns, fetchTeachersData, permissions } from "./Data";
+import { capitalize } from "../../Utils/capitalize";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import debounce from 'lodash/debounce';
-import './Teacher.css';
-import CustomUpload from "../../CustomUpload/CustomUpload";
-import { handleSearch, handleReset, getColumnSearchProps } from '../../../../../Helper/searchHelpers';
-import { Form, Input, Modal, Select, Steps, Upload } from "antd";
 
 const statusColorMap = {
-  "GVGD": "success",
-  "GVCV": "warning",
-  "ADMIN": "danger",
+  active: "success",
+  paused: "danger",
+  vacation: "warning",
 };
 
-const Teacher = React.memo((props) => {
+const INITIAL_VISIBLE_COLUMNS = ["name", "teacherCode", "permissionName", "typeTeacher", "actions"];
+
+export default function App(props) {
   const { setCollapsedNav, successNoti, errorNoti } = props;
-  const [filterVisible, setFilterVisible] = useState(false);
-  const [searchMode, setSearchMode] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [filterValue, setFilterValue] = useState("");
+  const [selectedKeys, setSelectedKeys] = useState(new Set([]));
+  const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
+  const [statusFilter, setStatusFilter] = useState(new Set(permissions.map(p => p.id)));
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [sortDescriptor, setSortDescriptor] = useState({
+    column: "name",
+    direction: "ascending",
+  });
+  const [page, setPage] = useState(1);
   const [teachers, setTeachers] = useState([]);
-  const [isAddModalVisible, setIsAddModalVisible] = useState(false);
-  const [isUploadModalVisible, setIsUploadModalVisible] = useState(false);
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [showTeacherCodeInput, setShowTeacherCodeInput] = useState(false);
-  const [currentTeacher, setCurrentTeacher] = useState(null);
-  const searchInputRef = useRef(null);
-  const [permission, setPermission] = useState(1);
-  const [current, setCurrent] = useState(0);
-  const [fileList, setFileList] = useState([]);
-  const [selectedRow, setSelectedRow] = useState([]);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [pageSize, setPageSize] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
   const [totalTeachers, setTotalTeachers] = useState(0);
-  const searchInput = useRef(null);
+  const [currentTeacher, setCurrentTeacher] = useState(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("");
+  const [confirmAction, setConfirmAction] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [newTeacher, setNewTeacher] = useState({
+    name: "",
+    email: "",
+    permission: "",
+    typeTeacher: "",
+  });
+  const [editTeacher, setEditTeacher] = useState({
+    id: "",
+    name: "",
+    email: "",
+    permission: "",
+    typeTeacher: "",
+  });
 
-  const [form] = Form.useForm();
-  const { Option } = Select;
+  const hasSearchFilter = Boolean(filterValue);
 
-  const fetchTeachers = useCallback(async (page = 1, size = 10) => {
-    try {
-      const response = await axiosAdmin.get(`/teacher?page=${page}&size=${size}`);
-      if (response.data.teachers) {
-        setTeachers(response.data.teachers);
-        setTotalTeachers(response.data.total);
-      } else {
-        setTeachers(response.data);
-      }
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching teacher data:", error);
+  useEffect(() => {
+    const loadTeachers = async () => {
+      const { teachers, total } = await fetchTeachersData(page, rowsPerPage);
+      setTeachers(teachers);
+      setTotalTeachers(total);
+    };
+
+    loadTeachers();
+  }, [page, rowsPerPage]);
+
+  const headerColumns = useMemo(() => {
+    if (visibleColumns === "all") return columns;
+
+    return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
+  }, [visibleColumns]);
+
+  const filteredItems = useMemo(() => {
+    let filteredTeachers = [...teachers];
+    console.log("aaa", filteredTeachers)
+    console.log("aaar", statusFilter)
+
+
+    if (hasSearchFilter) {
+      filteredTeachers = filteredTeachers.filter((teacher) =>
+        teacher.name.toLowerCase().includes(filterValue.toLowerCase())
+      );
+    }
+    if (statusFilter.size !== permissions.length) {
+      console.log("dd", statusFilter)
+      filteredTeachers = filteredTeachers.filter((teacher) =>
+        Array.from(statusFilter).includes(teacher.permission.toString())
+    );
+    console.log("xx", filteredTeachers.permission)
+    }
+
+    return filteredTeachers;
+  }, [teachers, filterValue, statusFilter]);
+
+  const pages = Math.ceil(totalTeachers / rowsPerPage);
+
+  const sortedItems = useMemo(() => {
+    return [...filteredItems].sort((a, b) => {
+      const first = a[sortDescriptor.column];
+      const second = b[sortDescriptor.column];
+      const cmp = first < second ? -1 : first > second ? 1 : 0;
+
+      return sortDescriptor.direction === "descending" ? -cmp : cmp;
+    });
+  }, [sortDescriptor, filteredItems]);
+
+  const renderCell = useCallback((teacher, columnKey) => {
+    const cellValue = teacher[columnKey];
+
+    switch (columnKey) {
+      case "name":
+        return (
+          <User
+            avatarProps={{ radius: "lg", src: teacher.avatar }}
+            description={teacher.email}
+            name={cellValue}
+          >
+            {teacher.email}
+          </User>
+        );
+      case "role":
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize">{cellValue}</p>
+            <p className="text-bold text-tiny capitalize text-default-400">{teacher.team}</p>
+          </div>
+        );
+      case "permissionName":
+        const permissionName = permissions.find(p => p.id === cellValue)?.name || cellValue;
+        return <span>{permissionName}</span>;
+      case "permission":
+        return (
+          <Chip className="capitalize" color={statusColorMap[teacher.status]} size="sm" variant="flat">
+            {cellValue}
+          </Chip>
+        );
+      case "actions":
+        return (
+          <div className="relative flex justify-end items-center gap-2">
+            <Dropdown>
+              <DropdownTrigger>
+                <Button isIconOnly size="sm" variant="light">
+                  <i className="fa-solid fa-ellipsis-vertical"></i>
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu>
+                <DropdownItem>View</DropdownItem>
+                <DropdownItem onClick={() => handleEditClick(teacher)}>Edit</DropdownItem>
+                <DropdownItem onClick={() => handleDeleteClick(teacher)}>Delete</DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+        );
+      default:
+        return cellValue;
     }
   }, []);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 1024) {
-        setCollapsedNav(true);
-      } else {
-        setCollapsedNav(false);
-      }
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [setCollapsedNav]);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (searchInputRef.current && !searchInputRef.current.input.contains(event.target)) {
-        setSearchMode(false);
-      }
-    };
-
-    if (searchMode) {
-      document.addEventListener("mousedown", handleClickOutside);
-      if (searchInputRef.current) {
-        searchInputRef.current.focus();
-      }
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
+  const onNextPage = useCallback(() => {
+    if (page < pages) {
+      setPage(page + 1);
     }
+  }, [page, pages]);
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [searchMode]);
+  const onPreviousPage = useCallback(() => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  }, [page]);
 
-  useEffect(() => {
-    fetchTeachers(currentPage, pageSize);
-  }, [fetchTeachers, currentPage, pageSize]);
+  const onRowsPerPageChange = useCallback((e) => {
+    setRowsPerPage(Number(e.target.value));
+    setPage(1);
+  }, []);
 
-  const handleSearch = debounce((value) => {
-    console.log("text ", value);
-  }, 300);
+  const onSearchChange = useCallback((value) => {
+    if (value) {
+      setFilterValue(value);
+      setPage(1);
+    } else {
+      setFilterValue("");
+    }
+  }, []);
+
+  const onClear = useCallback(() => {
+    setFilterValue("");
+    setPage(1);
+  }, []);
 
   const handleAddClick = () => {
-    setIsAddModalVisible(true);
+    setIsAddModalOpen(true);
   };
 
-  const handleUploadClick = () => {
-    setIsUploadModalVisible(true);
+  const handleDeleteClick = async () => {
+    try {
+      const selectedIds = Array.from(selectedKeys).map((key) => ({ id: key }));
+      const response = await axiosAdmin.patch('/teachers/delete', { data: selectedIds });
+      if (response.status === 200) {
+        const { teachers, total } = await fetchTeachersData(page, rowsPerPage);
+        setTeachers(teachers);
+        setTotalTeachers(total);
+        setIsAddModalOpen(false);
+        successNoti("Xóa thành công");
+        handleClearSelection();
+      } else {
+        console.error("Failed to delete teacher");
+      }
+    } catch (error) {
+      console.error('Error deleting teacher:', error);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsAddModalOpen(false);
+    setIsEditModalOpen(false);
   };
 
   const handleEditClick = (teacher) => {
     setCurrentTeacher(teacher);
-    form.setFieldsValue(teacher);
-    setIsEditModalVisible(true);
+    setEditTeacher(teacher); // Set the current teacher data to the editTeacher state
+    setIsEditModalOpen(true);
   };
 
-  const handleCancel = () => {
-    setIsAddModalVisible(false);
-    setIsUploadModalVisible(false);
-    setIsEditModalVisible(false);
-    form.resetFields();
-  };
-
-  const toggleTeacherCodeInput = () => {
-    setShowTeacherCodeInput(!showTeacherCodeInput);
-  };
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (selectedRowKeys, selectedRows) => {
-      setSelectedRow(selectedRows);
-      setSelectedRowKeys(selectedRowKeys);
-      console.log(`selectedRowKeys: ${selectedRowKeys}`);
-      console.log('selectedRows: ', selectedRows)
-    },
-  };
-
-  const handleUnSelect = () => {
-    setSelectedRowKeys([]);
-    setSelectedRow([]);
-  };
-
-  const handleFormSubmit = async (values) => {
+  const handleFormSubmit = async (event) => {
+    event.preventDefault();
     try {
-      await axiosAdmin.post('/teacher', values);
-      successNoti("Teacher added successfully");
-      setIsAddModalVisible(false);
-      fetchTeachers(currentPage, pageSize);
+      const response = await axiosAdmin.post("/teacher", newTeacher);
+      if (response.status === 200) {
+        const { teachers, total } = await fetchTeachersData(page, rowsPerPage);
+        setTeachers(teachers);
+        setTotalTeachers(total);
+        handleClearSelection();
+      } else {
+        console.error("Failed to add teacher");
+      }
     } catch (error) {
       console.error("Error adding teacher:", error);
-      if (error.response && error.response.data && error.response.data.message) {
-        errorNoti(error.response.data.message);
-      } else {
-        errorNoti("Error adding teacher");
-      }
     }
   };
 
-  const handleEditFormSubmit = async (values) => {
+  const handleEditFormSubmit = async (values, teacher_id) => {
+    if (!teacher_id) {
+      console.error("No teacher selected for editing");
+      return;
+    }
+  
     try {
-      const res = await axiosAdmin.put(`/teacher/${currentTeacher.teacher_id}`, { data: values });
-      console.log("id", currentTeacher.teacher_id)
+      const res = await axiosAdmin.put(`/teacher/${teacher_id}`, { data: values });
       successNoti(res.data.message);
-      setIsEditModalVisible(false);
-      fetchTeachers(currentPage, pageSize);
+      setIsEditModalOpen(false);
+      const { teachers, total } = await fetchTeachersData(page, rowsPerPage);
+      setTeachers(teachers);
+      setTotalTeachers(total);
     } catch (error) {
       console.error("Error updating teacher:", error);
       if (error.response && error.response.data && error.response.data.message) {
@@ -189,529 +281,532 @@ const Teacher = React.memo((props) => {
     }
   };
 
-  const handleDownloadTemplateExcel = async () => {
-    console.log("vao")
+  const handleBlockClick = async () => {
     try {
-      const response = await axiosAdmin.get('/teacher/template/excel', {
+      const selectedIds = Array.from(selectedKeys).map((key) => ({ id: key }));
+      const response = await axiosAdmin.patch('/teachers/block', { data: selectedIds });
+      if (response.status === 200) {
+        const { teachers, total } = await fetchTeachersData(page, rowsPerPage);
+        setTeachers(teachers);
+        setTotalTeachers(total);
+        setIsAddModalOpen(false);
+        successNoti("Chặn thành công");
+        handleClearSelection();
+      } else {
+        console.error("Failed to block teacher");
+      }
+    } catch (error) {
+      console.error('Error blocking teacher:', error);
+    }
+  };
+
+  const handleDownloadClick = async () => {
+    try {
+      const selectedIds = Array.from(selectedKeys).map((key) => ({ id: key }));
+      const response = await axiosAdmin.post('/teacher/template/data', { data: selectedIds }, {
         responseType: 'blob'
       });
 
       if (response && response.data) {
-        const url = window.URL.createObjectURL(response.data);
+        const url = window.URL.createObjectURL(new Blob([response.data]));
         const a = document.createElement('a');
         a.href = url;
         a.download = 'Teacher.xlsx';
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
-        setCurrent(1);
+        setPage(1);
+        handleClearSelection();
       }
     } catch (error) {
       console.error('Error downloading file:', error);
     }
   };
 
-  const handleDownloadTemplateExcelWithData = async () => {
-    try {
-      if (selectedRowKeys.length === 0) {
-        alert('Please select at least one teacher ID');
-        return;
-      }
-      const data = {
-        id: selectedRowKeys
-      }
-
-      console.log(data);
-      const response = await axiosAdmin.post('/teacher/template/data', { data: data }, {
-        responseType: 'blob'
-      });
-
-      if (response && response.data) {
-        const url = window.URL.createObjectURL(response.data);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'Teacher.xlsx';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        setCurrent(1);
-        handleUnSelect();
-      }
-    } catch (error) {
-      console.error('Error downloading file:', error);
-    }
-  }
-
-  const handleSoftDelete = async () => {
-    try {
-      if (selectedRowKeys.length === 0) {
-        alert('Please select at least one teacher ID');
-        return;
-      }
-      const data = {
-        id: selectedRowKeys
-      }
-
-      await axiosAdmin.patch('/teachers/deletes', { data: data });
-      successNoti("Chuyển vào thùng rác thành công")
-    } catch (error) {
-      console.error('Error downloading file:', error);
-    }
-  }
-
-  const onChange = (current) => {
-    setCurrent(current);
+  const handleClearSelection = () => {
+    setSelectedKeys(new Set([]));
   };
 
-  const propsUpload = {
-    onRemove: (file) => {
-      setFileList((prevFileList) => {
-        const index = prevFileList.indexOf(file);
-        const newFileList = prevFileList.slice();
-        newFileList.splice(index, 1);
-        return newFileList;
-      });
-    },
-    beforeUpload: (file) => {
-      setFileList((prevFileList) => [...prevFileList, file]);
-      return false;
-    },
-    fileList,
-  };
-
-  const columns = [
-    {
-      name: "Name",
-      uid: "name",
-    },
-    {
-      name: "Teacher Code",
-      uid: "teacherCode",
-    },
-    {
-      name: "Email",
-      uid: "email",
-    },
-    {
-      name: "Permission",
-      uid: "permission",
-    },
-    {
-      name: "Type Teacher",
-      uid: "typeTeacher",
-    },
-    {
-      name: "Actions",
-      uid: "actions",
-    }
-  ];
-
-  const renderCell = (teacher, columnKey) => {
-    const cellValue = teacher[columnKey];
-    switch (columnKey) {
-      case "name":
-        return (
-          <User
-            avatarProps={{ radius: "lg" }}
-            description={teacher.teacherCode}
-            name={teacher.name}
+  const topContent = useMemo(() => {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-between gap-3 items-end">
+          <Input
+            isClearable
+            className="w-full sm:max-w-[44%]"
+            placeholder="Search by name..."
+            startContent={<i className="fa-solid fa-magnifying-glass"></i>}
+            value={filterValue}
+            onClear={() => onClear()}
+            onValueChange={onSearchChange}
           />
-        );
-      case "permission":
-        return (
-          <Chip color={statusColorMap[teacher.typeTeacher]} size="sm" variant="flat">
-            {cellValue}
-          </Chip>
-        );
-      case "actions":
-        return (
-          <div className="flex items-center gap-2">
-            <Tooltip content="Edit">
-              <span className="cursor-pointer" onClick={() => handleEditClick(teacher)}>
-                <EditOutlined />
-              </span>
+          <div className="flex gap-3">
+            <Dropdown>
+              <DropdownTrigger className="hidden sm:flex">
+                <Button endContent={<i className="fa-solid fa-chevron-down"></i>} variant="flat">
+                  Permission
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                disallowEmptySelection
+                aria-label="Table Columns"
+                closeOnSelect={false}
+                selectedKeys={statusFilter}
+                selectionMode="multiple"
+                onSelectionChange={(keys) => {
+                  setStatusFilter(keys === "all" ? new Set(permissions.map(p => p.id)) : keys);
+                }}
+              >
+                {permissions.map((status) => (
+                  <DropdownItem key={status.id} className="capitalize">
+                    {capitalize(status.name)}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+            <Dropdown>
+              <DropdownTrigger className="hidden sm:flex">
+                <Button endContent={<i className="fa-solid fa-chevron-down"></i>} variant="flat">
+                  Columns
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                disallowEmptySelection
+                aria-label="Table Columns"
+                closeOnSelect={false}
+                selectedKeys={visibleColumns}
+                selectionMode="multiple"
+                onSelectionChange={setVisibleColumns}
+              >
+                {columns.map((column) => (
+                  <DropdownItem key={column.uid} className="capitalize">
+                    {capitalize(column.name)}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+            <Button color="primary" endContent={<i className="fa-solid fa-plus"></i>} onClick={handleAddClick}>
+              Add New
+            </Button>
+          </div>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-default-400 text-small">Total {totalTeachers} teachers</span>
+          <label className="flex items-center text-default-400 text-small">
+            Rows per page:
+            <select
+              className="bg-transparent outline-none text-default-400 text-small"
+              onChange={onRowsPerPageChange}
+            >
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="15">15</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    );
+  }, [
+    filterValue,
+    statusFilter,
+    visibleColumns,
+    onRowsPerPageChange,
+    totalTeachers,
+    onSearchChange,
+    hasSearchFilter,
+  ]);
+
+  const bottomContent = useMemo(() => {
+    return (
+      <div className="py-2 px-2 flex justify-between items-center">
+        <span className="w-[30%] text-small text-default-400">
+          {selectedKeys === "all"
+            ? "All items selected"
+            : `${selectedKeys.size} of ${filteredItems.length} selected`}
+        </span>
+        <Pagination
+          isCompact
+          showControls
+          showShadow
+          color="primary"
+          page={page}
+          total={pages}
+          onChange={setPage}
+        />
+        <div className="hidden sm:flex w-[30%] justify-end gap-2">
+          <Button isDisabled={page <= 1} size="sm" variant="flat" onPress={onPreviousPage}>
+            Previous
+          </Button>
+          <Button isDisabled={page >= pages} size="sm" variant="flat" onPress={onNextPage}>
+            Next
+          </Button>
+        </div>
+      </div>
+    );
+  }, [selectedKeys, filteredItems.length, page, pages, hasSearchFilter]);
+
+  const selectedItemsBar = useMemo(() => {
+    return (
+      selectedKeys.size > 0 && (
+        <div className="flex justify-between items-center text-[#FEFEFE] bg-[#FF8077] py-2 px-4 rounded-lg mb-4">
+          <div>{selectedKeys.size} selected</div>
+          <div className="flex gap-3 ">
+            <Tooltip showArrow={true} content={`Tải file excel ${selectedKeys.size} giáo viên`}>
+              <Button className="text-[#FEFEFE]" variant="light" onClick={handleDownloadClick}>
+                Download
+              </Button>
             </Tooltip>
-            <Tooltip content="Delete">
-              <span className="cursor-pointer">
-                <DeleteOutlined />
-              </span>
+            <Tooltip showArrow={true} content={`Chặn ${selectedKeys.size} giáo viên`}>
+              <Button className="text-[#FEFEFE]" variant="light" onClick={handleBlockClick}>
+                Block
+              </Button>
+            </Tooltip>
+            <Tooltip showArrow={true} content={`Chuyển ${selectedKeys.size} vào thùng rác`}>
+              <Button className="text-[#FEFEFE]" variant="light" color="danger" onClick={() => handleDeleteClick()}>
+                Delete
+              </Button>
+            </Tooltip>
+            <Tooltip showArrow={true} content="Bỏ chọn">
+              <Button className="text-[#FEFEFE]" variant="light" onClick={handleClearSelection}>
+                X
+              </Button>
             </Tooltip>
           </div>
-        );
-      default:
-        return cellValue;
-    }
-  };
+        </div>
+      )
+    );
+  }, [selectedKeys, handleDownloadClick, handleBlockClick, handleDeleteClick, handleClearSelection]);
 
   return (
     <>
-      <div>
-        <div>
-          <h2 className="text-center mb-5">
-            Danh sách giáo viên
-          </h2>
-          <div className="flex justify-between mx-3 mb-5">
-            <div className="flex justify-between gap-5">
-              <NextUIButton
-                color="primary"
-                icon={<PlusOutlined />}
-                onClick={handleAddClick}
-              >
-                Add
-              </NextUIButton>
-              <NextUIButton
-                icon={<UploadOutlined />}
-                onClick={handleUploadClick}
-              >
-                Upload
-              </NextUIButton>
-            </div>
-            <div className="order-last">
-              <Input
-                ref={searchInputRef}
-                placeholder="Search"
-                prefix={<SearchOutlined />}
-                className="w-72 ml-2"
-                onChange={(e) => handleSearch(e.target.value)}
-                allowClear
-              />
-            </div>
-          </div>
-          <div>
-            {selectedRowKeys.length !== 0 && (
-              <div className="Quick__Option flex justify-between items-center sticky top-0 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
-                <p className="text-sm font-medium">
-                  <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
-                  Đã chọn {selectedRow.length} Teacher
-                </p>
-                <div className="flex items-center gap-2">
-                  <Tooltip
-                    content={`Tải file excel ${selectedRowKeys.length} giáo viên`}
-                  >
-                    <NextUIButton
-                      onClick={() => handleDownloadTemplateExcelWithData()}
-                    >
-                      <i className="fa-solid fa-download"></i>
-                    </NextUIButton>
-                  </Tooltip>
-
-                  <Tooltip
-                    content={`Xoá ${selectedRowKeys.length} giáo viên`}
-                  >
-                    <NextUIButton
-                      onClick={() => handleSoftDelete()}
-                    >
-                      <i className="fa-solid fa-trash-can"></i>
-                    </NextUIButton>
-                  </Tooltip>
-                  <Tooltip content="Bỏ chọn">
-                    <NextUIButton
-                      onClick={() => {
-                        handleUnSelect();
-                      }}
-                    >
-                      <i className="fa-solid fa-xmark text-[18px]"></i>
-                    </NextUIButton>
-                  </Tooltip>
-                </div>
-              </div>
-            )}
-
-            <Table
-              aria-label="Teacher table"
-              css={{ minWidth: "100%" }}
-              selectionMode="multiple"
-              onSelectionChange={setSelectedRowKeys}
-            >
-              <TableHeader columns={columns}>
-                {(column) => (
-                  <TableColumn key={column.uid}>{column.name}</TableColumn>
-                )}
-              </TableHeader>
-              <TableBody items={teachers}>
-                {(teacher) => (
-                  <TableRow key={teacher.teacher_id}>
-                    {(columnKey) => (
-                      <TableCell>{renderCell(teacher, columnKey)}</TableCell>
-                    )}
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-      </div>
-      <Modal title="Thêm giáo viên mới" open={isAddModalVisible} onCancel={handleCancel} footer={null}>
-        <Form
-          name="add_teacher"
-          onFinish={handleFormSubmit}
-          layout="vertical"
-        >
-          <Form.Item
-            hasFeedback
-            label="Name"
-            name="name"
-            rules={[{ required: true, message: 'Vui lòng nhập tên giáo viên!' }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item>
-            <NextUIButton
-              type="text"
-              onClick={toggleTeacherCodeInput}>
-              {showTeacherCodeInput ?
-                "Nhập mã giáo viên theo ý bạn"
-                :
-                "Mã giáo viên tự động "
-              }
-            </NextUIButton>
-          </Form.Item>
-          {showTeacherCodeInput && (
-            <Form.Item
-              hasFeedback
-              label="Teacher Code"
-              name="teacherCode"
-              count={{
-                show: true,
-                max: 10,
-              }}
-              rules={[
-                { required: true, message: 'Vui lòng nhâp mã giáo viên!' },
-              ]}
-              tooltip={{
-                title: 'Mã giáo viên',
-                icon: <InfoCircleOutlined />,
-              }}
-            >
-              <Input />
-            </Form.Item>
-          )}
-
-          <Form.Item
-            hasFeedback
-            label="Email"
-            name="email"
-            rules={[
-              { required: true, message: 'Please input the email!' },
-              { type: 'email', message: 'The input is not valid email!' }
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            hasFeedback
-            label="Password"
-            name="password"
-            rules={[
-              { required: true, message: 'Please input the password!' },
-              { min: 6, max: 8, message: 'Password must be between 6 and 8 characters' }
-            ]}
-          >
-            <Input.Password />
-          </Form.Item>
-          <Form.Item
-            hasFeedback
-            label="Permission"
-            name="permission"
-            initialValue={1}
-            rules={[{
-              required: true,
-              message: 'Please input the permission!',
-            }]}
-          >
-            <Select>
-              <Option value="1">Giáo viên cố vấn</Option>
-              <Option value="2">Giáo viên giảng dạy</Option>
-              <Option value="3">Admin</Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            label="Type Teacher"
-            name="typeTeacher"
-            initialValue="GVGD"
-            rules={[{ required: true, message: 'Please select the type of teacher!' }]}
-          >
-            <Select>
-              <Option value="GVCV">GVCV</Option>
-              <Option value="GVGD">GVGD</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item>
-            <NextUIButton type="primary" htmlType="submit">
-              Submit
-            </NextUIButton>
-          </Form.Item>
-        </Form>
-      </Modal>
-      <Modal title="Chỉnh sửa giáo viên" open={isEditModalVisible} onCancel={handleCancel} footer={null}>
-        {currentTeacher && (
-          <Form
-            form={form}
-            name="edit_teacher"
-            onFinish={handleEditFormSubmit}
-            layout="vertical"
-            initialValues={currentTeacher}
-          >
-            <Form.Item
-              hasFeedback
-              label="Name"
-              name="name"
-              rules={[{ required: true, message: 'Vui lòng nhập tên giáo viên!' }]}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              hasFeedback
-              label="Teacher Code"
-              name="teacherCode"
-              rules={[
-                { required: true, message: 'Vui lòng nhâp mã giáo viên!' },
-              ]}
-              tooltip={{
-                title: 'Mã giáo viên',
-                icon: <InfoCircleOutlined />,
-              }}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              hasFeedback
-              label="Email"
-              name="email"
-              rules={[
-                { required: true, message: 'Please input the email!' },
-                { type: 'email', message: 'The input is not valid email!' }
-              ]}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              hasFeedback
-              label="Password"
-              name="password"
-              rules={[
-                { required: true, message: 'Please input the password!' },
-                { min: 6, max: 8, message: 'Password must be between 6 and 8 characters' }
-              ]}
-            >
-              <Input.Password />
-            </Form.Item>
-            <Form.Item
-              hasFeedback
-              label="Permission"
-              name="permission"
-              rules={[{
-                required: true,
-                message: 'Please input the permission!',
-              }]}
-            >
-              <Select>
-                <Option value="1">Giáo viên cố vấn</Option>
-                <Option value="2">Giáo viên giảng dạy</Option>
-                <Option value="3">Admin</Option>
-              </Select>
-            </Form.Item>
-            <Form.Item
-              label="Type Teacher"
-              name="typeTeacher"
-              rules={[{ required: true, message: 'Please select the type of teacher!' }]}
-            >
-              <Select>
-                <Option value="GVCV">GVCV</Option>
-                <Option value="GVGD">GVGD</Option>
-              </Select>
-            </Form.Item>
-
-            <Form.Item>
-              <NextUIButton type="primary" htmlType="submit">
-                Submit
-              </NextUIButton>
-            </Form.Item>
-          </Form>
-        )}
-      </Modal>
-      <Modal
-        title="Upload CSV"
-        open={isUploadModalVisible}
-        onCancel={handleCancel} footer={null}
+      {selectedItemsBar}
+      <Table
+        className="text-left"
+        aria-label="Example table with custom cells, pagination and sorting"
+        isHeaderSticky
+        bottomContent={bottomContent}
+        bottomContentPlacement="outside"
+        classNames={{
+          wrapper: "max-h-[382px]",
+        }}
+        selectedKeys={selectedKeys}
+        selectionMode="multiple"
+        sortDescriptor={sortDescriptor}
+        topContent={topContent}
+        topContentPlacement="outside"
+        onSelectionChange={setSelectedKeys}
+        onSortChange={setSortDescriptor}
       >
-        <div className="flex flex-col items-center w-full m-3 rounded-lg">
-          <div className='w-full grid grid-cols-1 gap-2 justify-center px-2 sm:px-4 lg:px-5 xl:px-5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2'>
-            <div className='hidden lg:block xl:block mt-14'>
-              <Steps
-                direction="vertical"
-                current={current}
-                onChange={onChange}
-                items={[
-                  {
-                    title: 'Bước 1',
-                    description: 'Tải mẫu',
-                  },
-                  {
-                    title: 'Bước 2',
-                    description: 'Upload file',
-                  },
-                  {
-                    title: 'Bước 3',
-                    description: 'Thành công',
-                  },
-                ]}
-              />
-            </div>
-            <div className='hidden sm:block lg:hidden xl:hidden'>
-              <Steps
-                current={current}
-                onChange={onChange}
-                direction="vertical"
-                items={[
-                  {
-                    title: 'Bước 1',
-                    description: 'Tải mẫu',
-                  },
-                  {
-                    title: 'Bước 2',
-                    description: 'Upload file',
-                  },
-                  {
-                    title: 'Bước 3',
-                    description: 'Thành công',
-                  },
-                ]}
-              />
-            </div>
-            <div className='flex flex-col w-full sm:gap-0 sm:w-full lg:flex-col xl:flex-col justify-around'>
-              <div className='w-full'>
-                <div className='p-10 w-full mt-2 h-auto border border-blue-500 flex flex-col items-center justify-center gap-2 rounded-lg'>
-                  <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
-                  <NextUIButton className='w-full bg-primary flex items-center justify-center p-5 rounded-lg' onClick={handleDownloadTemplateExcel}>
-                    <span>Tải xuống mẫu </span>
-                  </NextUIButton>
-                </div>
-              </div>
-              <div className='w-full'>
-                <div className='p-10 w-full mt-2 h-auto border border-blue-500 flex flex-col items-center justify-center gap-2 rounded-lg'>
-                  <div><p className='w-full text-center'>Gửi lại mẫu</p></div>
-                  <Upload {...propsUpload} >
-                    <NextUIButton icon={<UploadOutlined />} className='text-center items-center rounded-lg px-10 h-10'>Select File</NextUIButton>
-                  </Upload>
-                </div>
-              </div>
-              <div className='w-full'>
-                <div className='p-10 w-full mt-2 h-auto border border-blue-500 flex flex-col items-center justify-center gap-2 rounded-lg'>
-                  <div><p className='w-full text-center'>Lưu Dữ liệu</p></div>
-                  <CustomUpload endpoint={'teacher'} method="POST" setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Modal>
+        <TableHeader columns={headerColumns}>
+          {(column) => (
+            <TableColumn
+              key={column.uid}
+              align={column.uid === "actions" ? "center" : "start"}
+              allowsSorting={column.sortable}
+            >
+              {column.name}
+            </TableColumn>
+          )}
+        </TableHeader>
+        <TableBody emptyContent={"No teachers found"} items={sortedItems}>
+          {(item) => (
+            <TableRow key={item.teacher_id}>
+              {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+      <ConfirmAction
+        isOpen={isConfirmOpen}
+        onOpenChange={setIsConfirmOpen}
+        onConfirm={confirmAction}
+        message={confirmMessage}
+      />
+      <AddTeacherModal
+        isOpen={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        onSubmit={handleFormSubmit}
+        newTeacher={newTeacher}
+        setNewTeacher={setNewTeacher}
+      />
+      <EditTeacherModal
+        isOpen={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        onSubmit={handleEditFormSubmit}
+        editTeacher={editTeacher}
+        setEditTeacher={setEditTeacher}
+      />
     </>
   );
-});
+}
 
-export default Teacher;
+function ConfirmAction({ isOpen, onOpenChange, onConfirm, message }) {
+  const handleOnOKClick = (onClose) => {
+    onClose();
+    if (typeof onConfirm === 'function') {
+      onConfirm();
+    }
+  }
+  return (
+    <Modal
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      motionProps={{
+        variants: {
+          enter: {
+            y: 0,
+            opacity: 1,
+            transition: {
+              duration: 0.2,
+              ease: "easeOut",
+            },
+          },
+          exit: {
+            y: -20,
+            opacity: 0,
+            transition: {
+              duration: 0.1,
+              ease: "easeIn",
+            },
+          },
+        }
+      }}
+    >
+      <ModalContent>
+        {(onClose) => (
+          <>
+            <ModalHeader>Warning</ModalHeader>
+            <ModalBody>
+              <p className="text-[16px]">
+                {message}
+              </p>
+            </ModalBody>
+            <ModalFooter>
+              <Button variant="light" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button color="danger" className="font-medium" onClick={() => handleOnOKClick(onClose)}>
+                Ok
+              </Button>
+            </ModalFooter>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
+  );
+}
+
+function AddTeacherModal({ isOpen, onOpenChange, onSubmit, newTeacher, setNewTeacher }) {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNewTeacher((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSelectChange = (e) => {
+    setNewTeacher((prev) => ({
+      ...prev,
+      status: e.target.value,
+    }));
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+    >
+      <ModalContent>
+        {(onClose) => (
+          <>
+            <ModalHeader>Add New Teacher</ModalHeader>
+            <ModalBody>
+              <div>Thêm giáo viên bằng file excel</div>
+              <div className="flex justify-between m-1">
+                <div className="card p-3">
+                  <h3>Tải Mẫu CSV</h3>
+                  <Button> Tải xuống mẫu </Button>
+                </div>
+                <div className="card p-3">
+                  <h3>Gửi lại mẫu</h3>
+                  <Button> Select File </ Button>
+                </div>
+                <div className="card p-3">
+                  <h3>Lưu Dữ liệu</h3>
+                  <Button disabled> Start Upload </Button>
+                </div>
+              </div>
+
+              <Divider className="my-4" />
+
+              <div>Nhập thông tin</div>
+              <form
+                className="flex flex-col gap-3"
+                onSubmit={(e) => {
+                  onSubmit(e);
+                  onClose();
+                }}>
+                <Input
+                  fullWidth
+                  label="Name"
+                  name="name"
+                  value={newTeacher.name}
+                  onChange={handleChange}
+                  required
+                />
+                <Input
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={newTeacher.email}
+                  onChange={handleChange}
+                  required
+                />
+                <Input
+                  fullWidth
+                  label="Permission"
+                  name="permission"
+                  value={newTeacher.permission}
+                  onChange={handleChange}
+                  required
+                />
+                <Input
+                  fullWidth
+                  label="Type"
+                  name="typeTeacher"
+                  value={newTeacher.typeTeacher}
+                  onChange={handleChange}
+                  required
+                />
+                <Select
+                  label="Status"
+                  name="status"
+                  value={newTeacher.status}
+                  onChange={handleSelectChange}
+                  fullWidth
+                >
+                  {permissions.map((status) => (
+                    <SelectItem key={status.id} value={status.id}>
+                      {capitalize(status.name)}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </form>
+            </ModalBody>
+            <ModalFooter>
+              <Button variant="light" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit" color="primary">
+                Add
+              </Button>
+            </ModalFooter>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
+  );
+}
+
+function EditTeacherModal({ isOpen, onOpenChange, onSubmit, editTeacher, setEditTeacher }) {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEditTeacher((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSelectChange = (e) => {
+    setEditTeacher((prev) => ({
+      ...prev,
+      status: e.target.value,
+    }));
+  };
+
+  return (
+    <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+      <ModalContent>
+        {(onClose) => (
+          <>
+            <ModalHeader>Edit Teacher</ModalHeader>
+            <ModalBody>
+              <form
+                className="flex flex-col gap-3"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  onSubmit(editTeacher, editTeacher.teacher_id);
+                  onClose();
+                }}>
+                <Input
+                  fullWidth
+                  label="Name"
+                  name="name"
+                  value={editTeacher.name}
+                  onChange={handleChange}
+                  required
+                />
+                <Input
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={editTeacher.email}
+                  onChange={handleChange}
+                  required
+                />
+                {/* <Input
+                  fullWidth
+                  label="Permission"
+                  name="permission"
+                  value={editTeacher.permission}
+                  onChange={handleChange}
+                  required
+                /> */}
+                <Select
+                  label="Permission"
+                  name="permission"
+                  value={editTeacher.permission}
+                  onChange={handleSelectChange}
+                  fullWidth
+                >
+                  {permissions.map((permission) => (
+                    <SelectItem key={permission.id} value={permission.id}>
+                      {capitalize(permission.name)}
+                    </SelectItem>
+                  ))}
+                </Select>
+                <Input
+                  fullWidth
+                  label="Type"
+                  name="typeTeacher"
+                  value={editTeacher.typeTeacher}
+                  onChange={handleChange}
+                  required
+                />
+                
+              </form>
+            </ModalBody>
+            <ModalFooter>
+              <Button variant="light" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                color="primary"
+                onClick={(e) => {
+                  onSubmit(editTeacher, editTeacher.teacher_id);
+                  onClose();
+                }}
+              >
+                Save
+              </Button>
+            </ModalFooter>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
+  );
+}

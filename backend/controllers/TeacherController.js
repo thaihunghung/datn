@@ -20,42 +20,61 @@ const generateUniqueTeacherCode = async () => {
   return teacherCode;
 };
 
+const permissionMapping = [
+  { id: 1, name: "Giáo viên" },
+  { id: 2, name: "Quản trị viên" },
+  { id: 3, name: "Siêu quản trị viên" },
+];
+
+const getPermissionName = (permissionId) => {
+  const permission = permissionMapping.find(p => p.id === permissionId);
+  return permission ? permission.name : "Unknown";
+};
+
 const TeacherController = {
   // Lấy tất cả các giáo viên
   index: async (req, res) => {
     try {
       const { page, size } = req.query;
-
+  
+      const attributes = ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher'];
+      const whereClause = {
+        isDelete: false,
+        isBlock: false
+      };
+  
       if (page && size) {
-        console.log("yyyy")
-
         const offset = (page - 1) * size;
         const limit = parseInt(size, 10);
-
+  
         const { count, rows: teachers } = await TeacherModel.findAndCountAll({
-          attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher'],
-          where: {
-            isDelete: false,
-            isBlock: false
-          },
+          attributes: attributes,
+          where: whereClause,
           offset: offset,
           limit: limit
         });
-
+  
+        const teachersWithPermissionName = teachers.map(teacher => ({
+          ...teacher.dataValues,
+          permissionName: getPermissionName(teacher.permission)
+        }));
+  
         return res.json({
           total: count,
-          teachers: teachers
+          teachers: teachersWithPermissionName
         });
       } else {
-        console.log("xxx")
         const teachers = await TeacherModel.findAll({
-          attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher'],
-          where: {
-            isDelete: false,
-            isBlock: false
-          }
+          attributes: attributes,
+          where: whereClause
         });
-        res.json(teachers);
+  
+        const teachersWithPermissionName = teachers.map(teacher => ({
+          ...teacher.dataValues,
+          permissionName: getPermissionName(teacher.permission)
+        }));
+  
+        return res.json(teachersWithPermissionName);
       }
     } catch (error) {
       console.error('Lỗi khi lấy tất cả các giáo viên:', error);
@@ -147,7 +166,7 @@ const TeacherController = {
       // Update the teacher's details
       await teacherDetail.update(data);
 
-      res.json({ message: `Cập nhật thành công thông tin giáo viên có ID: ${id}` });
+      res.json({ message: `Cập nhật thành công thông tin giáo viên thành công` });
     } catch (error) {
       console.error('Lỗi khi cập nhật giáo viên:', error);
       res.status(500).json({ message: 'Lỗi server' });
@@ -164,8 +183,39 @@ const TeacherController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+  blockTeachers: async (req, res) => {
+    try {
+      const { data } = req.body;
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        return res.status(400).json({ error: 'Invalid or missing data array' });
+      }
 
+      const ids = data.map(item => item.id);
+
+      if (ids.length === 0) {
+        return res.status(400).json({ error: 'No valid teacher ids provided' });
+      }
+
+      await TeacherModel.update({ isBlock: 1 }, { where: { teacher_id: ids } });
+
+      res.status(200).json({ message: 'Teachers have been blocked.' });
+    } catch (error) {
+      console.error('Error blocking teachers:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
   unblockTeacher: async (req, res) => {
+    try {
+      const teacherId = req.params.id;
+      await TeacherModel.update({ isBlock: 0 }, { where: { teacher_id: teacherId } });
+      res.status(200).json({ message: 'Teacher has been unblocked.' });
+    } catch (error) {
+      console.error('Error unblocking teacher:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
+
+  unblockTeachers: async (req, res) => {
     try {
       const teacherId = req.params.id;
       await TeacherModel.update({ isBlock: 0 }, { where: { teacher_id: teacherId } });
@@ -189,25 +239,23 @@ const TeacherController = {
 
   deleteTeachers: async (req, res) => {
     try {
-      const { data } = req.body; // Extract data from the request body
-      const { id } = data; // Extract the array of IDs from data
-
-      if (!Array.isArray(id) || id.length === 0) {
-          return res.status(400).json({ message: 'Invalid data format. Expected an array of IDs.' });
+      const { data } = req.body;
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        return res.status(400).json({ error: 'Invalid or missing data array' });
       }
 
       console.log('Deleting teachers with IDs:', id); // Debugging log
 
       await TeacherModel.update(
-          { isDelete: 1 },
-          { where: { teacher_id: id } }
-      ); 
+        { isDelete: 1 },
+        { where: { teacher_id: id } }
+      );
 
       res.status(200).json({ message: 'Teachers have been deleted.' });
-  } catch (error) {
+    } catch (error) {
       console.error('Error deleting teachers:', error);
       res.status(500).json({ message: 'Server error' });
-  }
+    }
   },
 
   restoreTeacher: async (req, res) => {
@@ -242,12 +290,17 @@ const TeacherController = {
   getFormTeacherWithData: async (req, res) => {
     try {
       const { data } = req.body;
+      console.log(data);
 
-      if (!data || !Array.isArray(data.id) || data.id.length === 0) {
-        return res.status(400).json({ error: 'Invalid or missing id array' });
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        return res.status(400).json({ error: 'Invalid or missing data array' });
       }
 
-      const { id } = data;
+      const ids = data.map(item => item.id);
+
+      if (ids.length === 0) {
+        return res.status(400).json({ error: 'No valid teacher codes provided' });
+      }
 
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Teacher');
@@ -257,7 +310,7 @@ const TeacherController = {
         where: {
           isDelete: false,
           isBlock: false,
-          teacher_id: id
+          teacher_id: ids
         }
       });
 
@@ -297,7 +350,7 @@ const TeacherController = {
 
       const insertPromises = [];
       const emailsSet = new Set();
-      const teacherCodesSet = new Set();
+      const idsSet = new Set();
 
       worksheet.eachRow({ includeEmpty: false }, async (row, rowNumber) => {
         if (rowNumber !== 1) { // Skip the header row
@@ -313,13 +366,13 @@ const TeacherController = {
             return; // Skip this row
           }
 
-          if (!teacherCode || teacherCodesSet.has(teacherCode)) {
+          if (!teacherCode || idsSet.has(teacherCode)) {
             console.error(`Duplicate or invalid teacherCode found at row ${rowNumber}: ${teacherCode}`);
             teacherCode = await generateUniqueTeacherCode();
           }
 
           emailsSet.add(email);
-          teacherCodesSet.add(teacherCode);
+          idsSet.add(teacherCode);
 
           const salt = await bcrypt.genSalt(10);
           const hashedPassword = await bcrypt.hash(teacherCode.toString(), salt);

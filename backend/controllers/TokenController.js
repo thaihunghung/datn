@@ -25,7 +25,7 @@ const TokenController = {
       }
 
       const payload = { id: user.teacher_id,permission: user.permission  };
-      const newAccessToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '5m' });
+      const newAccessToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '30m' });
       const newRefreshToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '7d' });
 
       // Đánh dấu refresh token cũ là đã thu hồi và hết hạn
@@ -37,7 +37,7 @@ const TokenController = {
       await RefreshTokenModel.create({ token: newRefreshToken, teacher_id: user.teacher_id });
 
       // Đặt token mới trong HTTP-only cookies
-      res.cookie('accessToken', newAccessToken, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge: 5 * 60 * 1000 });
+      res.cookie('accessToken', newAccessToken, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge: 30 * 60 * 1000 });
       res.cookie('refreshToken', newRefreshToken, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
 
       res.json({

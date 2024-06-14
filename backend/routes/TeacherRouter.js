@@ -143,10 +143,12 @@ router.get('/teacher/:id',checkPermission(3), TeacherController.getByID);
 router.post('/teacher',checkPermission(3), TeacherController.create);
 router.put('/teacher/:id', TeacherController.update);
 
-router.patch('/teachers/:id/block', checkPermission(3), TeacherController.blockTeacher);
-router.patch('/teachers/:id/unblock', checkPermission(3), TeacherController.unblockTeacher);
+router.patch('/teacher/:id/block', checkPermission(3), TeacherController.blockTeacher);
+router.patch('/teachers/block', checkPermission(3), TeacherController.blockTeachers);
+router.patch('/teacher/:id/unblock', checkPermission(3), TeacherController.unblockTeacher);
+router.patch('/teachers/unblock', checkPermission(3), TeacherController.unblockTeachers);
 router.patch('/teachers/:id/delete', checkPermission(3), TeacherController.deleteTeacher);
-router.patch('/teachers/deletes', checkPermission(3), TeacherController.deleteTeachers);
+router.patch('/teachers/delete', checkPermission(3), TeacherController.deleteTeachers);
 router.patch('/teachers/:id/restore', checkPermission(3), TeacherController.restoreTeacher);
 
 router.get('/teacher/template/excel', TeacherController.getFormTeacher);
