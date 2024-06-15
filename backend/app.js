@@ -14,8 +14,8 @@ app.use(express.static("public"));
 const swaggerUi = require('swagger-ui-express');
 const indexRouter = require('./routes/IndexRouter');
 const session = require('express-session');
-
 const authRoutes = require('./routes/AuthRoutes');
+const { getAnalytics } = require("firebase/analytics");
 
 //config passport 
 app.use(express.json());

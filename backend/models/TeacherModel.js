@@ -35,6 +35,10 @@ const TeacherModel = sequelize.define('teacher', {
     allowNull: false,
     defaultValue: 1
   },
+  imgURL: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
   isBlock: {
     type: DataTypes.TINYINT,
     defaultValue: 0

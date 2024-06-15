@@ -36,29 +36,29 @@ const TeacherController = {
   index: async (req, res) => {
     try {
       const { page, size } = req.query;
-  
+
       const attributes = ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher'];
       const whereClause = {
         isDelete: false,
         isBlock: false
       };
-  
+
       if (page && size) {
         const offset = (page - 1) * size;
         const limit = parseInt(size, 10);
-  
+
         const { count, rows: teachers } = await TeacherModel.findAndCountAll({
           attributes: attributes,
           where: whereClause,
           offset: offset,
           limit: limit
         });
-  
+
         const teachersWithPermissionName = teachers.map(teacher => ({
           ...teacher.dataValues,
           permissionName: getPermissionName(teacher.permission)
         }));
-  
+
         return res.json({
           total: count,
           teachers: teachersWithPermissionName
@@ -68,12 +68,12 @@ const TeacherController = {
           attributes: attributes,
           where: whereClause
         });
-  
+
         const teachersWithPermissionName = teachers.map(teacher => ({
           ...teacher.dataValues,
           permissionName: getPermissionName(teacher.permission)
         }));
-  
+
         return res.json(teachersWithPermissionName);
       }
     } catch (error) {
@@ -134,7 +134,7 @@ const TeacherController = {
     try {
       const { id } = req.params;
       const teacherDetail = await TeacherModel.findOne({
-        attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher'],
+        attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher', 'imgURL'],
         where: {
           isDelete: false,
           isBlock: false,

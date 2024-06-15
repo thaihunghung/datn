@@ -29,6 +29,7 @@ import axios from "axios";
 import { columns, fetchTeachersData, permissions } from "./Data";
 import { capitalize } from "../../Utils/capitalize";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import { Link, useNavigate } from "react-router-dom";
 
 const statusColorMap = {
   active: "success",
@@ -39,6 +40,7 @@ const statusColorMap = {
 const INITIAL_VISIBLE_COLUMNS = ["name", "teacherCode", "permissionName", "typeTeacher", "actions"];
 
 export default function App(props) {
+  const navigate = useNavigate();
   const { setCollapsedNav, successNoti, errorNoti } = props;
   const [filterValue, setFilterValue] = useState("");
   const [selectedKeys, setSelectedKeys] = useState(new Set([]));
@@ -105,8 +107,8 @@ export default function App(props) {
       console.log("dd", statusFilter)
       filteredTeachers = filteredTeachers.filter((teacher) =>
         Array.from(statusFilter).includes(teacher.permission.toString())
-    );
-    console.log("xx", filteredTeachers.permission)
+      );
+      console.log("xx", filteredTeachers.permission)
     }
 
     return filteredTeachers;
@@ -164,7 +166,9 @@ export default function App(props) {
                 </Button>
               </DropdownTrigger>
               <DropdownMenu>
-                <DropdownItem>View</DropdownItem>
+                <DropdownItem onClick={() => handleViewClick(teacher.teacher_id)}>
+                  View
+                </DropdownItem>
                 <DropdownItem onClick={() => handleEditClick(teacher)}>Edit</DropdownItem>
                 <DropdownItem onClick={() => handleDeleteClick(teacher)}>Delete</DropdownItem>
               </DropdownMenu>
@@ -209,6 +213,10 @@ export default function App(props) {
 
   const handleAddClick = () => {
     setIsAddModalOpen(true);
+  };
+
+  const handleViewClick = (teacherId) => {
+    navigate(`${teacherId}/profile`);
   };
 
   const handleDeleteClick = async () => {
@@ -263,7 +271,7 @@ export default function App(props) {
       console.error("No teacher selected for editing");
       return;
     }
-  
+
     try {
       const res = await axiosAdmin.put(`/teacher/${teacher_id}`, { data: values });
       successNoti(res.data.message);
@@ -786,7 +794,7 @@ function EditTeacherModal({ isOpen, onOpenChange, onSubmit, editTeacher, setEdit
                   onChange={handleChange}
                   required
                 />
-                
+
               </form>
             </ModalBody>
             <ModalFooter>

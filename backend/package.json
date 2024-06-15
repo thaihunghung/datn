@@ -10,6 +10,7 @@
   "author": "Tran Thai Hung",
   "license": "ISC",
   "dependencies": {
+    "@firebase/storage": "^0.12.5",
     "axios": "^1.6.2",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
@@ -20,6 +21,7 @@
     "exceljs": "^4.4.0",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
+    "firebase": "^10.12.2",
     "fs": "^0.0.1-security",
     "json2csv": "^6.0.0-alpha.2",
     "jsonwebtoken": "^9.0.2",
