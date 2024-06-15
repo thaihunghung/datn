@@ -73,7 +73,7 @@ const AuthenticateController = {
   getUser: async (req, res) => {
     try {
       const user = await TeacherModel.findByPk(req.user.teacher_id, {
-        attributes: ['teacher_id', 'email', 'permission', 'name', 'teacherCode', 'typeTeacher']
+        attributes: ['teacher_id', 'email', 'permission', 'name', 'teacherCode', 'typeTeacher', 'imgURL']
       });
 
       if (!user) {

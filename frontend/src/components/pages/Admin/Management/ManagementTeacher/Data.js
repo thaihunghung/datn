@@ -31,7 +31,7 @@ export const columns = [
   { uid: "teacherCode", name: "Teacher Code", sortable: true },
   { uid: "email", name: "Email", sortable: true },
   { uid: "permission", name: "Permission", sortable: true },
-  { uid: "permissionName", name: "PermissionName", sortable: true },
+  { uid: "permissionName", name: "Permission Name", sortable: true },
   { uid: "typeTeacher", name: "Type Teacher", sortable: true },
   { uid: "actions", name: "Action", sortable: false },
 ];

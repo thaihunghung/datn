@@ -37,7 +37,7 @@ const TeacherController = {
     try {
       const { page, size } = req.query;
 
-      const attributes = ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher'];
+      const attributes = ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher','imgURL'];
       const whereClause = {
         isDelete: false,
         isBlock: false
@@ -133,18 +133,27 @@ const TeacherController = {
   getByID: async (req, res) => {
     try {
       const { id } = req.params;
-      const teacherDetail = await TeacherModel.findOne({
-        attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher', 'imgURL'],
-        where: {
-          isDelete: false,
-          isBlock: false,
-          teacher_id: id
-        }
+      const attributes = ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher','imgURL'];
+      const whereClause = {
+        isDelete: false,
+        isBlock: false,
+        teacher_id: id
+      };
+      const teachers = await TeacherModel.findOne({
+        attributes: attributes,
+        where: whereClause,
       });
-      if (!teacherDetail) {
-        return res.status(404).json({ message: 'Không tìm thấy giáo viên' });
-      }
-      res.json(teacherDetail);
+
+      // const teachersWithPermissionName = teachers.map(teacher => ({
+      //   ...teacher.dataValues,
+      //   permissionName: getPermissionName(teacher.permission)
+      // }));
+
+      return res.json({
+        teachers,
+        permissionName: getPermissionName(teachers.permission)
+      });
+
     } catch (error) {
       console.error('Lỗi khi tìm kiếm giáo viên:', error);
       res.status(500).json({ message: 'Lỗi server' });
@@ -156,7 +165,8 @@ const TeacherController = {
     try {
       const { id } = req.params;
       const { data } = req.body;
-
+      
+      console.log("vcvc", data)
       // Find the teacher by ID
       const teacherDetail = await TeacherModel.findOne({ where: { teacher_id: id } });
       if (!teacherDetail) {

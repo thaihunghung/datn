@@ -37,7 +37,7 @@ const statusColorMap = {
   vacation: "warning",
 };
 
-const INITIAL_VISIBLE_COLUMNS = ["name", "teacherCode", "permissionName", "typeTeacher", "actions"];
+const INITIAL_VISIBLE_COLUMNS = ["name", "teacherCode", "permissionName", "actions"];
 
 export default function App(props) {
   const navigate = useNavigate();
@@ -94,21 +94,17 @@ export default function App(props) {
 
   const filteredItems = useMemo(() => {
     let filteredTeachers = [...teachers];
-    console.log("aaa", filteredTeachers)
-    console.log("aaar", statusFilter)
-
 
     if (hasSearchFilter) {
       filteredTeachers = filteredTeachers.filter((teacher) =>
-        teacher.name.toLowerCase().includes(filterValue.toLowerCase())
+        teacher.name.toLowerCase().includes(filterValue.toLowerCase()) ||
+        teacher.teacherCode.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
     if (statusFilter.size !== permissions.length) {
-      console.log("dd", statusFilter)
       filteredTeachers = filteredTeachers.filter((teacher) =>
         Array.from(statusFilter).includes(teacher.permission.toString())
       );
-      console.log("xx", filteredTeachers.permission)
     }
 
     return filteredTeachers;
@@ -133,23 +129,23 @@ export default function App(props) {
       case "name":
         return (
           <User
-            avatarProps={{ radius: "lg", src: teacher.avatar }}
+            avatarProps={{ radius: "lg", src: teacher.imgURL }}
             description={teacher.email}
             name={cellValue}
           >
             {teacher.email}
           </User>
         );
-      case "role":
+      case "permissionName":
         return (
           <div className="flex flex-col">
             <p className="text-bold text-small capitalize">{cellValue}</p>
-            <p className="text-bold text-tiny capitalize text-default-400">{teacher.team}</p>
+            <p className="text-bold text-tiny capitalize text-default-400">{teacher.typeTeacher}</p>
           </div>
         );
-      case "permissionName":
-        const permissionName = permissions.find(p => p.id === cellValue)?.name || cellValue;
-        return <span>{permissionName}</span>;
+      // case "PermissionName":
+      //   const permissionName = permissions.find(p => p.id === cellValue)?.name || cellValue;
+      //   return <span>{permissionName}</span>;
       case "permission":
         return (
           <Chip className="capitalize" color={statusColorMap[teacher.status]} size="sm" variant="flat">
@@ -238,7 +234,7 @@ export default function App(props) {
     }
   };
 
-  const handleCancel = () => {
+    const handleCancel = () => {
     setIsAddModalOpen(false);
     setIsEditModalOpen(false);
   };
@@ -342,7 +338,7 @@ export default function App(props) {
           <Input
             isClearable
             className="w-full sm:max-w-[44%]"
-            placeholder="Search by name..."
+            placeholder="Search by name, teacher code ..."
             startContent={<i className="fa-solid fa-magnifying-glass"></i>}
             value={filterValue}
             onClear={() => onClear()}
@@ -516,6 +512,7 @@ export default function App(props) {
             </TableColumn>
           )}
         </TableHeader>
+
         <TableBody emptyContent={"No teachers found"} items={sortedItems}>
           {(item) => (
             <TableRow key={item.teacher_id}>
@@ -620,6 +617,25 @@ function AddTeacherModal({ isOpen, onOpenChange, onSubmit, newTeacher, setNewTea
     }));
   };
 
+  const handleDownloadTemplateExcel = async () => {
+    try {
+      const response = await axiosAdmin.get('/teacher/template/excel', {
+        responseType: 'blob'
+      });
+
+      if (response && response.data) {
+        const url = window.URL.createObjectURL(response.data);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Teacher.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  };
   return (
     <Modal
       isOpen={isOpen}
@@ -634,7 +650,7 @@ function AddTeacherModal({ isOpen, onOpenChange, onSubmit, newTeacher, setNewTea
               <div className="flex justify-between m-1">
                 <div className="card p-3">
                   <h3>Tải Mẫu CSV</h3>
-                  <Button> Tải xuống mẫu </Button>
+                  <Button onClick={()=>handleDownloadTemplateExcel()}> Tải xuống mẫu </Button>
                 </div>
                 <div className="card p-3">
                   <h3>Gửi lại mẫu</h3>
