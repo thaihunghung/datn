@@ -5,6 +5,7 @@ const checkPermission = require('../middlewares/permissionMiddleware');
 
 
 router.get('/teacher', checkPermission(2), TeacherController.index);
+router.get('/teachers-store', checkPermission(2), TeacherController.getAllStore);
 router.get('/teacher/:id', checkPermission(3), TeacherController.getByID);
 router.post('/teacher', checkPermission(3), TeacherController.create);
 router.put('/teacher/:id', TeacherController.update);

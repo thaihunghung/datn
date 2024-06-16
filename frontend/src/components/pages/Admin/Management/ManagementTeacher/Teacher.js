@@ -30,6 +30,8 @@ import { columns, fetchTeachersData, permissions } from "./Data";
 import { capitalize } from "../../Utils/capitalize";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Link, useNavigate } from "react-router-dom";
+import CustomUpload from "../../CustomUpload/CustomUpload";
+import { Upload } from "antd";
 
 const statusColorMap = {
   active: "success",
@@ -165,8 +167,9 @@ export default function App(props) {
                 <DropdownItem onClick={() => handleViewClick(teacher.teacher_id)}>
                   View
                 </DropdownItem>
-                <DropdownItem onClick={() => handleEditClick(teacher)}>Edit</DropdownItem>
-                <DropdownItem onClick={() => handleDeleteClick(teacher)}>Delete</DropdownItem>
+                <DropdownItem onClick={() => handleEditClick(teacher)}>
+                  Edit
+                </DropdownItem>
               </DropdownMenu>
             </Dropdown>
           </div>
@@ -232,11 +235,6 @@ export default function App(props) {
     } catch (error) {
       console.error('Error deleting teacher:', error);
     }
-  };
-
-    const handleCancel = () => {
-    setIsAddModalOpen(false);
-    setIsEditModalOpen(false);
   };
 
   const handleEditClick = (teacher) => {
@@ -391,6 +389,9 @@ export default function App(props) {
             </Dropdown>
             <Button color="primary" endContent={<i className="fa-solid fa-plus"></i>} onClick={handleAddClick}>
               Add New
+            </Button>
+            <Button color="secondary" onClick={() => navigate('store')}>
+              Manage Blocked/Deleted Teachers
             </Button>
           </div>
         </div>
@@ -602,6 +603,9 @@ function ConfirmAction({ isOpen, onOpenChange, onConfirm, message }) {
 }
 
 function AddTeacherModal({ isOpen, onOpenChange, onSubmit, newTeacher, setNewTeacher }) {
+  const [fileList, setFileList] = useState([]);
+  const [current, setCurrent] = useState(0);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewTeacher((prev) => ({
@@ -624,7 +628,7 @@ function AddTeacherModal({ isOpen, onOpenChange, onSubmit, newTeacher, setNewTea
       });
 
       if (response && response.data) {
-        const url = window.URL.createObjectURL(response.data);
+        const url = window.URL.createObjectURL(new Blob([response.data]));
         const a = document.createElement('a');
         a.href = url;
         a.download = 'Teacher.xlsx';
@@ -636,11 +640,16 @@ function AddTeacherModal({ isOpen, onOpenChange, onSubmit, newTeacher, setNewTea
       console.error('Error downloading file:', error);
     }
   };
+
+  const handleFileChange = (e) => {
+    setFileList([...e.target.files]);
+  };
+  const handleRemoveFile = (indexToRemove) => {
+    setFileList(currentFiles => currentFiles.filter((_, index) => index !== indexToRemove));
+  };
+
   return (
-    <Modal
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-    >
+    <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
       <ModalContent>
         {(onClose) => (
           <>
@@ -650,82 +659,77 @@ function AddTeacherModal({ isOpen, onOpenChange, onSubmit, newTeacher, setNewTea
               <div className="flex justify-between m-1">
                 <div className="card p-3">
                   <h3>Tải Mẫu CSV</h3>
-                  <Button onClick={()=>handleDownloadTemplateExcel()}> Tải xuống mẫu </Button>
+                  <Button onClick={handleDownloadTemplateExcel}> Tải xuống mẫu </Button>
                 </div>
                 <div className="card p-3">
-                  <h3>Gửi lại mẫu</h3>
-                  <Button> Select File </ Button>
+                  <div>
+                    <h3>Upload File</h3>
+                    <label htmlFor="file-upload" className="cursor-pointer">
+                      <Button auto flat as="span" color="primary">
+                        Select File
+                      </Button>
+                    </label>
+                    <input
+                      id="file-upload"
+                      type="file"
+                      style={{ display: 'none' }}
+                      onChange={handleFileChange}
+                      multiple
+                    />
+                    {/* Display the filenames below the button */}
+                    {/* Display the filenames below the button with a remove button */}
+                    {fileList.length > 0 && (
+                      <div className="mt-2">
+                        <ul>
+                          {fileList.map((file, index) => (
+                            <li key={index} className="flex justify-between items-center">
+                              <p>{file.name}</p>
+                              <Button auto flat color="error" size="xs" onClick={() => handleRemoveFile(index)}>
+                                X
+                              </Button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="card p-3">
-                  <h3>Lưu Dữ liệu</h3>
-                  <Button disabled> Start Upload </Button>
+                  <h3>Upload Data</h3>
+                  <CustomUpload
+                    endpoint='teacher'
+                    method="POST"
+                    setCurrent={setCurrent}
+                    fileList={fileList}
+                    setFileList={setFileList}
+                  />
                 </div>
               </div>
 
               <Divider className="my-4" />
 
               <div>Nhập thông tin</div>
-              <form
-                className="flex flex-col gap-3"
-                onSubmit={(e) => {
-                  onSubmit(e);
-                  onClose();
-                }}>
-                <Input
-                  fullWidth
-                  label="Name"
-                  name="name"
-                  value={newTeacher.name}
-                  onChange={handleChange}
-                  required
-                />
-                <Input
-                  fullWidth
-                  label="Email"
-                  name="email"
-                  type="email"
-                  value={newTeacher.email}
-                  onChange={handleChange}
-                  required
-                />
-                <Input
-                  fullWidth
-                  label="Permission"
-                  name="permission"
-                  value={newTeacher.permission}
-                  onChange={handleChange}
-                  required
-                />
-                <Input
-                  fullWidth
-                  label="Type"
-                  name="typeTeacher"
-                  value={newTeacher.typeTeacher}
-                  onChange={handleChange}
-                  required
-                />
-                <Select
-                  label="Status"
-                  name="status"
-                  value={newTeacher.status}
-                  onChange={handleSelectChange}
-                  fullWidth
-                >
+              <form className="flex flex-col gap-3" onSubmit={(e) => {
+                e.preventDefault();
+                onSubmit(newTeacher);
+                onClose();
+              }}>
+                <Input fullWidth label="Name" name="name" value={newTeacher.name} onChange={handleChange} required />
+                <Input fullWidth label="Email" name="email" type="email" value={newTeacher.email} onChange={handleChange} required />
+                <Select label="Permission" name="permission" value={newTeacher.permission} onChange={handleSelectChange} fullWidth required>
                   {permissions.map((status) => (
-                    <SelectItem key={status.id} value={status.id}>
-                      {capitalize(status.name)}
-                    </SelectItem>
+                    <SelectItem key={status.id} value={status.id}>{capitalize(status.name)}</SelectItem>
                   ))}
                 </Select>
               </form>
             </ModalBody>
             <ModalFooter>
-              <Button variant="light" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="submit" color="primary">
-                Add
-              </Button>
+              <Button variant="light" onClick={onClose}>Cancel</Button>
+              <Button type="submit" color="primary" onClick={(e) => {
+                e.preventDefault();
+                onSubmit(newTeacher);
+                onClose();
+              }}>Add</Button>
             </ModalFooter>
           </>
         )}
@@ -733,6 +737,7 @@ function AddTeacherModal({ isOpen, onOpenChange, onSubmit, newTeacher, setNewTea
     </Modal>
   );
 }
+
 
 function EditTeacherModal({ isOpen, onOpenChange, onSubmit, editTeacher, setEditTeacher }) {
   const handleChange = (e) => {

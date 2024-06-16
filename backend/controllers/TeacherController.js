@@ -4,6 +4,7 @@ const path = require('path');
 const sequelize = require("../config/database");
 const fs = require('fs');
 const bcrypt = require('bcrypt');
+const { Op } = require("sequelize");
 
 const generateUniqueTeacherCode = async () => {
   let isUnique = false;
@@ -81,7 +82,54 @@ const TeacherController = {
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
-
+  getAllStore: async (req, res) => {
+    try {
+      const { page, size } = req.query;
+  
+      const attributes = ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher', 'imgURL'];
+      const whereClause = {
+        isBlock: true,
+        isDelete: false,
+      };
+  
+      if (page && size) {
+        const offset = (page - 1) * size;
+        const limit = parseInt(size, 10);
+  
+        const { count, rows: teachers } = await TeacherModel.findAndCountAll({
+          attributes: attributes,
+          where: whereClause,
+          offset: offset,
+          limit: limit
+        });
+  
+        const teachersWithPermissionName = teachers.map(teacher => ({
+          ...teacher.dataValues,
+          permissionName: getPermissionName(teacher.permission)
+        }));
+  
+        return res.json({
+          total: count,
+          teachers: teachersWithPermissionName
+        });
+      } else {
+        const teachers = await TeacherModel.findAll({
+          attributes: attributes,
+          where: whereClause
+        });
+  
+        const teachersWithPermissionName = teachers.map(teacher => ({
+          ...teacher.dataValues,
+          permissionName: getPermissionName(teacher.permission)
+        }));
+  
+        return res.json(teachersWithPermissionName);
+      }
+    } catch (error) {
+      console.error('Lỗi khi lấy tất cả các giáo viên:', error);
+      res.status(500).json({ message: 'Lỗi server' });
+    }
+  },
   // Tạo một giáo viên mới
   create: async (req, res) => {
     try {
@@ -227,8 +275,11 @@ const TeacherController = {
 
   unblockTeachers: async (req, res) => {
     try {
-      const teacherId = req.params.id;
-      await TeacherModel.update({ isBlock: 0 }, { where: { teacher_id: teacherId } });
+      const { data } = req.body;
+      const teacherIds = data.map(item => item.id);
+      console.log("fxfxfx", teacherIds)
+      
+      await TeacherModel.update({ isBlock: 0 }, { where: { teacher_id: teacherIds } });
       res.status(200).json({ message: 'Teacher has been unblocked.' });
     } catch (error) {
       console.error('Error unblocking teacher:', error);
