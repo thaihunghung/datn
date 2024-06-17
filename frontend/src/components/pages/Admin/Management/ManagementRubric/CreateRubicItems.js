@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { EditorState } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import { convertToHTML, convertFromHTML } from 'draft-convert';
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import './Rubic.css';
@@ -18,7 +18,11 @@ import Tabs from '../../Utils/Tabs/Tabs';
 const CreateRubicItems = (nav) => {
   const { id } = useParams();
   const { Option } = Select;
-  const { setCollapsedNav, rubricData, loadData } = nav;
+  const { setCollapsedNav, rubricData} = nav;
+
+  const navigate = useNavigate();
+
+
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [activeTab, setActiveTab] = useState(0);
@@ -66,6 +70,7 @@ const CreateRubicItems = (nav) => {
     } catch (error) { }
   }
   useEffect(() => {
+    onOpen()
     getOneRubricById()
   }, []);
 
@@ -156,116 +161,12 @@ const CreateRubicItems = (nav) => {
     );
   }
   const onCloseModal = () => {
-    onClose(); // This function can be called to close the modal
+    onClose(
+      navigate("/management-rubric/1/rubric-items/list")
+    ); // This function can be called to close the modal
   };
   return (
     <div className='flex w-full flex-col justify-center pb-10 leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7 bg-[#f5f5f5]-500'>
-
-      {/* <Tabs tabs=
-        {[
-          {
-            title: 'Tạo mới',
-            content:
-              <div className="w-full  rounded-lg border">
-                <div className='flex flex-col sm:flex-col sm:items-start lg:flex-row  xl:flex-row  justify-center items-center gap-2'>
-                  <div className='flex-1 w-full sm:w-full items-center p-5 pb-0 sm:pb-0 lg:pb-5 xl:pb-5  justify-center flex flex-col gap-2 sm:flex-col lg:flex-col xl:flex-col'>
-                    <div className='text-left w-full font-bold'>Chọn Clo:</div>
-                    <Select
-                      defaultValue="Chọn loại"
-                      className="w-full h-full"
-                      onChange={handleCloSelectChange}
-                      value={selectedClo}
-                    >
-                      {DataClo.map((items) => (
-                        <Option
-                          key={items.clo_id}
-                          value={items.clo_id}
-                          textValue={items.cloName}
-                        >
-                          <span className='text-base text-wrap text-left'>{items.cloName}{". "}{items.description}</span>
-                          
-                        </Option>
-                      ))}
-                    </Select>
-                    <div className='text-left w-full font-bold'>Chọn Plo:</div>
-                    <Select
-                      defaultValue="Chọn loại"
-                      className="w-full h-full"
-                      onChange={handlePloSelectChange}
-                      value={selectedPlo}
-                    >
-                      {DataPlo.map((items) => (
-                        <Option
-                          key={items.plo_id}
-                          value={items.plo_id}
-                          textValue={items.ploName} 
-                        >
-                          <span className='text-base text-wrap text-left' >{items.ploName}{". "}{items.description}</span>
-           
-                        </Option>
-                      ))}
-                    </Select>
-                    <div className='text-left w-full font-bold'>Chọn Chapter:</div>
-                    <Select
-                      defaultValue="Chọn loại"
-                      value={selectedChapter}
-                      onChange={handleChapterSelectChange}
-                      size="large"
-                      className="w-full h-full"
-                    >
-                      {Chapter.map((items) => (
-                        <Option
-                          key={items.chapter_id}
-                          value={items.chapter_id}
-                          textValue={items.chapterName}
-                        >
-                          <span className='text-base text-wrap text-left'>{items.chapterName}{". "}{items.description}</span>
-
-                        
-                        </Option>
-                      ))}
-                    </Select>
-                    <div className='text-left w-full font-bold'>Nhập điểm:</div>
-                    <Select
-                      defaultValue="Chọn điểm"
-                      value={score}
-                      onChange={handleScoreChange}
-                      size="large"
-                      className="w-full"
-                    >
-                      {options}
-                    </Select>
-                  </div>
-
-                  <div className='flex flex-1 flex-col w-full sm:w-full items-start p-5 pb-[60px]'>
-                    <span className='text-justify font-bold'>
-                      Tiêu chí:
-                    </span>
-                    <Editor
-                      editorState={editorState}
-                      onEditorStateChange={setEditorState}
-                      wrapperClassName="wrapper-class w-full"
-                      editorClassName="editor-class px-5 border w-full"
-                      toolbarClassName="toolbar-class"
-                    />
-                    <div className='w-full min-w-[250px] sm:min-w-[200px] lg:min-w-[250px] xl:min-w-[250px]'>
-                      <div className='w-full mt-5'>
-                        <div>
-                          <Button color="primary" className='w-[200px]' onClick={handleSave}>
-                            <span className='font-bold'>Lưu</span>
-                          </Button>
-                        </div>
-                   
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-          },
-        ]}
-        activeTab={activeTab} setActiveTab={setActiveTab}
-      /> */}
-      <Button onPress={onOpen}>Tạo mới</Button>
       <Modal
         size="5xl"
         isOpen={isOpen}
