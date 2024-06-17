@@ -32,6 +32,7 @@ const CreateAssessment = (nav) => {
     const [place, setPlace] = useState("");
     const [rubric_id, setRubric_id] = useState();
     const [course_id, setCourse_id] = useState();
+    const [subject_id, setSubject_id] = useState();
 
     const [DataRubric, setDataRubric] = useState([]);
     const [defaultRubric, setDefaultRubric] = useState("Chọn Rubric");
@@ -44,12 +45,28 @@ const CreateAssessment = (nav) => {
     };
 
     const handleCourseChange = (value, option) => {
-        setCourse_id(value);
-        console.log(value);
-        setRubric_id(null)
-        setDefaultRubric('Chọn Rubric')
-    };
+        const selectedCourse = DataCourse.find(course => course.course_id === value);
+        if (selectedCourse) {
+          setCourse_id(selectedCourse.course_id);
+          console.log(selectedCourse.subject_id);
+          getRubricBySubject(selectedCourse.subject_id);
 
+
+          setRubric_id(null);
+          setDefaultRubric('Chọn Rubric');
+        }
+      };
+      const getRubricBySubject = async (idSubject) => {
+        try {
+            const response = await axiosAdmin.get(`/subject/${idSubject}/rubrics/teacher/${teacher_id}`);
+            if (response.data) {
+                console.log(response.data);
+                setDataRubric(response.data);
+            }      
+        } catch (error) {
+            console.error("Error fetching Rubric:", error);
+        }
+    }
     const handleDownloadStudent = async () => {
         try {
             const data = {
@@ -76,7 +93,7 @@ const CreateAssessment = (nav) => {
     const getCourseByTeacher = async () => {
         try {
             const response = await axiosAdmin.get(`/course/getByTeacher/${teacher_id}`);
-            console.log(response.data);
+            console.log(response.data.course);
             if (response.data) {
                 setCourseByTeacher(response.data.course);
             }
@@ -104,48 +121,29 @@ const CreateAssessment = (nav) => {
         };
     }, []);
 
-    useEffect(() => {
-        if (course_id) {
-            
-           // setDataRubric([])
-
-            const getRubricBySubject = async (idSubject) => {
-                try {
-                    const response = await axiosAdmin.get(`/subject/${idSubject}/rubrics`);
-                    if (response.data) {
-                        setDataRubric(response.data);
-                    }      
-                } catch (error) {
-                    console.error("Error fetching Rubric:", error);
-                }
-            }
-            
-            const getSubjectByCourseId = async (CourseId) => {
-                try {
-                    const response = await axiosAdmin.get(`/subject/getSubjectIdByCourseId/${CourseId}`);
-                    console.log(response.data);     
-                } catch (error) {
-                    console.error("Error fetching Rubric:", error);
-                }
-            }
-            const timer = setTimeout(() => {
-                getSubjectByCourseId(course_id)
-            }, 100);
-
-            return () => clearTimeout(timer);
-        }
-    }, [course_id]);
-
     // useEffect(() => {
-    //     if (selectedDate) {
+    //     if (course_id) {
+            
+    //        // setDataRubric([])
+
+           
+            
+    //         const getSubjectByCourseId = async (CourseId) => {
+    //             try {
+    //                 const response = await axiosAdmin.get(`/subject/getSubjectIdByCourseId/${CourseId}`);
+    //                 console.log(response.data);     
+    //             } catch (error) {
+    //                 console.error("Error fetching Rubric:", error);
+    //             }
+    //         }
     //         const timer = setTimeout(() => {
-    //             setDescription(`${description}_${selectedDate}`)
-    //         }, 100); // 1-second delay
+    //             getSubjectByCourseId(course_id)
+    //         }, 100);
 
     //         return () => clearTimeout(timer);
     //     }
-    // }, [selectedDate]);
-    
+    // }, [course_id]);
+
 
     const [fileList, setFileList] = useState([]);
 
@@ -192,6 +190,7 @@ const CreateAssessment = (nav) => {
                                                         key={Course.course_id}
                                                         value={Course.course_id}
                                                     >
+                                                                                                               
                                                         {Course.courseCode}{' - '}{Course.courseName}
                                                     </Select.Option>
                                                 ))}

@@ -14,6 +14,7 @@ router.get('/subject/getSubjectIdByCourseId/:course_id', SubjectController.getBy
 router.get('/subject/:subject_id/find-clo-ids', SubjectController.getArrayIDCloBySubjectId);
 router.get('/subject/:subject_id/find-chapter-ids', SubjectController.getArrayIDChapterBySubjectId);
 router.get('/subject/:subject_id/rubrics', SubjectController.getByrubricsbySubjectId);
+router.get('/subject/:subject_id/rubrics/teacher/:teacher_id', SubjectController.getByrubricsbySubjectIdTeacherId); //
 
 
 router.put('/subject/:subject_id', SubjectController.update);

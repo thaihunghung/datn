@@ -135,6 +135,7 @@ const ManagementAssessmentGrading = (nav) => {
     try {
       const response = await axiosAdmin.get(`/assessments/${description}/teacher/${teacher_id}`);
       console.log(response.data);
+      console.log("description", description);
       const updatedPoData = response.data.map((subject) => {
         const student = {
           studentCode: subject.Student.studentCode,
@@ -156,7 +157,7 @@ const ManagementAssessmentGrading = (nav) => {
         };
       });
       setSubjects(updatedPoData);
-      
+      console.log(updatedPoData);
     } catch (error) {
       console.error("Error: " + error.message);
     }
