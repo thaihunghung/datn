@@ -34,6 +34,7 @@ const MangementRubricItems = (nav) => {
         setSelectedRowKeys([]);
         setSelectedRow([]);
     };
+    
     const columns = [
         {
             title: "Tên CLO",
@@ -126,8 +127,6 @@ const MangementRubricItems = (nav) => {
         },
 
     ];
-
-
 
     //dem va create
     const GetRubicAndItemsById = async () => {
