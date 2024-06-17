@@ -71,9 +71,18 @@ const FormGrading = (nav) => {
       console.log('totalScore', totalScore);
       try {
         const data = { totalScore: totalScore }
-        const dataAssessmentItem = selectedValues
+        
         await axiosAdmin.put(`/assessment/${assessment_id}/updateStotalScore`,{data: data})
 
+        const dataAssessmentItem = selectedValues.map(item => {
+          const { maxScore, CheckGrading, ...rest } = item;
+          return {
+            ...rest,
+            assessmentScore: maxScore
+          };
+        });
+        
+        console.log(dataAssessmentItem);
         const response =  await axiosAdmin.post(`/assessment-item`, {data: dataAssessmentItem})
         if(response.status === 201) {
           message.success('Data saved successfully');
@@ -194,7 +203,6 @@ Tiêu chí: {Check}/{RubicItemsData.length}
           <p className="text-center font-bold  text-[#fefefe]">Điểm đạt</p>
         </div>
       </div>
-
       {
         RubicItemsData.map((item, i) => (
           <div className="w-full flex flex-col p-2 py-0 sm:p-5 sm:py-0 sm:flex-col lg:flex-row xl:flex-row" key={item.rubricsItem_id}>

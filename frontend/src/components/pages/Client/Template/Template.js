@@ -72,31 +72,12 @@ const Template = () => {
     const [RubicData, setRubicData] = useState([]);
     const [RubicItemsData, setRubicItemsData] = useState([]);
 
-    const totalKeyNumber = selectedValues.reduce((total, value) => total + value.keyNumber, 0);
-
-    const handleRadioChange = (index, qualityLevel_id, clo_id, keyNumber) => {
-        setSelectedValues(prevValues => {
-            const updatedValues = [...prevValues];
-            updatedValues[index] = {
-                qualityLevel_id: qualityLevel_id,
-                clo_id: clo_id,
-                keyNumber: keyNumber,
-            };
-            return updatedValues
-        });
-    };
-
-    const handleSubmit = () => {
-        console.log('Submit button clicked');
-        console.log('Selected values:', selectedValues);
-    };
 
     const GetRubricData = async () => {
         try {
-            const response = await axiosAdmin.get(`/rubric/${1}/items`);
+            const response = await axiosAdmin.get(`/rubric/${1}/items/isDelete/false`);
             setRubicData(response.data.rubric);
             setRubicItemsData(response.data.rubric.rubricItems);
-            console.log(response.data.rubric.rubricItems.qualityLevel);
         } catch (error) {
             console.error('Error fetching rubric data:', error);
             throw error;
@@ -137,11 +118,11 @@ const Template = () => {
                     <div className="w-full text-left">8. Ý kiến đánh giá của thành viên Chấm Thực tập Đồ án Chuyên Ngành theo tín chỉ:</div>
                     <div className="w-full text-left italic mb-5">(Thành viên Chấm khoanh tròn vào ô điểm số tương ứng với cột mức chất lượng mà SV đạt được theo từng tiêu chí)</div>
                 </div>
-                <table className='border-collapse border border-[#ff8077] w-full h-full'>
+                <table className='border-collapse border leading-6 border-[#ff8077] w-full h-full'>
                     <thead>
                         <tr className="border border-b-0 border-[#ff8077] h-[20px]">
-                            <th className="border border-b-0 border-[#ff8077]">CĐR_HP</th>
-                            <th className="border border-b-0 border-[#ff8077]">CĐR_CT</th>
+                            <th className="border border-b-0 border-[#ff8077]">CLO</th>
+                            <th className="border border-b-0 border-[#ff8077]">PLO</th>
                             <th className="border border-b-0 border-[#ff8077]">Tiêu chí</th>
                             <th className="border border-b-0 border-r-0 border-[#ff8077]">Tổng điểm</th>
 
@@ -155,43 +136,14 @@ const Template = () => {
                             <tr key={item.rubricsItem_id} className="border border-b-0 border-[#ff8077] p-5">
                                 <td className="border  border-[#ff8077] text-center px-2">{item.CLO.cloName}</td>
                                 <td className="border  border-[#ff8077] text-center px-2">{item.PLO.ploName}</td>
-                                <td className="border border-[#ff8077] test text-justify px-2">
+                                <td className="border border-[#ff8077] test text-justify p-2">
                                     <span dangerouslySetInnerHTML={{ __html: item.description }} />
                                 </td>
                                 <td className="border border-r-0 border-[#ff8077] text-center px-2">
                                     {item.score}
                                 </td>
                                 <td>
-                                    <table className="w-full h-full border-none">
-                                        <tr className="w-full h-[10%]">
-                                            {
-                                                item.qualityLevel.map((quality, index, array) => (
-                                                    <td className={`h-fit text-center p-1 border border-t-0 border-b-0 border-[#ff8077] ${index === array.length - 1 ? 'border-r-0' : ''}`}>
-                                                        {quality.level}
-                                                    </td>
-                                                ))
-                                            }
-                                        </tr>
-                                        <tr className="w-full h-[80%]">
-                                            {
-                                                item.qualityLevel.map((quality, index, array) => (
-                                                    <td className={`h-fit text-center p-1 border border-t border-b-0 border-[#ff8077] ${index === array.length - 1 ? 'border-r-0' : ''}`}>
-                                                        {quality.name}
-                                                    </td>
-                                                ))
-                                            }
-                                        </tr>
-                                        <tr className="w-full h-[10%] border-t border-b-0 border-[#ff8077]">
-                                            {
-                                                item.qualityLevel.map((quality, index, array) => (
-                                                    <td className={`h-fit text-center p-1 border border-b-0 border-[#ff8077] ${index === array.length - 1 ? 'border-r-0' : ''}`}>
-                                                        {quality.keyNumber}
-                                                    </td>
-                                                ))
-                                            }
-                                        </tr>
-
-                                    </table>
+                                    
                                 </td>
                             </tr>
 

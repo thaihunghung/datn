@@ -6,6 +6,7 @@ import { Table, Tooltip, Button, message } from 'antd';
 import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavRubricItems from "../../Utils/DropdownAndNav/DropdownAndNavRubricItems";
+import CreateRubicItems from "./CreateRubicItems";
 
 const MangementRubricItems = (nav) => {
     const { id } = useParams();
@@ -40,7 +41,7 @@ const MangementRubricItems = (nav) => {
             render: (record) => (
                 <Tooltip color={"#FF9908"}
                     title={record.description}>
-                    <div className="text-sm min-w-[100px]">
+                    <div className="text-sm">
                         <p className="font-medium">{record.cloName}</p>
                     </div>
                 </Tooltip>
@@ -50,7 +51,7 @@ const MangementRubricItems = (nav) => {
             title: "Tên PLO",
             dataIndex: "ploName",
             render: (record) => (
-                <div className="text-sm min-w-[100px]">
+                <div className="text-sm">
                     <Tooltip color={"#FF9908"}
                         title={record.description}>
                         <p className="font-medium">{record.ploName}</p>
@@ -62,12 +63,20 @@ const MangementRubricItems = (nav) => {
             title: "Tên Chapter",
             dataIndex: "chapterName",
             render: (record) => (
-                <div className="text-sm min-w-[100px]">
+                <div className="text-sm">
                     <Tooltip color={"#FF9908"}
                         title={record.description}>
                         <p className="font-medium">{record.chapterName}</p>
                     </Tooltip>
                 </div>
+            ),
+        },
+        {
+            title: "Tiêu chí",
+            dataIndex: "description",
+            render: (record) => (
+                <div className="text-sm text-justify text-wrap p-1 w-[300px]" dangerouslySetInnerHTML={{ __html: record }}></div>
+
             ),
         },
         {
@@ -147,6 +156,7 @@ const MangementRubricItems = (nav) => {
                     cloName: clo,
                     ploName: plo,
                     chapterName: chapter,
+                    description: item?.description || 'Unknown',
                     maxScore: item.maxScore,
                     action: item?.rubricsItem_id || 'Unknown',
                 };
@@ -226,6 +236,9 @@ const MangementRubricItems = (nav) => {
             <div className="mb-5 w-fit p-2 bg-[#475569] rounded-lg">
                 <p className="text-lg text-[#fefefe] text-left">Danh sách</p>
             </div>
+            <div className="mb-5 w-fit p-2 bg-[#475569] rounded-lg">
+                <p className="text-lg text-[#fefefe] text-left">Danh sách</p>
+            </div>
             <div className="w-full">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
@@ -265,7 +278,7 @@ const MangementRubricItems = (nav) => {
                         </div>
                     </div>
                 )}
-                <div className="w-full overflow-auto">
+                <div className="w-fit overflow-auto">
                     <Table className="table-po text-[#fefefe]"
                         bordered
                         loading={loading}
@@ -277,6 +290,7 @@ const MangementRubricItems = (nav) => {
                         dataSource={rubicItemsData}
                     />
                 </div>
+                <CreateRubicItems rubricData={GetRubicAndItemsById}/>
             </div>
         </div>
     );

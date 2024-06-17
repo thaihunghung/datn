@@ -202,7 +202,7 @@ const Subject = (nav) => {
   
   const getAllSubjectIsDeleteFalse = async () => {
     try {
-      const response = await axiosAdmin.get(`/subjects/teacher/${teacher_id}`);
+      const response = await axiosAdmin.get(`/subjects/isDelete/false`);
       const updatedPoData = response.data.map((subject) => {
         const clos = {
           id: subject.subject_id,

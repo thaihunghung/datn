@@ -7,6 +7,10 @@ const router = express.Router();
 router.get('/subjects', SubjectController.index);
 router.post('/subject', SubjectController.create);
 router.get('/subject/:subject_id', SubjectController.getByID);
+
+router.get('/subject/getSubjectIdByCourseId/:course_id', SubjectController.getByCourseId);
+
+
 router.get('/subject/:subject_id/find-clo-ids', SubjectController.getArrayIDCloBySubjectId);
 router.get('/subject/:subject_id/find-chapter-ids', SubjectController.getArrayIDChapterBySubjectId);
 router.get('/subject/:subject_id/rubrics', SubjectController.getByrubricsbySubjectId);
@@ -22,7 +26,6 @@ router.get('/subjects/isDelete/true', SubjectController.isDeleteTotrue);
 
 router.get('/subjects/teacher/:teacher_id', SubjectController.isDeleteTofalseByteacher);
 router.get('/subjects/archive/teacher/:teacher_id', SubjectController.isDeleteTotrueByteacher);
-
 
 router.put('/subjects/soft-delete-multiple', SubjectController.softDeleteMultiple);
 router.put('/subject/:subject_id/soft-delete', SubjectController.toggleSoftDeleteById);

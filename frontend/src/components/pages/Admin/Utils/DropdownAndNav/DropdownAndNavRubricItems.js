@@ -10,7 +10,6 @@ const DropdownAndNavRubricItems = () => {
 
   const items = useMemo(() => [
     { key: "Danh sách rubric items", label: "Danh sách rubric items", path: `/admin/management-rubric/${id}/rubric-items/list` },
-    { key: "Tạo mới", label: "Tạo mới", path: `/admin/management-rubric/${id}/rubric-items/create` },
     { key: "Tổng quan", label: "Tổng quan", path: `/admin/management-rubric/${id}/rubric-items/template` },
     { key: "Kho lưu trữ", label: "Kho lưu trữ", path: `/admin/management-rubric/${id}/rubric-items/store` },
   ], []);
@@ -79,13 +78,6 @@ const DropdownAndNavRubricItems = () => {
             </div>
           </Link>
 
-          <Link to={`/admin/management-rubric/${id}/rubric-items/create`}>
-            <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
-              <div className={` ${isActive(`/admin/management-rubric/${id}/rubric-items/create`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                Tạo mới
-              </div>
-            </div>
-          </Link>
           <Link to={`/admin/management-rubric/${id}/rubric-items/template`}>
             <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
               <div className={` ${isActive(`/admin/management-rubric/${id}/rubric-items/template`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>

@@ -45,6 +45,7 @@ const CreateAssessment = (nav) => {
 
     const handleCourseChange = (value, option) => {
         setCourse_id(value);
+        console.log(value);
         setRubric_id(null)
         setDefaultRubric('Chọn Rubric')
     };
@@ -75,6 +76,7 @@ const CreateAssessment = (nav) => {
     const getCourseByTeacher = async () => {
         try {
             const response = await axiosAdmin.get(`/course/getByTeacher/${teacher_id}`);
+            console.log(response.data);
             if (response.data) {
                 setCourseByTeacher(response.data.course);
             }
@@ -104,24 +106,31 @@ const CreateAssessment = (nav) => {
 
     useEffect(() => {
         if (course_id) {
-            setDataRubric([])
+            
+           // setDataRubric([])
+
             const getRubricBySubject = async (idSubject) => {
                 try {
                     const response = await axiosAdmin.get(`/subject/${idSubject}/rubrics`);
                     if (response.data) {
                         setDataRubric(response.data);
-                    }
-
+                    }      
                 } catch (error) {
                     console.error("Error fetching Rubric:", error);
-
                 }
             }
-
+            
+            const getSubjectByCourseId = async (CourseId) => {
+                try {
+                    const response = await axiosAdmin.get(`/subject/getSubjectIdByCourseId/${CourseId}`);
+                    console.log(response.data);     
+                } catch (error) {
+                    console.error("Error fetching Rubric:", error);
+                }
+            }
             const timer = setTimeout(() => {
-                getRubricBySubject(course_id);
-
-            }, 100); // 1-second delay
+                getSubjectByCourseId(course_id)
+            }, 100);
 
             return () => clearTimeout(timer);
         }
