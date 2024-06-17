@@ -1,29 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { EditorState } from 'draft-js';
-import { Editor } from 'react-draft-wysiwyg';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button} from "@nextui-org/react";
 import { convertToHTML, convertFromHTML } from 'draft-convert';
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-
-import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
-import './Rubic.css';
-import { message } from 'antd';
-
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
-
 import { axiosAdmin } from '../../../../../service/AxiosAdmin';
-
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+import { useNavigate, useParams } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { Editor } from 'react-draft-wysiwyg';
+import { EditorState } from 'draft-js';
+import { message } from 'antd';
 import { Select } from "antd";
-import Tabs from '../../Utils/Tabs/Tabs';
+import './Rubic.css';
 
 const CreateRubicItems = (nav) => {
   const { id } = useParams();
   const { Option } = Select;
-  const { setCollapsedNav, rubricData} = nav;
+  const { loadData, rubricData, isOpen, onClose} = nav;
 
   const navigate = useNavigate();
-
-
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [activeTab, setActiveTab] = useState(0);
 
@@ -70,7 +62,7 @@ const CreateRubicItems = (nav) => {
     } catch (error) { }
   }
   useEffect(() => {
-    onOpen()
+    
     getOneRubricById()
   }, []);
 
@@ -162,7 +154,7 @@ const CreateRubicItems = (nav) => {
   }
   const onCloseModal = () => {
     onClose(
-      navigate("/management-rubric/1/rubric-items/list")
+      navigate(`/admin/management-rubric/${id}/rubric-items/list`)
     ); // This function can be called to close the modal
   };
   return (
@@ -171,6 +163,27 @@ const CreateRubicItems = (nav) => {
         size="5xl"
         isOpen={isOpen}
         scrollBehavior="outside"
+        hideCloseButton
+        motionProps={{
+          variants: {
+              enter: {
+                  y: 0,
+                  opacity: 1,
+                  transition: {
+                      duration: 0.2,
+                      ease: "easeOut",
+                  },
+              },
+              exit: {
+                  y: -20,
+                  opacity: 0,
+                  transition: {
+                      duration: 0.1,
+                      ease: "easeIn",
+                  },
+              },
+          }
+      }}
       >
         <ModalContent>
           {(onClose) => (
