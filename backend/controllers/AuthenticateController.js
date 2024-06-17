@@ -42,7 +42,7 @@ const AuthenticateController = {
       }
 
       const payload = { id: user.teacher_id,permission: user.permission  };
-      const accessToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '5m' });
+      const accessToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '30m' });
       const refreshToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '7d' });
 
       // Thu hồi và hết hạn tất cả các refresh token cũ của người dùng
@@ -55,7 +55,7 @@ const AuthenticateController = {
       await RefreshTokenModel.create({ token: refreshToken, teacher_id: user.teacher_id });
 
       // Đặt token trong cookies
-      res.cookie('accessToken', accessToken, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge: 5 * 60 * 1000 });
+      res.cookie('accessToken', accessToken, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge: 30 * 60 * 1000 });
       res.cookie('refreshToken', refreshToken, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
 
       console.log(`Đăng nhập thành công cho người dùng: ${user.name}`);
@@ -73,7 +73,7 @@ const AuthenticateController = {
   getUser: async (req, res) => {
     try {
       const user = await TeacherModel.findByPk(req.user.teacher_id, {
-        attributes: ['teacher_id', 'email', 'permission', 'name', 'teacherCode', 'typeTeacher']
+        attributes: ['teacher_id', 'email', 'permission', 'name', 'teacherCode', 'typeTeacher', 'imgURL']
       });
 
       if (!user) {

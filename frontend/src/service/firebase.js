@@ -1,7 +1,5 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
-//import { postToken } from "./LoginService";
+import { initializeApp } from 'firebase/app';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
     apiKey: process.env.REACT_APP_APIKEY,
@@ -15,18 +13,6 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const storage = getStorage(app);
 
-const signInWithGoogle = async () => {
-    const googleProvider = new GoogleAuthProvider();
-    try {
-        const res = await signInWithPopup(auth, googleProvider);
-        //const response = await postToken(res.user.email, res.user.uid, res.user.photoURL, res.user.displayName);
-        return res.user;
-    } catch (err) {
-        console.error(err);
-    }
-};
-
-
-export { auth, signInWithGoogle, signOut}
+export { app, storage };

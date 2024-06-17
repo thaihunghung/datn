@@ -339,7 +339,7 @@ function Nav(props) {
                                                     !collapsedNav ? currentUser.teacherCode : ""
                                                 }
                                                 avatarProps={{
-                                                    src: currentUser.photoURL,
+                                                    src: currentUser.imgURL,
                                                 }}
                                                 classNames={{
                                                     base: `${collapsedNav ? "gap-0" : "gap-2"

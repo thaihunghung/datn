@@ -60,6 +60,8 @@ import UpdateRubricById from '../components/pages/Admin/Management/ManagementRub
 import ManagementAssessmentGrading from '../components/pages/Admin/Management/ManagementAssessment/ManagementAssessmentGrading';
 import FormGrading from '../components/pages/Admin/Management/ManagementAssessment/FormGrading';
 import Teacher from '../components/pages/Admin/Management/ManagementTeacher/Teacher';
+import StoreTeacher from '../components/pages/Admin/Management/ManagementTeacher/StoreTeacher/StoreTeacher';
+import TeacherProfile from '../components/pages/Admin/Management/ManagementTeacher/DetailTeacher/TeacherProfile';
 
 
 function Admin(props) {
@@ -164,6 +166,8 @@ function Admin(props) {
           <Route path="/course/:id" element={<DetailCourse collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
 
           <Route path="/teacher" element={<Teacher collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/teacher/store" element={<StoreTeacher collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
+          <Route path="/teacher/:id/profile" element={<TeacherProfile collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning}/>} />
           
         </Routes> 
       </div>
