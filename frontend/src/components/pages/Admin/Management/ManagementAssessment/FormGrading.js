@@ -12,77 +12,86 @@ import Cookies from "js-cookie";
 
 const FormGrading = (nav) => {
 
-    const { setCollapsedNav } = nav;
-    
-    const [selectedValues, setSelectedValues] = useState([]); // Initialize as array
-    const [RubicData, setRubicData] = useState([]);
-    const [RubicItemsData, setRubicItemsData] = useState([]);
-    const [totalScore, setTotalScore] = useState(0);
-    const [Check, setCheck] = useState(0);
-    const [defaultValue, setdefaultValue] = useState(0);
+  const { setCollapsedNav } = nav;
+
+  const [selectedValues, setSelectedValues] = useState([]); // Initialize as array
+  const [RubicData, setRubicData] = useState([]);
+  const [RubicItemsData, setRubicItemsData] = useState([]);
+  const [totalScore, setTotalScore] = useState(0);
+  const [Check, setCheck] = useState(0);
+  const [defaultValue, setdefaultValue] = useState(0);
 
 
-    
-    const { assessment_id, rubric_id } = useParams();
-    const navigate = useNavigate();
-    const teacher_id = Cookies.get('teacher_id');
-    
-    if (!teacher_id) {
-      navigate('/login');
-    }
-  
-    const handleSliderChange = (index, value, rubricsItem_id) => {
-      setSelectedValues(prevValues => {
-        if (!Array.isArray(prevValues)) {
-          prevValues = [];
-        }
-  
-        const updatedValues = [...prevValues];
-        updatedValues[index] = {
-          assessment_id: assessment_id,
-          rubricsItem_id: rubricsItem_id,
-          maxScore: value,
-          CheckGrading: true,
-        };
-  
-        const newTotalScore = updatedValues.reduce((acc, curr) => {
-          if (curr && typeof curr.maxScore === 'number') {
-            return acc + curr.maxScore;
-          }
-          return acc;
-        }, 0);
 
-        const Check = updatedValues.reduce((acc, curr) => {
-          // Check if curr is an object and CheckGrading is true
-          if (curr && curr.CheckGrading === true) {
-            return acc + 1; // Increment the count by 1
-          }
-          return acc; // Otherwise, return the accumulated count
-        }, 0);
-        setCheck(Check)
-        setTotalScore(newTotalScore);
-        return updatedValues;
-      });
-    };
-  
-    const handleSave = async () => {
+  const { assessment_id, rubric_id } = useParams();
+  const navigate = useNavigate();
+  const teacher_id = Cookies.get('teacher_id');
 
-      console.log('Updated values', selectedValues);
-      console.log('totalScore', totalScore);
-      try {
-        const data = { totalScore: totalScore }
-        const dataAssessmentItem = selectedValues
-        await axiosAdmin.put(`/assessment/${assessment_id}/updateStotalScore`,{data: data})
+  if (!teacher_id) {
+    navigate('/login');
+  }
 
-        const response =  await axiosAdmin.post(`/assessment-item`, {data: dataAssessmentItem})
-        if(response.status === 201) {
-          message.success('Data saved successfully');
-        }
-      } catch (e) {
-        console.error(e);
-        message.error('Error saving data');
+  const handleSliderChange = (index, value, rubricsItem_id) => {
+    setSelectedValues(prevValues => {
+      if (!Array.isArray(prevValues)) {
+        prevValues = [];
       }
-    };
+
+      const updatedValues = [...prevValues];
+      updatedValues[index] = {
+        assessment_id: assessment_id,
+        rubricsItem_id: rubricsItem_id,
+        maxScore: value,
+        CheckGrading: true,
+      };
+
+      const newTotalScore = updatedValues.reduce((acc, curr) => {
+        if (curr && typeof curr.maxScore === 'number') {
+          return acc + curr.maxScore;
+        }
+        return acc;
+      }, 0);
+
+      const Check = updatedValues.reduce((acc, curr) => {
+        // Check if curr is an object and CheckGrading is true
+        if (curr && curr.CheckGrading === true) {
+          return acc + 1; // Increment the count by 1
+        }
+        return acc; // Otherwise, return the accumulated count
+      }, 0);
+      setCheck(Check)
+      setTotalScore(newTotalScore);
+      return updatedValues;
+    });
+  };
+
+  const handleSave = async () => {
+
+    console.log('Updated values', selectedValues);
+    console.log('totalScore', totalScore);
+    try {
+      const data = { totalScore: totalScore }
+
+      await axiosAdmin.put(`/assessment/${assessment_id}/updateStotalScore`, { data: data })
+
+      const dataAssessmentItem = selectedValues.map(item => {
+        const { maxScore, CheckGrading, ...rest } = item;
+        return {
+          ...rest,
+          assessmentScore: maxScore
+        };
+      });
+
+      console.log(dataAssessmentItem);
+      const response = await axiosAdmin.post(`/assessment-item`, { data: dataAssessmentItem })
+      if (response.status === 201) {
+        message.success('Data saved successfully');
+      }
+    } catch (e) {
+      console.error(e);
+      message.error('Error saving data');
+    }
+  };
 
 
   const setValue = (data) => {
@@ -98,10 +107,10 @@ const FormGrading = (nav) => {
 
     setSelectedValues(updatedPoData);
 
-   }
+  }
   const GetRubricData = async () => {
     try {
-      
+
       const response = await axiosAdmin.get(`/rubric/${rubric_id}/items/isDelete/false`);
       console.log(response.data);
       setRubicData(response.data.rubric)
@@ -114,9 +123,9 @@ const FormGrading = (nav) => {
       throw error;
     }
   };
-  
 
- 
+
+
   useEffect(() => {
     if (setCheck === 0) {
       setTotalScore(0);
@@ -142,18 +151,18 @@ const FormGrading = (nav) => {
       <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-fit p-4 py-3 shadow-lg rounded-md border-1 border-slate-300">
         <p className="text-sm font-medium">
           <div className="flex justify-center items-center">
-              <div> <i className="fa-solid fa-circle-check mr-3 text-emerald-500 "></i>
-</div>
-              <div className="flex justify-center items-center gap-1 flex-col sm:flex-row lg:flex-row xl:flex-row">
+            <div> <i className="fa-solid fa-circle-check mr-3 text-emerald-500 "></i>
+            </div>
+            <div className="flex justify-center items-center gap-1 flex-col sm:flex-row lg:flex-row xl:flex-row">
               <span className="mr-2">Tổng điểm: {' ' + totalScore} </span>
 
-Tiêu chí: {Check}/{RubicItemsData.length}
+              Tiêu chí: {Check}/{RubicItemsData.length}
 
 
-              </div>
+            </div>
           </div>
 
-          
+
         </p>
         <div className="flex items-center gap-2 ml-5">
           <Tooltip
@@ -194,7 +203,6 @@ Tiêu chí: {Check}/{RubicItemsData.length}
           <p className="text-center font-bold  text-[#fefefe]">Điểm đạt</p>
         </div>
       </div>
-
       {
         RubicItemsData.map((item, i) => (
           <div className="w-full flex flex-col p-2 py-0 sm:p-5 sm:py-0 sm:flex-col lg:flex-row xl:flex-row" key={item.rubricsItem_id}>
@@ -226,7 +234,7 @@ Tiêu chí: {Check}/{RubicItemsData.length}
                     <Tooltip content={item.PLO.description}>{item.PLO.ploName}</Tooltip>
                   </div>
                 </div>
-                
+
               </div>
               <div className="w-full">
                 <div className="flex flex-col hidden sm:hidden lg:block xl:block text-justify leading-8 p-4" dangerouslySetInnerHTML={{ __html: item.description }} />

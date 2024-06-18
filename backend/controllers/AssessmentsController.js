@@ -103,8 +103,13 @@ const AssessmentsController = {
   GetByDescriptionByUser: async (req, res) => {
     try {
       const {description, teacher_id} = req.params;
+      console.log("description");
+
+      console.log(description);
 
       const normalizedDescription = description.replace(/_/g, ' ');
+      console.log("description");
+
       console.log(normalizedDescription);
 
       const assessments = await AssessmentModel.findAll({

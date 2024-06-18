@@ -67,7 +67,7 @@ const ManagementRubric = (nav) => {
                         </Link>
 
                         :
-                        <Link to={`/admin/management-rubric/${record._id}/rubric-items/create`}>
+                        <Link to={`/admin/management-rubric/${record._id}/rubric-items/list`}>
 
                             <Button
                                 isIconOnly

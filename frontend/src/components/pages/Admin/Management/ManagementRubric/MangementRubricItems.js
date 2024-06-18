@@ -1,16 +1,31 @@
 // MangementRubricItems.js
 
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 import { Table, Tooltip, Button, message } from 'antd';
 import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavRubricItems from "../../Utils/DropdownAndNav/DropdownAndNavRubricItems";
+import CreateRubicItems from "./CreateRubicItems";
 
 const MangementRubricItems = (nav) => {
     const { id } = useParams();
+
+    const location = useLocation();
+    const isActive = (path) => location.pathname === path;
     const { setCollapsedNav} = nav;
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    // const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+
+    const [isOpenModal1, setIsOpenModal1] = useState(false);
+  const [isOpenModal2, setIsOpenModal2] = useState(false);
+
+  const handleOpenModal1 = () => setIsOpenModal1(true);
+  const handleCloseModal1 = () => setIsOpenModal1(false);
+
+  const handleOpenModal2 = () => setIsOpenModal2(true);
+  const handleCloseModal2 = () => setIsOpenModal2(false);
+
+
 
     const [selectedRow, setSelectedRow] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -40,7 +55,7 @@ const MangementRubricItems = (nav) => {
             render: (record) => (
                 <Tooltip color={"#FF9908"}
                     title={record.description}>
-                    <div className="text-sm min-w-[100px]">
+                    <div className="text-sm">
                         <p className="font-medium">{record.cloName}</p>
                     </div>
                 </Tooltip>
@@ -50,7 +65,7 @@ const MangementRubricItems = (nav) => {
             title: "Tên PLO",
             dataIndex: "ploName",
             render: (record) => (
-                <div className="text-sm min-w-[100px]">
+                <div className="text-sm">
                     <Tooltip color={"#FF9908"}
                         title={record.description}>
                         <p className="font-medium">{record.ploName}</p>
@@ -62,12 +77,20 @@ const MangementRubricItems = (nav) => {
             title: "Tên Chapter",
             dataIndex: "chapterName",
             render: (record) => (
-                <div className="text-sm min-w-[100px]">
+                <div className="text-sm">
                     <Tooltip color={"#FF9908"}
                         title={record.description}>
                         <p className="font-medium">{record.chapterName}</p>
                     </Tooltip>
                 </div>
+            ),
+        },
+        {
+            title: "Tiêu chí",
+            dataIndex: "description",
+            render: (record) => (
+                <div className="text-sm text-justify text-wrap w-[500px]" dangerouslySetInnerHTML={{ __html: record }}></div>
+
             ),
         },
         {
@@ -106,7 +129,7 @@ const MangementRubricItems = (nav) => {
                             variant="light"
                             radius="full"
                             size="sm"
-                            onClick={() => { onOpen(); setDeleteId(_id); }}
+                            // onClick={() => { onOpen(); setDeleteId(_id); }}
                         >
                             <i className="fa-solid fa-trash-can"></i>
                         </Button>
@@ -118,6 +141,7 @@ const MangementRubricItems = (nav) => {
 
     ];
 
+    //dem va create
     const GetRubicAndItemsById = async () => {
         try {
             const response = await axiosAdmin.get(`/rubric/${id}/items/isDelete/false`);
@@ -147,6 +171,7 @@ const MangementRubricItems = (nav) => {
                     cloName: clo,
                     ploName: plo,
                     chapterName: chapter,
+                    description: item?.description || 'Unknown',
                     maxScore: item.maxScore,
                     action: item?.rubricsItem_id || 'Unknown',
                 };
@@ -160,33 +185,6 @@ const MangementRubricItems = (nav) => {
         }
     };
     
-    const handleSoftDelete = async () => {
-        const data = {
-            rubricsitem_id: selectedRowKeys,
-        };
-        try {
-            const response = await axiosAdmin.put('/rubric-items/soft-delete-multiple', { data });
-            await GetRubicAndItemsById();
-            handleUnSelect();
-            message.success(response.data.message);
-        } catch (error) {
-            console.error("Error soft deleting rubricsitems:", error);
-            message.error('Error soft deleting rubricsitems');
-        }
-    };
-
-    const handleSoftDeleteById = async (_id) => {
-        try {
-            const response = await axiosAdmin.put(`/rubric-item/${_id}/soft-delete`);
-            await GetRubicAndItemsById();
-            handleUnSelect();
-            message.success(response.data.message);
-        } catch (error) {
-            console.error(`Error toggling soft delete for rubricsitem with ID ${_id}:`, error);
-            message.error(`Error toggling soft delete for rubricsitem with ID ${_id}`);
-        }
-    };
-
     useEffect(() => {
         GetRubicAndItemsById()
         const handleResize = () => {
@@ -205,77 +203,74 @@ const MangementRubricItems = (nav) => {
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7 bg-[#f5f5f5]-500">
-            <ConfirmAction
-                onOpenChange={onOpenChange}
-                isOpen={isOpen}
-                onConfirm={() => {
-                    if (deleteId) {
-                        handleSoftDeleteById(deleteId);
-                        setDeleteId(null);
-                    } else if (selectedRowKeys.length > 0) {
-                        handleSoftDelete();
-                        setSelectedRowKeys([]);
-                    }
-                }}
-            />
             <DropdownAndNavRubricItems />
-            <div className="my-5 flex justify-center items-center flex-col sm:flex-col lg:flex-row xl:fex-row">
+            <div className="my-5 flex justify-center items-start flex-col sm:flex-col lg:flex-row xl:fex-row">
                 <div className="text-lg leading-8 italic font-bold text-[#FF9908] flex-1 text-justify">Tên học phần:{' '+rubicData.rubricName}</div>
                 <div className="text-lg  leading-8 italic font-bold text-[#FF9908]  flex-1 text-justify">Tên rubric:{' '+rubicData.subjectName}</div>
             </div>
-            <div className="mb-5 w-fit p-2 bg-[#475569] rounded-lg">
-                <p className="text-lg text-[#fefefe] text-left">Danh sách</p>
-            </div>
-            <div className="w-full">
-                {selectedRowKeys.length !== 0 && (
-                    <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
-                        <p className="text-sm font-medium">
-                            <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
-                            Đã chọn {selectedRow.length} rubric
-                        </p>
-                        <div className="flex items-center gap-2">
-
-                            <Tooltip 
-                                title={`Xoá ${selectedRowKeys.length} rubric`}
-                                getPopupContainer={() =>
-                                    document.querySelector(".Quick__Option")
-                                }
-                            >
-                                <Button isIconOnly variant="light" radius="full" onClick={onOpen}>
-                                    <i className="fa-solid fa-trash-can"></i>
-                                </Button>
-                            </Tooltip>
-                            <Tooltip
-                                title="Bỏ chọn"
-                                getPopupContainer={() =>
-                                    document.querySelector(".Quick__Option")
-                                }
-                            >
-                                <Button
-                                    isIconOnly
-                                    variant="light"
-                                    radius="full"
-                                    onClick={() => {
-                                        handleUnSelect();
-                                    }}
-                                >
-                                    <i className="fa-solid fa-xmark text-[18px]"></i>
-                                </Button>
-                            </Tooltip>
+            <div className="flex flex-col">
+                <div className="Quick__Option flex justify-between items-center sticky top-2 z-50 w-fit bg-[#fefefe]">
+                        <div className={`w-fit p-2 rounded-lg border-2 bg-[#475569]`}>
+                            <p className={`text-lg text-[#fefefe] text-left`}>Danh sách</p>
                         </div>
+                    <div onClick={handleOpenModal1} className={`cursor-pointer w-fit p-2 rounded-lg border-2 border-[#FF8077] hover:bg-[#AF84DD]`}>
+                        <p className={`text-lg text-[#475569] text-left w-full h-full`}>Tạo mới</p>
                     </div>
-                )}
-                <div className="w-full overflow-auto">
-                    <Table className="table-po text-[#fefefe]"
-                        bordered
-                        loading={loading}
-                        rowSelection={{
-                            type: "checkbox",
-                            ...rowSelection,
-                        }}
-                        columns={columns}
-                        dataSource={rubicItemsData}
-                    />
+                </div>
+                <div className="w-full">
+                    {selectedRowKeys.length !== 0 && (
+                        <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
+                            <p className="text-sm font-medium">
+                                <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
+                                Đã chọn {selectedRow.length} rubric
+                            </p>
+                            <div className="flex items-center gap-2">
+
+                                <Tooltip 
+                                    title={`Xoá ${selectedRowKeys.length} rubric`}
+                                    getPopupContainer={() =>
+                                        document.querySelector(".Quick__Option")
+                                    }
+                                >
+                                    {/* <Button isIconOnly variant="light" radius="full" onClick={onOpen}>
+                                        <i className="fa-solid fa-trash-can"></i>
+                                    </Button> */}
+                                </Tooltip>
+                                <Tooltip
+                                    title="Bỏ chọn"
+                                    getPopupContainer={() =>
+                                        document.querySelector(".Quick__Option")
+                                    }
+                                >
+                                    <Button
+                                        isIconOnly
+                                        variant="light"
+                                        radius="full"
+                                        onClick={() => {
+                                            handleUnSelect();
+                                        }}
+                                    >
+                                        <i className="fa-solid fa-xmark text-[18px]"></i>
+                                    </Button>
+                                </Tooltip>
+                            </div>
+                        </div>
+                    )}
+                    <div className="w-fit overflow-auto">
+                        <Table className="table-po text-[#fefefe]"
+                            bordered
+                            loading={loading}
+                            rowSelection={{
+                                type: "checkbox",
+                                ...rowSelection,
+                            }}
+                            columns={columns}
+                            dataSource={rubicItemsData}
+                        />
+                    </div>
+                    <CreateRubicItems onOpen={handleOpenModal1} isOpen={isOpenModal1} onClose={handleCloseModal1} />
+                    
+                    {/* <CreateRubicItems onOpen={onOpen} isOpen={isOpen} onClose={onClose} onOpenChange={onOpenChange} loadData={GetRubicAndItemsById}/> */}
                 </div>
             </div>
         </div>
@@ -283,60 +278,3 @@ const MangementRubricItems = (nav) => {
 }
 
 export default MangementRubricItems;
-
-function ConfirmAction(props) {
-    const { isOpen, onOpenChange, onConfirm } = props;
-    const handleOnOKClick = (onClose) => {
-        onClose();
-        if (typeof onConfirm === 'function') {
-            onConfirm();
-        }
-    }
-    return (
-        <Modal
-            isOpen={isOpen}
-            onOpenChange={onOpenChange}
-            motionProps={{
-                variants: {
-                    enter: {
-                        y: 0,
-                        opacity: 1,
-                        transition: {
-                            duration: 0.2,
-                            ease: "easeOut",
-                        },
-                    },
-                    exit: {
-                        y: -20,
-                        opacity: 0,
-                        transition: {
-                            duration: 0.1,
-                            ease: "easeIn",
-                        },
-                    },
-                }
-            }}
-        >
-            <ModalContent>
-                {(onClose) => (
-                    <>
-                        <ModalHeader>Cảnh báo</ModalHeader>
-                        <ModalBody>
-                            <p className="text-[16px]">
-                                Rubric sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
-                            </p>
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button variant="light" onClick={onClose}>
-                                Huỷ
-                            </Button>
-                            <Button color="danger" className="font-medium" onClick={() => handleOnOKClick(onClose)}>
-                                Xoá
-                            </Button>
-                        </ModalFooter>
-                    </>
-                )}
-            </ModalContent>
-        </Modal>
-    )
-}

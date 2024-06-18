@@ -4,6 +4,8 @@ const ChapterModel = require("../models/ChapterModel");
 const RubricItemModel = require("../models/RubricItemModel");
 const CloChapterModel = require("../models/CloChapterModel");
 const PloCloModel = require("../models/PloCloModel");
+const CourseModel = require("../models/CourseModel");
+
 const ExcelJS = require('exceljs');
 const fs = require('fs');
 const path = require('path');
@@ -57,6 +59,8 @@ const SubjectController = {
       res.status(500).json({ message: 'Internal server error' });
     }
   },
+
+  
 
   getArrayIDCloBySubjectId: async (req, res) => {
     try {
@@ -116,6 +120,48 @@ const SubjectController = {
     } catch (error) {
       console.error('Error finding rubric:', error);
       res.status(500).json({ message: 'Server error' });
+    }
+  },
+  getByrubricsbySubjectIdTeacherId: async (req, res) => {
+    try {
+      const { subject_id, teacher_id } = req.params;
+      const subject = await SubjectModel.findOne({ where: { subject_id: subject_id } });
+      if (!subject) {
+        return res.status(404).json({ message: 'Subject not found' });
+      }
+      const rubric = await RubricModel.findAll({ where: { subject_id: subject_id, teacher_id:teacher_id } });
+      if (!rubric) {
+        return res.status(404).json({ message: 'rubric not found' });
+      }
+      res.status(200).json(rubric);
+    } catch (error) {
+      console.error('Error finding rubric:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
+
+
+  getByCourseId: async (req, res) => {
+    try {
+        const { course_id } = req.params;
+
+        // Find the course by course_id
+        const course = await CourseModel.findOne({ where: { course_id: course_id } });
+        if (!course) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
+
+        // Find the subject by subject_id from the found course
+        const subject = await SubjectModel.findOne({ where: { subject_id: course.subject_id } });
+        if (!subject) {
+            return res.status(404).json({ message: 'Subject not found' });
+        }
+
+        // Send the subject as a response
+        res.status(200).json(subject);
+    } catch (error) {
+        console.error('Error finding subject:', error);
+        res.status(500).json({ message: 'Server error' });
     }
   },
 
