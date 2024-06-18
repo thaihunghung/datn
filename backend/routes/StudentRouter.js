@@ -209,4 +209,6 @@ router.put('/student/isDelete/:id', StudentController.isDelete);
 
 router.get('/student/templates/post', StudentController.getFormStudent);
 router.post('/student/templates/update', StudentController.getFormStudentWithData);
+
+router.get('/students/performance/:student_id', StudentController.getStudentPerformanceByCourse);
 module.exports = router;

@@ -277,7 +277,6 @@ const TeacherController = {
     try {
       const { data } = req.body;
       const teacherIds = data.map(item => item.id);
-      console.log("fxfxfx", teacherIds)
       
       await TeacherModel.update({ isBlock: 0 }, { where: { teacher_id: teacherIds } });
       res.status(200).json({ message: 'Teacher has been unblocked.' });
@@ -301,15 +300,14 @@ const TeacherController = {
   deleteTeachers: async (req, res) => {
     try {
       const { data } = req.body;
+      const teacherIds = data.map(item => item.id);
       if (!data || !Array.isArray(data) || data.length === 0) {
         return res.status(400).json({ error: 'Invalid or missing data array' });
       }
-
-      console.log('Deleting teachers with IDs:', id); // Debugging log
-
+      
       await TeacherModel.update(
         { isDelete: 1 },
-        { where: { teacher_id: id } }
+        { where: { teacher_id: teacherIds } }
       );
 
       res.status(200).json({ message: 'Teachers have been deleted.' });

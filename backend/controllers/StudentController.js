@@ -4,6 +4,13 @@ const sequelize = require("../config/database");
 const ExcelJS = require('exceljs');
 const path = require('path');
 const ClassModel = require("../models/ClassModel");
+const { Sequelize } = require("sequelize");
+const AcademicYearModel = require("../models/AcademicYearModel");
+const SemesterModel = require("../models/SemesterModel");
+const SemesterAcademicYearModel = require("../models/SemesterAcademicYearModel");
+const SubjectModel = require("../models/SubjectModel");
+const CourseModel = require("../models/CourseModel");
+const AssessmentModel = require("../models/AssessmentModel");
 
 const StudentController = {
   // Lấy tất cả sinh viên
@@ -364,7 +371,67 @@ const StudentController = {
       console.error('Error updating students from Excel file:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
+  },
+  // for chart
+  getStudentPerformanceByCourse: async (req, res) => {
+    try {
+      const { student_id } = req.params;
+      const results = await sequelize.query(
+        `SELECT 
+            a.assessment_id, 
+            a.totalScore, 
+            s.student_id AS student_id, 
+            s.studentCode AS studentCode, 
+            s.name AS studentName, 
+            s.date_of_birth AS studentDOB, 
+            c.class_id AS class_id, 
+            c.className AS className, 
+            c.classCode AS classCode, 
+            c.classNameShort AS classNameShort, 
+            cr.course_id AS course_id, 
+            cr.courseName AS courseName, 
+            sub.subject_id AS subject_id, 
+            sub.subjectName AS subjectName, 
+            sem.semester_id AS semester_id, 
+            sem.descriptionShort AS semesterDescriptionShort, 
+            ay.academic_year_id AS academic_year_id, 
+            ay.startDate AS academicYearStartDate, 
+            ay.endDate AS academicYearEndDate, 
+            ay.description AS academicYearDescription
+        FROM 
+            assessments AS a
+        LEFT JOIN students AS s
+            ON a.student_id = s.student_id
+        LEFT JOIN classes AS c
+            ON s.class_id = c.class_id
+        LEFT JOIN courses AS cr
+            ON a.course_id = cr.course_id
+        LEFT JOIN subjects AS sub
+            ON cr.subject_id = sub.subject_id
+        LEFT JOIN semester_academic_years AS say
+            ON cr.id_semester_academic_year = say.id_semester_academic_year
+        LEFT JOIN semesters AS sem
+            ON say.semester_id = sem.semester_id
+        LEFT JOIN academic_years AS ay
+            ON say.academic_year_id = ay.academic_year_id
+        WHERE 
+            a.student_id = :student_id
+            AND a.isDelete = false
+        ORDER BY 
+            ay.startDate ASC;`,
+        {
+          type: Sequelize.QueryTypes.SELECT,
+          replacements: { student_id }
+        }
+      );
+
+      res.json(results);
+    } catch (error) {
+      console.error('Error fetching student performance by course:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
   }
+
 };
 
 module.exports = StudentController;

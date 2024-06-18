@@ -1,7 +1,12 @@
+const sequelize = require("../config/database");
 const AcademicYearModel = require("../models/AcademicYearModel");
+const AssessmentItemModel = require("../models/AssessmentItemModel");
+const AssessmentModel = require("../models/AssessmentModel");
 const ClassModel = require("../models/ClassModel");
+const CloModel = require("../models/CloModel");
 const CourseEnrollmentModel = require("../models/CourseEnrollmentModel");
 const CourseModel = require("../models/CourseModel");
+const RubricsItemModel = require("../models/RubricItemModel");
 const SemesterAcademicYearModel = require("../models/SemesterAcademicYearModel");
 const SemesterModel = require("../models/SemesterModel");
 const SubjectModel = require("../models/SubjectModel");
@@ -251,14 +256,14 @@ const CourseController = {
       subject_id,
       teacher_id
     } = req.body.data;
-  
+
     console.log(req.body);
     try {
       const course = await CourseModel.findOne({ where: { course_id: id } });
       if (!course) {
         return res.status(404).json({ message: 'Không tìm thấy khóa học' });
       }
-  
+
       // Kiểm tra sự tồn tại của cặp semester_id và academic_year_id
       let semesterAcademicYear = await SemesterAcademicYearModel.findOne({
         where: {
@@ -266,7 +271,7 @@ const CourseController = {
           academic_year_id
         }
       });
-  
+
       // Nếu không tồn tại, tạo mới
       if (!semesterAcademicYear) {
         semesterAcademicYear = await SemesterAcademicYearModel.create({
@@ -275,7 +280,7 @@ const CourseController = {
           isDelete: 0 // Giả định rằng `isDelete` mặc định là 0
         });
       }
-  
+
       // Cập nhật khóa học với id_semester_academic_year mới
       await CourseModel.update({
         academic_year_id,
@@ -287,7 +292,7 @@ const CourseController = {
         subject_id,
         teacher_id
       }, { where: { course_id: id } });
-   
+
       res.json({ message: `Cập nhật thành công khóa học có id: ${id}` });
     } catch (error) {
       console.error('Lỗi khi cập nhật khóa học:', error);
@@ -348,6 +353,62 @@ const CourseController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+  getCourseAssessmentScores: async (req, res) => {
+    console.log("okok");
+    try {
+        const results = await sequelize.query(
+            `SELECT 
+                s.subject_id,
+                s.subjectName,
+                clo.clo_id,
+                clo.cloName,
+                (SUM(ai.assessmentScore) / SUM(ri.maxScore)) AS percentage_score
+            FROM 
+                assessmentItems ai
+            JOIN 
+                rubricsItems ri ON ai.rubricsItem_id = ri.rubricsItem_id
+            JOIN 
+                clos clo ON ri.clo_id = clo.clo_id
+            JOIN 
+                subjects s ON clo.subject_id = s.subject_id
+            WHERE 
+                ai.isDelete = 0
+            GROUP BY 
+                s.subject_id, s.subjectName, clo.clo_id, clo.cloName
+            ORDER BY 
+                clo.cloName;`,
+            {
+                type: Sequelize.QueryTypes.SELECT,
+            }
+        );
+        const formattedResults = results.reduce((acc, result) => {
+            const { subject_id, subjectName, clo_id, cloName, percentage_score } = result;
+
+            if (!acc[subject_id]) {
+                acc[subject_id] = {
+                    subject_id,
+                    subjectName,
+                    clos: []
+                };
+            }
+
+            acc[subject_id].clos.push({
+                clo_id,
+                cloName,
+                percentage_score
+            });
+
+            return acc;
+        }, {});
+
+        res.json(Object.values(formattedResults));
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
+
 };
 
 module.exports = CourseController;
