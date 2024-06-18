@@ -9,7 +9,6 @@ const DropdownAndNavGrading = () => {
 
   const items = useMemo(() => [
     { key: "Danh sách rubric", label: "Danh sách rubric", path: `/admin/management-grading/list` },
-    { key: "Kho lưu trữ", label: "Kho lưu trữ", path: `/admin/management-grading/store` },
     { key: "Tạo mới", label: "Tạo mới", path: `/admin/management-grading/create` }
   ], []);
 
@@ -70,22 +69,7 @@ const DropdownAndNavGrading = () => {
           </Link>
         </div>
       </div>
-      <div className="hidden sm:hidden lg:block xl:block">
-        <Link to={`/admin/management-grading/store`}>
-          <div className="p-5 bg-default-50">
-            <i className="fa-solid mr-2 fa-trash-can"></i><span className="text-base">Kho lưu trữ</span>
-          </div>
-        </Link>
-      </div>
-      <div className="lg:hidden xl:hidden">
-        <Link to={`/admin/management-grading/store`}>
-          <Tooltip title="Kho lưu trữ" color={'#ff9908'}>
-            <div className="p-5 bg-default-50">
-              <i className="fa-solid fa-trash-can"></i>
-            </div>
-          </Tooltip>
-        </Link>
-      </div>
+      
     </div>
   );
 }

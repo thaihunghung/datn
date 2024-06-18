@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { Input } from "@nextui-org/react";
-import { Button, message} from 'antd';
+import { Button, message, Select } from 'antd';
 
 import DropdownAndNavSubject from "../../Utils/DropdownAndNav/DropdownAndNavSubject";
 import DownloadAndUpload from "../../Utils/DownloadAndUpload/DownloadAndUpload";
@@ -67,7 +67,7 @@ const CreateSubject = (nav) => {
             const response = await axiosAdmin.get('/subject/templates/post', {
                 responseType: 'blob'
             });
-            
+
 
             if (response && response.data) {
                 const url = window.URL.createObjectURL(response.data);
@@ -112,7 +112,12 @@ const CreateSubject = (nav) => {
             window.removeEventListener("resize", handleResize);
         };
     }, [setCollapsedNav]);
-
+    const DataTypeSubject = [
+        { key: '1', TypeSubject: 'Đại cương' },
+        { key: '2', TypeSubject: 'Cơ sở ngành' },
+        { key: '3', TypeSubject: 'Chuyên ngành' },
+        { key: '4', TypeSubject: 'Thực tập đồ án' },
+    ];
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7">
             <DropdownAndNavSubject />
@@ -168,13 +173,24 @@ const CreateSubject = (nav) => {
                                             onValueChange={setNumberCreditsPractice}
                                             className="w-full"
                                         />
-                                        <Input
-                                            label="Loại học phần"
-                                            placeholder="Enter your setTypeSubject"
-                                            value={typeSubject}
-                                            onValueChange={setTypeSubject}
-                                            className="w-full"
-                                        />
+                                      
+                                      <span className="font-bold text-left">Chọn loại học phần</span>
+
+        <Select
+            value={typeSubject}
+            onChange={(value) => setTypeSubject(value)}
+            size="large"
+            className="w-full"
+        >
+            {DataTypeSubject.map((TypeSubject) => (
+                <Select.Option
+                    key={TypeSubject.key}
+                    value={TypeSubject.TypeSubject}
+                >
+                    {TypeSubject.TypeSubject}
+                </Select.Option>
+            ))}
+        </Select>
                                         <div className="w-full flex justify-center items-center">
                                             <Button color="primary" onClick={handleSave} className="max-w-[300px] mt-5 px-20">
                                                 Tạo

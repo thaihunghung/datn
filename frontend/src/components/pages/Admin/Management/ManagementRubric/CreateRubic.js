@@ -1,16 +1,16 @@
 // CreateRubic.js
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from "@nextui-org/react";
 
 import { useEffect, useState } from "react";
 import { Input } from "@nextui-org/react";
-import { Button,Select, message } from 'antd';
+import { Select, message } from 'antd';
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import Tabs from "../../Utils/Tabs/Tabs";
-import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 
 const CreateRubic = (nav) => {
-    const { setCollapsedNav } = nav;
+    const { loadData, rubricData, isOpen, onClose } = nav;
+
     const [activeTab, setActiveTab] = useState(0);
 
     const [rubricName, setRubricName] = useState("");
@@ -20,10 +20,18 @@ const CreateRubic = (nav) => {
     const navigate = useNavigate();
     const teacher_id = Cookies.get('teacher_id');
     if (!teacher_id) {
-      navigate('/login');
+        navigate('/login');
     }
-
+    const onCloseModal = () => {
+        onClose(
+            navigate(`/admin/management-rubric/list`)
+        ); // This function can be called to close the modal
+    };
     const handleSave = async () => {
+        if (!subject_id) {
+            message.error('Please select a subject');
+            return; // Dừng hàm nếu subject_id là null
+        }
         try {
             const data = {
                 subject_id: subject_id,
@@ -35,6 +43,9 @@ const CreateRubic = (nav) => {
             const response = await axiosAdmin.post('/rubric', { data: data });
             if (response.status === 201) {
                 message.success('Data saved successfully');
+                loadData()
+                onCloseModal()
+
             } else {
                 message.error(response.data.message || 'Error saving data');
             }
@@ -57,73 +68,91 @@ const CreateRubic = (nav) => {
     }
     useEffect(() => {
         getAllSubject()
-        const handleResize = () => {
-            if (window.innerWidth < 1024) {
-                setCollapsedNav(true);
-            } else {
-                setCollapsedNav(false);
-            }
-        };
-        handleResize();
-        window.addEventListener("resize", handleResize);
-        return () => {
-            window.removeEventListener("resize", handleResize);
-        };
     }, []);
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
-            <DropdownAndNavRubric />
             <div className="w-full mt-5 px-5 rounded-lg">
-                <Tabs tabs=
-                    {[
-                        {
-                            title: 'Tạo mới',
-                            content:
-                                <div className="w-full rounded-lg border">
-                                    <div className="w-[50%] p-5 flex flex-col gap-2">
-                                        <Select
-                                            defaultValue={"Chọn học phần"}
-                                            value={subject_id}
-                                            onChange={setSubject_id} 
-                                            size="large"
-                                            className="w-full"
-                                        >
-                                            {DataSubject.map((subject) => (
-                                                <Select.Option
-                                                    key={subject.subject_id}
-                                                    value={subject.subject_id}
-                                                >
-                                                    {subject.subjectCode}{' - '}{subject.subjectName}
-                                                </Select.Option>
-                                            ))}
-                                        </Select>
-                                        <Input
-                                            label="Name Rubric"
-                                            placeholder="Enter your name Rubric"
-                                            value={rubricName}
-                                            onValueChange={setRubricName}
+                <Modal
+                    size="xl"
+                    isOpen={isOpen}
+                    scrollBehavior="outside"
+                    hideCloseButton
+                    motionProps={{
+                        variants: {
+                            enter: {
+                                y: 0,
+                                opacity: 1,
+                                transition: {
+                                    duration: 0.2,
+                                    ease: "easeOut",
+                                },
+                            },
+                            exit: {
+                                y: -20,
+                                opacity: 0,
+                                transition: {
+                                    duration: 0.1,
+                                    ease: "easeIn",
+                                },
+                            },
+                        }
+                    }}
+                >
+                    <ModalContent>
+                        {(onClose) => (
+                            <>
+                                <ModalHeader className="flex flex-col gap-1 text-[#FF9908]"> Tạo mới</ModalHeader>
+                                <ModalBody>
+                                    <div className='flex flex-col sm:flex-col sm:items-start lg:flex-row  xl:flex-row  justify-center items-center gap-2'>
+                                        <div className='flex-1 w-full sm:w-full items-center p-5 pb-0 sm:pb-0 lg:pb-5 xl:pb-5  justify-center flex flex-col gap-2 sm:flex-col lg:flex-col xl:flex-col'>
+                                            <div className='text-left w-full font-bold'>Chọn Clo:</div>
+                                            <Select
+                                                defaultValue={"Chọn học phần"}
+                                                value={subject_id}
+                                                onChange={setSubject_id}
+                                                size="large"
+                                                className="w-full"
+                                            >
+                                                {DataSubject.map((subject) => (
+                                                    <Select.Option
+                                                        key={subject.subject_id}
+                                                        value={subject.subject_id}
+                                                    >
+                                                        {subject.subjectCode}{' - '}{subject.subjectName}
+                                                    </Select.Option>
+                                                ))}
+                                            </Select>
+                                            <Input
+                                                label="Name Rubric"
+                                                placeholder="Enter your name Rubric"
+                                                value={rubricName}
+                                                onValueChange={setRubricName}
 
-                                        />
-                                        <Input
-                                            label="Ghi chú"
-                                            placeholder="Enter your Comment"
-                                            value={Comment}
-                                            onValueChange={setComment}
+                                            />
+                                            <Input
+                                                label="Ghi chú"
+                                                placeholder="Enter your Comment"
+                                                value={Comment}
+                                                onValueChange={setComment}
 
-                                        /> 
-                                
-                                        <div className="w-full flex justify-center items-center">
-                                            <Button color="primary" onClick={handleSave} className="max-w-[300px] mt-5 px-20">
-                                                Tạo
-                                            </Button>
+                                            />
+
                                         </div>
                                     </div>
-                                </div>
-                        },
-                    ]}
-                    activeTab={activeTab} setActiveTab={setActiveTab}
-                />
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button color="danger" variant="light" onClick={onCloseModal}>
+                                        Hủy
+                                    </Button>
+                                    <Button color="primary" onClick={handleSave}>
+                                        Tạo
+                                    </Button>
+                                </ModalFooter>
+                            </>
+                        )}
+                    </ModalContent>
+                </Modal>
             </div>
         </div>
     );

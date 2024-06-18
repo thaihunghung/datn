@@ -105,28 +105,16 @@ const ManagementAssessment = (nav) => {
               </Button>
             </Tooltip>
           </Link>
-          <Link to={`/admin/management-subject/update/${record._id}`}>
-            <Tooltip title="Chỉnh sửa">
-              <Button
-                isIconOnly
-                variant="light"
-                radius="full"
-                size="sm"
-              >
-                <i className="fa-solid fa-pen"></i>
-              </Button>
-            </Tooltip>
-          </Link>
-          <Tooltip title="Xoá">
+       
+          <Tooltip title="In phiếu chấm">
             <Button
               isIconOnly
               variant="light"
               radius="full"
               size="sm"
-              onClick={() => { onOpen(); setDeleteId(record._id); }}
             >
-              <i className="fa-solid fa-trash-can"></i>
-            </Button>
+<i class="fa-regular fa-file-pdf"></i>            
+</Button>
           </Tooltip>
 
         </div>

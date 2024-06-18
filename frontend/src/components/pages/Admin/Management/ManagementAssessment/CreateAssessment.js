@@ -105,7 +105,6 @@ const CreateAssessment = (nav) => {
 
     //id_teacher nhận trên cookie id_teacher =2
     useEffect(() => {
-
         getCourseByTeacher()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
@@ -120,30 +119,6 @@ const CreateAssessment = (nav) => {
             window.removeEventListener("resize", handleResize);
         };
     }, []);
-
-    // useEffect(() => {
-    //     if (course_id) {
-            
-    //        // setDataRubric([])
-
-           
-            
-    //         const getSubjectByCourseId = async (CourseId) => {
-    //             try {
-    //                 const response = await axiosAdmin.get(`/subject/getSubjectIdByCourseId/${CourseId}`);
-    //                 console.log(response.data);     
-    //             } catch (error) {
-    //                 console.error("Error fetching Rubric:", error);
-    //             }
-    //         }
-    //         const timer = setTimeout(() => {
-    //             getSubjectByCourseId(course_id)
-    //         }, 100);
-
-    //         return () => clearTimeout(timer);
-    //     }
-    // }, [course_id]);
-
 
     const [fileList, setFileList] = useState([]);
 
@@ -211,7 +186,8 @@ const CreateAssessment = (nav) => {
                                                         {Rubric.rubricName}
                                                     </Select.Option>
                                                 ))}
-                                            </Select></div>
+                                            </Select>
+                                            </div>
 
 
                                         <div className="flex flex-col gap-5">

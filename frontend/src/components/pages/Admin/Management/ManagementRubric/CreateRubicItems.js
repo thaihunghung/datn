@@ -62,7 +62,6 @@ const CreateRubicItems = (nav) => {
     } catch (error) { }
   }
   useEffect(() => {
-    
     getOneRubricById()
   }, []);
 
