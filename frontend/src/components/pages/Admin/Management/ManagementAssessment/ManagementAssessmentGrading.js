@@ -88,7 +88,7 @@ const ManagementAssessmentGrading = (nav) => {
               </Button>
             </Tooltip>
           </Link>
-          <Link to={`/admin/management-subject/update/${record._id}`}>
+          <Link to={`/admin/management-grading/update/${slugify(record.description, { lower: true, replacement: '_' })}/student-code/${record.studentCode}/assessment/${record.assessment_id}/rubric/${record.rubric_id}`}>
             <Tooltip title="Chỉnh sửa">
               <Button
                 isIconOnly

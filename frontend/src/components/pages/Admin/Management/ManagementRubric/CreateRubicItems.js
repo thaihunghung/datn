@@ -143,14 +143,17 @@ const CreateRubicItems = (nav) => {
     }
   };
 
-  const options = [];
-  for (let i = 0.5; i <= 2; i += 0.5) {
-    options.push(
-      <Option key={i} value={i} textValue={`${i}`}>
-        {`${i}`}
-      </Option>
-    );
-  }
+  const DataScore = [
+    { key: '1', Score: 0.25 },
+    { key: '2', Score: 0.5 },
+    { key: '3', Score: 0.75 },
+    { key: '4', Score: 1 },
+    { key: '4', Score: 1.25 },
+    { key: '4', Score: 1.5 },
+    { key: '4', Score: 1.75 },
+    { key: '4', Score: 2 },
+];
+
   const onCloseModal = () => {
     onClose(
       navigate(`/admin/management-rubric/${id}/rubric-items/list`)
@@ -261,7 +264,14 @@ const CreateRubicItems = (nav) => {
                       size="large"
                       className="w-full"
                     >
-                      {options}
+                      {DataScore.map((TypeSubject) => (
+                <Select.Option
+                    key={TypeSubject.key}
+                    value={TypeSubject.Score}
+                >
+                    {TypeSubject.Score}
+                </Select.Option>
+            ))}
                     </Select>
                   </div>
 

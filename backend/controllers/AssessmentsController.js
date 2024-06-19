@@ -3,10 +3,16 @@ const AssessmentModel = require('../models/AssessmentModel');
 const CourseModel = require('../models/CourseModel');
 const StudentModel = require('../models/StudentModel');
 const ClassModel = require('../models/ClassModel');
+const RubricModel = require('../models/RubricModel');
+const RubricItemModel = require('../models/RubricItemModel');
+const AssessmentItemModel = require('../models/AssessmentItemModel');
 
 const ExcelJS = require('exceljs');
 const fs = require('fs');
 const path = require('path');
+const CloModel = require('../models/CloModel');
+const ChapterModel = require('../models/ChapterModel');
+const PloModel = require('../models/PloModel');
 
 const AssessmentsController = {
   index: async (req, res) => {
@@ -57,19 +63,19 @@ const AssessmentsController = {
         acc[key].push(assessment);
         return acc;
       }, {});
-      
-      console.log(groupedAssessments);
-   // attributes: [
-        //   'course_id',
-        
-        // ],
 
-        //group: ['course_id']
-        
+      console.log(groupedAssessments);
+      // attributes: [
+      //   'course_id',
+
+      // ],
+
+      //group: ['course_id']
+
       if (assessments.length === 0) {
         return res.status(404).json({ message: 'No assessments found for this user' });
       }
-  
+
       const result = assessments.map(assessment => {
         let status;
         if (parseInt(assessment.dataValues.zeroScoreCount) === 0) {
@@ -79,7 +85,7 @@ const AssessmentsController = {
         } else {
           status = (parseInt(assessment.dataValues.zeroScoreCount) / parseInt(assessment.dataValues.assessmentCount)) * 100;
         }
-        
+
         return {
           course_id: assessment.course_id,
           description: assessment.description,
@@ -90,9 +96,9 @@ const AssessmentsController = {
           status: status
         };
       });
-      
-      
-      
+
+
+
       console.log(result);
       res.status(200).json(result);
     } catch (error) {
@@ -102,7 +108,7 @@ const AssessmentsController = {
   },
   GetByDescriptionByUser: async (req, res) => {
     try {
-      const {description, teacher_id} = req.params;
+      const { description, teacher_id } = req.params;
       console.log("description");
 
       console.log(description);
@@ -121,7 +127,7 @@ const AssessmentsController = {
         include: [{
           model: CourseModel,
           attributes: ['courseCode', 'courseName']
-        },{
+        }, {
           model: StudentModel,
           attributes: ['studentCode', 'name', 'class_id'],
           include: [{
@@ -129,7 +135,7 @@ const AssessmentsController = {
             attributes: ['classNameShort']
           }]
         }
-      ]
+        ]
       });
 
 
@@ -141,7 +147,73 @@ const AssessmentsController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
-  
+
+  GetitemsByID: async (req, res) => {
+    try {
+      const { assessment_id } = req.params;
+      const assessments = await AssessmentModel.findOne({
+        where: {
+          assessment_id: assessment_id,
+          isDelete: false
+        },
+        include: [
+          { model: CourseModel, attributes: ['courseCode', 'courseName'] },
+          {
+            model: StudentModel,
+            attributes: ['studentCode', 'name', 'class_id'],
+            include: [{
+              model: ClassModel,
+              attributes: ['classNameShort']
+            }]
+          },
+          {
+            model: RubricModel,
+            where: {
+              isDelete: false
+            },
+            // include: [{
+            //   model: RubricItemModel, // Include RubricsItemModel here
+            //   include: [
+            //     { model: CloModel, attributes: ['clo_id', 'cloName', 'description'] },
+            //     { model: ChapterModel, attributes: ['chapter_id', 'chapterName', 'description'] },
+            //     { model: PloModel, attributes: ['plo_id', 'ploName', 'description'] },
+            //     { model: AssessmentItemModel, attributes: ['assessmentScore'] }
+            //   ]
+            // }]
+          },
+        ]
+      });
+      
+      const [rubricItems, Clos, Chapters, PloClo] = await Promise.all([
+        RubricItemModel.findAll({
+          where: {
+            rubric_id: assessments?.Rubric?.rubric_id, isDelete: false
+          },
+          include: [{
+            model: CloModel,
+            attributes: ['clo_id', 'cloName', 'description']
+          }, {
+            model: ChapterModel,
+            attributes: ['chapter_id', 'chapterName', 'description']
+          }, {
+            model: PloModel,
+            attributes: ['plo_id', 'ploName', 'description']
+          }]
+        }),
+
+        // PloCloModel.findAll({ where: { clo_id: rubric.clo_id } }),
+        CloModel.findAll({ where: { subject_id: assessments?.Rubric?.subject_id } }),
+        // ChapterModel.findAll({ where: { subject_id: rubric.subject_id } })
+      ]);
+
+
+      console.log(assessments);
+      res.status(200).json(assessments);
+    } catch (error) {
+      console.error('Error fetching assessments:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
   create: async (req, res) => {
     try {
       const { data } = req.body;
@@ -156,7 +228,7 @@ const AssessmentsController = {
   getByID: async (req, res) => {
     try {
       const { assessment_id } = req.params;
-      const assessment = await AssessmentModel.findOne({ assessment_id: assessment_id});
+      const assessment = await AssessmentModel.findOne({ assessment_id: assessment_id });
       res.json(assessment);
     } catch (error) {
       console.error('Lỗi tìm kiếm chương trình:', error);
@@ -167,7 +239,7 @@ const AssessmentsController = {
     try {
       const { assessment_id } = req.params;
       const { data } = req.body;
-      const updatedProgram = await AssessmentModel.update(data , { where: { assessment_id: assessment_id } });
+      const updatedProgram = await AssessmentModel.update(data, { where: { assessment_id: assessment_id } });
       if (updatedProgram[0] === 0) {
         return res.status(404).json({ message: 'Program not found' });
       }
@@ -181,7 +253,7 @@ const AssessmentsController = {
     try {
       const { assessment_id } = req.params;
       const { data } = req.body;
-      const updatedProgram = await AssessmentModel.update(data , { where: { assessment_id: assessment_id } });
+      const updatedProgram = await AssessmentModel.update(data, { where: { assessment_id: assessment_id } });
       if (updatedProgram[0] === 0) {
         return res.status(404).json({ message: 'Program not found' });
       }
@@ -208,14 +280,14 @@ const AssessmentsController = {
       if (!assessment) {
         return res.status(404).json({ message: 'Không tìm thấy chương trình' });
       }
-      
+
       res.json(assessment);
     } catch (error) {
       console.error('Lỗi tìm kiếm assessment:', error);
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
-  isDeleteTofalse: async(req, res) => {
+  isDeleteTofalse: async (req, res) => {
     try {
       const assessment = await AssessmentModel.findAll({ where: { isDelete: false } });
       if (!assessment) {
@@ -255,12 +327,12 @@ const AssessmentsController = {
     if (!req.files) {
       return res.status(400).send('No file uploaded.');
     }
-    
+
     const requestData = JSON.parse(req.body.data);
 
     // Tạo một object mới với thuộc tính course_id
     //console.log(requestData);
-    
+
     // try {
     //   const subject = await SubjectModel.findByPk(subject_id);
     //   if (!subject) {
