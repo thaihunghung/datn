@@ -4,6 +4,9 @@ const assessmentItemsController = require('../controllers/AssessmentItemsControl
 
 
 router.post('/assessment-item', assessmentItemsController.create);
+router.put('/assessment-item/:assessmentItem_id', assessmentItemsController.update);
+
+
 
 
 module.exports = router;

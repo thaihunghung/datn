@@ -19,6 +19,20 @@ const AssessmentItemsController = {
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
+  update: async (req, res) => {
+    try {
+      const { assessmentItem_id } = req.params;
+      const { data } = req.body;
+      const updated = await AssessmentItemModel.update(data, { where: { assessmentItem_id: assessmentItem_id } });
+      if (updated[0] === 0) {
+        return res.status(404).json({ message: 'items not found' });
+      }
+      res.json(updated);
+    } catch (error) {
+      console.error('Lỗi cập nhật items:', error);
+      res.status(500).json({ message: 'Lỗi server' });
+    }
+  },
 };
 
 module.exports = AssessmentItemsController;

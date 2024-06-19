@@ -15,6 +15,8 @@ const UpdateFormGrading = (nav) => {
   const { setCollapsedNav } = nav;
 
   const [selectedValues, setSelectedValues] = useState([]); // Initialize as array
+
+  
   const [RubicData, setRubicData] = useState([]);
   const [RubicItemsData, setRubicItemsData] = useState([]);
   const [totalScore, setTotalScore] = useState(0);
@@ -31,7 +33,8 @@ const UpdateFormGrading = (nav) => {
     navigate('/login');
   }
 
-  const handleSliderChange = (index, value, rubricsItem_id) => {
+  const handleSliderChange = (index, value, rubricsItem_id, assessmentItem_id) => {
+    console.log('index: ', index)
     setSelectedValues(prevValues => {
       if (!Array.isArray(prevValues)) {
         prevValues = [];
@@ -39,6 +42,7 @@ const UpdateFormGrading = (nav) => {
 
       const updatedValues = [...prevValues];
       updatedValues[index] = {
+        assessmentItem_id: assessmentItem_id,
         assessment_id: assessment_id,
         rubricsItem_id: rubricsItem_id,
         maxScore: value,
@@ -66,13 +70,13 @@ const UpdateFormGrading = (nav) => {
   };
 
   const handleSave = async () => {
-    console.log('Updated values', selectedValues);
-    console.log('totalScore', totalScore);
+    // console.log('Updated values', selectedValues);
+    // console.log('totalScore', totalScore);
+    
     try {
       const data = { totalScore: totalScore }
 
       await axiosAdmin.put(`/assessment/${assessment_id}/updateStotalScore`, { data: data })
-
       const dataAssessmentItem = selectedValues.map(item => {
         const { maxScore, CheckGrading, ...rest } = item;
         return {
@@ -81,11 +85,16 @@ const UpdateFormGrading = (nav) => {
         };
       });
 
-      console.log(dataAssessmentItem);
-      const response = await axiosAdmin.post(`/assessment-item`, { data: dataAssessmentItem })
-      if (response.status === 201) {
-        message.success('Data saved successfully');
+      for (const item of dataAssessmentItem) {
+        const { assessmentItem_id, ...dataToUpdate } = item;
+        try {
+          await axiosAdmin.put(`/assessment-item/${assessmentItem_id}`, { data: dataToUpdate });
+        } catch (error) {
+          console.error(`Error updating assessment item with id ${assessmentItem_id}:`, error);
+          // Handle error as needed
+        }
       }
+      message.success("update success")
     } catch (e) {
       console.error(e);
       message.error('Error saving data');
@@ -96,24 +105,31 @@ const UpdateFormGrading = (nav) => {
   const setValue = (data) => {
     const updatedPoData = data.map((subject) => {
       return {
+        assessmentItem_id: subject?.AssessmentItems[0]?.assessmentItem_id,
         assessment_id: assessment_id,
-        rubricsItem_id: subject.rubricsItem_id,
-        maxScore: 0.0,
-        CheckGrading: false,
+        rubricsItem_id: subject?.rubricsItem_id,
+        maxScore: subject?.AssessmentItems[0]?.assessmentScore,
+        CheckGrading: true,
       };
     });
-
+    console.log(updatedPoData);
     setSelectedValues(updatedPoData);
   }
   const GetRubricData = async () => {
     try {
       // /assessments/:assessment_id/items
 
-      const response = await axiosAdmin.get(`/rubric/${rubric_id}/items/isDelete/false`);
-      console.log(response?.data);
-      setRubicData(response?.data?.rubric)
-      setRubicItemsData(response?.data?.rubric?.rubricItems)
-      const data = response?.data?.rubric?.rubricItems
+      const response = await axiosAdmin.get(`/assessments/${assessment_id}/items`);
+      //console.log(response?.data);
+      setRubicData(response?.data?.Rubric)
+      setRubicItemsData(response?.data?.Rubric?.RubricItems)
+      // console.log("assessment")
+      // console.log(response?.data?.Rubric?.RubricItems[0].AssessmentItems[0].assessmentScore)
+      // console.log("RubricItems")
+      // console.log(response?.data?.Rubric?.RubricItems[0]?.rubricsItem_id)
+
+      handleSliderChange(0,response?.data?.Rubric?.RubricItems[0].AssessmentItems[0]?.assessmentScore,response?.data?.Rubric?.RubricItems[0]?.rubricsItem_id)
+      const data = response?.data?.Rubric?.RubricItems
       setValue(data)
 
     } catch (error) {
@@ -265,9 +281,9 @@ const UpdateFormGrading = (nav) => {
                     showTooltip={true}
                     step={0.25}
                     // formatOptions={{style: "percent"}}
-                    maxValue={item.maxScore}
+                    maxValue={item?.maxScore}
                     minValue={0}
-                    defaultValue={defaultValue}
+                    defaultValue={item?.AssessmentItems[0]?.assessmentScore}
                     className="max-w-md"
                     marks={[
                       {
@@ -291,7 +307,7 @@ const UpdateFormGrading = (nav) => {
                         label: "1",
                       },
                     ]}
-                    onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
+                    onChange={(value) => handleSliderChange(i, value, item?.rubricsItem_id, item?.AssessmentItems[0]?.assessmentItem_id)}
 
                   />
                 )}
@@ -305,7 +321,7 @@ const UpdateFormGrading = (nav) => {
                     // formatOptions={{style: "percent"}}
                     maxValue={item.maxScore}
                     minValue={0}
-                    defaultValue={defaultValue}
+                    defaultValue={item.AssessmentItems[0].assessmentScore}
                     className="max-w-md"
                     marks={[
                       {
@@ -335,7 +351,7 @@ const UpdateFormGrading = (nav) => {
                     // formatOptions={{style: "percent"}}
                     maxValue={item.maxScore}
                     minValue={0}
-                    defaultValue={defaultValue}
+                    defaultValue={item.AssessmentItems[0].assessmentScore}
                     className="max-w-md"
                     marks={[
                       {

@@ -150,70 +150,86 @@ const AssessmentsController = {
 
   GetitemsByID: async (req, res) => {
     try {
-      const { assessment_id } = req.params;
-      const assessments = await AssessmentModel.findOne({
-        where: {
-          assessment_id: assessment_id,
-          isDelete: false
-        },
-        include: [
-          { model: CourseModel, attributes: ['courseCode', 'courseName'] },
-          {
-            model: StudentModel,
-            attributes: ['studentCode', 'name', 'class_id'],
-            include: [{
-              model: ClassModel,
-              attributes: ['classNameShort']
-            }]
-          },
-          {
-            model: RubricModel,
+        const { assessment_id } = req.params;
+        
+        // Step 1: Fetch the assessment with basic associations
+        const assessments = await AssessmentModel.findOne({
             where: {
-              isDelete: false
+                assessment_id: assessment_id,
+                isDelete: false
             },
-            // include: [{
-            //   model: RubricItemModel, // Include RubricsItemModel here
-            //   include: [
-            //     { model: CloModel, attributes: ['clo_id', 'cloName', 'description'] },
-            //     { model: ChapterModel, attributes: ['chapter_id', 'chapterName', 'description'] },
-            //     { model: PloModel, attributes: ['plo_id', 'ploName', 'description'] },
-            //     { model: AssessmentItemModel, attributes: ['assessmentScore'] }
-            //   ]
-            // }]
-          },
-        ]
-      });
-      
-      const [rubricItems, Clos, Chapters, PloClo] = await Promise.all([
-        RubricItemModel.findAll({
+            include: [
+                { model: CourseModel, attributes: ['courseCode', 'courseName'] },
+                {
+                    model: StudentModel,
+                    attributes: ['studentCode', 'name', 'class_id'],
+                    include: [{
+                        model: ClassModel,
+                        attributes: ['classNameShort']
+                    }]
+                },
+                {
+                    model: RubricModel,
+                    where: {
+                        isDelete: false
+                    }
+                }
+            ]
+        });
+
+        if (!assessments || !assessments.Rubric) {
+            return res.status(404).json({ message: 'Assessment or Rubric not found' });
+        }
+
+        // Step 2: Fetch related rubric items
+        const rubricItems = await RubricItemModel.findAll({
+            where: {
+                rubric_id: assessments.Rubric.rubric_id,
+                isDelete: false
+            },
+            include: [
+                {
+                    model: CloModel,
+                    attributes: ['clo_id', 'cloName', 'description']
+                },
+                {
+                    model: ChapterModel,
+                    attributes: ['chapter_id', 'chapterName', 'description']
+                },
+                {
+                    model: PloModel,
+                    attributes: ['plo_id', 'ploName', 'description']
+                }
+            ]
+        });
+
+        const rubricsItemIds = rubricItems.map(item => item.rubricsItem_id);
+
+        const assessmentItems = await AssessmentItemModel.findAll({
           where: {
-            rubric_id: assessments?.Rubric?.rubric_id, isDelete: false
-          },
-          include: [{
-            model: CloModel,
-            attributes: ['clo_id', 'cloName', 'description']
-          }, {
-            model: ChapterModel,
-            attributes: ['chapter_id', 'chapterName', 'description']
-          }, {
-            model: PloModel,
-            attributes: ['plo_id', 'ploName', 'description']
-          }]
-        }),
+              rubricsItem_id: rubricsItemIds,
+              assessment_id: assessment_id
+          }
+        });
 
-        // PloCloModel.findAll({ where: { clo_id: rubric.clo_id } }),
-        CloModel.findAll({ where: { subject_id: assessments?.Rubric?.subject_id } }),
-        // ChapterModel.findAll({ where: { subject_id: rubric.subject_id } })
-      ]);
+        rubricItems.forEach(rubricItem => {
+          rubricItem.dataValues.AssessmentItems = assessmentItems.filter(
+              assessmentItem => assessmentItem.rubricsItem_id === rubricItem.rubricsItem_id
+          );
+      });
 
+      // Step 6: Manually merge the fetched rubric items into the assessment object
+      assessments.dataValues.Rubric.dataValues.RubricItems = rubricItems;
+        // assessments.dataValues.Rubric.dataValues.RubricItems.dataValues.AssessmentItems = assessmentItems;
 
-      console.log(assessments);
-      res.status(200).json(assessments);
+        // Step 4: Send the combined result in the response
+        res.status(200).json(assessments);
     } catch (error) {
-      console.error('Error fetching assessments:', error);
-      res.status(500).json({ message: 'Server error' });
+        console.error('Error fetching assessments:', error);
+        res.status(500).json({ message: 'Server error' });
     }
-  },
+},
+
   create: async (req, res) => {
     try {
       const { data } = req.body;
