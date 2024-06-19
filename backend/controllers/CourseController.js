@@ -353,6 +353,7 @@ const CourseController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+  //
   getCourseAssessmentScores: async (req, res) => {
     console.log("okok");
     try {

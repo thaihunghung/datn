@@ -1,15 +1,36 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Input, Button, Typography, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { AxiosClient } from '../../../../service/AxiosClient';
 import Cookies from 'js-cookie';
+import { axiosAdmin } from '../../../../service/AxiosAdmin';
+import axios from 'axios';
 
 const { Title } = Typography;
 
 const Login = ({ onLoginSuccess }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.post(`${process.env.REACT_APP_API_DOMAIN_CLIENT}/refresh-token`, {}, {
+          withCredentials: true
+      });
+
+        if (response.status === 200) {
+          // Lấy token mới từ response
+          navigate('/admin');
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const onFinish = async (values) => {
     setLoading(true);

@@ -4,7 +4,6 @@ const ChapterModel = require("../models/ChapterModel");
 const RubricItemModel = require("../models/RubricItemModel");
 const CloChapterModel = require("../models/CloChapterModel");
 const PloCloModel = require("../models/PloCloModel");
-const CourseModel = require("../models/CourseModel");
 
 const ExcelJS = require('exceljs');
 const fs = require('fs');
@@ -620,6 +619,7 @@ const SubjectController = {
       return res.status(500).json({ message: 'Server error' });
     }
   },
+  // phần trăm clo theo suject
   averageScoresPerSubject: async (req, res) => {
     try {
       const results = await sequelize.query(
