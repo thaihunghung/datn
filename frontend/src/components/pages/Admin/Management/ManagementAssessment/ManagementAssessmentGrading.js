@@ -146,8 +146,9 @@ const ManagementAssessmentGrading = (nav) => {
       return;
     }
 
-    const liststudent = [selectedRowKeys]
-    navigate(`/admin/management-grading/${slugify(description, { lower: true, replacement: '_' })}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${liststudent}`)
+    const liststudent = [selectedRowKeys]; // Mảng các mã học sinh
+const studentCodesString = encodeURIComponent(JSON.stringify(liststudent)); 
+    navigate(`/admin/management-grading/${slugify(description, { lower: true, replacement: '_' })}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}`)
   }
   const getAllAssessmentIsDeleteFalse = async () => {
     try {

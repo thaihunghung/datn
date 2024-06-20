@@ -9,6 +9,7 @@ import "./FormGrading.css"
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
+import RubricSlider from "../../Utils/RubricSlider/RubricSlider";
 
 const FormMultipleGrading = (nav) => {
 
@@ -84,28 +85,28 @@ const FormMultipleGrading = (nav) => {
 
     console.log('Updated values', selectedValues);
     console.log('totalScore', totalScore);
-    try {
-      const data = { totalScore: totalScore }
+    // try {
+    //   const data = { totalScore: totalScore }
 
-      await axiosAdmin.put(`/assessment/${assessment_id}/updateStotalScore`, { data: data })
+    //   await axiosAdmin.put(`/assessment/${assessment_id}/updateStotalScore`, { data: data })
 
-      const dataAssessmentItem = selectedValues.map(item => {
-        const { maxScore, CheckGrading, ...rest } = item;
-        return {
-          ...rest,
-          assessmentScore: maxScore
-        };
-      });
+    //   const dataAssessmentItem = selectedValues.map(item => {
+    //     const { maxScore, CheckGrading, ...rest } = item;
+    //     return {
+    //       ...rest,
+    //       assessmentScore: maxScore
+    //     };
+    //   });
 
-      console.log(dataAssessmentItem);
-      const response = await axiosAdmin.post(`/assessment-item`, { data: dataAssessmentItem })
-      if (response.status === 201) {
-        message.success('Data saved successfully');
-      }
-    } catch (e) {
-      console.error(e);
-      message.error('Error saving data');
-    }
+    //   console.log(dataAssessmentItem);
+    //   const response = await axiosAdmin.post(`/assessment-item`, { data: dataAssessmentItem })
+    //   if (response.status === 201) {
+    //     message.success('Data saved successfully');
+    //   }
+    // } catch (e) {
+    //   console.error(e);
+    //   message.error('Error saving data');
+    // }
   };
 
 
@@ -141,9 +142,7 @@ const FormMultipleGrading = (nav) => {
   };
 
 
-
   useEffect(() => {
-    
     if (setCheck === 0) {
       setTotalScore(0);
       setdefaultValue(0);
@@ -275,102 +274,14 @@ const FormMultipleGrading = (nav) => {
             </div>
 
             {/* Right Side */}
-            <div className="w-full sm:w-full lg:w-[45%] xl:w-[40%] text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-[#ff8077]" key={i}>
-              <div className="flex flex-col gap-6 w-full max-w-md">
-                {item.maxScore === 1 && (
-                  <Slider
-                    size="lg"
-                    label={<span>Điểm tối đa: {item.maxScore} </span>}
-                    showTooltip={true}
-                    step={0.25}
-                    // formatOptions={{style: "percent"}}
-                    maxValue={item.maxScore}
-                    minValue={0}
-                    defaultValue={defaultValue}
-                    className="max-w-md"
-                    marks={[
-                      {
-                        value: 0,
-                        label: "0",
-                      },
-                      {
-                        value: 0.25,
-                        label: "0.25",
-                      },
-                      {
-                        value: 0.5,
-                        label: "0.5",
-                      },
-                      {
-                        value: 0.75,
-                        label: "0.75",
-                      },
-                      {
-                        value: 1,
-                        label: "1",
-                      },
-                    ]}
-                    onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
-
-                  />
-                )}
-
-                {item.maxScore === 0.5 && (
-                  <Slider
-                    size="lg"
-                    label={<span>Điểm tối đa: {item.maxScore} </span>}
-                    showTooltip={true}
-                    step={0.25}
-                    // formatOptions={{style: "percent"}}
-                    maxValue={item.maxScore}
-                    minValue={0}
-                    defaultValue={defaultValue}
-                    className="max-w-md"
-                    marks={[
-                      {
-                        value: 0,
-                        label: "0",
-                      },
-                      {
-                        value: 0.25,
-                        label: "0.25",
-                      },
-                      {
-                        value: 0.5,
-                        label: "0.5",
-                      },
-                    ]}
-                    onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
-
-                  />
-                )}
-
-                {item.maxScore === 0.25 && (
-                  <Slider
-                    size="lg"
-                    label={<span>Điểm tối đa: {item.maxScore} </span>}
-                    showTooltip={true}
-                    step={0.25}
-                    // formatOptions={{style: "percent"}}
-                    maxValue={item.maxScore}
-                    minValue={0}
-                    defaultValue={defaultValue}
-                    className="max-w-md"
-                    marks={[
-                      {
-                        value: 0,
-                        label: "Chưa đạt",
-                      },
-                      {
-                        value: 0.25,
-                        label: "Đạt",
-                      },
-                    ]}
-                    onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
-
-                  />
-                )}
-              </div>
+            <div className="w-full sm:w-full lg:w-[45%] xl:w-[40%] text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-[#ff8077]" key={i}>    
+              <RubricSlider
+                maxScore={item.maxScore}
+                index={i}
+                defaultValue={defaultValue}
+                handleSliderChange={handleSliderChange}
+                rubricsItem_id={item.rubricsItem_id}
+              />
             </div>
           </div>
         ))
