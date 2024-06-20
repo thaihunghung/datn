@@ -8,7 +8,7 @@ const DropdownAndNavGrading = () => {
   const isActive = (path) => location.pathname.startsWith(path);
 
   const items = useMemo(() => [
-    { key: "Danh sách rubric", label: "Danh sách rubric", path: `/admin/management-grading/list` },
+    { key: "Danh sách Lần chấm", label: "Danh sách rubric", path: `/admin/management-grading/list` },
     { key: "Tạo mới", label: "Tạo mới", path: `/admin/management-grading/create` }
   ], []);
 
@@ -55,7 +55,7 @@ const DropdownAndNavGrading = () => {
           <Link to={`/admin/management-grading/list`}>
             <div className="p-5 text-[#020401] hover:bg-[#475569]  rounded-lg hover:text-[#FEFEFE]">
               <div className={` ${isActive(`/admin/management-grading/list`) ? "border-b-4 text-[#020401] border-[#475569]" : ""}`}>
-                Danh sách
+                Danh sách Lần Chấm
               </div>
             </div>
           </Link>

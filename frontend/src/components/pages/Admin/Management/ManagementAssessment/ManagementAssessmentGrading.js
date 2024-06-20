@@ -25,6 +25,11 @@ const ManagementAssessmentGrading = (nav) => {
   const [loading, setLoading] = useState(false);
   const [subjects, setSubjects] = useState([]);
 
+  const [Couse_id, setCouse_id] = useState();
+  const [rubric_id, setRubric_id] = useState();
+
+
+  
   const [deleteId, setDeleteId] = useState(null);
 
   const columns = [
@@ -53,11 +58,11 @@ const ManagementAssessmentGrading = (nav) => {
         <div className="text-sm min-w-[100px] flex flex-col">
           <p className="font-medium">{record.name}</p>
           <p className="font-medium">{record.studentCode}</p>
-        
+
         </div>
       ),
     },
-    
+
     {
       title: "Điểm",
       dataIndex: "totalScore",
@@ -131,31 +136,47 @@ const ManagementAssessmentGrading = (nav) => {
     setSelectedRow([]);
   };
 
+  const navigateGradingGroup = () => {
+    if (selectedRowKeys.length === 0) {
+      message.error('Please select at least one student');
+      return;
+    }
+    if (selectedRowKeys.length > 4) {
+      message.error('Please select no more than 4 students');
+      return;
+    }
+
+    const liststudent = [selectedRowKeys]
+    navigate(`/admin/management-grading/${slugify(description, { lower: true, replacement: '_' })}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${liststudent}`)
+  }
   const getAllAssessmentIsDeleteFalse = async () => {
     try {
       const response = await axiosAdmin.get(`/assessments/${description}/teacher/${teacher_id}`);
-      console.log(response.data);
+      console.log(response?.data);
       console.log("description", description);
-      const updatedPoData = response.data.map((subject) => {
+      const updatedPoData = response?.data?.map((subject) => {
         const student = {
-          studentCode: subject.Student.studentCode,
-          name: subject.Student.name
+          studentCode: subject?.Student?.studentCode,
+          name: subject?.Student.name
         }
         const action = {
-          assessment_id: subject.assessment_id,
-          rubric_id: subject.rubric_id,
-          description: subject.description,
-          studentCode: subject.Student.studentCode
+          assessment_id: subject?.assessment_id,
+          rubric_id: subject?.rubric_id,
+          description: subject?.description,
+          studentCode: subject?.Student?.studentCode
         }
         return {
-          key: subject.assessment_id,
-          description: subject.description,
-          totalScore: subject.totalScore,
+          key: subject?.assessment_id,
+          description: subject?.description,
+          totalScore: subject?.totalScore,
           student: student,
-          class: subject.Student.class,
+          class: subject?.Student?.class,
           action: action
         };
       });
+
+      setRubric_id(response?.data[0]?.rubric_id)
+      setCouse_id(response?.data[0]?.course_id)
       setSubjects(updatedPoData);
       console.log(updatedPoData);
     } catch (error) {
@@ -222,8 +243,38 @@ const ManagementAssessmentGrading = (nav) => {
           }
         }}
       />
+      <div className="w-fit flex justify-center items-center gap-2">
+        <div className="flex border justify-start text-base font-bold rounded-lg w-fit px-3">
+          <Link to={`/admin/management-grading/list`}>
+            <Tooltip title="Quay lại" color={'#ff9908'}>
+              <span className="p-1 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-arrow-left text-lg"></i><span className="text-[#475569] text-lg"> Quay lại</span>
+              </span>
+            </Tooltip>
+          </Link>
+        </div>
+        <div>
+          <Tooltip
+            title="Chọn sinh viên"
+            getPopupContainer={() =>
+              document.querySelector(".Quick__Option")
+            }
+          >
+            <Button
+              className="flex justify-center items-center p-4"
+              isIconOnly
+              variant="light"
+              radius="full"
+              onClick={() => {
+                navigateGradingGroup();
+              }}
+            >
+              <span className="text-[#475569] text-lg font-bold">Chấm theo nhóm</span>
+            </Button>
+          </Tooltip>
+        </div>
+      </div>
 
-      <DropdownAndNavGrading />
       <div className="w-full my-5">
         {selectedRowKeys.length !== 0 && (
           <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">

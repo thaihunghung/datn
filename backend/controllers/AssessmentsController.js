@@ -126,7 +126,7 @@ const AssessmentsController = {
         },
         include: [{
           model: CourseModel,
-          attributes: ['courseCode', 'courseName']
+          attributes: ['course_id','courseCode', 'courseName']
         }, {
           model: StudentModel,
           attributes: ['studentCode', 'name', 'class_id'],
