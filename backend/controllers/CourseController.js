@@ -74,32 +74,27 @@ const CourseController = {
           {
             model: ClassModel,
             where: { isDelete: false },
-            required: true
           },
           {
             model: TeacherModel,
             where: { isDelete: false },
-            required: true
           },
           {
             model: SubjectModel,
             where: { isDelete: false },
-            required: true
           },
           {
             model: SemesterAcademicYearModel,
             where: { isDelete: false },
-            required: true,
+
             include: [
               {
                 model: SemesterModel,
                 where: { isDelete: false },
-                required: true
               },
               {
                 model: AcademicYearModel,
                 where: { isDelete: false },
-                required: true
               }
             ]
           },
@@ -251,7 +246,6 @@ const CourseController = {
       class_id,
       courseCode,
       courseName,
-      id_semester_academic_year,
       semester_id,
       subject_id,
       teacher_id
@@ -277,7 +271,7 @@ const CourseController = {
         semesterAcademicYear = await SemesterAcademicYearModel.create({
           semester_id,
           academic_year_id,
-          isDelete: 0 // Giả định rằng `isDelete` mặc định là 0
+          isDelete: 0
         });
       }
 
@@ -357,8 +351,8 @@ const CourseController = {
   getCourseAssessmentScores: async (req, res) => {
     console.log("okok");
     try {
-        const results = await sequelize.query(
-            `SELECT 
+      const results = await sequelize.query(
+        `SELECT 
                 s.subject_id,
                 s.subjectName,
                 clo.clo_id,
@@ -378,36 +372,36 @@ const CourseController = {
                 s.subject_id, s.subjectName, clo.clo_id, clo.cloName
             ORDER BY 
                 clo.cloName;`,
-            {
-                type: Sequelize.QueryTypes.SELECT,
-            }
-        );
-        const formattedResults = results.reduce((acc, result) => {
-            const { subject_id, subjectName, clo_id, cloName, percentage_score } = result;
+        {
+          type: Sequelize.QueryTypes.SELECT,
+        }
+      );
+      const formattedResults = results.reduce((acc, result) => {
+        const { subject_id, subjectName, clo_id, cloName, percentage_score } = result;
 
-            if (!acc[subject_id]) {
-                acc[subject_id] = {
-                    subject_id,
-                    subjectName,
-                    clos: []
-                };
-            }
+        if (!acc[subject_id]) {
+          acc[subject_id] = {
+            subject_id,
+            subjectName,
+            clos: []
+          };
+        }
 
-            acc[subject_id].clos.push({
-                clo_id,
-                cloName,
-                percentage_score
-            });
+        acc[subject_id].clos.push({
+          clo_id,
+          cloName,
+          percentage_score
+        });
 
-            return acc;
-        }, {});
+        return acc;
+      }, {});
 
-        res.json(Object.values(formattedResults));
+      res.json(Object.values(formattedResults));
     } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ message: 'Internal Server Error' });
+      console.error('Error:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
     }
-}
+  }
 
 
 };

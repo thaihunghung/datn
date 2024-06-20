@@ -289,7 +289,7 @@ const StudentController = {
           studentCodesSet.add(studentCode);
 
           const sql = `INSERT INTO students (class_id, name, studentCode, email)
-                 VALUES ((SELECT class_id FROM classes WHERE classCode = ?), ?, ?, ?)`;
+                 VALUES ((SELECT class_id FROM classes WHERE 	classNameShort = ?), ?, ?, ?)`;
           const values = [
             row.getCell(1).value,
             row.getCell(2).value,
