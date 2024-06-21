@@ -17,18 +17,32 @@ const FormMultipleGrading = (nav) => {
 
   const { setCollapsedNav } = nav;
   const { Option } = Select;
-  const [selectedValues, setSelectedValues] = useState([]); // Initialize as array
+  const [selectedValues1, setSelectedValues1] = useState([]); 
+  const [selectedValues2, setSelectedValues2] = useState([]); 
+  const [selectedValues3, setSelectedValues3] = useState([]); 
+  const [selectedValues4, setSelectedValues4] = useState([]); 
+
   const [RubicData, setRubicData] = useState([]);
   const [RubicItemsData, setRubicItemsData] = useState([]);
-  const [totalScore, setTotalScore] = useState(0);
-  const [Check, setCheck] = useState(0);
+  const [totalScore1, setTotalScore1] = useState(0);
+  const [totalScore2, setTotalScore2] = useState(0);
+  const [totalScore3, setTotalScore3] = useState(0);
+  const [totalScore4, setTotalScore4] = useState(0);
+
+
+  const [Check1, setCheck1] = useState(0);
+  const [Check2, setCheck2] = useState(0);
+  const [Check3, setCheck3] = useState(0);
+  const [Check4, setCheck4] = useState(0);
+
+
   const [defaultValue, setdefaultValue] = useState(0);
-
   const [StudentData, setStudentData] = useState([]);
+  const [ListStudentOJ, setListStudentOJ] = useState([]);
+  const [Assessment, setAssessment] = useState([]);
 
 
-
-  const { assessment_id, rubric_id, couse_id } = useParams();
+  const { assessment_id, description,  rubric_id, couse_id } = useParams();
   const navigate = useNavigate();
   const teacher_id = Cookies.get('teacher_id');
 
@@ -37,50 +51,55 @@ const FormMultipleGrading = (nav) => {
   }
   const location = useLocation();
 
+  
   const searchParams = new URLSearchParams(location.search);
   const studentCodesString = searchParams.getAll('student-code');
 
   let studentCodes = [];
+  let listStudentCodes = [];
   if (studentCodesString) {
     try {
-      studentCodes = JSON.parse(decodeURIComponent(studentCodesString));
+      const studentCodes = JSON.parse(decodeURIComponent(studentCodesString));
+      listStudentCodes = studentCodes.map((key) => key.studentCode);
+      console.log(listStudentCodes)
     } catch (error) {
       console.error('Error parsing student codes:', error);
     }
   }
+  // Assessment: key,
+  // studentCode: item.student.studentCode  
+  // console.log(studentCodes);
+  // const DataScore = [
+  //   { key: '1', Score: 0.25 },
+  //   { key: '2', Score: 0.5 },
+  //   { key: '3', Score: 0.75 },
+  //   { key: '4', Score: 1 },
+  //   { key: '4', Score: 1.25 },
+  //   { key: '4', Score: 1.5 },
+  //   { key: '4', Score: 1.75 },
+  //   { key: '4', Score: 2 },
+  // ];
 
-  console.log(studentCodes);
-
-  const DataScore = [
-    { key: '1', Score: 0.25 },
-    { key: '2', Score: 0.5 },
-    { key: '3', Score: 0.75 },
-    { key: '4', Score: 1 },
-    { key: '4', Score: 1.25 },
-    { key: '4', Score: 1.5 },
-    { key: '4', Score: 1.75 },
-    { key: '4', Score: 2 },
-  ];
-
-  const [Student, setStudent] = useState([]);
+  const [Student, setStudent] = useState(listStudentCodes);
 
   const handleStudentChange = (value, option) => {
     if (value.length > 4) {
       message.warning('You can only select up to 4 student.');
       return;
     }
+    console.log('value');
     setStudent(value);
   };
 
-  const handleSliderChange = (index, value, rubricsItem_id) => {
-    setSelectedValues(prevValues => {
+  const handleSliderChange1 = (index, value, rubricsItem_id) => {
+    setSelectedValues1(prevValues => {
       if (!Array.isArray(prevValues)) {
         prevValues = [];
       }
 
       const updatedValues = [...prevValues];
       updatedValues[index] = {
-        assessment_id: assessment_id,
+        //assessment_id: assessment_id,
         rubricsItem_id: rubricsItem_id,
         maxScore: value,
         CheckGrading: true,
@@ -100,8 +119,107 @@ const FormMultipleGrading = (nav) => {
         }
         return acc; // Otherwise, return the accumulated count
       }, 0);
-      setCheck(Check)
-      setTotalScore(newTotalScore);
+      setCheck1(Check)
+      setTotalScore1(newTotalScore);
+      return updatedValues;
+    });
+  };
+  const handleSliderChange2 = (index, value, rubricsItem_id) => {
+    setSelectedValues2(prevValues => {
+      if (!Array.isArray(prevValues)) {
+        prevValues = [];
+      }
+
+      const updatedValues = [...prevValues];
+      updatedValues[index] = {
+        //assessment_id: assessment_id,
+        rubricsItem_id: rubricsItem_id,
+        maxScore: value,
+        CheckGrading: true,
+      };
+
+      const newTotalScore = updatedValues.reduce((acc, curr) => {
+        if (curr && typeof curr.maxScore === 'number') {
+          return acc + curr.maxScore;
+        }
+        return acc;
+      }, 0);
+
+      const Check = updatedValues.reduce((acc, curr) => {
+        // Check if curr is an object and CheckGrading is true
+        if (curr && curr.CheckGrading === true) {
+          return acc + 1; // Increment the count by 1
+        }
+        return acc; // Otherwise, return the accumulated count
+      }, 0);
+      setCheck2(Check)
+      setTotalScore2(newTotalScore);
+      return updatedValues;
+    });
+  };
+  const handleSliderChange3 = (index, value, rubricsItem_id) => {
+    setSelectedValues3(prevValues => {
+      if (!Array.isArray(prevValues)) {
+        prevValues = [];
+      }
+
+      const updatedValues = [...prevValues];
+      updatedValues[index] = {
+       // assessment_id: assessment_id,
+        rubricsItem_id: rubricsItem_id,
+        maxScore: value,
+        CheckGrading: true,
+      };
+
+      const newTotalScore = updatedValues.reduce((acc, curr) => {
+        if (curr && typeof curr.maxScore === 'number') {
+          return acc + curr.maxScore;
+        }
+        return acc;
+      }, 0);
+
+      const Check = updatedValues.reduce((acc, curr) => {
+        // Check if curr is an object and CheckGrading is true
+        if (curr && curr.CheckGrading === true) {
+          return acc + 1; // Increment the count by 1
+        }
+        return acc; // Otherwise, return the accumulated count
+      }, 0);
+      setCheck3(Check)
+      setTotalScore3(newTotalScore);
+      return updatedValues;
+    });
+  };
+  const handleSliderChange4 = (index, value, rubricsItem_id) => {
+    setSelectedValues4(prevValues => {
+      if (!Array.isArray(prevValues)) {
+        prevValues = [];
+      }
+
+      const updatedValues = [...prevValues];
+      updatedValues[index] = {
+        //assessment_id: assessment_id,
+        rubricsItem_id: rubricsItem_id,
+        maxScore: value,
+        CheckGrading: true,
+      };
+
+      const newTotalScore = updatedValues.reduce((acc, curr) => {
+        if (curr && typeof curr.maxScore === 'number') {
+          return acc + curr.maxScore;
+        }
+        return acc;
+      }, 0);
+
+      const Check = updatedValues.reduce((acc, curr) => {
+        // Check if curr is an object and CheckGrading is true
+        if (curr && curr.CheckGrading === true) {
+          return acc + 1; // Increment the count by 1
+        }
+        return acc; // Otherwise, return the accumulated count
+      }, 0);
+      setCheck4(Check)
+      setTotalScore4(newTotalScore);
       return updatedValues;
     });
   };
@@ -111,8 +229,14 @@ const FormMultipleGrading = (nav) => {
   };
   const handleSave = async () => {
 
-    console.log('Updated values', selectedValues);
-    console.log('totalScore', totalScore);
+    console.log('Updated values1', selectedValues1);
+    console.log('totalScore1', totalScore1);
+    console.log('Updated values2', selectedValues2);
+    console.log('totalScore2', totalScore2);
+    console.log('Updated values3', selectedValues3);
+    console.log('totalScore3', totalScore3);
+    console.log('Updated values4', selectedValues4);
+    console.log('totalScore4', totalScore4);
     // try {
     //   const data = { totalScore: totalScore }
 
@@ -137,27 +261,75 @@ const FormMultipleGrading = (nav) => {
     // }
   };
 
-
-  const setValue = (data) => {
+  const setValue1 = (data) => {
     const updatedPoData = data.map((subject) => {
       return {
-        assessment_id: assessment_id,
+        //assessment_id: assessment_id,
         rubricsItem_id: subject.rubricsItem_id,
         maxScore: 0.0,
         CheckGrading: false,
       };
     });
-    setSelectedValues(updatedPoData);
+    setSelectedValues1(updatedPoData);
+  }
+  const setValue2 = (data) => {
+    const updatedPoData = data.map((subject) => {
+      return {
+        //assessment_id: assessment_id,
+        rubricsItem_id: subject.rubricsItem_id,
+        maxScore: 0.0,
+        CheckGrading: false,
+      };
+    });
+    setSelectedValues2(updatedPoData);
+  }
+  const setValue3 = (data) => {
+    const updatedPoData = data.map((subject) => {
+      return {
+        //assessment_id: assessment_id,
+        rubricsItem_id: subject.rubricsItem_id,
+        maxScore: 0.0,
+        CheckGrading: false,
+      };
+    });
+    setSelectedValues3(updatedPoData);
+  }
+  const setValue4 = (data) => {
+    const updatedPoData = data.map((subject) => {
+      return {
+        // assessment_id: assessment_id,
+        rubricsItem_id: subject.rubricsItem_id,
+        maxScore: 0.0,
+        CheckGrading: false,
+      };
+    });
+    setSelectedValues4(updatedPoData);
   }
 
+
+
+  const GetAssesmentByDicriptions = async ()=> {
+    try {
+      const response = await axiosAdmin.get(`/assessments/${description}/teacher/${teacher_id}`);
+      if(response.data){
+        setAssessment(response?.data);
+      }
+    } catch (error) {
+      console.error('Error fetching rubric data:', error);
+      throw error;
+    }
+  }
   const GetRubricData = async () => {
     try {
       const response = await axiosAdmin.get(`/rubric/${rubric_id}/items/isDelete/false`);
-      console.log(response.data);
+      //console.log(response.data);
       setRubicData(response.data.rubric)
       setRubicItemsData(response.data.rubric.rubricItems)
       const data = response.data.rubric.rubricItems
-      setValue(data)
+      setValue1(data)
+      setValue2(data)
+      setValue3(data)
+      setValue4(data)
     } catch (error) {
       console.error('Error fetching rubric data:', error);
       throw error;
@@ -167,6 +339,7 @@ const FormMultipleGrading = (nav) => {
   const GetStudentData = async () => {
     try {
       const response = await axiosAdmin.get(`/course-enrollment/${couse_id}`);
+      console.log("response?.data");
       console.log(response?.data);
       if (response?.data) {
         setStudentData(response?.data);
@@ -178,13 +351,56 @@ const FormMultipleGrading = (nav) => {
     }
   };
 
+  const getStudentBySelect = (data, studentCode) => {
+    for (let item of data) {
+      if (item.Student && item.Student.studentCode === studentCode) {
+        // Trả về đối tượng Student của item này nếu trùng khớp
+        return item.Student;
+      }
+    }
+    return null;
+  };
+
   useEffect(() => {
-    if (setCheck === 0) {
-      setTotalScore(0);
+    if (Student) {
+      console.log("Student:", Student); // Array of student codes
+
+      // Map student codes to student IDs from StudentData
+      const listStudentIds = Student.map(code => getStudentBySelect(StudentData, code));
+      setListStudentOJ(listStudentIds)
+      GetRubricData()
+      setTotalScore1(0)
+      setTotalScore2(0)
+      setTotalScore3(0)
+      setTotalScore4(0)
+      console.log("List of Student IDs:", listStudentIds);
+    }
+  }, [Student, StudentData]);
+
+
+  useEffect(() => {
+    if (setCheck1 === 0) {
+      setTotalScore1(0);
       setdefaultValue(0);
     }
-    GetRubricData()
-    GetStudentData()
+    if (setCheck2 === 0) {
+      setTotalScore2(0);
+      setdefaultValue(0);
+    }
+    if (setCheck3 === 0) {
+      setTotalScore1(0);
+      setdefaultValue(0);
+    }
+    if (setCheck4 === 0) {
+      setTotalScore2(0);
+      setdefaultValue(0);
+    }
+
+
+
+
+    GetRubricData();
+    GetStudentData();
     const handleResize = () => {
       if (window.innerWidth < 1200) {
         setCollapsedNav(true);
@@ -192,50 +408,100 @@ const FormMultipleGrading = (nav) => {
         setCollapsedNav(false);
       }
     };
+
     handleResize();
     window.addEventListener("resize", handleResize);
+
+    // Delayed execution of setStudent(`${studentCodes}`)
+    setTimeout(() => {
+      // Suppose you have some initial selected student codes
+      // const initialSelectedStudentCodes = ['110110121', '110120152'];
+      // setStudent(initialSelectedStudentCodes); // Set initial selected students
+    }, 100);
+
     return () => {
       window.removeEventListener("resize", handleResize);
+      clearTimeout(setTimeout); // Clean up the timeout on component unmount
     };
   }, []);
+
   return (
     <div className="w-full p-2 pb-[100px] py-0 flex flex-col leading-6 mt-10">
 
-      <div className='text-left w-full font-bold'>Nhập điểm:</div>
+      <div className='text-left w-full font-bold'>Chọn sinh viên</div>
       <Select
         mode="multiple"
         // defaultValue="Chọn điểm"
+        // value={['110110121', '110120152', ]}
         value={Student}
         onChange={handleStudentChange}
         size="large"
-        className="w-full"
+        className=" max-w-[600px] w-full my-2 bg-[white]"
       >
-        {DataScore.map((TypeSubject) => (
+        {StudentData.map((Student) => (
           <Select.Option
-            key={TypeSubject.key}
-            value={TypeSubject.Score}
+            key={Student.Student.student_id}
+            value={Student.Student.studentCode}
           >
-            {TypeSubject.Score}
+            <span className="p-2">{Student.Student.studentCode}{" - "}{Student.Student.name}</span>
+            
           </Select.Option>
         ))}
       </Select>
-      <Button
+      {/* <Button
         type="primary"
         onClick={handleSubmit}
         className="mt-4"
       >
         Submit Scores
-      </Button>
+      </Button> */}
       <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-fit p-4 py-3 shadow-lg rounded-md border-1 border-slate-300">
         <p className="text-sm font-medium">
           <div className="flex justify-center items-center">
             <div> <i className="fa-solid fa-circle-check mr-3 text-emerald-500 "></i>
             </div>
             <div className="flex justify-center items-center gap-1 flex-col sm:flex-row lg:flex-row xl:flex-row">
-              <span className="mr-2">Tổng điểm: {' ' + totalScore} </span>
-
-              Tiêu chí: {Check}/{RubicItemsData.length}
-
+              {
+                ListStudentOJ.length === 0 && (
+                  <span className="mr-2"></span>
+                )
+              }
+              {
+                ListStudentOJ.length === 1 && (
+                  <span className="mr-2">SV1: {' ' + totalScore1} </span>
+                )
+              }
+              {
+                ListStudentOJ.length === 2 && (
+                  <>
+                  <span className="mr-2">SV1: {' ' + totalScore1} </span>
+                  <span className="mr-2">SV2: {' ' + totalScore2} </span>
+                  </>
+                )
+              }
+              {
+                ListStudentOJ.length === 3 && (
+                  <>
+                  <span className="mr-2">SV1: {' ' + totalScore1} </span>
+                  <span className="mr-2">SV2: {' ' + totalScore2} </span>
+                  <span className="mr-2">SV3: {' ' + totalScore3} </span>
+                  </>
+                )
+              }
+              {
+                ListStudentOJ.length === 4 && (
+                  <>
+                  <span className="mr-2">SV1: {' ' + totalScore1} </span>
+                  <span className="mr-2">SV2: {' ' + totalScore2} </span>
+                  <span className="mr-2">SV3: {' ' + totalScore3} </span>
+                  <span className="mr-2">SV4: {' ' + totalScore4} </span>
+                  </>
+                )
+              }
+              {/* Tiêu chí: {Check1}/{RubicItemsData.length} */}
+              {/* Tiêu chí: {Check2}/{RubicItemsData.length} */}
+              {/* Tiêu chí: {Check3}/{RubicItemsData.length} */}
+              {/* Tiêu chí: {Check4}/{RubicItemsData.length} */}
 
             </div>
           </div>
@@ -275,8 +541,6 @@ const FormMultipleGrading = (nav) => {
             <p className="text-center font-bold block sm:block lg:hidden xl:hidden text-[#fefefe] p-5 sm:p-5 lg:p-0 xl:p-0">Chấm điểm</p>
           </div>
         </div>
-
-
         <div className="hidden w-full bg-[#475569] sm:hidden lg:w-[45%]   lg:block xl:block xl:w-[40%] text-justify p-5 pb-0 pt-2">
           <p className="text-center font-bold  text-[#fefefe]">Điểm đạt</p>
         </div>
@@ -332,16 +596,132 @@ const FormMultipleGrading = (nav) => {
                 </div>
               </div>
             </div>
-
-            {/* Right Side */}
             <div className="w-full sm:w-full lg:w-[45%] xl:w-[40%] text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-[#ff8077]" key={i}>
-              <RubricSlider
-                maxScore={item.maxScore}
-                index={i}
-                defaultValue={defaultValue}
-                handleSliderChange={handleSliderChange}
-                rubricsItem_id={item.rubricsItem_id}
-              />
+              {
+                ListStudentOJ.length === 0 && (
+                  // Hiển thị 0 RubricSlider khi không có sinh viên được chọn
+                  <>
+                  </>
+                )
+              }
+              {
+                ListStudentOJ.length === 1 && (
+                  // Hiển thị 1 RubricSlider khi có 1 sinh viên được chọn
+                  <>
+                    <RubricSlider
+                      studentCode={ListStudentOJ[0]?.studentCode}
+                      StudentName={ListStudentOJ[0]?.name}
+                      maxScore={item.maxScore}
+                      index={i}
+                      defaultValue={defaultValue}
+                      handleSliderChange={handleSliderChange1}
+                      rubricsItem_id={item.rubricsItem_id}
+                    />
+                  </>
+                )
+              }
+              {
+                ListStudentOJ.length === 2 && (
+                  // Hiển thị 2 RubricSlider khi có 2 sinh viên được chọn
+                  <>
+                    <RubricSlider
+                      studentCode={ListStudentOJ[0]?.studentCode}
+                      StudentName={ListStudentOJ[0]?.name}
+                      maxScore={item.maxScore}
+                      index={i}
+                      defaultValue={defaultValue}
+                      handleSliderChange={handleSliderChange1}
+                      rubricsItem_id={item.rubricsItem_id}
+                    />
+                    <RubricSlider
+                      studentCode={ListStudentOJ[1]?.studentCode}
+                      StudentName={ListStudentOJ[1]?.name}
+                      maxScore={item.maxScore}
+                      index={i}
+                      defaultValue={defaultValue}
+                      handleSliderChange={handleSliderChange2}
+                      rubricsItem_id={item.rubricsItem_id}
+                    />
+                  </>
+                )
+              }
+              {
+                ListStudentOJ.length === 3 && (
+                  // Hiển thị 3 RubricSlider khi có 3 hoặc nhiều hơn sinh viên được chọn
+                  <>
+                    <RubricSlider
+                      studentCode={ListStudentOJ[0]?.studentCode}
+                      StudentName={ListStudentOJ[0]?.name}
+                      maxScore={item.maxScore}
+                      index={i}
+                      defaultValue={defaultValue}
+                      handleSliderChange={handleSliderChange1}
+                      rubricsItem_id={item.rubricsItem_id}
+                    />
+                    <RubricSlider
+                      studentCode={ListStudentOJ[1]?.studentCode}
+                      StudentName={ListStudentOJ[1]?.name}
+                      maxScore={item.maxScore}
+                      index={i}
+                      defaultValue={defaultValue}
+                      handleSliderChange={handleSliderChange2}
+                      rubricsItem_id={item.rubricsItem_id}
+                    />
+                    <RubricSlider
+                      studentCode={ListStudentOJ[2]?.studentCode}
+                      StudentName={ListStudentOJ[2]?.name}
+                      maxScore={item.maxScore}
+                      index={i}
+                      defaultValue={defaultValue}
+                      handleSliderChange={handleSliderChange3}
+                      rubricsItem_id={item.rubricsItem_id}
+                    />
+                  </>
+                )
+              }
+               {
+                ListStudentOJ.length === 4 && (
+                  // Hiển thị 3 RubricSlider khi có 3 hoặc nhiều hơn sinh viên được chọn
+                  <>
+                    <RubricSlider
+                      studentCode={ListStudentOJ[0]?.studentCode}
+                      StudentName={ListStudentOJ[0]?.name}
+                      maxScore={item.maxScore}
+                      index={i}
+                      defaultValue={defaultValue}
+                      handleSliderChange={handleSliderChange1}
+                      rubricsItem_id={item.rubricsItem_id}
+                    />
+                    <RubricSlider
+                      studentCode={ListStudentOJ[1]?.studentCode}
+                      StudentName={ListStudentOJ[1]?.name}
+                      maxScore={item.maxScore}
+                      index={i}
+                      defaultValue={defaultValue}
+                      handleSliderChange={handleSliderChange2}
+                      rubricsItem_id={item.rubricsItem_id}
+                    />
+                    <RubricSlider
+                      studentCode={ListStudentOJ[2]?.studentCode}
+                      StudentName={ListStudentOJ[2]?.name}
+                      maxScore={item.maxScore}
+                      index={i}
+                      defaultValue={defaultValue}
+                      handleSliderChange={handleSliderChange3}
+                      rubricsItem_id={item.rubricsItem_id}
+                    />
+                    <RubricSlider
+                      studentCode={ListStudentOJ[3]?.studentCode}
+                      StudentName={ListStudentOJ[3]?.name}
+                      maxScore={item.maxScore}
+                      index={i}
+                      defaultValue={defaultValue}
+                      handleSliderChange={handleSliderChange4}
+                      rubricsItem_id={item.rubricsItem_id}
+                    />
+                  </>
+                )
+              }
             </div>
           </div>
         ))

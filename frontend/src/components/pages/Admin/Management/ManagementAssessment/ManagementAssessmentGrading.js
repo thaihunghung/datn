@@ -81,7 +81,7 @@ const ManagementAssessmentGrading = (nav) => {
       dataIndex: "action",
       render: (record) => (
         <div className="flex items-center justify-center w-full gap-2">
-          <Link to={`/admin/management-grading/${slugify(record.description, { lower: true, replacement: '_' })}/student-code/${record.studentCode}/assessment/${record.assessment_id}/rubric/${record.rubric_id}`}>
+          {record.totalScore===0?(<Link to={`/admin/management-grading/${slugify(record.description, { lower: true, replacement: '_' })}/student-code/${record.studentCode}/assessment/${record.assessment_id}/rubric/${record.rubric_id}`}>
             <Tooltip title="Chấm điểm">
               <Button
                 isIconOnly
@@ -92,8 +92,7 @@ const ManagementAssessmentGrading = (nav) => {
                 <i className="fa-solid fa-feather-pointed"></i>
               </Button>
             </Tooltip>
-          </Link>
-          <Link to={`/admin/management-grading/update/${slugify(record.description, { lower: true, replacement: '_' })}/student-code/${record.studentCode}/assessment/${record.assessment_id}/rubric/${record.rubric_id}`}>
+          </Link>):(<Link to={`/admin/management-grading/update/${slugify(record.description, { lower: true, replacement: '_' })}/student-code/${record.studentCode}/assessment/${record.assessment_id}/rubric/${record.rubric_id}`}>
             <Tooltip title="Chỉnh sửa">
               <Button
                 isIconOnly
@@ -104,7 +103,9 @@ const ManagementAssessmentGrading = (nav) => {
                 <i className="fa-solid fa-pen"></i>
               </Button>
             </Tooltip>
-          </Link>
+          </Link>)}
+          
+          
           <Tooltip title="Xoá">
             <Button
               isIconOnly
@@ -135,6 +136,18 @@ const ManagementAssessmentGrading = (nav) => {
     setSelectedRowKeys([]);
     setSelectedRow([]);
   };
+  const getStudentCode = (data, key) => {
+    for (let item of data) {
+      // && item.totalScore === 0
+      if (item.key === key ) {
+        return {
+          Assessment: key,
+          studentCode: item.student.studentCode   
+        }
+      }
+    }
+    return null;
+  };
 
   const navigateGradingGroup = () => {
     if (selectedRowKeys.length === 0) {
@@ -145,10 +158,10 @@ const ManagementAssessmentGrading = (nav) => {
       message.error('Please select no more than 4 students');
       return;
     }
+    const listStudentCodes = selectedRowKeys.map((key) => getStudentCode(subjects, key));
+    const studentCodesString = encodeURIComponent(JSON.stringify(listStudentCodes));
 
-    const liststudent = [selectedRowKeys]; // Mảng các mã học sinh
-const studentCodesString = encodeURIComponent(JSON.stringify(liststudent)); 
-    navigate(`/admin/management-grading/${slugify(description, { lower: true, replacement: '_' })}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}`)
+    navigate(`/admin/management-grading/${slugify(description, { lower: true, replacement: '_' })}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}`);
   }
   const getAllAssessmentIsDeleteFalse = async () => {
     try {
@@ -161,6 +174,7 @@ const studentCodesString = encodeURIComponent(JSON.stringify(liststudent));
           name: subject?.Student.name
         }
         const action = {
+          totalScore: subject?.totalScore,
           assessment_id: subject?.assessment_id,
           rubric_id: subject?.rubric_id,
           description: subject?.description,
@@ -256,7 +270,7 @@ const studentCodesString = encodeURIComponent(JSON.stringify(liststudent));
         </div>
         <div>
           <Tooltip
-            title="Chọn sinh viên"
+            title="Chọn sinh viên chưa chấm."
             getPopupContainer={() =>
               document.querySelector(".Quick__Option")
             }

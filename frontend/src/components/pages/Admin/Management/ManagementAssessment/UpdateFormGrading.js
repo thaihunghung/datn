@@ -308,7 +308,6 @@ const UpdateFormGrading = (nav) => {
                       },
                     ]}
                     onChange={(value) => handleSliderChange(i, value, item?.rubricsItem_id, item?.AssessmentItems[0]?.assessmentItem_id)}
-
                   />
                 )}
 
