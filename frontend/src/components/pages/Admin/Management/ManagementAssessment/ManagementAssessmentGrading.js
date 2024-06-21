@@ -23,7 +23,7 @@ const ManagementAssessmentGrading = (nav) => {
   const [selectedRow, setSelectedRow] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [subjects, setSubjects] = useState([]);
+  const [assessments, setAssessments] = useState([]);
 
   const [Couse_id, setCouse_id] = useState();
   const [rubric_id, setRubric_id] = useState();
@@ -149,6 +149,19 @@ const ManagementAssessmentGrading = (nav) => {
     return null;
   };
 
+  const checkstotalscore = (data, key) => {
+    for (let item of data) {
+      if (item.key === key) {
+        return {
+          assessment_id: key,
+          totalScore: item.totalScore,
+          checktotalScore: item.totalScore === 0 ? true : false
+        };
+      }
+    }
+    return null;
+  };
+
   const navigateGradingGroup = () => {
     if (selectedRowKeys.length === 0) {
       message.error('Please select at least one student');
@@ -158,10 +171,31 @@ const ManagementAssessmentGrading = (nav) => {
       message.error('Please select no more than 4 students');
       return;
     }
-    const listStudentCodes = selectedRowKeys.map((key) => getStudentCode(subjects, key));
+    const checkStotalScore = selectedRowKeys.map((key) => checkstotalscore(assessments, key));
+
+    const hasUncheckedAssessment = checkStotalScore.some((item, index) => {
+      if (item.checktotalScore === false) {
+          message.error(`Sinh viên thứ ${index + 1} đã chấm điểm.`);
+          return true;
+      }
+      return false;
+    });
+    
+    if (hasUncheckedAssessment) {
+        return;
+    }
+
+
+
+
+
+
+    const listStudentCodes = selectedRowKeys.map((key) => getStudentCode(assessments, key));
+    console.log(checkStotalScore);
+
     const studentCodesString = encodeURIComponent(JSON.stringify(listStudentCodes));
 
-    navigate(`/admin/management-grading/${slugify(description, { lower: true, replacement: '_' })}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}`);
+    //navigate(`/admin/management-grading/${slugify(description, { lower: true, replacement: '_' })}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}`);
   }
   const getAllAssessmentIsDeleteFalse = async () => {
     try {
@@ -192,7 +226,7 @@ const ManagementAssessmentGrading = (nav) => {
 
       setRubric_id(response?.data[0]?.rubric_id)
       setCouse_id(response?.data[0]?.course_id)
-      setSubjects(updatedPoData);
+      setAssessments(updatedPoData);
       console.log(updatedPoData);
     } catch (error) {
       console.error("Error: " + error.message);
@@ -205,13 +239,13 @@ const ManagementAssessmentGrading = (nav) => {
     };
     console.log(data)
     try {
-      const response = await axiosAdmin.put('/subjects/soft-delete-multiple', { data });
+      const response = await axiosAdmin.put('/assessments/soft-delete-multiple', { data });
       await getAllAssessmentIsDeleteFalse();
       handleUnSelect();
       message.success(response.data.message);
     } catch (error) {
-      console.error("Error soft deleting subjects:", error);
-      message.error('Error soft deleting subjects');
+      console.error("Error soft deleting assessments:", error);
+      message.error('Error soft deleting assessments');
     }
   };
 
@@ -339,7 +373,7 @@ const ManagementAssessmentGrading = (nav) => {
             }}
             pagination={{ pageSize: 30 }}
             columns={columns}
-            dataSource={subjects}
+            dataSource={assessments}
           />
         </div>
       </div>

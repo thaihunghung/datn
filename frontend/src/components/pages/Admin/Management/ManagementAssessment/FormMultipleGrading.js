@@ -61,7 +61,7 @@ const FormMultipleGrading = (nav) => {
     try {
       const studentCodes = JSON.parse(decodeURIComponent(studentCodesString));
       listStudentCodes = studentCodes.map((key) => key.studentCode);
-      console.log(listStudentCodes)
+      //console.log(listStudentCodes)
     } catch (error) {
       console.error('Error parsing student codes:', error);
     }
@@ -87,7 +87,7 @@ const FormMultipleGrading = (nav) => {
       message.warning('You can only select up to 4 student.');
       return;
     }
-    console.log('value');
+    //console.log('value');
     setStudent(value);
   };
   const handleSliderChange1 = (index, value, rubricsItem_id, student_id) => {
@@ -222,205 +222,196 @@ const FormMultipleGrading = (nav) => {
       return updatedValues;
     });
   };
-  const handleSubmit = () => {
-    console.log('student list');
-    console.log(Student);
+
+  const updateSelectedValues = (studentIds, selectedValues, assessments) => {
+    return selectedValues.map(item => {
+      const matchingAssessment = assessments.find(assessment => assessment.student_id === studentIds);
+
+      if (matchingAssessment) {
+        const { assessment_id, totalScore } = matchingAssessment;
+        const { maxScore, student_id, CheckGrading, ...rest } = item;
+        return {
+          ...rest,
+          assessment_id: assessment_id,
+          CheckSave: totalScore === 0,
+          assessmentScore: maxScore
+        };
+      }
+      return item;
+    });
   };
-  const handleSave = async () => {
 
-    // console.log('Updated values1', selectedValues1);
-    // console.log('totalScore1', totalScore1);
-    // console.log('Updated values2', selectedValues2);
-    // console.log('totalScore2', totalScore2);
-    // console.log('Updated values3', selectedValues3);
-    // console.log('totalScore3', totalScore3);
-    // console.log('Updated values4', selectedValues4);
-    // console.log('totalScore4', totalScore4);
-    if (Student.length === 1) {
-      let count1 = 0;
-
-      selectedValues1.map(item => {
-        if (item.hasOwnProperty('student_id')) {
-          console.log(`Đối tượng có thuộc tính student_id:`, item);
-          count1++;
-        } else {
-          console.log(`Đối tượng không có thuộc tính student_id:`, item);
+  const CheckSave = (items) => {
+    for (const [itemIndex, item] of items.entries()) {
+      for (const [entryIndex, entry] of item.entries()) {
+        if (!entry.CheckSave) {
+          message.error(`Lưu không thành công do SV${itemIndex + 1}, đã được chấm`);
+          return false;
         }
-      });
-
-      if (count1 === 0) {
-        message.error('Chưa chấm điểm cho SV1'); return;
-      } else {
-      }
-
-    }
-
-    // Check for Student 4
-    if (Student.length === 2) {
-      let count1 = 0;
-      let count2 = 0;
-
-      selectedValues1.map(item => {
-        if (item.hasOwnProperty('student_id')) {
-          console.log(`Đối tượng có thuộc tính student_id:`, item);
-          count1++;
-        } else {
-          console.log(`Đối tượng không có thuộc tính student_id:`, item);
-        }
-      });
-
-      selectedValues2.map(item => {
-        if (item.hasOwnProperty('student_id')) {
-          console.log(`Đối tượng có thuộc tính student_id:`, item);
-          count2++;
-        } else {
-          console.log(`Đối tượng không có thuộc tính student_id:`, item);
-        }
-      });
-
-      if (count1 === 0) {
-        message.error('Chưa chấm điểm cho SV1'); return;
-      }
-
-      if (count2 === 0) {
-        message.error('Chưa chấm điểm cho SV2'); return;
       }
     }
-    // Check for Student 3
-    if (Student.length === 3) {
-      let count1 = 0;
-      let count2 = 0;
-      let count3 = 0;
+    return true;
+  }
+  const Save = async (dataSaveAssessment, Score) => {
+    try {
+      const data = { totalScore: Score }
 
-      selectedValues1.map(item => {
-        if (item.hasOwnProperty('student_id')) {
-          console.log(`Đối tượng có thuộc tính student_id:`, item);
-          count1++;
-        } else {
-          console.log(`Đối tượng không có thuộc tính student_id:`, item);
-        }
+      await axiosAdmin.put(`/assessment/${dataSaveAssessment[0].assessment_id}/updateStotalScore`, { data: data })
+
+      const dataAssessmentItem = dataSaveAssessment.map(item => {
+        const { CheckSave, ...rest } = item;
+        return {
+          ...rest,
+        };
       });
 
-      selectedValues2.map(item => {
-        if (item.hasOwnProperty('student_id')) {
-          console.log(`Đối tượng có thuộc tính student_id:`, item);
-          count2++;
-        } else {
-          console.log(`Đối tượng không có thuộc tính student_id:`, item);
-        }
-      });
-
-      selectedValues3.map(item => {
-        if (item.hasOwnProperty('student_id')) {
-          console.log(`Đối tượng có thuộc tính student_id:`, item);
-          count3++;
-        } else {
-          console.log(`Đối tượng không có thuộc tính student_id:`, item);
-        }
-      });
-
-
-      if (count1 === 0) {
-        message.error('Chưa chấm điểm cho SV1'); return;
+      const response = await axiosAdmin.post(`/assessment-item`, { data: dataAssessmentItem })
+      if (response.status === 201) {
+        message.success('Data saved successfully');
       }
-
-      if (count2 === 0) {
-        message.error('Chưa chấm điểm cho SV2'); return;
-      }
-
-      if (count3 === 0) {
-        message.error('Chưa chấm điểm cho SV3'); return;
-      }
+    } catch (e) {
+      console.error(e);
+      message.error('Error saving data');
     }
-
-    // Check for Student 4
-    if (Student.length === 4) {
-      let count1 = 0;
-      let count2 = 0;
-      let count3 = 0;
-      let count4 = 0;
-
-      selectedValues1.map(item => {
-        if (item.hasOwnProperty('student_id')) {
-          console.log(`Đối tượng có thuộc tính student_id:`, item);
-          count1++;
-        } else {
-          console.log(`Đối tượng không có thuộc tính student_id:`, item);
-        }
-      });
-
-      selectedValues2.map(item => {
-        if (item.hasOwnProperty('student_id')) {
-          console.log(`Đối tượng có thuộc tính student_id:`, item);
-          count2++;
-        } else {
-          console.log(`Đối tượng không có thuộc tính student_id:`, item);
-        }
-      });
-
-      selectedValues3.map(item => {
-        if (item.hasOwnProperty('student_id')) {
-          console.log(`Đối tượng có thuộc tính student_id:`, item);
-          count3++;
-        } else {
-          console.log(`Đối tượng không có thuộc tính student_id:`, item);
-        }
-      });
-
-      selectedValues4.map(item => {
-        if (item.hasOwnProperty('student_id')) {
-          console.log(`Đối tượng có thuộc tính student_id:`, item);
-          count4++;
-        } else {
-          console.log(`Đối tượng không có thuộc tính student_id:`, item);
-        }
-      });
-
-      if (count1 === 0) {
-        message.error('Chưa chấm điểm cho SV1'); return;
-      }
-
-      if (count2 === 0) {
-        message.error('Chưa chấm điểm cho SV2'); return;
-      }
-
-      if (count3 === 0) {
-        message.error('Chưa chấm điểm cho SV3'); return;
-      }
-
-      if (count4 === 0) {
-        message.error('Chưa chấm điểm cho SV4');
-        return;
-      }
-
-      // try {
-      //   const data = { totalScore: totalScore }
-
-      //   await axiosAdmin.put(`/assessment/${assessment_id}/updateStotalScore`, { data: data })
-
-      //   const dataAssessmentItem = selectedValues.map(item => {
-      //     const { maxScore, CheckGrading, ...rest } = item;
-      //     return {
-      //       ...rest,
-      //       assessmentScore: maxScore
-      //     };
-      //   });
-
-      //   console.log(dataAssessmentItem);
-      //   const response = await axiosAdmin.post(`/assessment-item`, { data: dataAssessmentItem })
-      //   if (response.status === 201) {
-      //     message.success('Data saved successfully');
-      //   }
-      // } catch (e) {
-      //   console.error(e);
-      //   message.error('Error saving data');
-      // }
-    };
   }
 
+  const handleLogicSave = async () => {
+    const checkStudent = (selectedValues, studentIndex) => {
+      let count = 0;
+      const studentIds = [];
+
+      for (let i = 0; i < selectedValues.length; i++) {
+        const item = selectedValues[i];
+        if (item.hasOwnProperty('student_id')) {
+          //console.log(`Đối tượng có thuộc tính student_id:`, item);
+          count++;
+          studentIds.push(item.student_id); // Extracting student_id
+          break; // Exit loop early
+        } else {
+          //console.log(`Đối tượng không có thuộc tính student_id:`, item);
+        }
+      }
+
+      if (count === 0) {
+        message.error(`Chưa chấm điểm cho SV${studentIndex}`);
+        return { valid: false, studentIds: [] };
+      }
+      return { valid: true, studentIds };
+    };
+
+    let allStudentIds = [];
+
+    switch (Student.length) {
+      case 1:
+        {
+          const result = checkStudent(selectedValues1, 1);
+          if (!result.valid) return;
+
+          const findAssessment1 = updateSelectedValues(result.studentIds[0], selectedValues1, Assessment)
 
 
+          const items = [findAssessment1]
+          const check = CheckSave(items)
+          console.log(items)
+          if (check) {
+            Save(findAssessment1, totalScore1) 
+          }
+        }
+        break;
+      case 2:
+        {
+          const result1 = checkStudent(selectedValues1, 1);
+          const result2 = checkStudent(selectedValues2, 2);
+          if (!result1.valid) return;
 
+          if (!result2.valid) return;
+
+          const findAssessment1 = updateSelectedValues(result1.studentIds[0], selectedValues1, Assessment)
+          const findAssessment2 = updateSelectedValues(result2.studentIds[0], selectedValues2, Assessment)
+
+          const items = [findAssessment1, findAssessment2]
+          const check = CheckSave(items)
+          console.log(items)
+          if (check) {
+            Save(findAssessment1, totalScore1)
+            Save(findAssessment2, totalScore2)
+          }
+        }
+        break;
+      case 3:
+        {
+          const result1 = checkStudent(selectedValues1, 1);
+          const result2 = checkStudent(selectedValues2, 2);
+          const result3 = checkStudent(selectedValues3, 3);
+          if (!result1.valid) return;
+
+          if (!result2.valid) return;
+
+          if (!result3.valid) return;
+
+          // console.log("Assessment",Assessment);
+          // console.log("student_id",result1.studentIds[0]);
+          // console.log("selectedValues1",selectedValues1);
+
+          const findAssessment1 = updateSelectedValues(result1.studentIds[0], selectedValues1, Assessment)
+          const findAssessment2 = updateSelectedValues(result2.studentIds[0], selectedValues2, Assessment)
+          const findAssessment3 = updateSelectedValues(result3.studentIds[0], selectedValues3, Assessment)
+
+          const items = [findAssessment1, findAssessment2, findAssessment3]
+          const check = CheckSave(items)
+          console.log(items)
+          if (check) {
+            Save(findAssessment1, totalScore1)
+            Save(findAssessment2, totalScore2)
+            Save(findAssessment3, totalScore3)
+          }
+
+          //
+
+          // const test2 =updateSelectedValues(result2.studentIds, selectedValues2, Assessment)
+          // const test3 =updateSelectedValues(result3.studentIds, selectedValues3, Assessment)
+
+
+          // allStudentIds = [test1, test2, test3]
+          // allStudentIds = [...result1.studentIds, ...result2.studentIds, ...result3.studentIds];
+        }
+        break;
+      case 4:
+        {
+          const result1 = checkStudent(selectedValues1, 1);
+          const result2 = checkStudent(selectedValues2, 2);
+          const result3 = checkStudent(selectedValues3, 3);
+          const result4 = checkStudent(selectedValues4, 4);
+          if (!result1.valid) return;
+
+          if (!result2.valid) return;
+
+          if (!result3.valid) return;
+
+          if (!result4.valid) return;
+
+          const findAssessment1 = updateSelectedValues(result1.studentIds[0], selectedValues1, Assessment)
+          const findAssessment2 = updateSelectedValues(result2.studentIds[0], selectedValues2, Assessment)
+          const findAssessment3 = updateSelectedValues(result3.studentIds[0], selectedValues3, Assessment)
+          const findAssessment4 = updateSelectedValues(result4.studentIds[0], selectedValues4, Assessment)
+
+
+          const items = [findAssessment1, findAssessment2, findAssessment3, findAssessment4]
+          const check = CheckSave(items)
+          console.log(items)
+          if (check) {
+            Save(findAssessment1, totalScore1)
+            Save(findAssessment2, totalScore2)
+            Save(findAssessment3, totalScore3)
+            Save(findAssessment4, totalScore4)
+          }
+        }
+        break;
+      default:
+        message.error('Số lượng sinh viên không hợp lệ');
+        return;
+    }
+  };
 
 
   const setValue1 = (data) => {
@@ -468,19 +459,6 @@ const FormMultipleGrading = (nav) => {
     setSelectedValues4(updatedPoData);
   }
 
-  const GetAssesmentByDicriptionssss = async () => {
-    try {
-      const response = await axiosAdmin.get(`/assessments/${description}/teacher/${teacher_id}`);
-      if (response.data) {
-        setAssessment(response?.data);
-      }
-      console.log("assessments");
-      console.log(response.data);
-    } catch (error) {
-      console.error('Error fetching rubric data:', error);
-      throw error;
-    }
-  }
   const GetRubricData = async () => {
     try {
       const response = await axiosAdmin.get(`/rubric/${rubric_id}/items/isDelete/false`);
@@ -536,18 +514,18 @@ const FormMultipleGrading = (nav) => {
 
   useEffect(() => {
     if (Student) {
-      console.log("Student:", Student); // Array of student codes
+      //console.log("Student:", Student); // Array of student codes
 
       // Map student codes to student IDs from StudentData
       const listStudentIds = Student.map(code => getStudentBySelect(Assessment, code));
       setListStudentOJ(listStudentIds)
-      console.log("Student:", listStudentIds)
+      //console.log("Student:", listStudentIds)
       GetRubricData()
       setTotalScore1(0)
       setTotalScore2(0)
       setTotalScore3(0)
       setTotalScore4(0)
-      console.log("List of Student IDs:", listStudentIds);
+      //console.log("List of Student IDs:", listStudentIds);
     }
   }, [Student, Assessment]);
 
@@ -584,12 +562,7 @@ const FormMultipleGrading = (nav) => {
 
     handleResize();
     window.addEventListener("resize", handleResize);
-
-    // Delayed execution of setStudent(`${studentCodes}`)
     setTimeout(() => {
-      // Suppose you have some initial selected student codes
-      // const initialSelectedStudentCodes = ['110110121', '110120152'];
-      // setStudent(initialSelectedStudentCodes); // Set initial selected students
     }, 100);
 
     return () => {
@@ -604,8 +577,6 @@ const FormMultipleGrading = (nav) => {
       <div className='text-left w-full font-bold'>Chọn sinh viên</div>
       <Select
         mode="multiple"
-        // defaultValue="Chọn điểm"
-        // value={['110110121', '110120152', ]}
         value={Student}
         onChange={handleStudentChange}
         size="large"
@@ -615,20 +586,14 @@ const FormMultipleGrading = (nav) => {
           <Select.Option
             key={Student?.Student?.student_id}
             value={Student?.Student?.studentCode}
-          // disabled={Student?.totalScore > 0}
+            disabled={Student?.totalScore > 0}
           >
             <span className="p-2">{Student?.Student?.studentCode}{" - "}{Student?.Student?.name}</span>
 
           </Select.Option>
         ))}
       </Select>
-      {/* <Button
-        type="primary"
-        onClick={handleSubmit}
-        className="mt-4"
-      >
-        Submit Scores
-      </Button> */}
+
       <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-fit p-4 py-3 shadow-lg rounded-md border-1 border-slate-300">
         <p className="text-sm font-medium">
           <div className="flex justify-center items-center">
@@ -694,7 +659,7 @@ const FormMultipleGrading = (nav) => {
               variant="light"
               radius="full"
               onClick={() => {
-                handleSave();
+                handleLogicSave();
               }}
               disabled={Student.length === 0}
             >
