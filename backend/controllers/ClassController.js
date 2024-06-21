@@ -16,16 +16,42 @@ const ClassController = {
   },
   getAllWithTeacher: async (req, res) => {
     try {
-      const classes = await ClassModel.findAll({
-        include: [{
-          model: TeacherModel,
-          attributes: ['name']
-        }],
-        attributes: ['class_id','teacher_id', 'className', 'classCode', 'isDelete'],// Lọc ra các trường cần lấy
-        where: { isDelete: false }
-      });
-
-      res.json(classes);
+      const { page, size } = req.query;
+  
+      const attributes = ['class_id', 'teacher_id', 'className', 'classCode', 'isDelete'];
+      const whereClause = { isDelete: false };
+  
+      if (page && size) {
+        const offset = (page - 1) * size;
+        const limit = parseInt(size, 10);
+  
+        const { count, rows: classes } = await ClassModel.findAndCountAll({
+          include: [{
+            model: TeacherModel,
+            attributes: ['name']
+          }],
+          attributes: attributes,
+          where: whereClause,
+          offset: offset,
+          limit: limit
+        });
+  
+        return res.json({
+          total: count,
+          classes: classes
+        });
+      } else {
+        const classes = await ClassModel.findAll({
+          include: [{
+            model: TeacherModel,
+            attributes: ['name']
+          }],
+          attributes: attributes,
+          where: whereClause
+        });
+  
+        return res.json(classes);
+      }
     } catch (error) {
       console.error('Error:', error);
       res.status(500).json({ message: 'Internal Server Error' });

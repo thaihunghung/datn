@@ -15,11 +15,6 @@ import {
   Chip,
   User,
   Pagination,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Select,
   SelectItem,
   Divider,
@@ -30,8 +25,9 @@ import { columns, fetchTeachersData, permissions } from "./Data";
 import { capitalize } from "../../Utils/capitalize";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Link, useNavigate } from "react-router-dom";
-import CustomUpload from "../../CustomUpload/CustomUpload";
-import { Upload } from "antd";
+import AddTeacherModal from "./AddTeacherModal";
+import EditTeacherModal from "./EditTeacherModal";
+import ConfirmAction from "./ConfirmAction";
 
 const statusColorMap = {
   active: "success",
@@ -145,9 +141,6 @@ export default function App(props) {
             <p className="text-bold text-tiny capitalize text-default-400">{teacher.typeTeacher}</p>
           </div>
         );
-      // case "PermissionName":
-      //   const permissionName = permissions.find(p => p.id === cellValue)?.name || cellValue;
-      //   return <span>{permissionName}</span>;
       case "permission":
         return (
           <Chip className="capitalize" color={statusColorMap[teacher.status]} size="sm" variant="flat">
@@ -242,7 +235,7 @@ export default function App(props) {
 
   const handleEditClick = (teacher) => {
     setCurrentTeacher(teacher);
-    setEditTeacher(teacher); // Set the current teacher data to the editTeacher state
+    setEditTeacher(teacher);
     setIsEditModalOpen(true);
   };
 
@@ -546,299 +539,5 @@ export default function App(props) {
         setEditTeacher={setEditTeacher}
       />
     </>
-  );
-}
-
-function ConfirmAction({ isOpen, onOpenChange, onConfirm, message }) {
-  const handleOnOKClick = (onClose) => {
-    onClose();
-    if (typeof onConfirm === 'function') {
-      onConfirm();
-    }
-  }
-  return (
-    <Modal
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      motionProps={{
-        variants: {
-          enter: {
-            y: 0,
-            opacity: 1,
-            transition: {
-              duration: 0.2,
-              ease: "easeOut",
-            },
-          },
-          exit: {
-            y: -20,
-            opacity: 0,
-            transition: {
-              duration: 0.1,
-              ease: "easeIn",
-            },
-          },
-        }
-      }}
-    >
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader>Warning</ModalHeader>
-            <ModalBody>
-              <p className="text-[16px]">
-                {message}
-              </p>
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="light" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button color="danger" className="font-medium" onClick={() => handleOnOKClick(onClose)}>
-                Ok
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
-    </Modal>
-  );
-}
-
-function AddTeacherModal({ isOpen, onOpenChange, onSubmit, newTeacher, setNewTeacher }) {
-  const [fileList, setFileList] = useState([]);
-  const [current, setCurrent] = useState(0);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setNewTeacher((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSelectChange = (e) => {
-    setNewTeacher((prev) => ({
-      ...prev,
-      status: e.target.value,
-    }));
-  };
-
-  const handleDownloadTemplateExcel = async () => {
-    try {
-      const response = await axiosAdmin.get('/teacher/template/excel', {
-        responseType: 'blob'
-      });
-
-      if (response && response.data) {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'Teacher.xlsx';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-      }
-    } catch (error) {
-      console.error('Error downloading file:', error);
-    }
-  };
-
-  const handleFileChange = (e) => {
-    setFileList([...e.target.files]);
-  };
-  const handleRemoveFile = (indexToRemove) => {
-    setFileList(currentFiles => currentFiles.filter((_, index) => index !== indexToRemove));
-  };
-
-  return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader>Add New Teacher</ModalHeader>
-            <ModalBody>
-              <div>Thêm giáo viên bằng file excel</div>
-              <div className="flex justify-between m-1">
-                <div className="card p-3">
-                  <h3>Tải Mẫu CSV</h3>
-                  <Button onClick={handleDownloadTemplateExcel}> Tải xuống mẫu </Button>
-                </div>
-                <div className="card p-3">
-                  <div>
-                    <h3>Upload File</h3>
-                    <label htmlFor="file-upload" className="cursor-pointer">
-                      <Button auto flat as="span" color="primary">
-                        Select File
-                      </Button>
-                    </label>
-                    <input
-                      id="file-upload"
-                      type="file"
-                      style={{ display: 'none' }}
-                      onChange={handleFileChange}
-                      multiple
-                    />
-                    {/* Display the filenames below the button */}
-                    {/* Display the filenames below the button with a remove button */}
-                    {fileList.length > 0 && (
-                      <div className="mt-2">
-                        <ul>
-                          {fileList.map((file, index) => (
-                            <li key={index} className="flex justify-between items-center">
-                              <p>{file.name}</p>
-                              <Button auto flat color="error" size="xs" onClick={() => handleRemoveFile(index)}>
-                                X
-                              </Button>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="card p-3">
-                  <h3>Upload Data</h3>
-                  <CustomUpload
-                    endpoint='teacher'
-                    method="POST"
-                    setCurrent={setCurrent}
-                    fileList={fileList}
-                    setFileList={setFileList}
-                  />
-                </div>
-              </div>
-
-              <Divider className="my-4" />
-
-              <div>Nhập thông tin</div>
-              <form className="flex flex-col gap-3" onSubmit={(e) => {
-                e.preventDefault();
-                onSubmit(newTeacher);
-                onClose();
-              }}>
-                <Input fullWidth label="Name" name="name" value={newTeacher.name} onChange={handleChange} required />
-                <Input fullWidth label="Email" name="email" type="email" value={newTeacher.email} onChange={handleChange} required />
-                <Select label="Permission" name="permission" value={newTeacher.permission} onChange={handleSelectChange} fullWidth required>
-                  {permissions.map((status) => (
-                    <SelectItem key={status.id} value={status.id}>{capitalize(status.name)}</SelectItem>
-                  ))}
-                </Select>
-              </form>
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="light" onClick={onClose}>Cancel</Button>
-              <Button type="submit" color="primary" onClick={(e) => {
-                e.preventDefault();
-                onSubmit(newTeacher);
-                onClose();
-              }}>Add</Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
-    </Modal>
-  );
-}
-
-
-function EditTeacherModal({ isOpen, onOpenChange, onSubmit, editTeacher, setEditTeacher }) {
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditTeacher((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSelectChange = (e) => {
-    setEditTeacher((prev) => ({
-      ...prev,
-      status: e.target.value,
-    }));
-  };
-
-  return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader>Edit Teacher</ModalHeader>
-            <ModalBody>
-              <form
-                className="flex flex-col gap-3"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  onSubmit(editTeacher, editTeacher.teacher_id);
-                  onClose();
-                }}>
-                <Input
-                  fullWidth
-                  label="Name"
-                  name="name"
-                  value={editTeacher.name}
-                  onChange={handleChange}
-                  required
-                />
-                <Input
-                  fullWidth
-                  label="Email"
-                  name="email"
-                  type="email"
-                  value={editTeacher.email}
-                  onChange={handleChange}
-                  required
-                />
-                {/* <Input
-                  fullWidth
-                  label="Permission"
-                  name="permission"
-                  value={editTeacher.permission}
-                  onChange={handleChange}
-                  required
-                /> */}
-                <Select
-                  label="Permission"
-                  name="permission"
-                  value={editTeacher.permission}
-                  onChange={handleSelectChange}
-                  fullWidth
-                >
-                  {permissions.map((permission) => (
-                    <SelectItem key={permission.id} value={permission.id}>
-                      {capitalize(permission.name)}
-                    </SelectItem>
-                  ))}
-                </Select>
-                <Input
-                  fullWidth
-                  label="Type"
-                  name="typeTeacher"
-                  value={editTeacher.typeTeacher}
-                  onChange={handleChange}
-                  required
-                />
-
-              </form>
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="light" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                color="primary"
-                onClick={(e) => {
-                  onSubmit(editTeacher, editTeacher.teacher_id);
-                  onClose();
-                }}
-              >
-                Save
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
-    </Modal>
   );
 }
