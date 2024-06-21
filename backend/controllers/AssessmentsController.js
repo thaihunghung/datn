@@ -129,7 +129,7 @@ const AssessmentsController = {
           attributes: ['course_id','courseCode', 'courseName']
         }, {
           model: StudentModel,
-          attributes: ['studentCode', 'name', 'class_id'],
+          attributes: ['student_id','studentCode', 'name', 'class_id'],
           include: [{
             model: ClassModel,
             attributes: ['classNameShort']

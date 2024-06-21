@@ -1,7 +1,7 @@
 import React from 'react';
 import { Slider, Tooltip } from "@nextui-org/react";
 
-const RubricSlider = ({ maxScore, index, defaultValue, handleSliderChange, rubricsItem_id, StudentName, studentCode}) => {
+const RubricSlider = ({ maxScore, index, defaultValue, handleSliderChange, rubricsItem_id, StudentName, studentID}) => {
   
   
   
@@ -42,7 +42,7 @@ const RubricSlider = ({ maxScore, index, defaultValue, handleSliderChange, rubri
         defaultValue={defaultValue}
         className="max-w-md"
         marks={getMarks(maxScore)}
-        onChange={(value) => handleSliderChange(index, value, rubricsItem_id)}
+        onChange={(value) => handleSliderChange(index, value, rubricsItem_id, studentID)}
       />
     </div>
   );
