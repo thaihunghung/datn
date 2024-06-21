@@ -167,6 +167,9 @@ export default function App(props) {
                 <DropdownItem onClick={() => handleViewClick(teacher.teacher_id)}>
                   View
                 </DropdownItem>
+                <DropdownItem onClick={() => handleBlockClick(teacher.teacher_id)}>
+                  Block
+                </DropdownItem>
                 <DropdownItem onClick={() => handleEditClick(teacher)}>
                   Edit
                 </DropdownItem>
@@ -391,7 +394,7 @@ export default function App(props) {
               Add New
             </Button>
             <Button color="secondary" onClick={() => navigate('store')}>
-              Manage Blocked/Deleted Teachers
+              Manage Blocked
             </Button>
           </div>
         </div>

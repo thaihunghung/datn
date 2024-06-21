@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const CloModel = require('./CloModel');
 const TeacherModel = require('./TeacherModel');
 
 const SubjectModel = sequelize.define('subject', {

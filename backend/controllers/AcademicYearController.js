@@ -16,13 +16,42 @@ const AcademicYearController = {
   create: async (req, res) => {
     try {
       const { data } = req.body;
-      const newAcademicYear = await AcademicYearModel.create(data);
-      res.json(newAcademicYear);
+      const year = parseInt(data, 10);
+  
+      if (isNaN(year)) {
+        return res.status(400).json({ message: 'Dữ liệu năm không hợp lệ' });
+      }
+  
+      const startDate = new Date(Date.UTC(year, 0, 1, 0, 0, 0));
+      const endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59));
+      const description = `Năm học ${year}-${year + 1}`;
+  
+      // Check if the academic year already exists
+      const existingAcademicYear = await AcademicYearModel.findOne({
+        where: { startDate, endDate },
+      });
+  
+      if (existingAcademicYear) {
+        return res.status(200).json(existingAcademicYear);
+      }
+  
+      // Create a new academic year if it doesn't exist
+      const newAcademicYear = await AcademicYearModel.create({
+        startDate,
+        endDate,
+        description,
+        isDelete: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+  
+      res.status(201).json(newAcademicYear);
     } catch (error) {
       console.error('Lỗi khi tạo năm học mới:', error);
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
+  
 
   // Lấy thông tin của một năm học dựa trên ID
   getByID: async (req, res) => {

@@ -4,13 +4,16 @@ const ChapterModel = require("../models/ChapterModel");
 const RubricItemModel = require("../models/RubricItemModel");
 const CloChapterModel = require("../models/CloChapterModel");
 const PloCloModel = require("../models/PloCloModel");
-const CourseModel = require("../models/CourseModel");
 
 const ExcelJS = require('exceljs');
 const fs = require('fs');
 const path = require('path');
 const TeacherModel = require("../models/TeacherModel");
 const RubricModel = require("../models/RubricModel");
+const { Sequelize } = require("sequelize");
+const CourseModel = require("../models/CourseModel");
+const AssessmentModel = require("../models/AssessmentModel");
+const sequelize = require("../config/database");
 
 
 const validTypes = [
@@ -63,7 +66,7 @@ const SubjectController = {
       const { subject_id } = req.params;
       const clos = await CloModel.findAll({
         where: { subject_id: subject_id, isDelete: false },
-        attributes: ['clo_id','cloName', 'description']
+        attributes: ['clo_id', 'cloName', 'description']
       });
 
       if (clos.length === 0) {
@@ -87,7 +90,7 @@ const SubjectController = {
       const { subject_id } = req.params;
       const Chapters = await ChapterModel.findAll({
         where: { subject_id: subject_id, isDelete: false },
-        attributes: ['chapter_id','chapterName', 'description']
+        attributes: ['chapter_id', 'chapterName', 'description']
       });
 
       if (Chapters.length === 0) {
@@ -159,7 +162,7 @@ const SubjectController = {
         console.error('Error finding subject:', error);
         res.status(500).json({ message: 'Server error' });
     }
-},
+  },
 
   update: async (req, res) => {
     try {
@@ -292,7 +295,7 @@ const SubjectController = {
     try {
       const { teacher_id } = req.params;
       const activeSubjects = await SubjectModel.findAll({
-        where: { isDelete: false, teacher_id: teacher_id}
+        where: { isDelete: false, teacher_id: teacher_id }
       });
       const subjectIds = activeSubjects.map(subject => subject.subject_id);
       const Clos = await CloModel.findAll({ where: { subject_id: subjectIds } });
@@ -315,7 +318,7 @@ const SubjectController = {
     }
   },
 
-  
+
   isDelete: async (req, res) => {
     try {
       const { id } = req.params;
@@ -475,7 +478,7 @@ const SubjectController = {
       return res.status(404).json({ message: 'TeacherModels not found' });
     }
 
-    
+
     const uploadDirectory = path.join(__dirname, '../uploads');
     const filename = req.files[0].filename;
     const filePath = path.join(uploadDirectory, filename);
@@ -616,6 +619,36 @@ const SubjectController = {
       return res.status(500).json({ message: 'Server error' });
     }
   },
+  // phần trăm clo theo suject
+  averageScoresPerSubject: async (req, res) => {
+    try {
+      const results = await sequelize.query(
+        `SELECT
+            ROUND(AVG(a.totalScore), 2) AS averageScore,
+            s.subject_id AS subject_id,
+            s.subjectName AS subjectName
+        FROM
+            assessments AS a
+        LEFT JOIN courses AS c
+            ON a.course_id = c.course_id
+        LEFT JOIN subjects AS s
+            ON c.subject_id = s.subject_id
+        GROUP BY
+            s.subject_id, s.subjectName;
+        `,
+        {
+          type: Sequelize.QueryTypes.SELECT,
+
+        }
+      );
+
+      res.json(results);
+    } catch (error) {
+      console.error('Error fetching average scores per subject:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
+
 };
 
 module.exports = SubjectController;
