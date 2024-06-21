@@ -306,8 +306,6 @@ const FormMultipleGrading = (nav) => {
     setSelectedValues4(updatedPoData);
   }
 
-
-
   const GetAssesmentByDicriptions = async ()=> {
     try {
       const response = await axiosAdmin.get(`/assessments/${description}/teacher/${teacher_id}`);
