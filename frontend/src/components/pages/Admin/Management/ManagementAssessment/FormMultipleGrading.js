@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 
 import { Table, Tooltip, Button, message } from 'antd';
+import { Select } from "antd";
+
 
 import { Collapse } from 'antd';
 import { Slider } from "@nextui-org/react";
@@ -14,7 +16,7 @@ import RubricSlider from "../../Utils/RubricSlider/RubricSlider";
 const FormMultipleGrading = (nav) => {
 
   const { setCollapsedNav } = nav;
-
+  const { Option } = Select;
   const [selectedValues, setSelectedValues] = useState([]); // Initialize as array
   const [RubicData, setRubicData] = useState([]);
   const [RubicItemsData, setRubicItemsData] = useState([]);
@@ -22,9 +24,11 @@ const FormMultipleGrading = (nav) => {
   const [Check, setCheck] = useState(0);
   const [defaultValue, setdefaultValue] = useState(0);
 
+  const [StudentData, setStudentData] = useState([]);
 
 
-  const { assessment_id, rubric_id } = useParams();
+
+  const { assessment_id, rubric_id, couse_id } = useParams();
   const navigate = useNavigate();
   const teacher_id = Cookies.get('teacher_id');
 
@@ -46,6 +50,27 @@ const FormMultipleGrading = (nav) => {
   }
 
   console.log(studentCodes);
+
+  const DataScore = [
+    { key: '1', Score: 0.25 },
+    { key: '2', Score: 0.5 },
+    { key: '3', Score: 0.75 },
+    { key: '4', Score: 1 },
+    { key: '4', Score: 1.25 },
+    { key: '4', Score: 1.5 },
+    { key: '4', Score: 1.75 },
+    { key: '4', Score: 2 },
+  ];
+
+  const [Student, setStudent] = useState([]);
+
+  const handleStudentChange = (value, option) => {
+    if (value.length > 4) {
+      message.warning('You can only select up to 4 student.');
+      return;
+    }
+    setStudent(value);
+  };
 
   const handleSliderChange = (index, value, rubricsItem_id) => {
     setSelectedValues(prevValues => {
@@ -80,7 +105,10 @@ const FormMultipleGrading = (nav) => {
       return updatedValues;
     });
   };
-
+  const handleSubmit = () => {
+    console.log('student list');
+    console.log(Student);
+  };
   const handleSave = async () => {
 
     console.log('Updated values', selectedValues);
@@ -119,28 +147,36 @@ const FormMultipleGrading = (nav) => {
         CheckGrading: false,
       };
     });
-
-
     setSelectedValues(updatedPoData);
-
   }
 
   const GetRubricData = async () => {
     try {
-
       const response = await axiosAdmin.get(`/rubric/${rubric_id}/items/isDelete/false`);
       console.log(response.data);
       setRubicData(response.data.rubric)
       setRubicItemsData(response.data.rubric.rubricItems)
       const data = response.data.rubric.rubricItems
       setValue(data)
-
     } catch (error) {
       console.error('Error fetching rubric data:', error);
       throw error;
     }
   };
 
+  const GetStudentData = async () => {
+    try {
+      const response = await axiosAdmin.get(`/course-enrollment/${couse_id}`);
+      console.log(response?.data);
+      if (response?.data) {
+        setStudentData(response?.data);
+      }
+
+    } catch (error) {
+      console.error('Error fetching student data:', error);
+      throw error;
+    }
+  };
 
   useEffect(() => {
     if (setCheck === 0) {
@@ -148,6 +184,7 @@ const FormMultipleGrading = (nav) => {
       setdefaultValue(0);
     }
     GetRubricData()
+    GetStudentData()
     const handleResize = () => {
       if (window.innerWidth < 1200) {
         setCollapsedNav(true);
@@ -164,6 +201,31 @@ const FormMultipleGrading = (nav) => {
   return (
     <div className="w-full p-2 pb-[100px] py-0 flex flex-col leading-6 mt-10">
 
+      <div className='text-left w-full font-bold'>Nhập điểm:</div>
+      <Select
+        mode="multiple"
+        // defaultValue="Chọn điểm"
+        value={Student}
+        onChange={handleStudentChange}
+        size="large"
+        className="w-full"
+      >
+        {DataScore.map((TypeSubject) => (
+          <Select.Option
+            key={TypeSubject.key}
+            value={TypeSubject.Score}
+          >
+            {TypeSubject.Score}
+          </Select.Option>
+        ))}
+      </Select>
+      <Button
+        type="primary"
+        onClick={handleSubmit}
+        className="mt-4"
+      >
+        Submit Scores
+      </Button>
       <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-fit p-4 py-3 shadow-lg rounded-md border-1 border-slate-300">
         <p className="text-sm font-medium">
           <div className="flex justify-center items-center">
@@ -238,8 +300,6 @@ const FormMultipleGrading = (nav) => {
               lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-[#ff8077]
               flex justify-center items-center
               ">
-
-
                 <div className="hidden sm:block lg:block xl:block flex-1 p-2">
                   <div className="text-center font-bold sm:font-bold lg:font-normal xl:font-normal text-[#008000] sm:text-[#008000] lg:text-black xl:text-black">
                     <Tooltip content={item.CLO.description}>{item.CLO.cloName}</Tooltip>
@@ -274,7 +334,7 @@ const FormMultipleGrading = (nav) => {
             </div>
 
             {/* Right Side */}
-            <div className="w-full sm:w-full lg:w-[45%] xl:w-[40%] text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-[#ff8077]" key={i}>    
+            <div className="w-full sm:w-full lg:w-[45%] xl:w-[40%] text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-[#ff8077]" key={i}>
               <RubricSlider
                 maxScore={item.maxScore}
                 index={i}
