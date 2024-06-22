@@ -17,14 +17,14 @@ const ClassController = {
   getAllWithTeacher: async (req, res) => {
     try {
       const { page, size } = req.query;
-  
-      const attributes = ['class_id', 'teacher_id', 'className', 'classCode', 'isDelete'];
+
+      const attributes = ['class_id', 'teacher_id', 'className', 'classNameShort', 'classCode', 'isDelete'];
       const whereClause = { isDelete: false };
-  
+
       if (page && size) {
         const offset = (page - 1) * size;
         const limit = parseInt(size, 10);
-  
+
         const { count, rows: classes } = await ClassModel.findAndCountAll({
           include: [{
             model: TeacherModel,
@@ -35,7 +35,7 @@ const ClassController = {
           offset: offset,
           limit: limit
         });
-  
+
         return res.json({
           total: count,
           classes: classes
@@ -49,7 +49,7 @@ const ClassController = {
           attributes: attributes,
           where: whereClause
         });
-  
+
         return res.json(classes);
       }
     } catch (error) {
@@ -57,7 +57,7 @@ const ClassController = {
       res.status(500).json({ message: 'Internal Server Error' });
     }
   },
-  
+
   // Lấy một lớp học theo ID
   getByID: async (req, res) => {
     try {
@@ -67,11 +67,11 @@ const ClassController = {
           model: TeacherModel,
           attributes: ['name']
         }],
-        attributes: ['class_id','teacher_id', 'className', 'classCode', 'isDelete'],// Lọc ra các trường cần lấy
+        attributes: ['class_id', 'teacher_id', 'className', 'classCode', 'isDelete'],// Lọc ra các trường cần lấy
         where: {
           isDelete: false,
           class_id: id
-         }
+        }
       });
       if (!classes) {
         return res.status(404).json({ message: 'Không tìm thấy lớp học' });
@@ -100,11 +100,11 @@ const ClassController = {
           model: TeacherModel,
           attributes: ['name']
         }],
-        attributes: ['class_id','teacher_id', 'className', 'classCode', 'isDelete'],// Lọc ra các trường cần lấy
+        attributes: ['class_id', 'teacher_id', 'className', 'classCode', 'isDelete'],// Lọc ra các trường cần lấy
         where: {
           isDelete: false,
           class_id: id
-         }
+        }
       });
 
       worksheet.columns = [
@@ -131,7 +131,7 @@ const ClassController = {
 
       worksheet.eachRow((row, rowNumber) => {
         row.eachCell((cell, colNumber) => {
-          if (colNumber === 1 ) {
+          if (colNumber === 1) {
             cell.protection = { locked: true };
           } else {
             cell.protection = { locked: false };
@@ -148,7 +148,7 @@ const ClassController = {
       res.status(500).json({ error: 'Internal server error' });
     }
   },
-  
+
   // Tạo một lớp học mới
   create: async (req, res) => {
     try {
@@ -165,6 +165,7 @@ const ClassController = {
     try {
       const { id } = req.params;
       const { data } = req.body;
+      console.log("data", data)
       const classObj = await ClassModel.findOne({ where: { class_id: id, isDelete: false } });
       if (!classObj) {
         return res.status(404).json({ message: 'Không tìm thấy lớp học' });
@@ -195,16 +196,42 @@ const ClassController = {
 
   isDeleteTotrue: async (req, res) => {
     try {
-      const classes = await ClassModel.findAll({
-        include: [{
-          model: TeacherModel,
-          attributes: ['name']
-        }],
-        attributes: ['class_id','teacher_id', 'className', 'classCode', 'isDelete'],// Lọc ra các trường cần lấy
-        where: { isDelete: true }
-      });
+      const { page, size } = req.query;
 
-      res.json(classes);
+      const attributes = ['class_id', 'teacher_id', 'className', 'classCode', 'isDelete'];
+      const whereClause = { isDelete: true };
+
+      if (page && size) {
+        const offset = (page - 1) * size;
+        const limit = parseInt(size, 10);
+
+        const { count, rows: classes } = await ClassModel.findAndCountAll({
+          include: [{
+            model: TeacherModel,
+            attributes: ['name']
+          }],
+          attributes: attributes,
+          where: whereClause,
+          offset: offset,
+          limit: limit
+        });
+
+        return res.json({
+          total: count,
+          classes: classes
+        });
+      } else {
+        const classes = await ClassModel.findAll({
+          include: [{
+            model: TeacherModel,
+            attributes: ['name']
+          }],
+          attributes: attributes,
+          where: whereClause
+        });
+
+        return res.json(classes);
+      }
     } catch (error) {
       console.error('Error:', error);
       res.status(500).json({ message: 'Internal Server Error' });

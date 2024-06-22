@@ -16,13 +16,13 @@ import {
   DropdownTrigger,
 } from "@nextui-org/react";
 import { Link, useNavigate } from "react-router-dom";
-import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import { SearchOutlined, DeleteFilled, EditFilled } from '@ant-design/icons';
+import { SearchOutlined, DeleteFilled, EditFilled, RedoOutlined } from '@ant-design/icons';
 import { columns, fetchClassesData } from "./Data";
-import ConfirmAction from "./ConfirmAction";
-import AddClassModal from "./AddClassModal";
-import { capitalize } from "../../Utils/capitalize";
-import EditClassModal from "./EditClassModal";
+import EditClassModal from "../EditClassModal";
+import ConfirmAction from "../ConfirmAction";
+import AddClassModal from "../AddClassModal";
+import { axiosAdmin } from "../../../../../../service/AxiosAdmin";
+import { capitalize } from "../../../Utils/capitalize";
 
 const INITIAL_VISIBLE_COLUMNS = ["classCode", "className", "nameTeacher", "actions"];
 
@@ -49,12 +49,10 @@ const Class = (props) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState(null);
 
-
   const hasSearchFilter = Boolean(filterValue);
 
   const handleDownloadTemplateExcel = async (id) => {
     try {
-      console.log("selectedClassId", id)
       const response = await axiosAdmin.get(`/student/course/${id}`, {
         responseType: 'blob'
       });
@@ -147,16 +145,18 @@ const Class = (props) => {
         return cellValue;
       case "nameTeacher":
         return (
-          <>
-            {item.teacher.name}
-          </>
+          <Link to={`teacher/${item.teacher_id}`}>
+            <Tooltip content="Click để xem thông tin chi tiết">
+              {item.teacher.name}
+            </Tooltip>
+          </Link>
         );
       case "actions":
         return (
           <div className="flex justify-center items-center gap-2">
             <Tooltip content="Cập nhật thông tin lớp học">
-              <Button isIconOnly auto onClick={() => handleEditClass(item)}>
-                <EditFilled />
+              <Button isIconOnly auto onClick={() => handleChangeIdDelete(item.class_id)}>
+                <RedoOutlined />
               </Button>
             </Tooltip>
             <Tooltip content="Tải danh sách sinh viên">
@@ -171,20 +171,7 @@ const Class = (props) => {
                 <i className="fa-solid fa-download"></i>
               </Button>
             </Tooltip>
-            <Tooltip content="Chuyển vào thùng rác">
-              <Button
-                isIconOnly
-                auto
-                color="warning"
-                onClick={() => {
-                  setIsConfirmOpen(true);
-                  setConfirmMessage('Bạn có chắc muốn ẩn đi lớp này chứ');
-                  setDeleteId(item.class_id);
-                }}
-              >
-                <DeleteFilled />
-              </Button>
-            </Tooltip>
+
           </div>
         );
       default:
@@ -279,14 +266,8 @@ const Class = (props) => {
                 ))}
               </DropdownMenu>
             </Dropdown>
-            <Button color="primary" endContent={<i className="fa-solid fa-plus"></i>}
-              onClick={() => setIsAddClassOpen(true)}
-            >
-              Tạo mới
-            </Button>
-
-            <Button color="secondary" onClick={() => navigate('/admin/class/store')}>
-              Manage Blocked
+            <Button color="secondary" onClick={() => navigate('/admin/class')}>
+              Manage Class
             </Button>
           </div>
         </div>
@@ -368,6 +349,18 @@ const Class = (props) => {
     );
   }, [selectedKeys, handleDeleteClick, handleClearSelection, totalClasses]);
 
+  const handleChangeIdDelete = async (id) => {
+    try {
+      const response = await axiosAdmin.put(`/class/isDelete/${id}`);
+      if (response) {
+        getAllClass(page, rowsPerPage);
+        console.log(response.data.message);
+        successNoti("Khôi phục sinh viên thành công");
+      }
+    } catch (err) {
+      console.log("Error: " + err.message);
+    };
+  }
   return (
     <>
       {selectedItemsBar}

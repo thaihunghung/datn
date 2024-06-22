@@ -249,7 +249,52 @@ const StudentController = {
       res.status(500).json({ error: 'Internal server error' });
     }
   },
+  getFormStudentByClass: async (req, res) => {
+    try {
+      const { id } = req.params;
 
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Students Form');
+
+      const students = await StudentModel.findAll({
+        include: [{
+          model: ClassModel,
+          attributes: ['classCode', 'classNameShort', 'className'],
+          where: {
+            class_id: id,
+          }
+        }],
+        attributes: ['student_id', 'class_id', 'studentCode', 'email', 'name', 'isDelete'],
+        where: {
+          isDelete: false,
+        }
+      });
+
+      worksheet.columns = [
+        { header: 'Mã lớp', key: 'classNameShort', width: 15 },
+        { header: 'Tên SV', key: 'name', width: 32 },
+        { header: 'MSSV', key: 'studentCode', width: 20 },
+        { header: 'Email', key: 'email', width: 30 }
+      ];
+
+      students.forEach(student => {
+        worksheet.addRow({
+          classNameShort: student.class.classNameShort,
+          name: student.name,
+          studentCode: student.studentCode,
+          email: student.email
+        });
+      });
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename="Students.xlsx"');
+      await workbook.xlsx.write(res);
+      res.end();
+    } catch (error) {
+      console.error('Error generating Excel file:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  },
   saveStudentExcel: async (req, res) => {
     console.log("dc");
     if (req.files) {

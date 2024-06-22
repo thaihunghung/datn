@@ -41,10 +41,6 @@ import UpdateSubject from '../components/pages/Admin/Management/ManagementSubjec
 import StoreSubject from '../components/pages/Admin/Management/ManagementSubject/StoreSubject';
 import CreateSubject from '../components/pages/Admin/Management/ManagementSubject/CreateSubject';
 import Class from '../components/pages/Admin/Management/ManagementClass/Class';
-import UpdateClass from '../components/pages/Admin/Management/ManagementClass/UpdateClass';
-import StoreClass from '../components/pages/Admin/Management/ManagementClass/StoreClass';
-import UpdateClassById from '../components/pages/Admin/Management/ManagementClass/UpdateClassById';
-import CreateClass from '../components/pages/Admin/Management/ManagementClass/CreateClass';
 import Course from '../components/pages/Admin/Management/ManagementCourse/Course';
 import MangementRubricItems from '../components/pages/Admin/Management/ManagementRubric/MangementRubricItems';
 import CreateRubicItems from '../components/pages/Admin/Management/ManagementRubric/CreateRubicItems';
@@ -63,6 +59,7 @@ import Teacher from '../components/pages/Admin/Management/ManagementTeacher/Teac
 import StoreTeacher from '../components/pages/Admin/Management/ManagementTeacher/StoreTeacher/StoreTeacher';
 import TeacherProfile from '../components/pages/Admin/Management/ManagementTeacher/DetailTeacher/TeacherProfile';
 import Dashboard from '../components/pages/Admin/DashBoard/Dashboard';
+import StoreClass from '../components/pages/Admin/Management/ManagementClass/StoreClass/StoreClass';
 
 
 function Admin(props) {
@@ -160,9 +157,6 @@ function Admin(props) {
           <Route path="/student/store" element={<StoreStudent collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
 
           <Route path="/class" element={<Class collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
-          <Route path="/class/create" element={<CreateClass collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
-          <Route path="/class/update" element={<UpdateClass collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
-          <Route path="/class/update/:id" element={<UpdateClassById collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
           <Route path="/class/store" element={<StoreClass collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
 
           <Route path="/course" element={<Course collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
