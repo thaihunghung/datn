@@ -11,7 +11,6 @@ import {
   ModalBody,
   ModalFooter, useDisclosure
 } from "@nextui-org/react";
-import './Student.css'
 const StoreStudent = (props) => {
   const { setCollapsedNav, successNoti } = props;
   const { isOpen, onOpen, onOpenChange } = useDisclosure();

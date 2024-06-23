@@ -154,7 +154,7 @@ const Class = (props) => {
       case "actions":
         return (
           <div className="flex justify-center items-center gap-2">
-            <Tooltip content="Cập nhật thông tin lớp học">
+            <Tooltip content="Khôi phục lớp học này">
               <Button isIconOnly auto onClick={() => handleChangeIdDelete(item.class_id)}>
                 <RedoOutlined />
               </Button>
@@ -401,25 +401,6 @@ const Class = (props) => {
           )}
         </TableBody>
       </Table>
-      <ConfirmAction
-        isOpen={isConfirmOpen}
-        onOpenChange={setIsConfirmOpen}
-        onConfirm={confirmAction}
-        message={confirmMessage}
-        onSubmit={handleDeleteClick}
-      />
-      <AddClassModal
-        isOpen={isAddClassOpen}
-        onOpenChange={setIsAddClassOpen}
-        fetchClasses={() => getAllClass(page, rowsPerPage)}
-      />
-      <EditClassModal
-        isOpen={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
-        initialData={classClick}
-        classId={selectedClassId}
-        fetchClasses={() => getAllClass(page, rowsPerPage)}
-      />
     </>
   );
 };

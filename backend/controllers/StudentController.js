@@ -16,8 +16,45 @@ const StudentController = {
   // Lấy tất cả sinh viên
   index: async (req, res) => {
     try {
-      const students = await StudentModel.findAll();
-      res.json(students);
+      const { page, size } = req.query;
+  
+      const attributes = ['student_id', 'class_id', 'studentCode', 'email', 'name', 'createdAt', 'updatedAt', 'isDelete'];
+      const whereClause = { isDelete: false };
+  
+      if (page && size) {
+        const offset = (page - 1) * size;
+        const limit = parseInt(size, 10);
+  
+        const { count, rows: students } = await StudentModel.findAndCountAll({
+          include: [{
+            model: ClassModel,
+            attributes: ['classCode', 'classNameShort', 'className'],
+            where: {
+              isDelete:false
+            }
+          }],
+          attributes: attributes,
+          where: whereClause,
+          offset: offset,
+          limit: limit
+        });
+  
+        return res.json({
+          total: count,
+          students: students
+        });
+      } else {
+        const students = await StudentModel.findAll({
+          include: [{
+            model: ClassModel,
+            attributes: ['classCode']
+          }],
+          attributes: attributes,
+          where: whereClause
+        });
+  
+        return res.json(students);
+      }
     } catch (error) {
       console.error('Lỗi khi lấy tất cả sinh viên:', error);
       res.status(500).json({ message: 'Lỗi server' });

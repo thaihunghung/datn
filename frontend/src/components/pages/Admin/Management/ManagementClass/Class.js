@@ -258,7 +258,7 @@ const Class = (props) => {
             onValueChange={onSearchChange}
           />
           <div className="flex gap-3">
-            <Dropdown>
+          <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button endContent={<i className="fa-solid fa-chevron-down"></i>} variant="flat">
                   Columns
@@ -312,6 +312,7 @@ const Class = (props) => {
     totalClasses,
     onSearchChange,
     hasSearchFilter,
+    visibleColumns
   ]);
 
   const bottomContent = useMemo(() => {
