@@ -58,6 +58,7 @@ import TeacherProfile from '../components/pages/Admin/Management/ManagementTeach
 import DashboardPage from '../components/pages/Admin/DashBoard/Dashboard';
 import UpdateFormGrading from '../components/pages/Admin/Management/ManagementAssessment/UpdateFormGrading';
 import FormMultipleGrading from '../components/pages/Admin/Management/ManagementAssessment/FormMultipleGrading';
+import StoreClass from '../components/pages/Admin/Management/ManagementClass/StoreClass/StoreClass';
 
 
 function Admin(props) {

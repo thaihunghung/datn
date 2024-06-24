@@ -26,7 +26,7 @@ import { capitalize } from "../../../Utils/capitalize";
 
 const INITIAL_VISIBLE_COLUMNS = ["classCode", "className", "nameTeacher", "actions"];
 
-const Class = (props) => {
+const StoreClass = (props) => {
   const navigate = useNavigate();
   const { setCollapsedNav, successNoti } = props;
   const [filterValue, setFilterValue] = useState("");
@@ -405,4 +405,4 @@ const Class = (props) => {
   );
 };
 
-export default Class;
+export default StoreClass;
