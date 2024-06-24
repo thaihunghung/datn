@@ -9,9 +9,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 
 const CreateRubic = (nav) => {
-    const { loadData, rubricData, isOpen, onClose } = nav;
-
-    const [activeTab, setActiveTab] = useState(0);
+    const { loadData, isOpen, onClose } = nav;
 
     const [rubricName, setRubricName] = useState("");
     const [Comment, setComment] = useState("");
@@ -32,11 +30,20 @@ const CreateRubic = (nav) => {
             message.error('Please select a subject');
             return; // Dừng hàm nếu subject_id là null
         }
+        if (!rubricName) {
+            message.error('Please input rubricName');
+            return; // Dừng hàm nếu subject_id là null
+        }
+
+        const subjectName = DataSubject.find(subject => subject.subject_id === subject_id)?.subjectName;
+        const subjectCode = DataSubject.find(subject => subject.subject_id === subject_id)?.subjectCode;
+        
+        const combinedString = `${subjectCode} - ${subjectName} - ${rubricName}`;
         try {
             const data = {
                 subject_id: subject_id,
                 teacher_id: teacher_id,
-                rubricName: rubricName,
+                rubricName: combinedString,
                 comment: Comment,
             }
 
@@ -106,7 +113,7 @@ const CreateRubic = (nav) => {
                                 <ModalBody>
                                     <div className='flex flex-col sm:flex-col sm:items-start lg:flex-row  xl:flex-row  justify-center items-center gap-2'>
                                         <div className='flex-1 w-full sm:w-full items-center p-5 pb-0 sm:pb-0 lg:pb-5 xl:pb-5  justify-center flex flex-col gap-2 sm:flex-col lg:flex-col xl:flex-col'>
-                                            <div className='text-left w-full font-bold'>Chọn Clo:</div>
+                                            <div className='text-left w-full font-bold'>Chọn học phần:</div>
                                             <Select
                                                 defaultValue={"Chọn học phần"}
                                                 value={subject_id}
@@ -123,6 +130,7 @@ const CreateRubic = (nav) => {
                                                     </Select.Option>
                                                 ))}
                                             </Select>
+                                            <span className="text-left w-full font-bold">SubjectName + RubricName</span>
                                             <Input
                                                 label="Name Rubric"
                                                 placeholder="Enter your name Rubric"

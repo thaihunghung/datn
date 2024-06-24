@@ -2,11 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Input } from "@nextui-org/react";
-import { Button, Select, message } from 'antd';
-import { Upload } from 'antd';
-import CustomUpload from "../../CustomUpload/CustomUpload";
-import { UploadOutlined } from '@ant-design/icons';
-
+import { Select, message } from 'antd';
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import Tabs from "../../Utils/Tabs/Tabs";
 import DropdownAndNavGrading from "../../Utils/DropdownAndNav/DropdownAndNavGrading";
@@ -56,9 +52,7 @@ const CreateAssessment = (nav) => {
             setCourse_id(selectedCourse.course_id);
             setCourseName(selectedCourse.courseCode + "_" + selectedCourse.courseName)
             getRubricBySubject(selectedCourse.subject_id);
-
             setRubric_id(null);
-            setDefaultRubric('Chọn Rubric');
         }
     };
 
@@ -74,44 +68,15 @@ const CreateAssessment = (nav) => {
             console.error("Error fetching Rubric:", error);
         }
     }
+
     useEffect(() => {
-
-            const filteredData = filterRubicData.filter(filterItem =>
-                DataRubric.some(dataItem => dataItem.rubric_id === filterItem.rubric_id)
-            );
-            setRubicDataCompe(filteredData)
-            console.log("Filtered Data:", filteredData);
-        
-    }, [DataRubric]);
-
-
-
-
-
-
-    const getAllRubricIsDeleteFalse = async () => {
-        try {
-            const response = await axiosAdmin.get(`/rubrics/teacher/${teacher_id}/checkscore`);
-            const updatedRubricData = response.data.rubric.map((rubric) => {
-                const status = {
-                    status: rubric.RubricItem.length === 0 ? false : true,
-                    _id: rubric.rubric_id
-                };
-                return {
-                    rubric_id: rubric.rubric_id,
-                    rubricName: rubric.rubricName,
-                    status: status,
-                    point: rubric.RubricItem[0]?.total_score ? rubric.RubricItem[0].total_score : 0.0,
-                    action: rubric.rubric_id
-                };
-            });
-            setfilterRubicData(updatedRubricData);
-            console.log(updatedRubricData);
-        } catch (error) {
-            console.error("Error: " + error.message);
-            message.error('Error fetching Rubric data');
-        }
-    };
+        const filteredData = filterRubicData.filter(filterItem =>
+            DataRubric.some(dataItem => dataItem.rubric_id === filterItem.rubric_id)
+        );
+        setRubicDataCompe(filteredData);
+        setDefaultRubric('Chọn Rubric');
+        console.log("Filtered Data:", filteredData);
+    }, [DataRubric, filterRubicData]);
 
     const handleDownloadStudent = async () => {
         try {
@@ -136,23 +101,48 @@ const CreateAssessment = (nav) => {
         }
     };
 
-    const getCourseByTeacher = async () => {
-        try {
-            const response = await axiosAdmin.get(`/course/getByTeacher/${teacher_id}`);
-            console.log(response.data.course);
-            if (response.data) {
-                setCourseByTeacher(response.data.course);
-            }
-        } catch (error) {
-            console.error("Error fetching course:", error);
-            message.error('Error fetching course');
-        }
-    }
-
     //id_teacher nhận trên cookie id_teacher =2
     useEffect(() => {
-        getCourseByTeacher()
-        getAllRubricIsDeleteFalse()
+        const getAllRubricIsDeleteFalse = async () => {
+            try {
+                const response = await axiosAdmin.get(`/rubrics/teacher/${teacher_id}/checkscore`);
+                const updatedRubricData = response.data.rubric.map((rubric) => {
+                    const status = {
+                        status: rubric.RubricItem.length === 0 ? false : true,
+                        _id: rubric.rubric_id
+                    };
+                    return {
+                        rubric_id: rubric.rubric_id,
+                        rubricName: rubric.rubricName,
+                        status: status,
+                        point: rubric.RubricItem[0]?.total_score ? rubric.RubricItem[0].total_score : 0.0,
+                        action: rubric.rubric_id
+                    };
+                });
+                setfilterRubicData(updatedRubricData);
+                console.log(updatedRubricData);
+            } catch (error) {
+                console.error("Error: " + error.message);
+                message.error('Error fetching Rubric data');
+            }
+        };
+    
+        const getCourseByTeacher = async () => {
+            try {
+                const response = await axiosAdmin.get(`/course/getByTeacher/${teacher_id}`);
+                console.log(response.data.course);
+                if (response.data) {
+                    setCourseByTeacher(response.data.course);
+                }
+            } catch (error) {
+                console.error("Error fetching course:", error);
+                message.error('Error fetching course');
+            }
+        };
+    
+        getCourseByTeacher();
+        getAllRubricIsDeleteFalse();
+    
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -160,12 +150,15 @@ const CreateAssessment = (nav) => {
                 setCollapsedNav(false);
             }
         };
+    
         handleResize();
         window.addEventListener("resize", handleResize);
+    
         return () => {
             window.removeEventListener("resize", handleResize);
         };
-    }, []);
+    }, [setCollapsedNav, teacher_id]);
+    
 
     const [fileList, setFileList] = useState([]);
 
@@ -219,7 +212,7 @@ const CreateAssessment = (nav) => {
                                             </Select>
 
                                             <Select
-                                                defaultValue={"Chọn rubric"}
+                                                defaultValue={defaultRubric}
                                                 value={rubric_id}
                                                 onChange={setRubric_id}
                                                 size="large"

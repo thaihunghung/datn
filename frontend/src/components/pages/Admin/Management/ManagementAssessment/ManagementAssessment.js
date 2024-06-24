@@ -8,7 +8,6 @@ import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavGrading from "../../Utils/DropdownAndNav/DropdownAndNavGrading";
 import Cookies from "js-cookie";
-import slugify from 'slugify';
 
 const ManagementAssessment = (nav) => {
   const { setCollapsedNav } = nav;

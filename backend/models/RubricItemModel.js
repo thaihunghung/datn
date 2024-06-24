@@ -52,6 +52,10 @@ const RubricsItemModel = sequelize.define('rubricsItem', {
     type: DataTypes.DOUBLE(8, 2),
     defaultValue: 0
   },
+  stt: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1
+  },
   isDelete: {
     type: DataTypes.TINYINT,
     defaultValue: 0
