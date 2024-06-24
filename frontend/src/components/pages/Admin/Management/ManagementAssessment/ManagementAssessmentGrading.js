@@ -184,12 +184,7 @@ const ManagementAssessmentGrading = (nav) => {
     if (hasUncheckedAssessment) {
         return;
     }
-
-
-
-
-
-
+    
     const listStudentCodes = selectedRowKeys.map((key) => getStudentCode(assessments, key));
     console.log(checkStotalScore);
 
