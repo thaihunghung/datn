@@ -23,8 +23,13 @@ const ManagementAssessmentGrading = (nav) => {
   const [selectedRow, setSelectedRow] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [subjects, setSubjects] = useState([]);
+  const [assessments, setAssessments] = useState([]);
 
+  const [Couse_id, setCouse_id] = useState();
+  const [rubric_id, setRubric_id] = useState();
+
+
+  
   const [deleteId, setDeleteId] = useState(null);
 
   const columns = [
@@ -53,11 +58,11 @@ const ManagementAssessmentGrading = (nav) => {
         <div className="text-sm min-w-[100px] flex flex-col">
           <p className="font-medium">{record.name}</p>
           <p className="font-medium">{record.studentCode}</p>
-        
+
         </div>
       ),
     },
-    
+
     {
       title: "Điểm",
       dataIndex: "totalScore",
@@ -76,7 +81,7 @@ const ManagementAssessmentGrading = (nav) => {
       dataIndex: "action",
       render: (record) => (
         <div className="flex items-center justify-center w-full gap-2">
-          <Link to={`/admin/management-grading/${slugify(record.description, { lower: true, replacement: '_' })}/student-code/${record.studentCode}/assessment/${record.assessment_id}/rubric/${record.rubric_id}`}>
+          {record.totalScore===0?(<Link to={`/admin/management-grading/${slugify(record.description, { lower: true, replacement: '_' })}/student-code/${record.studentCode}/assessment/${record.assessment_id}/rubric/${record.rubric_id}`}>
             <Tooltip title="Chấm điểm">
               <Button
                 isIconOnly
@@ -87,8 +92,7 @@ const ManagementAssessmentGrading = (nav) => {
                 <i className="fa-solid fa-feather-pointed"></i>
               </Button>
             </Tooltip>
-          </Link>
-          <Link to={`/admin/management-subject/update/${record._id}`}>
+          </Link>):(<Link to={`/admin/management-grading/update/${slugify(record.description, { lower: true, replacement: '_' })}/student-code/${record.studentCode}/assessment/${record.assessment_id}/rubric/${record.rubric_id}`}>
             <Tooltip title="Chỉnh sửa">
               <Button
                 isIconOnly
@@ -99,7 +103,9 @@ const ManagementAssessmentGrading = (nav) => {
                 <i className="fa-solid fa-pen"></i>
               </Button>
             </Tooltip>
-          </Link>
+          </Link>)}
+          
+          
           <Tooltip title="Xoá">
             <Button
               isIconOnly
@@ -130,33 +136,97 @@ const ManagementAssessmentGrading = (nav) => {
     setSelectedRowKeys([]);
     setSelectedRow([]);
   };
+  const getStudentCode = (data, key) => {
+    for (let item of data) {
+      // && item.totalScore === 0
+      if (item.key === key ) {
+        return {
+          Assessment: key,
+          studentCode: item.student.studentCode   
+        }
+      }
+    }
+    return null;
+  };
 
+  const checkstotalscore = (data, key) => {
+    for (let item of data) {
+      if (item.key === key) {
+        return {
+          assessment_id: key,
+          totalScore: item.totalScore,
+          checktotalScore: item.totalScore === 0 ? true : false
+        };
+      }
+    }
+    return null;
+  };
+
+  const navigateGradingGroup = () => {
+    if (selectedRowKeys.length === 0) {
+      message.error('Please select at least one student');
+      return;
+    }
+    if (selectedRowKeys.length > 4) {
+      message.error('Please select no more than 4 students');
+      return;
+    }
+    const checkStotalScore = selectedRowKeys.map((key) => checkstotalscore(assessments, key));
+
+    const hasUncheckedAssessment = checkStotalScore.some((item, index) => {
+      if (item.checktotalScore === false) {
+          message.error(`Sinh viên thứ ${index + 1} đã chấm điểm.`);
+          return true;
+      }
+      return false;
+    });
+    
+    if (hasUncheckedAssessment) {
+        return;
+    }
+
+
+
+
+
+
+    const listStudentCodes = selectedRowKeys.map((key) => getStudentCode(assessments, key));
+    console.log(checkStotalScore);
+
+    const studentCodesString = encodeURIComponent(JSON.stringify(listStudentCodes));
+
+    //navigate(`/admin/management-grading/${slugify(description, { lower: true, replacement: '_' })}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}`);
+  }
   const getAllAssessmentIsDeleteFalse = async () => {
     try {
       const response = await axiosAdmin.get(`/assessments/${description}/teacher/${teacher_id}`);
-      console.log(response.data);
+      console.log(response?.data);
       console.log("description", description);
-      const updatedPoData = response.data.map((subject) => {
+      const updatedPoData = response?.data?.map((subject) => {
         const student = {
-          studentCode: subject.Student.studentCode,
-          name: subject.Student.name
+          studentCode: subject?.Student?.studentCode,
+          name: subject?.Student.name
         }
         const action = {
-          assessment_id: subject.assessment_id,
-          rubric_id: subject.rubric_id,
-          description: subject.description,
-          studentCode: subject.Student.studentCode
+          totalScore: subject?.totalScore,
+          assessment_id: subject?.assessment_id,
+          rubric_id: subject?.rubric_id,
+          description: subject?.description,
+          studentCode: subject?.Student?.studentCode
         }
         return {
-          key: subject.assessment_id,
-          description: subject.description,
-          totalScore: subject.totalScore,
+          key: subject?.assessment_id,
+          description: subject?.description,
+          totalScore: subject?.totalScore,
           student: student,
-          class: subject.Student.class,
+          class: subject?.Student?.class,
           action: action
         };
       });
-      setSubjects(updatedPoData);
+
+      setRubric_id(response?.data[0]?.rubric_id)
+      setCouse_id(response?.data[0]?.course_id)
+      setAssessments(updatedPoData);
       console.log(updatedPoData);
     } catch (error) {
       console.error("Error: " + error.message);
@@ -169,13 +239,13 @@ const ManagementAssessmentGrading = (nav) => {
     };
     console.log(data)
     try {
-      const response = await axiosAdmin.put('/subjects/soft-delete-multiple', { data });
+      const response = await axiosAdmin.put('/assessments/soft-delete-multiple', { data });
       await getAllAssessmentIsDeleteFalse();
       handleUnSelect();
       message.success(response.data.message);
     } catch (error) {
-      console.error("Error soft deleting subjects:", error);
-      message.error('Error soft deleting subjects');
+      console.error("Error soft deleting assessments:", error);
+      message.error('Error soft deleting assessments');
     }
   };
 
@@ -222,8 +292,38 @@ const ManagementAssessmentGrading = (nav) => {
           }
         }}
       />
+      <div className="w-fit flex justify-center items-center gap-2">
+        <div className="flex border justify-start text-base font-bold rounded-lg w-fit px-3">
+          <Link to={`/admin/management-grading/list`}>
+            <Tooltip title="Quay lại" color={'#ff9908'}>
+              <span className="p-1 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-arrow-left text-lg"></i><span className="text-[#475569] text-lg"> Quay lại</span>
+              </span>
+            </Tooltip>
+          </Link>
+        </div>
+        <div>
+          <Tooltip
+            title="Chọn sinh viên chưa chấm."
+            getPopupContainer={() =>
+              document.querySelector(".Quick__Option")
+            }
+          >
+            <Button
+              className="flex justify-center items-center p-4"
+              isIconOnly
+              variant="light"
+              radius="full"
+              onClick={() => {
+                navigateGradingGroup();
+              }}
+            >
+              <span className="text-[#475569] text-lg font-bold">Chấm theo nhóm</span>
+            </Button>
+          </Tooltip>
+        </div>
+      </div>
 
-      <DropdownAndNavGrading />
       <div className="w-full my-5">
         {selectedRowKeys.length !== 0 && (
           <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
@@ -273,7 +373,7 @@ const ManagementAssessmentGrading = (nav) => {
             }}
             pagination={{ pageSize: 30 }}
             columns={columns}
-            dataSource={subjects}
+            dataSource={assessments}
           />
         </div>
       </div>

@@ -7,6 +7,7 @@ import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisc
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
 import Cookies from "js-cookie";
+import CreateRubic from "./CreateRubic";
 
 const ManagementRubric = (nav) => {
     const { setCollapsedNav } = nav;
@@ -17,6 +18,9 @@ const ManagementRubric = (nav) => {
     if (!teacher_id) {
         navigate('/login');
     }
+    const [isOpenModalCreate, setIsOpenModalCreate] = useState(false);
+    const handleOpenModalCreate = () => setIsOpenModalCreate(true);
+    const handleCloseModalCreate = () => setIsOpenModalCreate(false);
 
     const [selectedRow, setSelectedRow] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -126,7 +130,7 @@ const ManagementRubric = (nav) => {
                             <i className="fa-solid fa-trash-can"></i>
                         </Button>
                     </Tooltip>
-                    <Link to={`/admin/management-rubric/update/${_id}`}>
+                    <Link to={`/admin/management-grading/list`}>
                         <Tooltip title="Chấm điểm">
                             <Button
                                 isIconOnly
@@ -226,7 +230,8 @@ const ManagementRubric = (nav) => {
                     }
                 }}
             />
-            <DropdownAndNavRubric />
+            <DropdownAndNavRubric open={handleOpenModalCreate}/>
+            {/* <Button onClick={handleOpenModalCreate}>tạo mới</Button> */}
             <div className="w-full my-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
@@ -235,7 +240,6 @@ const ManagementRubric = (nav) => {
                             Đã chọn {selectedRow.length} rubric
                         </p>
                         <div className="flex items-center gap-2">
-
                             <Tooltip
                                 title={`Xoá ${selectedRowKeys.length} rubric`}
                                 getPopupContainer={() =>
@@ -277,6 +281,8 @@ const ManagementRubric = (nav) => {
                         columns={columns}
                         dataSource={rubicData}
                     />
+                    <CreateRubic loadData={getAllRubricIsDeleteFalse} onOpen={handleOpenModalCreate} isOpen={isOpenModalCreate} onClose={handleCloseModalCreate} />
+
                 </div>
             </div>
         </div>

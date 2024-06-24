@@ -1,4 +1,4 @@
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button} from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from "@nextui-org/react";
 import { convertToHTML, convertFromHTML } from 'draft-convert';
 import { axiosAdmin } from '../../../../../service/AxiosAdmin';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
@@ -13,7 +13,7 @@ import './Rubic.css';
 const CreateRubicItems = (nav) => {
   const { id } = useParams();
   const { Option } = Select;
-  const { loadData, rubricData, isOpen, onClose} = nav;
+  const { loadData, rubricData, isOpen, onClose } = nav;
 
   const navigate = useNavigate();
 
@@ -62,7 +62,6 @@ const CreateRubicItems = (nav) => {
     } catch (error) { }
   }
   useEffect(() => {
-    
     getOneRubricById()
   }, []);
 
@@ -144,14 +143,17 @@ const CreateRubicItems = (nav) => {
     }
   };
 
-  const options = [];
-  for (let i = 0.5; i <= 2; i += 0.5) {
-    options.push(
-      <Option key={i} value={i} textValue={`${i}`}>
-        {`${i}`}
-      </Option>
-    );
-  }
+  const DataScore = [
+    { key: '1', Score: 0.25 },
+    { key: '2', Score: 0.5 },
+    { key: '3', Score: 0.75 },
+    { key: '4', Score: 1 },
+    { key: '4', Score: 1.25 },
+    { key: '4', Score: 1.5 },
+    { key: '4', Score: 1.75 },
+    { key: '4', Score: 2 },
+  ];
+
   const onCloseModal = () => {
     onClose(
       navigate(`/admin/management-rubric/${id}/rubric-items/list`)
@@ -166,24 +168,24 @@ const CreateRubicItems = (nav) => {
         hideCloseButton
         motionProps={{
           variants: {
-              enter: {
-                  y: 0,
-                  opacity: 1,
-                  transition: {
-                      duration: 0.2,
-                      ease: "easeOut",
-                  },
+            enter: {
+              y: 0,
+              opacity: 1,
+              transition: {
+                duration: 0.2,
+                ease: "easeOut",
               },
-              exit: {
-                  y: -20,
-                  opacity: 0,
-                  transition: {
-                      duration: 0.1,
-                      ease: "easeIn",
-                  },
+            },
+            exit: {
+              y: -20,
+              opacity: 0,
+              transition: {
+                duration: 0.1,
+                ease: "easeIn",
               },
+            },
           }
-      }}
+        }}
       >
         <ModalContent>
           {(onClose) => (
@@ -254,6 +256,7 @@ const CreateRubicItems = (nav) => {
                         </Option>
                       ))}
                     </Select>
+
                     <div className='text-left w-full font-bold'>Nhập điểm:</div>
                     <Select
                       defaultValue="Chọn điểm"
@@ -262,7 +265,14 @@ const CreateRubicItems = (nav) => {
                       size="large"
                       className="w-full"
                     >
-                      {options}
+                      {DataScore.map((TypeSubject) => (
+                        <Select.Option
+                          key={TypeSubject.key}
+                          value={TypeSubject.Score}
+                        >
+                          {TypeSubject.Score}
+                        </Select.Option>
+                      ))}
                     </Select>
                   </div>
 

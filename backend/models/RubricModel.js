@@ -2,6 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const SubjectModel = require('./SubjectModel');
 const TeacherModel = require('./TeacherModel');
+const RubricsItemModel = require('./RubricItemModel');
 
 const RubricModel = sequelize.define('Rubric', {
   rubric_id: {
@@ -53,6 +54,8 @@ const RubricModel = sequelize.define('Rubric', {
   updatedAt: 'updatedAt',
   tableName: 'rubrics'
 });
+// RubricModel.hasMany(RubricsItemModel, { foreignKey: 'rubric_id' }); // Define the association
+
 RubricModel.belongsTo(SubjectModel, { foreignKey: 'subject_id' });
 RubricModel.belongsTo(TeacherModel, { foreignKey: 'teacher_id' });
 

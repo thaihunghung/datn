@@ -13,18 +13,18 @@ const MangementRubricItems = (nav) => {
 
     const location = useLocation();
     const isActive = (path) => location.pathname === path;
-    const { setCollapsedNav} = nav;
+    const { setCollapsedNav } = nav;
     // const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
 
+    const [isOpenModalCreate, setIsOpenModalCreate] = useState(false);
+    const handleOpenModalCreate = () => setIsOpenModalCreate(true);
+    const handleCloseModalCreate = () => setIsOpenModalCreate(false);
+
+
+
     const [isOpenModal1, setIsOpenModal1] = useState(false);
-  const [isOpenModal2, setIsOpenModal2] = useState(false);
-
-  const handleOpenModal1 = () => setIsOpenModal1(true);
-  const handleCloseModal1 = () => setIsOpenModal1(false);
-
-  const handleOpenModal2 = () => setIsOpenModal2(true);
-  const handleCloseModal2 = () => setIsOpenModal2(false);
-
+    const handleOpenModal1 = () => setIsOpenModal1(true);
+    const handleCloseModal1 = () => setIsOpenModal1(false);
 
 
     const [selectedRow, setSelectedRow] = useState([]);
@@ -109,9 +109,9 @@ const MangementRubricItems = (nav) => {
                 </div>
             ),
             dataIndex: "action",
-            render: (_id) => (
+            render: (record) => (
                 <div className="flex items-center justify-center w-full gap-2">
-                    <Link to={`/admin/management-rubric/${id}/rubric-items/${_id}`}>
+                    <Link to={`/admin/management-rubric/${id}/rubric-items/${record.id}`}>
                         <Tooltip title="Chỉnh sửa">
                             <Button
                                 isIconOnly
@@ -129,7 +129,7 @@ const MangementRubricItems = (nav) => {
                             variant="light"
                             radius="full"
                             size="sm"
-                            // onClick={() => { onOpen(); setDeleteId(_id); }}
+                        // onClick={() => { onOpen(); setDeleteId(record.id); }}
                         >
                             <i className="fa-solid fa-trash-can"></i>
                         </Button>
@@ -146,14 +146,16 @@ const MangementRubricItems = (nav) => {
         try {
             const response = await axiosAdmin.get(`/rubric/${id}/items/isDelete/false`);
             const rubric = response.data?.rubric || {};
-    
+
             const RubricData = {
                 rubricName: rubric?.rubricName || 'Unknown',
                 subjectName: rubric?.subject?.subjectName || 'Unknown',
             };
-            console.log(RubricData);
-    
+
+
+            let count = 1;
             const updatedRubricData = rubric?.rubricItems?.map((item) => {
+
                 const clo = {
                     cloName: item?.CLO?.cloName || 'Unknown',
                     description: item?.CLO?.description || 'No description',
@@ -166,6 +168,13 @@ const MangementRubricItems = (nav) => {
                     chapterName: item?.Chapter?.chapterName || 'Unknown',
                     description: item?.Chapter?.description || 'No description',
                 };
+
+
+                const action = {
+                    id: item?.rubricsItem_id || 'Unknown',
+                    number: count++
+                }
+
                 return {
                     key: item?.rubricsItem_id || 'Unknown',
                     cloName: clo,
@@ -173,10 +182,10 @@ const MangementRubricItems = (nav) => {
                     chapterName: chapter,
                     description: item?.description || 'Unknown',
                     maxScore: item.maxScore,
-                    action: item?.rubricsItem_id || 'Unknown',
+                    action: action
                 };
             }) || [];
-    
+            console.log(updatedRubricData);
             setRubicItemsData(updatedRubricData);
             setRubicData(RubricData);
         } catch (error) {
@@ -184,7 +193,7 @@ const MangementRubricItems = (nav) => {
             message.error('Error fetching Rubric data');
         }
     };
-    
+
     useEffect(() => {
         GetRubicAndItemsById()
         const handleResize = () => {
@@ -205,15 +214,15 @@ const MangementRubricItems = (nav) => {
         <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7 bg-[#f5f5f5]-500">
             <DropdownAndNavRubricItems />
             <div className="my-5 flex justify-center items-start flex-col sm:flex-col lg:flex-row xl:fex-row">
-                <div className="text-lg leading-8 italic font-bold text-[#FF9908] flex-1 text-justify">Tên học phần:{' '+rubicData.rubricName}</div>
-                <div className="text-lg  leading-8 italic font-bold text-[#FF9908]  flex-1 text-justify">Tên rubric:{' '+rubicData.subjectName}</div>
+                <div className="text-lg leading-8 italic font-bold text-[#FF9908] flex-1 text-justify">Tên học phần:{' ' + rubicData.rubricName}</div>
+                <div className="text-lg  leading-8 italic font-bold text-[#FF9908]  flex-1 text-justify">Tên rubric:{' ' + rubicData.subjectName}</div>
             </div>
             <div className="flex flex-col">
                 <div className="Quick__Option flex justify-between items-center sticky top-2 z-50 w-fit bg-[#fefefe]">
-                        <div className={`w-fit p-2 rounded-lg border-2 bg-[#475569]`}>
-                            <p className={`text-lg text-[#fefefe] text-left`}>Danh sách</p>
-                        </div>
-                    <div onClick={handleOpenModal1} className={`cursor-pointer w-fit p-2 rounded-lg border-2 border-[#FF8077] hover:bg-[#AF84DD]`}>
+                    <div className={`w-fit p-2 rounded-lg border-2 bg-[#475569]`}>
+                        <p className={`text-lg text-[#fefefe] text-left`}>Danh sách</p>
+                    </div>
+                    <div onClick={handleOpenModalCreate} className={`cursor-pointer w-fit p-2 rounded-lg border-2 border-[#FF8077] hover:bg-[#AF84DD]`}>
                         <p className={`text-lg text-[#475569] text-left w-full h-full`}>Tạo mới</p>
                     </div>
                 </div>
@@ -226,15 +235,12 @@ const MangementRubricItems = (nav) => {
                             </p>
                             <div className="flex items-center gap-2">
 
-                                <Tooltip 
+                                <Tooltip
                                     title={`Xoá ${selectedRowKeys.length} rubric`}
                                     getPopupContainer={() =>
                                         document.querySelector(".Quick__Option")
                                     }
                                 >
-                                    {/* <Button isIconOnly variant="light" radius="full" onClick={onOpen}>
-                                        <i className="fa-solid fa-trash-can"></i>
-                                    </Button> */}
                                 </Tooltip>
                                 <Tooltip
                                     title="Bỏ chọn"
@@ -268,9 +274,8 @@ const MangementRubricItems = (nav) => {
                             dataSource={rubicItemsData}
                         />
                     </div>
-                    <CreateRubicItems onOpen={handleOpenModal1} isOpen={isOpenModal1} onClose={handleCloseModal1} />
-                    
-                    {/* <CreateRubicItems onOpen={onOpen} isOpen={isOpen} onClose={onClose} onOpenChange={onOpenChange} loadData={GetRubicAndItemsById}/> */}
+                    <CreateRubicItems onOpen={handleOpenModalCreate} isOpen={isOpenModalCreate} onClose={handleCloseModalCreate} />
+
                 </div>
             </div>
         </div>

@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import DropdownAndNavSubject from "../../Utils/DropdownAndNav/DropdownAndNavSubject";
+import { Select } from 'antd';
 
 const UpdateSubject = (nav) => {
     const { id } = useParams();
@@ -79,6 +80,13 @@ const UpdateSubject = (nav) => {
         };
     }, [id, setCollapsedNav, onOpen]);
     
+    const DataTypeSubject = [
+        { key: '1', TypeSubject: 'Đại cương' },
+        { key: '2', TypeSubject: 'Cơ sở ngành' },
+        { key: '3', TypeSubject: 'Chuyên ngành' },
+        { key: '4', TypeSubject: 'Thực tập đồ án' },
+    ];
+
     useEffect(() => {
         onOpen()
         getSubjectByID()
@@ -112,38 +120,48 @@ const UpdateSubject = (nav) => {
                         <Input
                             value={subjectName}
                             onValueChange={setSubjectName}
-                            className="max-w-xs"
+                            className="w-full"
                         />
                         <span>Mô tả</span>
                         <Input
                             value={description}
                             onValueChange={setDescription}
-                            className="max-w-xs"
+                            className="w-full"
                         />
                         <span>Số tín chỉ</span>
                         <Input
                             value={numberCredit}
                             onValueChange={setNumberCredit}
-                            className="max-w-xs"
+                            className="w-full"
                         />
                         <span>Số tín chỉ lý thuyết</span>
                         <Input
                             value={numberCreditsTheory}
                             onValueChange={setNumberCreditsTheory}
-                            className="max-w-xs"
+                            className="w-full"
                         />
                         <span>Số tín chỉ thực hành</span>
                         <Input
                             value={numberCreditsPractice}
                             onValueChange={setNumberCreditsPractice}
-                            className="max-w-xs"
+                            className="w-full"
                         />
                         <span>Loại môn học</span>
-                        <Input
-                            value={typeSubject}
-                            onValueChange={setTypeSubject}
-                            className="max-w-xs"
-                        />
+                        <Select
+            value={typeSubject}
+            onChange={(value) => setTypeSubject(value)}
+            size="large"
+            className="w-full"
+        >
+            {DataTypeSubject.map((TypeSubject) => (
+                <Select.Option
+                    key={TypeSubject.key}
+                    value={TypeSubject.TypeSubject}
+                >
+                    {TypeSubject.TypeSubject}
+                </Select.Option>
+            ))}
+        </Select>
 
 
                     </ModalBody>

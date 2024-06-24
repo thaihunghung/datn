@@ -142,6 +142,8 @@ router.get('/assessments', assessmentsController.index);
 router.get('/assessments/teacher/:teacher_id', assessmentsController.GetByUser);
 router.get('/assessments/:description/teacher/:teacher_id', assessmentsController.GetByDescriptionByUser);
 
+router.get('/assessments/:assessment_id/items', assessmentsController.GetitemsByID);
+
 router.post('/assessment', assessmentsController.create);
 router.get('/assessment/:assessment_id', assessmentsController.getByID);
 router.put('/assessment/:assessment_id', assessmentsController.update);
