@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Line, Bar, Pie } from 'react-chartjs-2';
-// import 'tailwindcss/tailwind.css';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,6 +13,7 @@ import {
   Legend
 } from 'chart.js';
 import { axiosAdmin } from '../../../../service/AxiosAdmin';
+import { Container, Card, Button, Input, Spacer } from '@nextui-org/react';
 
 // Register the necessary components with Chart.js
 ChartJS.register(
@@ -29,7 +29,7 @@ ChartJS.register(
 );
 
 export default function DashboardPage() {
-  const [user, setUser] = useState([])
+  const [user, setUser] = useState({})
 
   // Sample data for various charts
   const salesStats = [
@@ -170,86 +170,89 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="p-8">
-      <header className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Good afternoon, {user.name }. 👋</h1>
-          <p>Here is what's happening with your projects today:</p>
-        </div>
-        <div className="flex items-center">
-          <input type="date" className="border border-gray-300 p-2 rounded-md mr-4" />
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-md">Add View</button>
-        </div>
-      </header>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        {salesStats.map((stat, index) => (
-          <div key={index} className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">{stat.name}</h2>
-            <p className="text-2xl font-bold text-gray-800 mb-2">${stat.amount.toLocaleString()}</p>
-            <Line data={{
-              labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-              datasets: [{
-                label: 'Sales',
-                data: stat.sales,
-                borderColor: stat.color,
-                backgroundColor: stat.color,
-                fill: false,
-              }],
-            }} />
+    <div>
+      <div className="p-8">
+        <header className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold">Chào bạn {user.name}. 👋</h1>
+            <p>Here is what's happening with your projects today:</p>
           </div>
-        ))}
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Direct vs Indirect Sales</h2>
-          <Bar data={directIndirectSales} />
+          <div className="flex items-center">
+            <Input type="date" />
+            <Spacer x={1} />
+            <Button>Add View</Button>
+          </div>
+        </header>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+          {salesStats.map((stat, index) => (
+            <div key={index} className="bg-white shadow-md rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">{stat.name}</h2>
+              <p className="text-2xl font-bold text-gray-800 mb-2">${stat.amount.toLocaleString()}</p>
+              <Line data={{
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                  label: 'Sales',
+                  data: stat.sales,
+                  borderColor: stat.color,
+                  backgroundColor: stat.color,
+                  fill: false,
+                }],
+              }} />
+            </div>
+          ))}
         </div>
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Real-Time Value</h2>
-          <Line data={realTimeValue} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+          <div className="bg-white shadow-md rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Direct vs Indirect Sales</h2>
+            <Bar data={directIndirectSales} />
+          </div>
+          <div className="bg-white shadow-md rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Real-Time Value</h2>
+            <Line data={realTimeValue} />
+          </div>
+          <div className="bg-white shadow-md rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Top Countries</h2>
+            <Pie data={topCountriesData} />
+          </div>
         </div>
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Top Countries</h2>
-          <Pie data={topCountriesData} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="bg-white shadow-md rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Sales Over Time (all stores)</h2>
+            <Line data={salesOverTimeData} />
+          </div>
+          <div className="bg-white shadow-md rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Sales vs Refunds</h2>
+            <Bar data={salesVsRefundsData} />
+          </div>
         </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Sales Over Time (all stores)</h2>
-          <Line data={salesOverTimeData} />
-        </div>
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Sales vs Refunds</h2>
-          <Bar data={salesVsRefundsData} />
-        </div>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Customers</h2>
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th className="text-left p-2">Name</th>
-                <th className="text-left p-2">Email</th>
-                <th className="text-right p-2">Spent</th>
-                <th className="text-left p-2">Country</th>
-              </tr>
-            </thead>
-            <tbody>
-              {customersData.map((customer, index) => (
-                <tr key={index}>
-                  <td className="p-2">{customer.name}</td>
-                  <td className="p-2">{customer.email}</td>
-                  <td className="p-2 text-right">${customer.spent.toLocaleString()}</td>
-                  <td className="p-2">{customer.country}</td>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="bg-white shadow-md rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Customers</h2>
+            <table className="w-full">
+              <thead>
+                <tr>
+                  <th className="text-left p-2">Name</th>
+                  <th className="text-left p-2">Email</th>
+                  <th className="text-right p-2">Spent</th>
+                  <th className="text-left p-2">Country</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Reasons for Refunds</h2>
-          <Bar data={reasonsForRefundsData} />
+              </thead>
+              <tbody>
+                {customersData.map((customer, index) => (
+                  <tr key={index}>
+                    <td className="p-2">{customer.name}</td>
+                    <td className="p-2">{customer.email}</td>
+                    <td className="p-2 text-right">${customer.spent.toLocaleString()}</td>
+                    <td className="p-2">{customer.country}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="bg-white shadow-md rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Reasons for Refunds</h2>
+            <Bar data={reasonsForRefundsData} />
+          </div>
         </div>
       </div>
     </div>
