@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from "react";
-
 import { Table, Tooltip, Button, message } from 'antd';
 import { Select } from "antd";
-
-
 import { Collapse } from 'antd';
 import { Slider } from "@nextui-org/react";
-
 import "./FormGrading.css"
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -14,35 +10,26 @@ import Cookies from "js-cookie";
 import RubricSlider from "../../Utils/RubricSlider/RubricSlider";
 
 const FormMultipleGrading = (nav) => {
-
   const { setCollapsedNav } = nav;
   const { Option } = Select;
   const [selectedValues1, setSelectedValues1] = useState([]);
   const [selectedValues2, setSelectedValues2] = useState([]);
   const [selectedValues3, setSelectedValues3] = useState([]);
   const [selectedValues4, setSelectedValues4] = useState([]);
-
   const [RubicData, setRubicData] = useState([]);
   const [RubicItemsData, setRubicItemsData] = useState([]);
   const [totalScore1, setTotalScore1] = useState(0);
   const [totalScore2, setTotalScore2] = useState(0);
   const [totalScore3, setTotalScore3] = useState(0);
   const [totalScore4, setTotalScore4] = useState(0);
-
-
   const [Check1, setCheck1] = useState(0);
   const [Check2, setCheck2] = useState(0);
   const [Check3, setCheck3] = useState(0);
   const [Check4, setCheck4] = useState(0);
-
-
   const [defaultValue, setdefaultValue] = useState(0);
-
   const [ListStudentOJ, setListStudentOJ] = useState([]);
   const [Assessment, setAssessment] = useState([]);
-
-
-  const { assessment_id, description, rubric_id, couse_id } = useParams();
+  const { rubric_id } = useParams();
   const navigate = useNavigate();
   const teacher_id = Cookies.get('teacher_id');
 
@@ -50,12 +37,9 @@ const FormMultipleGrading = (nav) => {
     navigate('/login');
   }
   const location = useLocation();
-
-
   const searchParams = new URLSearchParams(location.search);
   const studentCodesString = searchParams.getAll('student-code');
 
-  let studentCodes = [];
   let listStudentCodes = [];
   if (studentCodesString) {
     try {
@@ -66,6 +50,21 @@ const FormMultipleGrading = (nav) => {
       console.error('Error parsing student codes:', error);
     }
   }
+  const descriptionString = searchParams.get('disc');
+  let descriptionURL;
+
+  if (descriptionString) {
+    try {
+      const decodedDescription = decodeURIComponent(descriptionString);
+
+      descriptionURL = decodedDescription;
+
+      console.log(descriptionURL);
+    } catch (error) {
+      console.error('Error processing description:', error);
+    }
+  }
+
   // Assessment: key,
   // studentCode: item.student.studentCode  
   // console.log(studentCodes);
@@ -490,7 +489,7 @@ const FormMultipleGrading = (nav) => {
     //   throw error;
     // }
     try {
-      const response = await axiosAdmin.get(`/assessments/${description}/teacher/${teacher_id}`);
+      const response = await axiosAdmin.get(`/assessments/${descriptionURL}/teacher/${teacher_id}`);
       if (response.data) {
         setAssessment(response?.data);
       }
@@ -529,7 +528,9 @@ const FormMultipleGrading = (nav) => {
     }
   }, [Student, Assessment]);
 
-
+  function replaceUnderscoresWithSpaces(description) {
+    return description.replace(/_/g, " ");
+  }
 
   useEffect(() => {
     if (setCheck1 === 0) {
@@ -694,7 +695,7 @@ const FormMultipleGrading = (nav) => {
 
                 <div className="flex justify-center items-center h-full w-full p-2">
                   <div className="text-center font-bold sm:font-bold lg:font-normal xl:font-normal text-[#008000] sm:text-[#008000] lg:text-black xl:text-black">
-                    <Tooltip content={item.PLO.description}>{item.PLO.ploName}</Tooltip>
+                  <Tooltip content={item.PLO.description}>{replaceUnderscoresWithSpaces(item.PLO.ploName)}</Tooltip>
                   </div>
                 </div>
 
@@ -706,7 +707,7 @@ const FormMultipleGrading = (nav) => {
               ">
                 <div className="hidden sm:block lg:block xl:block flex-1 p-2">
                   <div className="text-center font-bold sm:font-bold lg:font-normal xl:font-normal text-[#008000] sm:text-[#008000] lg:text-black xl:text-black">
-                    <Tooltip content={item.CLO.description}>{item.CLO.cloName}</Tooltip>
+                  <Tooltip content={item.CLO.description}>{replaceUnderscoresWithSpaces(item.CLO.cloName)}</Tooltip>
                   </div>
                 </div>
                 <div className="hidden sm:block lg:hidden xl:hidden flex-1">

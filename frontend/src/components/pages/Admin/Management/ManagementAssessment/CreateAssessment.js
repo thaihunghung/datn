@@ -32,9 +32,15 @@ const CreateAssessment = (nav) => {
     const [place, setPlace] = useState("");
     const [rubric_id, setRubric_id] = useState();
     const [course_id, setCourse_id] = useState();
-    const [subject_id, setSubject_id] = useState();
+    const [courseName, setCourseName] = useState("");
+
 
     const [DataRubric, setDataRubric] = useState([]);
+    const [filterRubicData, setfilterRubicData] = useState([]);
+
+    const [RubicDataCompe, setRubicDataCompe] = useState([]);
+
+    
     const [defaultRubric, setDefaultRubric] = useState("Chọn Rubric");
 
     const [DataCourse, setCourseByTeacher] = useState([]);
@@ -47,26 +53,56 @@ const CreateAssessment = (nav) => {
     const handleCourseChange = (value, option) => {
         const selectedCourse = DataCourse.find(course => course.course_id === value);
         if (selectedCourse) {
-          setCourse_id(selectedCourse.course_id);
-          console.log(selectedCourse.subject_id);
-          getRubricBySubject(selectedCourse.subject_id);
+            setCourse_id(selectedCourse.course_id);
+            setCourseName(selectedCourse.courseCode + "_" + selectedCourse.courseName)
+            getRubricBySubject(selectedCourse.subject_id);
 
-
-          setRubric_id(null);
-          setDefaultRubric('Chọn Rubric');
+            setRubric_id(null);
+            setDefaultRubric('Chọn Rubric');
         }
-      };
-      const getRubricBySubject = async (idSubject) => {
+    };
+
+    const getRubricBySubject = async (idSubject) => {
         try {
             const response = await axiosAdmin.get(`/subject/${idSubject}/rubrics/teacher/${teacher_id}`);
             if (response.data) {
-                console.log(response.data);
+                //console.log(response.data);
                 setDataRubric(response.data);
-            }      
+            }
+            const filteredData = filterRubicData.filter(filterItem =>
+                DataRubric.some(dataItem => dataItem.rubric_id === filterItem.rubric_id)
+            );
+            setRubicDataCompe(filteredData)
+            console.log("Filtered Data:", filteredData);
         } catch (error) {
             console.error("Error fetching Rubric:", error);
         }
     }
+
+    const getAllRubricIsDeleteFalse = async () => {
+        try {
+            const response = await axiosAdmin.get(`/rubrics/teacher/${teacher_id}/checkscore`);
+            const updatedRubricData = response.data.rubric.map((rubric) => {
+                const status = {
+                    status: rubric.RubricItem.length === 0 ? false : true,
+                    _id: rubric.rubric_id
+                };
+                return {
+                    rubric_id: rubric.rubric_id,
+                    rubricName: rubric.rubricName,
+                    status: status,
+                    point: rubric.RubricItem[0]?.total_score ? rubric.RubricItem[0].total_score : 0.0,
+                    action: rubric.rubric_id
+                };
+            });
+            setfilterRubicData(updatedRubricData);
+            console.log(updatedRubricData);
+        } catch (error) {
+            console.error("Error: " + error.message);
+            message.error('Error fetching Rubric data');
+        }
+    };
+
     const handleDownloadStudent = async () => {
         try {
             const data = {
@@ -106,6 +142,7 @@ const CreateAssessment = (nav) => {
     //id_teacher nhận trên cookie id_teacher =2
     useEffect(() => {
         getCourseByTeacher()
+        getAllRubricIsDeleteFalse()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -178,10 +215,11 @@ const CreateAssessment = (nav) => {
                                                 size="large"
                                                 className="w-full"
                                             >
-                                                {DataRubric.map((Rubric) => (
+                                                {RubicDataCompe.map((Rubric) => (
                                                     <Select.Option
                                                         key={Rubric.rubric_id}
                                                         value={Rubric.rubric_id}
+                                                        disabled={Rubric?.status?.status===false}
                                                     >
                                                         {Rubric.rubricName}
                                                     </Select.Option>
@@ -194,7 +232,8 @@ const CreateAssessment = (nav) => {
                                             <div className="w-full flex flex-col sm:flex-col lg:flex-row xl:flex-row justify-center gap-5">
                                             <Input
                                                 label="Description"
-                                                placeholder="Enter your Description"
+                                                placeholder="Báo cáo kết thúc môn lần thứ"
+
                                                 value={description}
                                                 onValueChange={setDescription}
 
@@ -231,6 +270,7 @@ const CreateAssessment = (nav) => {
                                                 course_id: course_id,
                                                 rubric_id: rubric_id,
                                                 description: description,
+                                                courseName: courseName,
                                                 place: place,
                                                 date: selectedDate
                                             }

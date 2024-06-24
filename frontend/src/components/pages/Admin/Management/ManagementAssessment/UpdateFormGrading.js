@@ -15,15 +15,12 @@ const UpdateFormGrading = (nav) => {
   const { setCollapsedNav } = nav;
 
   const [selectedValues, setSelectedValues] = useState([]); // Initialize as array
-
   
   const [RubicData, setRubicData] = useState([]);
   const [RubicItemsData, setRubicItemsData] = useState([]);
   const [totalScore, setTotalScore] = useState(0);
   const [Check, setCheck] = useState(0);
   const [defaultValue, setdefaultValue] = useState(0);
-
-
 
   const { assessment_id, rubric_id } = useParams();
   const navigate = useNavigate();

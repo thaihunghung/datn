@@ -124,7 +124,9 @@ const FormGrading = (nav) => {
     }
   };
 
-
+  function replaceUnderscoresWithSpaces(description) {
+    return description.replace(/_/g, " ");
+  }
 
   useEffect(() => {
     if (setCheck === 0) {
@@ -212,7 +214,7 @@ const FormGrading = (nav) => {
 
                 <div className="flex justify-center items-center h-full w-full p-2">
                   <div className="text-center font-bold sm:font-bold lg:font-normal xl:font-normal text-[#008000] sm:text-[#008000] lg:text-black xl:text-black">
-                    <Tooltip content={item.PLO.description}>{item.PLO.ploName}</Tooltip>
+                    <Tooltip content={item.PLO.description}>{replaceUnderscoresWithSpaces(item.PLO.ploName)}</Tooltip>
                   </div>
                 </div>
 
@@ -226,7 +228,7 @@ const FormGrading = (nav) => {
 
                 <div className="hidden sm:block lg:block xl:block flex-1 p-2">
                   <div className="text-center font-bold sm:font-bold lg:font-normal xl:font-normal text-[#008000] sm:text-[#008000] lg:text-black xl:text-black">
-                    <Tooltip content={item.CLO.description}>{item.CLO.cloName}</Tooltip>
+                    <Tooltip content={item.CLO.description}>{replaceUnderscoresWithSpaces(item.CLO.cloName)}</Tooltip>
                   </div>
                 </div>
                 <div className="hidden sm:block lg:hidden xl:hidden flex-1">
