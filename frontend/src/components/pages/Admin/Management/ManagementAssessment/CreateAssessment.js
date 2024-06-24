@@ -69,15 +69,25 @@ const CreateAssessment = (nav) => {
                 //console.log(response.data);
                 setDataRubric(response.data);
             }
+           
+        } catch (error) {
+            console.error("Error fetching Rubric:", error);
+        }
+    }
+    useEffect(() => {
+
             const filteredData = filterRubicData.filter(filterItem =>
                 DataRubric.some(dataItem => dataItem.rubric_id === filterItem.rubric_id)
             );
             setRubicDataCompe(filteredData)
             console.log("Filtered Data:", filteredData);
-        } catch (error) {
-            console.error("Error fetching Rubric:", error);
-        }
-    }
+        
+    }, [DataRubric]);
+
+
+
+
+
 
     const getAllRubricIsDeleteFalse = async () => {
         try {
