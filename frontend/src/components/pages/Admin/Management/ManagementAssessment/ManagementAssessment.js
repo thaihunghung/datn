@@ -91,38 +91,47 @@ const ManagementAssessment = (nav) => {
         </div>
       ),
       dataIndex: "action",
-      render: (record) => (
-        <div className="flex items-center justify-center w-full gap-2">
-          <Link to={`/admin/management-grading/${slugify(record.description, { lower: true, replacement: '_' })}`}>
-            <Tooltip title="Chấm điểm">
+      render: (record) => {
+        const disc = replaceCharacters(record.description);
+        return (
+          <div className="flex items-center justify-center w-full gap-2">
+            <Link to={`/admin/management-grading/${disc}/?description=${record.description}`}>
+              <Tooltip title="Chấm điểm">
+                <Button
+                  isIconOnly
+                  variant="light"
+                  radius="full"
+                  size="sm"
+                >
+                  <i className="fa-solid fa-feather-pointed"></i>
+                </Button>
+              </Tooltip>
+            </Link>
+            
+            <Tooltip title="In phiếu chấm">
               <Button
                 isIconOnly
                 variant="light"
                 radius="full"
                 size="sm"
               >
-                <i className="fa-solid fa-feather-pointed"></i>
+                <i className="fa-regular fa-file-pdf"></i>
               </Button>
             </Tooltip>
-          </Link>
-       
-          <Tooltip title="In phiếu chấm">
-            
-            <Button
-              isIconOnly
-              variant="light"
-              radius="full"
-              size="sm"
-            >
-<i class="fa-regular fa-file-pdf"></i>            
-</Button>
-          </Tooltip>
-
-        </div>
-      ),
-    },
+          </div>
+        );
+      }
+    }
 
   ];
+
+  function replaceCharacters(description) {
+    // Replace spaces with underscores
+    let result = description.replace(/ /g, "_");
+    // Replace hyphens with underscores
+    result = result.replace(/-/g, "_");
+    return result;
+  }
 
   const rowSelection = {
     selectedRowKeys,
@@ -143,7 +152,7 @@ const ManagementAssessment = (nav) => {
       const updatedPoData = response.data.map((subject) => {
         const action = {
           _id: subject.assessment_id,
-          description: subject.description
+          description: subject?.description
         }
         return {
           key: subject.assessment_id,

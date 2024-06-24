@@ -113,15 +113,15 @@ const AssessmentsController = {
 
       console.log(description);
 
-      const normalizedDescription = description.replace(/_/g, ' ');
-      console.log("description");
+      // const normalizedDescription = description.replace(/_/g, ' ');
+      // console.log("description");
 
-      console.log(normalizedDescription);
+      // console.log(normalizedDescription);
 
       const assessments = await AssessmentModel.findAll({
         where: {
           teacher_id: parseInt(teacher_id),
-          description: normalizedDescription,
+          description: description,
           isDelete: false
         },
         include: [{
@@ -378,7 +378,7 @@ const AssessmentsController = {
           teacher_id: requestData.teacher_id,
           course_id: requestData.course_id,
           rubric_id: requestData.rubric_id,
-          description: `${requestData.description} ${requestData.date}`,
+          description: `${requestData.courseName}_${requestData.description}_${requestData.date}`,
           place: requestData.place,
           date: requestData.date,
           student_id: row.getCell(1).value,

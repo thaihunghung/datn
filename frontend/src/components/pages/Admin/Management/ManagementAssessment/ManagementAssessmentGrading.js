@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Table, Tooltip, Button, message } from 'antd';
 import { Flex, Progress } from 'antd';
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Chip } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavGrading from "../../Utils/DropdownAndNav/DropdownAndNavGrading";
@@ -12,12 +12,28 @@ import slugify from 'slugify';
 const ManagementAssessmentGrading = (nav) => {
   const { setCollapsedNav } = nav;
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const { description } = useParams();
+  // const { description } = useParams();
 
   const navigate = useNavigate();
   const teacher_id = Cookies.get('teacher_id');
   if (!teacher_id) {
     navigate('/login');
+  }
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const descriptionString = searchParams.get('description');
+  let descriptionURL;
+
+  if (descriptionString) {
+    try {
+      const decodedDescription = decodeURIComponent(descriptionString);
+
+      descriptionURL = decodedDescription;
+
+      console.log(descriptionURL); // Logging the result
+    } catch (error) {
+      console.error('Error processing description:', error);
+    }
   }
 
   const [selectedRow, setSelectedRow] = useState([]);
@@ -173,35 +189,42 @@ const ManagementAssessmentGrading = (nav) => {
     }
     const checkStotalScore = selectedRowKeys.map((key) => checkstotalscore(assessments, key));
 
-    const hasUncheckedAssessment = checkStotalScore.some((item, index) => {
-      if (item.checktotalScore === false) {
-          message.error(`Sinh viên thứ ${index + 1} đã chấm điểm.`);
-          return true;
-      }
-      return false;
-    });
+    // const hasUncheckedAssessment = checkStotalScore.some((item, index) => {
+    //   if (item.checktotalScore === false) {
+    //       message.error(`Sinh viên thứ ${index + 1} đã chấm điểm.`);
+    //       return true;
+    //   }
+    //   return false;
+    // });
     
-    if (hasUncheckedAssessment) {
-        return;
-    }
-
-
-
-
-
-
+    // if (hasUncheckedAssessment) {
+    //     return;
+    // }
+    
     const listStudentCodes = selectedRowKeys.map((key) => getStudentCode(assessments, key));
     console.log(checkStotalScore);
 
     const studentCodesString = encodeURIComponent(JSON.stringify(listStudentCodes));
 
-    //navigate(`/admin/management-grading/${slugify(description, { lower: true, replacement: '_' })}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}`);
+    const disc = replaceCharacters(descriptionURL);
+    navigate(`/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}`);
   }
+  
+  function replaceCharacters(description) {
+    // Replace spaces with underscores
+    let result = description.replace(/ /g, "_");
+    // Replace hyphens with underscores
+    result = result.replace(/-/g, "_");
+    return result;
+  }
+
+
+  
   const getAllAssessmentIsDeleteFalse = async () => {
     try {
-      const response = await axiosAdmin.get(`/assessments/${description}/teacher/${teacher_id}`);
+      const response = await axiosAdmin.get(`/assessments/${descriptionURL}/teacher/${teacher_id}`);
       console.log(response?.data);
-      console.log("description", description);
+      // console.log("description", description);
       const updatedPoData = response?.data?.map((subject) => {
         const student = {
           studentCode: subject?.Student?.studentCode,
