@@ -357,6 +357,7 @@ const CourseController = {
                 s.subjectName,
                 clo.clo_id,
                 clo.cloName,
+                clo.description,
                 (SUM(ai.assessmentScore) / SUM(ri.maxScore)) AS percentage_score
             FROM 
                 assessmentItems ai
@@ -377,7 +378,7 @@ const CourseController = {
         }
       );
       const formattedResults = results.reduce((acc, result) => {
-        const { subject_id, subjectName, clo_id, cloName, percentage_score } = result;
+        const { subject_id, subjectName, clo_id, cloName,description, percentage_score } = result;
 
         if (!acc[subject_id]) {
           acc[subject_id] = {
@@ -390,6 +391,7 @@ const CourseController = {
         acc[subject_id].clos.push({
           clo_id,
           cloName,
+          description,
           percentage_score
         });
 

@@ -20,6 +20,7 @@ export default function Dashboard() {
 
   const [originalRadarData, setOriginalRadarData] = useState([]);
   const [allLabels, setAllLabels] = useState([]);
+  const [descriptions, setDescriptions] = useState({});
 
   // Sample data for various charts
   const salesStats = [
@@ -55,10 +56,12 @@ export default function Dashboard() {
 
       const labelsSet = new Set();
       const datasetsMap = {};
+      const descriptionsMap = {};
 
       data.forEach(subject => {
         subject.clos.forEach(clo => {
           labelsSet.add(clo.cloName);
+          descriptionsMap[clo.cloName] = clo.description;
           if (!datasetsMap[subject.subjectName]) {
             datasetsMap[subject.subjectName] = {
               label: subject.subjectName,
@@ -92,6 +95,7 @@ export default function Dashboard() {
 
       setOriginalRadarData(datasets);
       setAllLabels(labelsArray);
+      setDescriptions(descriptionsMap);
 
       setRadarChartData({
         labels: labelsArray,
@@ -193,10 +197,12 @@ export default function Dashboard() {
     plugins: {
       tooltip: {
         callbacks: {
-          label: function(tooltipItem) {
-            const label = tooltipItem.dataset.label || '';
-            const value = tooltipItem.raw;
-            return `${label}: ${value} %`;
+          label: function(context) {
+            // const label = context.dataset.label || '';
+            const value = context.raw;
+            const cloName = context.label;
+            const description = descriptions[cloName] || '';
+            return `Tỉ lệ đạt được là ${value} %\n\n${description}`;
           }
         }
       }
