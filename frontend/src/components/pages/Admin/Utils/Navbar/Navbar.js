@@ -328,7 +328,7 @@ function Nav(props) {
                       <User
                         name={
                           !collapsedNav ? (
-                            <p className="font-semibold">
+                            <p className="text-left font-semibold">
                               {currentUser.name}
                             </p>
                           ) : (
@@ -367,7 +367,7 @@ function Nav(props) {
                           ? "Super Admin"
                           : "Admin"}
                       </p>
-                      <p className="font-bold">{currentUser.name}</p>
+                      <p className="text-left font-bold">{currentUser.name}</p>
                     </DropdownItem>
                     <DropdownSection showDivider>
                       <DropdownItem

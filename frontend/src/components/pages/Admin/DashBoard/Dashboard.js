@@ -1,35 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { Line, Bar, Pie } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend
-} from 'chart.js';
-import { axiosAdmin } from '../../../../service/AxiosAdmin';
+import { Line, Bar, Radar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, RadialLinearScale, PointElement, LineElement, BarElement, RadarController, Title, Tooltip, Legend } from 'chart.js';
 import { Container, Card, Button, Input, Spacer } from '@nextui-org/react';
+import axios from 'axios';
+import { axiosAdmin } from '../../../../service/AxiosAdmin';
 
 // Register the necessary components with Chart.js
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, RadialLinearScale, LinearScale, PointElement, LineElement, BarElement, RadarController, Title, Tooltip, Legend);
 
-export default function DashboardPage() {
-  const [user, setUser] = useState({})
+export default function Dashboard() {
+  const [user, setUser] = useState({});
+  const [selectedLines, setSelectedLines] = useState(['Acme Plus', 'Acme Advanced', 'Acme Professional']);
+  const [selectedBars, setSelectedBars] = useState(['Acme Plus', 'Acme Advanced', 'Acme Professional']);
+  const [selectedRadar, setSelectedRadar] = useState([]);
+  const [radarChartData, setRadarChartData] = useState({
+    labels: [],
+    datasets: []
+  });
+
+  const [originalRadarData, setOriginalRadarData] = useState([]);
+  const [allLabels, setAllLabels] = useState([]);
 
   // Sample data for various charts
   const salesStats = [
@@ -38,122 +28,87 @@ export default function DashboardPage() {
     { name: 'Acme Professional', amount: 9962, color: '#F59E0B', sales: [3, 5, 6, 8, 9, 11] },
   ];
 
-  const directIndirectSales = {
-    labels: ['Dec 30', 'Jan 1', 'Feb 21', 'Mar 12', 'Apr 21', 'May 21'],
-    datasets: [
-      {
-        label: 'Direct',
-        data: [12000, 15000, 18000, 20000, 22000, 25000],
-        backgroundColor: '#4F46E5',
-      },
-      {
-        label: 'Indirect',
-        data: [20000, 23000, 25000, 27000, 30000, 33000],
-        backgroundColor: '#10B981',
-      },
-    ],
-  };
-
-  const realTimeValue = {
-    labels: ['10:00', '10:05', '10:10', '10:15', '10:20', '10:25'],
-    datasets: [
-      {
-        label: 'Value',
-        data: [50, 52, 54, 53, 51, 59],
-        borderColor: '#4F46E5',
-        backgroundColor: '#4F46E5',
-        fill: false,
-      },
-    ],
-  };
-
-  const topCountriesData = {
-    labels: ['United States', 'Italy', 'Other'],
-    datasets: [
-      {
-        data: [60, 25, 15],
-        backgroundColor: ['#4F46E5', '#10B981', '#F59E0B'],
-      },
-    ],
-  };
-
-  const topChannelsData = {
-    labels: ['GitHub.com', 'Twitter', 'Google (organic)', 'Vimeo.com', 'linkedin.com'],
-    datasets: [
-      {
-        label: 'Visitors',
-        data: [2400, 1800, 2000, 1500, 1200],
-        backgroundColor: '#4F46E5',
-      },
-      {
-        label: 'Revenues',
-        data: [3077, 2048, 2444, 1820, 2034],
-        backgroundColor: '#10B981',
-      },
-      {
-        label: 'Sales',
-        data: [267, 249, 224, 204, 194],
-        backgroundColor: '#F59E0B',
-      },
-    ],
-  };
-
-  const salesOverTimeData = {
+  const lineChartData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [
-      {
-        label: 'Current',
-        data: [1500, 2000, 2500, 3000, 3500, 4000],
-        borderColor: '#4F46E5',
-        backgroundColor: '#4F46E5',
-        fill: false,
-      },
-      {
-        label: 'Previous',
-        data: [1200, 1700, 2200, 2700, 3200, 3700],
-        borderColor: '#10B981',
-        backgroundColor: '#10B981',
-        fill: false,
-      },
-    ],
+    datasets: salesStats.filter(stat => selectedLines.includes(stat.name)).map(stat => ({
+      label: stat.name,
+      data: stat.sales,
+      borderColor: stat.color,
+      backgroundColor: stat.color,
+      fill: false,
+    }))
   };
 
-  const salesVsRefundsData = {
-    labels: ['Dec 30', 'Jan 1', 'Feb 21', 'Mar 12', 'Apr 21', 'May 21'],
-    datasets: [
-      {
-        label: 'Sales',
-        data: [1500, 2000, 2500, 3000, 3500, 4000],
-        backgroundColor: '#4F46E5',
-      },
-      {
-        label: 'Refunds',
-        data: [200, 300, 400, 500, 600, 700],
-        backgroundColor: '#F87171',
-      },
-    ],
+  const barChartData = {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    datasets: salesStats.filter(stat => selectedBars.includes(stat.name)).map(stat => ({
+      label: stat.name,
+      data: stat.sales,
+      backgroundColor: stat.color,
+    }))
   };
 
-  const customersData = [
-    { name: 'Alex Shatov', email: 'alexshatov@gmail.com', spent: 3040, country: 'US' },
-    { name: 'Philip Harbach', email: 'philip.h@gmail.com', spent: 2970, country: 'DE' },
-    { name: 'Mirko Fisuk', email: 'mirkofisuk@gmail.com', spent: 2490, country: 'IT' },
-    { name: 'Olga Semklo', email: 'olga.s.design@gmail.com', spent: 1760, country: 'RU' },
-    { name: 'Bartek Long', email: 'long.bart@gmail.com', spent: 1560, country: 'GA' },
-  ];
+  const fetchRadarChartData = async () => {
+    try {
+      const response = await axiosAdmin.get('/courses/assessment-scores');
+      const data = response.data;
 
-  const reasonsForRefundsData = {
-    labels: ['Having difficulties using the product', 'Missing features I need', 'Not satisfied with the quality of the product', 'The product doesn\'t look as advertised', 'Other'],
-    datasets: [
-      {
-        label: 'Reasons for Refunds',
-        data: [29, 23, 19, 15, 14],
-        backgroundColor: ['#4F46E5', '#10B981', '#F59E0B', '#F87171', '#34D399'],
-      },
-    ],
+      const labelsSet = new Set();
+      const datasetsMap = {};
+
+      data.forEach(subject => {
+        subject.clos.forEach(clo => {
+          labelsSet.add(clo.cloName);
+          if (!datasetsMap[subject.subjectName]) {
+            datasetsMap[subject.subjectName] = {
+              label: subject.subjectName,
+              data: {},
+              fill: true,
+              backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.2)`,
+              borderColor: `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`,
+              pointBackgroundColor: '#6FDCE3',
+              pointBorderColor: '#fff',
+              pointHoverBackgroundColor: '#5C2FC2',
+              pointHoverBorderColor: '#fff',
+            };
+          }
+        });
+      });
+
+      const labelsArray = Array.from(labelsSet);
+
+      data.forEach(subject => {
+        subject.clos.forEach(clo => {
+          if (!datasetsMap[subject.subjectName].data[clo.cloName]) {
+            datasetsMap[subject.subjectName].data[clo.cloName] = clo.percentage_score * 100;
+          }
+        });
+      });
+
+      const datasets = Object.values(datasetsMap).map(dataset => ({
+        ...dataset,
+        data: labelsArray.map(label => dataset.data[label] || null)
+      }));
+
+      setOriginalRadarData(datasets);
+      setAllLabels(labelsArray);
+
+      setRadarChartData({
+        labels: labelsArray,
+        datasets
+      });
+
+      // Set default selected radar datasets
+      setSelectedRadar(datasets.map(dataset => dataset.label));
+
+    } catch (error) {
+      console.error('Error fetching radar chart data:', error);
+    }
   };
 
   useEffect(() => {
+    fetchRadarChartData();
+
     const fetchUser = async () => {
       try {
         const response = await axiosAdmin.get(`${process.env.REACT_APP_API_DOMAIN_CLIENT}/user`);
@@ -169,89 +124,173 @@ export default function DashboardPage() {
     fetchUser();
   }, []);
 
+  useEffect(() => {
+    const selectedDatasets = originalRadarData.filter(dataset => selectedRadar.includes(dataset.label));
+    const selectedLabelsSet = new Set();
+
+    selectedDatasets.forEach(dataset => {
+      dataset.data.forEach((score, index) => {
+        if (score > 0) {
+          selectedLabelsSet.add(allLabels[index]);
+        }
+      });
+    });
+
+    const newLabels = Array.from(selectedLabelsSet);
+
+    setRadarChartData({
+      labels: newLabels,
+      datasets: selectedDatasets.map(dataset => ({
+        ...dataset,
+        data: newLabels.map(label => {
+          const index = allLabels.indexOf(label);
+          return dataset.data[index];
+        })
+      }))
+    });
+  }, [selectedRadar]);
+
+  const handleLineSelection = (event) => {
+    const { value, checked } = event.target;
+    setSelectedLines(prev =>
+      checked ? [...prev, value] : prev.filter(line => line !== value)
+    );
+  };
+
+  const handleBarSelection = (event) => {
+    const { value, checked } = event.target;
+    setSelectedBars(prev =>
+      checked ? [...prev, value] : prev.filter(bar => bar !== value)
+    );
+  };
+
+  const handleRadarSelection = (event) => {
+    const { value, checked } = event.target;
+    setSelectedRadar(prev =>
+      checked ? [...prev, value] : prev.filter(radar => radar !== value)
+    );
+  };
+
+  const radarChartFilteredData = {
+    labels: radarChartData.labels,
+    datasets: radarChartData.datasets.filter(dataset => selectedRadar.includes(dataset.label))
+  };
+
+  const radarChartOptions = {
+    scales: {
+      r: {
+        beginAtZero: true,
+        min: 0,
+        max: 100
+      }
+    },
+    elements: {
+      point: {
+        radius: 6, // Increase point size
+        hoverRadius: 8
+      }
+    },
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: function(tooltipItem) {
+            const label = tooltipItem.dataset.label || '';
+            const value = tooltipItem.raw;
+            return `${label}: ${value} %`;
+          }
+        }
+      }
+    }
+  };
+
   return (
-    <div>
-      <div className="p-8">
-        <header className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold">Chào bạn {user.name}. 👋</h1>
-            <p>Here is what's happening with your projects today:</p>
-          </div>
-          <div className="flex items-center">
-            <Input type="date" />
-            <Spacer x={1} />
-            <Button>Add View</Button>
-          </div>
-        </header>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-          {salesStats.map((stat, index) => (
-            <div key={index} className="bg-white shadow-md rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">{stat.name}</h2>
-              <p className="text-2xl font-bold text-gray-800 mb-2">${stat.amount.toLocaleString()}</p>
-              <Line data={{
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [{
-                  label: 'Sales',
-                  data: stat.sales,
-                  borderColor: stat.color,
-                  backgroundColor: stat.color,
-                  fill: false,
-                }],
-              }} />
+    <div className="p-8">
+      <header className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold">Chào bạn {user.name}. 👋</h1>
+          <p className='text-left'>Dưới đây là các biểu đồ</p>
+        </div>
+        <div className="flex items-center">
+          <Input type="date" className="mr-4" />
+          <Button>Add View</Button>
+        </div>
+      </header>
+      <div className='grid grid-cols-2'>
+        <div className='mx-3'>
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-4">Select Lines to Display</h2>
+            <div className='flex gap-3'>
+              {salesStats.map((stat, index) => (
+                <div key={index} className="mb-2">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      value={stat.name}
+                      checked={selectedLines.includes(stat.name)}
+                      onChange={handleLineSelection}
+                      className="mr-2"
+                    />
+                    {stat.name}
+                  </label>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Direct vs Indirect Sales</h2>
-            <Bar data={directIndirectSales} />
           </div>
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Real-Time Value</h2>
-            <Line data={realTimeValue} />
-          </div>
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Top Countries</h2>
-            <Pie data={topCountriesData} />
+          <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Sales Data (Line Chart)</h2>
+            <Line data={lineChartData} />
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Sales Over Time (all stores)</h2>
-            <Line data={salesOverTimeData} />
+
+        <div className='mx-3'>
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-4">Select Bars to Display</h2>
+            <div className='flex gap-3'>
+              {salesStats.map((stat, index) => (
+                <div key={index} className="mb-2">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      value={stat.name}
+                      checked={selectedBars.includes(stat.name)}
+                      onChange={handleBarSelection}
+                      className="mr-2"
+                    />
+                    {stat.name}
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Sales vs Refunds</h2>
-            <Bar data={salesVsRefundsData} />
+          <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Sales Data (Bar Chart)</h2>
+            <Bar data={barChartData} />
           </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Customers</h2>
-            <table className="w-full">
-              <thead>
-                <tr>
-                  <th className="text-left p-2">Name</th>
-                  <th className="text-left p-2">Email</th>
-                  <th className="text-right p-2">Spent</th>
-                  <th className="text-left p-2">Country</th>
-                </tr>
-              </thead>
-              <tbody>
-                {customersData.map((customer, index) => (
-                  <tr key={index}>
-                    <td className="p-2">{customer.name}</td>
-                    <td className="p-2">{customer.email}</td>
-                    <td className="p-2 text-right">${customer.spent.toLocaleString()}</td>
-                    <td className="p-2">{customer.country}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+        <div className='col-span-2 mx-3'>
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-4">Select Radar to Display</h2>
+            <div className='flex'>
+              {originalRadarData.map((dataset, index) => (
+                <div key={index} className="mb-2">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      value={dataset.label}
+                      checked={selectedRadar.includes(dataset.label)}
+                      onChange={handleRadarSelection}
+                      className="mr-2"
+                    />
+                    {dataset.label}
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Reasons for Refunds</h2>
-            <Bar data={reasonsForRefundsData} />
+          <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Sales Data (Radar Chart)</h2>
+            <Radar data={radarChartFilteredData} options={radarChartOptions} />
           </div>
         </div>
       </div>

@@ -55,7 +55,7 @@ import FormGrading from '../components/pages/Admin/Management/ManagementAssessme
 import Teacher from '../components/pages/Admin/Management/ManagementTeacher/Teacher';
 import StoreTeacher from '../components/pages/Admin/Management/ManagementTeacher/StoreTeacher/StoreTeacher';
 import TeacherProfile from '../components/pages/Admin/Management/ManagementTeacher/DetailTeacher/TeacherProfile';
-import DashboardPage from '../components/pages/Admin/DashBoard/Dashboard';
+import Dashboard from '../components/pages/Admin/DashBoard/Dashboard';
 import UpdateFormGrading from '../components/pages/Admin/Management/ManagementAssessment/UpdateFormGrading';
 import FormMultipleGrading from '../components/pages/Admin/Management/ManagementAssessment/FormMultipleGrading';
 import StoreClass from '../components/pages/Admin/Management/ManagementClass/StoreClass/StoreClass';
@@ -88,7 +88,7 @@ function Admin(props) {
       <Nav collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} setSpinning={setSpinning} user={user} />
       <div className='Admin-Content bg-[#FEFEFE] flex-1 h-full overflow-auto p-2 sm:p-5 sm:px-7 lg:p-5 lg:px-2 xl:p-5 xl:px-2'>
         <Routes>
-          <Route path="/" element={<DashboardPage collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
+          <Route path="/" element={<Dashboard collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
           
           <Route path="/management-program/description" element={<ManageProgram collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
           <Route path="/management-program/create" element={<CreateProgram collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
