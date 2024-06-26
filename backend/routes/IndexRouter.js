@@ -23,6 +23,7 @@ const rubricItemRoutes = require('./RubricItemRouter');
 const cloChapterRoutes = require('./Clo_ChapterRouter');
 const assessmentsRoutes = require('./AssessmentsRoutes');
 const assessmentsItemsRoutes = require('./AssessmentsItemsRoutes');
+const ChartRoute = require('./ChartRoute');
 
 const CourseEnrollmentRoutes = require('./CourseEnrollmentRouter')
 const AuthRoutes = require('./AuthRoutes')
@@ -54,6 +55,7 @@ router.use('/api/admin', rubricRoutes);
 router.use('/api/admin', rubricItemRoutes);
 router.use('/api/admin', assessmentsRoutes);
 router.use('/api/admin', assessmentsItemsRoutes);
+router.use('/api/admin', ChartRoute);
 
 
 

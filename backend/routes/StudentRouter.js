@@ -212,7 +212,6 @@ router.post('/student/templates/update', StudentController.getFormStudentWithDat
 
 router.get('/student/course/:id', StudentController.getFormStudentByClass);
 
-router.get('/students/performance/:student_id', StudentController.getStudentPerformanceByCourse);
 
 
 module.exports = router;

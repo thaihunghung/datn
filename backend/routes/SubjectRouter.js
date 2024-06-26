@@ -34,8 +34,5 @@ router.put('/subject/:subject_id/soft-delete', SubjectController.toggleSoftDelet
 router.get('/subject/templates/post', SubjectController.getFormPost);
 router.post('/subject/templates/update', SubjectController.getFormUpdate);
 
-//chart
-router.get('/subject/average/subject', SubjectController.averageScoresPerSubject);
-
 
 module.exports = router;

@@ -145,14 +145,6 @@ const CourseEnrollmentController = {
           attributes: ['student_id', 'class_id', 'studentCode', 'email', 'name', 'isDelete'],
           where: {
             isDelete: false,
-          }
-        },
-        {
-          model: CourseModel,
-          attributes: ['courseName'],
-          where: {
-            course_id: id,
-            isDelete: false,
           },
           include: [
             {
@@ -163,6 +155,15 @@ const CourseEnrollmentController = {
               }
             }
           ]
+        },
+        {
+          model: CourseModel,
+          attributes: ['courseName'],
+          where: {
+            course_id: id,
+            isDelete: false,
+          },
+          
         },],
         attributes: [],
         where: {
@@ -179,7 +180,7 @@ const CourseEnrollmentController = {
       const index = 0;
       students.forEach(student => {
         worksheet.addRow({
-          classCode: student.course.class.classNameShort,
+          classCode: student.Student.class.classNameShort,
           name: student.Student.name,
           studentCode: student.Student.studentCode,
           email: student.Student.email
@@ -222,8 +223,8 @@ const CourseEnrollmentController = {
 
       const processRow = async (row, rowNumber) => {
         if (rowNumber !== 1) { // Skip the header row
-          let email = row.getCell(4).value;
-          let studentCode = row.getCell(3).value;
+          let email = row.getCell(5).value;
+          let studentCode = row.getCell(4).value;
 
           if (email && typeof email === 'object' && email.hasOwnProperty('text')) {
             email = email.text;

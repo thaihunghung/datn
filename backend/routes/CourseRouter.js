@@ -154,5 +154,4 @@ router.get('/course/isDelete/true', CourseController.isDeleteTotrue);
 router.get('/course/isDelete/false', CourseController.isDeleteTofalse);
 router.put('/course/isDelete/:id', CourseController.isdelete);
 
-router.get('/courses/assessment-scores', CourseController.getCourseAssessmentScores);
 module.exports = router;
