@@ -68,7 +68,7 @@ const ChartController = {
       res.status(500).json({ message: 'Internal Server Error' });
     }
   },
-  // phần trăm clo theo suject
+  // diểm trung bình của subject
   averageScoresPerSubject: async (req, res) => {
     try {
       const results = await sequelize.query(
@@ -156,8 +156,7 @@ const ChartController = {
       res.status(500).json({ message: 'Internal Server Error' });
     }
   },
-   // average scores by course with optional course_id_list filter
-   
+  
   // average scores by course with optional course_id_list filter
   getAverageCourseScores: async (req, res) => {
     try {

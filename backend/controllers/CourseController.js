@@ -25,7 +25,8 @@ const CourseController = {
         },
         {
           model: TeacherModel,
-          where: { isDelete: false }
+          where: { isDelete: false },
+          attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher', 'imgURL'],
         },
         {
           model: SubjectModel,
@@ -37,6 +38,17 @@ const CourseController = {
         }],
         where: { isDelete: false }
 
+      });
+      res.json(courses);
+    } catch (error) {
+      console.error('Lỗi khi lấy tất cả các khóa học:', error);
+      res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
+    }
+  },
+  getAll: async (req, res) => {
+    try {
+      const courses = await CourseModel.findAll({
+        where: { isDelete: false }
       });
       res.json(courses);
     } catch (error) {
@@ -115,7 +127,7 @@ const CourseController = {
           },
           {
             model: TeacherModel,
-            attributes:['teacher_id', 'name', 'email', 'typeTeacher', 'teacherCode', 'permission','imgURL'],
+            attributes: ['teacher_id', 'name', 'email', 'typeTeacher', 'teacherCode', 'permission', 'imgURL'],
             where: { isDelete: false },
           },
           {
@@ -386,6 +398,6 @@ const CourseController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
-  };
+};
 
 module.exports = CourseController;

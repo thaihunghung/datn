@@ -223,8 +223,8 @@ const CourseEnrollmentController = {
 
       const processRow = async (row, rowNumber) => {
         if (rowNumber !== 1) { // Skip the header row
-          let email = row.getCell(5).value;
-          let studentCode = row.getCell(4).value;
+          let email = row.getCell(4).value;
+          let studentCode = row.getCell(3).value;
 
           if (email && typeof email === 'object' && email.hasOwnProperty('text')) {
             email = email.text;
