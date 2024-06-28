@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Radar, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, RadialLinearScale, PointElement, LineElement, BarElement, RadarController, BarController, Title, Tooltip, Legend } from 'chart.js';
-import { Container, Card, Button, Input, Spacer } from '@nextui-org/react';
+import { Container, Card, Button, Input, Spacer, Autocomplete, AutocompleteItem } from '@nextui-org/react';
 import axios from 'axios';
 import { axiosAdmin } from '../../../../service/AxiosAdmin';
+import { DownOutlined } from '@ant-design/icons';
+import { Select } from 'antd';
 
 // Register the necessary components with Chart.js
 ChartJS.register(
@@ -33,11 +35,11 @@ export default function Dashboard() {
   const [descriptions, setDescriptions] = useState({});
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
-    year: '',
-    semester: '',
-    class: '',
-    subject: '',
-    course: ''
+    year: [],
+    semester: [],
+    class: [],
+    subject: [],
+    course: []
   });
 
   const [semesters, setSemesters] = useState([]);
@@ -51,10 +53,18 @@ export default function Dashboard() {
     datasets: []
   });
   const [barChartInfo, setBarChartInfo] = useState([]);
+  const [ploRadarChartData, setPloRadarChartData] = useState({
+    labels: [],
+    datasets: []
+  });
+  const [originalPloRadarData, setOriginalPloRadarData] = useState([]);
+  const [selectedPloRadar, setSelectedPloRadar] = useState([]);
+
+  const MAX_COUNT = 3;
 
   const fetchRadarChartData = async () => {
     try {
-      const response = await axiosAdmin.get('/courses/assessment-scores');
+      const response = await axiosAdmin.get('/achieved-rate/clo/percentage');
       const data = response.data;
 
       const labelsSet = new Set();
@@ -86,7 +96,7 @@ export default function Dashboard() {
       data.forEach(subject => {
         subject.clos.forEach(clo => {
           if (!datasetsMap[subject.subjectName].data[clo.cloName]) {
-            datasetsMap[subject.subjectName].data[clo.cloName] = clo.percentage_score * 100;
+            datasetsMap[subject.subjectName].data[clo.cloName] = (clo.percentage_score * 100).toFixed(2);
           }
         });
       });
@@ -113,6 +123,64 @@ export default function Dashboard() {
     }
   };
 
+  const fetchPloRadarChartData = async () => {
+    try {
+      const response = await axiosAdmin.get('/achieved-rate/plo/percentage');
+      const data = response.data;
+
+      console.log("data plo", data)
+      const labelsSet = new Set();
+      const datasetsMap = {};
+
+      data.forEach(subject => {
+        subject.plos.forEach(plo => {
+          labelsSet.add(plo.ploName);
+          if (!datasetsMap[subject.subjectName]) {
+            datasetsMap[subject.subjectName] = {
+              label: subject.subjectName,
+              data: {},
+              fill: true,
+              backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.2)`,
+              borderColor: `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`,
+              pointBackgroundColor: '#6FDCE3',
+              pointBorderColor: '#fff',
+              pointHoverBackgroundColor: '#5C2FC2',
+              pointHoverBorderColor: '#fff',
+            };
+          }
+        });
+      });
+
+      const labelsArray = Array.from(labelsSet);
+
+      data.forEach(subject => {
+        subject.plos.forEach(plo => {
+          if (!datasetsMap[subject.subjectName].data[plo.ploName]) {
+            datasetsMap[subject.subjectName].data[plo.ploName] = (plo.percentage_score * 100).toFixed(2);
+          }
+        });
+      });
+
+      const datasets = Object.values(datasetsMap).map(dataset => ({
+        ...dataset,
+        data: labelsArray.map(label => dataset.data[label] || null)
+      }));
+
+      setOriginalPloRadarData(datasets);
+
+      setPloRadarChartData({
+        labels: labelsArray,
+        datasets
+      });
+
+      // Set default selected PLO radar datasets
+      setSelectedPloRadar(datasets.map(dataset => dataset.label));
+
+    } catch (error) {
+      console.error('Error fetching PLO radar chart data:', error);
+    }
+  };
+
   const fetchFiltersData = async () => {
     try {
       const [semestersRes, academicYearsRes, classesRes, subjectsRes, coursesRes] = await Promise.all([
@@ -135,12 +203,17 @@ export default function Dashboard() {
 
   const fetchBarChartData = async () => {
     try {
+      const processedFilters = {
+        academic_year_id_list: filters.year.map(value => parseInt(value.split(' ')[0])),
+        semester_id_list: filters.semester.map(value => parseInt(value.split(' ')[0])),
+        class_id_list: filters.class.map(value => parseInt(value.split(' ')[0])),
+        subject_id_list: filters.subject.map(value => parseInt(value.split(' ')[0])),
+        course_id_list: filters.course.map(value => parseInt(value.split(' ')[0])),
+      };
+      console.log("filter", filters)
+      console.log("data", processedFilters)
       const response = await axiosAdmin.post('/course/arg-score', {
-        year: filters.year,
-        semester: filters.semester,
-        class: filters.class,
-        subject: filters.subject,
-        course: filters.course
+        processedFilters
       });
       const data = response.data;
 
@@ -167,6 +240,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchRadarChartData();
+    fetchPloRadarChartData();
     fetchFiltersData();
 
     const fetchUser = async () => {
@@ -213,6 +287,32 @@ export default function Dashboard() {
     });
   }, [selectedRadar]);
 
+  useEffect(() => {
+    const selectedDatasets = originalPloRadarData.filter(dataset => selectedPloRadar.includes(dataset.label));
+    const selectedLabelsSet = new Set();
+
+    selectedDatasets.forEach(dataset => {
+      dataset.data.forEach((score, index) => {
+        if (score > 0) {
+          selectedLabelsSet.add(ploRadarChartData.labels[index]);
+        }
+      });
+    });
+
+    const newLabels = Array.from(selectedLabelsSet);
+
+    setPloRadarChartData({
+      labels: newLabels,
+      datasets: selectedDatasets.map(dataset => ({
+        ...dataset,
+        data: newLabels.map(label => {
+          const index = ploRadarChartData.labels.indexOf(label);
+          return dataset.data[index];
+        })
+      }))
+    });
+  }, [selectedPloRadar]);
+
   const handleRadarSelection = (event) => {
     const { value, checked } = event.target;
     setSelectedRadar(prev =>
@@ -220,17 +320,28 @@ export default function Dashboard() {
     );
   };
 
-  const handleFilterChange = (event) => {
-    const { name, value } = event.target;
+  const handlePloRadarSelection = (event) => {
+    const { value, checked } = event.target;
+    setSelectedPloRadar(prev =>
+      checked ? [...prev, value] : prev.filter(radar => radar !== value)
+    );
+  };
+
+  const handleFilterChange = (name, values) => {
     setFilters(prev => ({
       ...prev,
-      [name]: value
+      [name]: values
     }));
   };
 
   const radarChartFilteredData = {
     labels: radarChartData.labels,
     datasets: radarChartData.datasets.filter(dataset => selectedRadar.includes(dataset.label))
+  };
+
+  const ploRadarChartFilteredData = {
+    labels: ploRadarChartData.labels,
+    datasets: ploRadarChartData.datasets.filter(dataset => selectedPloRadar.includes(dataset.label))
   };
 
   const radarChartOptions = {
@@ -291,6 +402,31 @@ export default function Dashboard() {
     }
   };
 
+  const optionsAcademicYear = academicYears.map((item) => ({
+    value: `${item.academic_year_id} - ${item.startDate}`,
+    label: item.description,
+  }));
+
+  const optionsSemester = semesters.map((item) => ({
+    value: `${item.semester_id} - ${item.descriptionLong} - ${item.descriptionShort}`,
+    label: item.descriptionLong,
+  }));
+
+  const optionsClass = classes.map((item) => ({
+    value: `${item.class_id} - ${item.classNameShort} - ${item.classCode} - ${item.className}`,
+    label: item.className,
+  }));
+
+  const optionsCourse = courses.map((item) => ({
+    value: `${item.course_id} - ${item.courseCode} - ${item.courseName}`,
+    label: item.courseName,
+  }));
+
+  const optionsSubject = subjects.map((item) => ({
+    value: `${item.subject_id} - ${item.subjectCode} - ${item.subjectName}`,
+    label: item.subjectName,
+  }));
+
   return (
     <div className="p-8">
       <header className="flex justify-between items-center mb-6">
@@ -298,63 +434,8 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold">Chào bạn {user.name}. 👋</h1>
           <p className='text-left'>Dưới đây là các biểu đồ</p>
         </div>
-        <div className="flex items-center">
-          <Input type="date" className="mr-4" />
-          <Button onClick={() => setShowFilters(!showFilters)}>Filter</Button>
-        </div>
       </header>
-      {showFilters && (
-        <div className="mb-6 p-6 bg-white shadow-md rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">Filters</h2>
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block mb-2">Năm học</label>
-              <select name="year" value={filters.year} onChange={handleFilterChange} className="w-full p-2 border rounded">
-                <option value="">Chọn năm học</option>
-                {academicYears.map(year => (
-                  <option key={year.academic_year_id} value={year.academic_year_id}>{year.description}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block mb-2">Học kì</label>
-              <select name="semester" value={filters.semester} onChange={handleFilterChange} className="w-full p-2 border rounded">
-                <option value="">Chọn học kì</option>
-                {semesters.map(semester => (
-                  <option key={semester.semester_id} value={semester.semester_id}>{semester.descriptionLong}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block mb-2">Lớp học</label>
-              <select name="class" value={filters.class} onChange={handleFilterChange} className="w-full p-2 border rounded">
-                <option value="">Chọn lớp học</option>
-                {classes.map(cls => (
-                  <option key={cls.class_id} value={cls.class_id}>{cls.className}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block mb-2">Subject</label>
-              <select name="subject" value={filters.subject} onChange={handleFilterChange} className="w-full p-2 border rounded">
-                <option value="">Chọn subject</option>
-                {subjects.map(subject => (
-                  <option key={subject.subject_id} value={subject.subject_id}>{subject.subjectName}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block mb-2">Course</label>
-              <select name="course" value={filters.course} onChange={handleFilterChange} className="w-full p-2 border rounded">
-                <option value="">Chọn course</option>
-                {courses.map(course => (
-                  <option key={course.course_id} value={course.course_id}>{course.courseName}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      )}
+
       <div className='mx-3'>
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-4">Select Radar to Display</h2>
@@ -379,8 +460,106 @@ export default function Dashboard() {
           <h2 className="text-xl font-semibold mb-4">Sales Data (Radar Chart)</h2>
           <Radar data={radarChartFilteredData} options={radarChartOptions} />
         </div>
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-4">Select PLO Radar to Display</h2>
+          <div className='flex'>
+            {originalPloRadarData.map((dataset, index) => (
+              <div key={index} className="mb-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    value={dataset.label}
+                    checked={selectedPloRadar.includes(dataset.label)}
+                    onChange={handlePloRadarSelection}
+                    className="mr-2"
+                  />
+                  {dataset.label}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
         <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Average Scores (Bar Chart)</h2>
+          <h2 className="text-xl font-semibold mb-4">PLO Data (Radar Chart)</h2>
+          <Radar data={ploRadarChartFilteredData} options={radarChartOptions} />
+        </div>
+        <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+          <div className="flex items-center">
+            <Button onClick={() => setShowFilters(!showFilters)}>Filter</Button>
+          </div>
+          {showFilters && (
+            <div className="mb-6 p-6 bg-white shadow-md rounded-lg">
+              <h2 className="text-xl font-semibold mb-4">Filters</h2>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block mb-2">Năm học</label>
+                  <Select
+                    mode="multiple"
+                    value={filters.year}
+                    style={{
+                      width: '100%',
+                    }}
+                    onChange={(value) => handleFilterChange('year', value)}
+                    placeholder="Chọn năm học"
+                    options={optionsAcademicYear}
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2">Học kì</label>
+                  <Select
+                    mode="multiple"
+                    value={filters.semester}
+                    style={{
+                      width: '100%',
+                    }}
+                    onChange={(value) => handleFilterChange('semester', value)}
+                    placeholder="Chọn học kì"
+                    options={optionsSemester}
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2">Lớp học</label>
+                  <Select
+                    mode="multiple"
+                    value={filters.class}
+                    style={{
+                      width: '100%',
+                    }}
+                    onChange={(value) => handleFilterChange('class', value)}
+                    placeholder="Chọn lớp"
+                    options={optionsClass}
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2">Subject</label>
+                  <Select
+                    mode="multiple"
+                    value={filters.subject}
+                    style={{
+                      width: '100%',
+                    }}
+                    onChange={(value) => handleFilterChange('subject', value)}
+                    placeholder="Chọn môn học"
+                    options={optionsSubject}
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2">Course</label>
+                  <Select
+                    mode="multiple"
+                    value={filters.course}
+                    style={{
+                      width: '100%',
+                    }}
+                    onChange={(value) => handleFilterChange('course', value)}
+                    placeholder="Chọn học phần"
+                    options={optionsCourse}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          <h2 className="text-xl font-semibold mb-4">Điểm trung bình của khóa học</h2>
           <Bar data={barChartData} options={barChartOptions} />
         </div>
       </div>

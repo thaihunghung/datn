@@ -4,7 +4,7 @@ const sequelize = require("../config/database");
 
 const ChartController = {
   // tỉ lệ đạt được clo trên subject
-  getCourseAssessmentScores: async (req, res) => {
+  getCloPercentage: async (req, res) => {
     console.log("okok");
     try {
       const results = await sequelize.query(
@@ -15,7 +15,7 @@ const ChartController = {
               c.cloName,
               SUM(ai.assessmentScore) AS totalScoreAchieved,
               SUM(ri.maxScore) AS totalMaxScore,
-              (SUM(ai.assessmentScore) / SUM(ri.maxScore)) AS percentage_score
+              ROUND((SUM(ai.assessmentScore) / SUM(ri.maxScore)),4) AS percentage_score
           FROM
               assessmentItems ai
           JOIN
@@ -56,6 +56,64 @@ const ChartController = {
           clo_id,
           cloName,
           description,
+          percentage_score
+        });
+
+        return acc;
+      }, {});
+
+      res.json(Object.values(formattedResults));
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  },
+  getPloPercentage: async (req, res) => {
+    try {
+      const results = await sequelize.query(
+        `SELECT
+              s.subject_id,
+              s.subjectName,
+              plo.plo_id,
+              plo.ploName,
+              SUM(ai.assessmentScore) AS totalScoreAchieved,
+              SUM(ri.maxScore) AS totalMaxScore,
+              ROUND((SUM(ai.assessmentScore) / SUM(ri.maxScore)), 4) AS percentage_score
+          FROM
+              assessmentItems ai
+          JOIN rubricsItems ri ON ai.rubricsItem_id = ri.rubricsItem_id
+          JOIN rubrics r ON ri.rubric_id = r.rubric_id
+          JOIN subjects s ON r.subject_id = s.subject_id
+          JOIN plos plo ON ri.plo_id = plo.plo_id
+          WHERE
+              ai.isDelete = 0 AND ri.isDelete = 0 AND r.isDelete = 0 AND s.isDelete = 0 AND plo.isDelete = 0
+          GROUP BY
+              s.subject_id,
+              s.subjectName,
+              plo.plo_id,
+              plo.ploName
+          ORDER BY
+              s.subject_id,
+              plo.plo_id;`,
+        {
+          type: Sequelize.QueryTypes.SELECT,
+        }
+      );
+
+      const formattedResults = results.reduce((acc, result) => {
+        const { subject_id, subjectName, plo_id, ploName, percentage_score } = result;
+
+        if (!acc[subject_id]) {
+          acc[subject_id] = {
+            subject_id,
+            subjectName,
+            plos: []
+          };
+        }
+
+        acc[subject_id].plos.push({
+          plo_id,
+          ploName,
           percentage_score
         });
 
@@ -156,15 +214,27 @@ const ChartController = {
       res.status(500).json({ message: 'Internal Server Error' });
     }
   },
-  
+
   // average scores by course with optional course_id_list filter
   getAverageCourseScores: async (req, res) => {
     try {
-      const { data: course_id_list } = req.body;
-      const courseIdFilter = course_id_list && course_id_list.length > 0 ? 'AND c.course_id IN (:course_id_list)' : '';
+      const {
+        course_id_list,
+        subject_id_list,
+        academic_year_id_list,
+        semester_id_list,
+        class_id_list
+      } = req.body.processedFilters;
 
-      const results = await sequelize.query(
-        `SELECT
+      // Construct dynamic query filters
+      const courseIdFilter = course_id_list && course_id_list.length > 0 ? 'AND c.course_id IN (:course_id_list)' : '';
+      const subjectIdFilter = subject_id_list && subject_id_list.length > 0 ? 'AND sub.subject_id IN (:subject_id_list)' : '';
+      const academicYearIdFilter = academic_year_id_list && academic_year_id_list.length > 0 ? 'AND ay.academic_year_id IN (:academic_year_id_list)' : '';
+      const semesterIdFilter = semester_id_list && semester_id_list.length > 0 ? 'AND s.semester_id IN (:semester_id_list)' : '';
+      const classIdFilter = class_id_list && class_id_list.length > 0 ? 'AND cl.class_id IN (:class_id_list)' : '';
+
+      const query = `
+        SELECT
             c.course_id,
             c.courseName,
             ay.academic_year_id,
@@ -190,21 +260,36 @@ const ChartController = {
             teachers t ON c.teacher_id = t.teacher_id
         JOIN
             classes cl ON c.class_id = cl.class_id
+        JOIN
+            subjects sub ON c.subject_id = sub.subject_id
         WHERE
             c.isDelete = 0
             AND ay.isDelete = 0
             AND s.isDelete = 0
             AND a.isDelete = 0
             ${courseIdFilter}
+            ${subjectIdFilter}
+            ${academicYearIdFilter}
+            ${semesterIdFilter}
+            ${classIdFilter}
         GROUP BY
             c.course_id, c.courseName, ay.academic_year_id, ay.description, s.semester_id, s.descriptionShort, t.teacher_id, t.name, cl.class_id, cl.className
         ORDER BY
-            ay.academic_year_id, s.semester_id, c.course_id;`,
-        {
-          type: Sequelize.QueryTypes.SELECT,
-          replacements: course_id_list && course_id_list.length > 0 ? { course_id_list } : {},
-        }
-      );
+            ay.academic_year_id, s.semester_id, c.course_id;
+      `;
+
+      const replacements = {
+        ...(course_id_list && course_id_list.length > 0 && { course_id_list }),
+        ...(subject_id_list && subject_id_list.length > 0 && { subject_id_list }),
+        ...(academic_year_id_list && academic_year_id_list.length > 0 && { academic_year_id_list }),
+        ...(semester_id_list && semester_id_list.length > 0 && { semester_id_list }),
+        ...(class_id_list && class_id_list.length > 0 && { class_id_list })
+      };
+
+      const results = await sequelize.query(query, {
+        type: Sequelize.QueryTypes.SELECT,
+        replacements,
+      });
 
       res.json(results);
     } catch (error) {
