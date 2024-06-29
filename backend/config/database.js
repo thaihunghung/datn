@@ -1,16 +1,19 @@
 const { Sequelize } = require('sequelize');
+const dotenv = require('dotenv');
 
+// Load environment variables from .env file
+dotenv.config();
 
-// kết nối docker
-// const sequelize = new Sequelize(process.env.DATABASE_URL, {
-//   dialect: 'mysql'
-// });
-
-// kết nối localhost
-const sequelize = new Sequelize('TVU', 'AdminTVU', 'CongNgheThongTin-DA20TTB', {
-  host: '103.200.20.110',
-  dialect: 'mysql',
-});
+// Create a new Sequelize instance using the environment variables
+const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    dialect: process.env.DB_DIALECT,
+  }
+);
 
 // Hàm kiểm tra kết nối
 async function testConnection() {
@@ -26,4 +29,3 @@ async function testConnection() {
 testConnection();
 
 module.exports = sequelize;
-
