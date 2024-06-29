@@ -15,12 +15,9 @@ import {
   Chip,
   User,
   Pagination,
-  Select,
-  SelectItem,
   Divider,
   Tooltip,
 } from "@nextui-org/react";
-import axios from "axios";
 import { columns, fetchTeachersData, permissions } from "./Data";
 import { capitalize } from "../../Utils/capitalize";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";

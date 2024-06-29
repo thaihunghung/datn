@@ -72,8 +72,7 @@ const ChartController = {
     try {
       const results = await sequelize.query(
         `SELECT
-              s.subject_id,
-              s.subjectName,
+             
               plo.plo_id,
               plo.ploName,
               SUM(ai.assessmentScore) AS totalScoreAchieved,
@@ -88,13 +87,10 @@ const ChartController = {
           WHERE
               ai.isDelete = 0 AND ri.isDelete = 0 AND r.isDelete = 0 AND s.isDelete = 0 AND plo.isDelete = 0
           GROUP BY
-              s.subject_id,
-              s.subjectName,
               plo.plo_id,
               plo.ploName
           ORDER BY
-              s.subject_id,
-              plo.plo_id;`,
+              plo.plo_id,plo.ploName;`,
         {
           type: Sequelize.QueryTypes.SELECT,
         }

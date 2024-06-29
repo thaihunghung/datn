@@ -195,6 +195,7 @@ const router = express.Router();
  */
 
 router.get('/students', StudentController.index);
+router.get('/students/:id/learning-outcome', StudentController.learningOutcomes);
 router.post('/student', StudentController.create);
 router.get('/student/:id', StudentController.getByID);
 router.get('/student/class/:id', StudentController.getAllByClassId);

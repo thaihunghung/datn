@@ -59,6 +59,7 @@ import Dashboard from '../components/pages/Admin/DashBoard/Dashboard';
 import UpdateFormGrading from '../components/pages/Admin/Management/ManagementAssessment/UpdateFormGrading';
 import FormMultipleGrading from '../components/pages/Admin/Management/ManagementAssessment/FormMultipleGrading';
 import StoreClass from '../components/pages/Admin/Management/ManagementClass/StoreClass/StoreClass';
+import ProfileStudent from '../components/pages/Admin/Management/ManagementStudent/Profile/ProfileStudent';
 
 
 function Admin(props) {
@@ -153,6 +154,7 @@ function Admin(props) {
           <Route path="/management-rubric/:id/rubric-items/template" element={<View collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
 
           <Route path="/student" element={<Student collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
+          <Route path="/student/:id/profile" element={<ProfileStudent collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
           <Route path="/student/store" element={<StoreStudent collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
 
           <Route path="/class" element={<Class collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />

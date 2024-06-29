@@ -17,7 +17,7 @@ import {
 } from "@nextui-org/react";
 import { Link, useNavigate } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import { SearchOutlined, DeleteFilled, EditFilled } from '@ant-design/icons';
+import { SearchOutlined, DeleteFilled, EditFilled, EyeOutlined } from '@ant-design/icons';
 import { fetchStudentsData, studentColumns } from "./StudentData";
 import ConfirmAction from "./ConfirmAction";
 import AddStudentModal from "./AddStudentModal";
@@ -136,6 +136,11 @@ const Student = (props) => {
       case "actions":
         return (
           <div className="flex justify-center items-center gap-2">
+            <Tooltip content="Xem thông tin sinh viên">
+              <Button color="secondary" isIconOnly auto onClick={() => navigate(`${item.student_id}/profile`)}>
+                <EyeOutlined />
+              </Button>
+            </Tooltip>
             <Tooltip content="Cập nhật thông tin sinh viên">
               <Button isIconOnly auto onClick={() => handleEditStudent(item)}>
                 <EditFilled />
@@ -287,7 +292,7 @@ const Student = (props) => {
 
   const bottomContent = useMemo(() => {
     return (
-      <div className="py-2 px-2 flex justify-between items-center">
+      <div className="py-2 px-2 flex justify-between items-center mt-5">
         <span className="w-[30%] text-small text-default-400">
           {selectedKeys === "all"
             ? "All items selected"

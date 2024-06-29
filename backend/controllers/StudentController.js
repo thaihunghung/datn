@@ -11,26 +11,27 @@ const SemesterAcademicYearModel = require("../models/SemesterAcademicYearModel")
 const SubjectModel = require("../models/SubjectModel");
 const CourseModel = require("../models/CourseModel");
 const AssessmentModel = require("../models/AssessmentModel");
+const TeacherModel = require("../models/TeacherModel");
 
 const StudentController = {
   // Lấy tất cả sinh viên
   index: async (req, res) => {
     try {
       const { page, size } = req.query;
-  
+
       const attributes = ['student_id', 'class_id', 'studentCode', 'email', 'name', 'createdAt', 'updatedAt', 'isDelete'];
       const whereClause = { isDelete: false };
-  
+
       if (page && size) {
         const offset = (page - 1) * size;
         const limit = parseInt(size, 10);
-  
+
         const { count, rows: students } = await StudentModel.findAndCountAll({
           include: [{
             model: ClassModel,
             attributes: ['classCode', 'classNameShort', 'className'],
             where: {
-              isDelete:false
+              isDelete: false
             }
           }],
           attributes: attributes,
@@ -38,7 +39,7 @@ const StudentController = {
           offset: offset,
           limit: limit
         });
-  
+
         return res.json({
           total: count,
           students: students
@@ -52,7 +53,7 @@ const StudentController = {
           attributes: attributes,
           where: whereClause
         });
-  
+
         return res.json(students);
       }
     } catch (error) {
@@ -71,6 +72,75 @@ const StudentController = {
     } catch (error) {
       console.error('Lỗi tìm kiếm students:', error);
       res.status(500).json({ message: 'Lỗi server' });
+    }
+  },
+  // Kết quả học tập
+  learningOutcomes: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const results = await sequelize.query(
+        `SELECT
+              s.student_id,
+              s.name AS studentName,
+              sub.subject_id,
+              sub.subjectName,
+              c.course_id,
+              c.courseName,
+              a.totalScore AS score,
+              ay.academic_year_id,
+              ay.description AS academic_year,
+              sem.semester_id,
+              sem.descriptionShort AS semester,
+              t.teacher_id,
+              t.name AS teacherName,
+              cl.class_id,
+              cl.className,
+              cl.classNameShort
+          FROM
+              students s
+          JOIN
+              course_enrollments ce ON s.student_id = ce.student_id
+          JOIN
+              courses c ON ce.course_id = c.course_id
+          JOIN
+              subjects sub ON c.subject_id = sub.subject_id
+          JOIN
+              semester_academic_years say ON c.id_semester_academic_year = say.id_semester_academic_year
+          JOIN
+              academic_years ay ON say.academic_year_id = ay.academic_year_id
+          JOIN
+              semesters sem ON say.semester_id = sem.semester_id
+          JOIN
+              assessments a ON c.course_id = a.course_id AND a.student_id = s.student_id
+          JOIN
+              teachers t ON c.teacher_id = t.teacher_id
+          JOIN
+              classes cl ON c.class_id = cl.class_id
+          WHERE
+              s.student_id = ${id}
+              AND s.isDelete = 0
+              AND c.isDelete = 0
+              AND sub.isDelete = 0
+              AND ce.isDelete = 0
+              AND a.isDelete = 0
+              AND ay.isDelete = 0
+              AND sem.isDelete = 0
+              AND t.isDelete = 0
+              AND cl.isDelete = 0
+          ORDER BY
+              ay.academic_year_id, sem.semester_id, c.course_id;
+          ;
+        `,
+        {
+          type: Sequelize.QueryTypes.SELECT,
+
+        }
+      );
+
+      res.json(results);
+    } catch (error) {
+      console.error('Error fetching average scores per subject:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
     }
   },
 
@@ -110,7 +180,11 @@ const StudentController = {
       const students = await StudentModel.findAll({
         include: [{
           model: ClassModel,
-          attributes: ['classCode']
+          attributes: ['classCode', 'classNameShort', 'className'],
+          include: [{
+            model: TeacherModel,
+            attributes: ['name', 'teacherCode', 'email']
+          }]
         }],
         attributes: ['student_id', 'class_id', 'studentCode', 'date_of_birth', 'email', 'name', 'isDelete'],
         where:
