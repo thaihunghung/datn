@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Radar } from 'react-chartjs-2';
-import { Chart as ChartJS, RadialLinearScale,LinearScale,CategoryScale,BarElement,  PointElement, LineElement, RadarController, Title, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, RadialLinearScale, LinearScale, CategoryScale, BarElement, PointElement, LineElement, RadarController, Title, Tooltip, Legend } from 'chart.js';
 import { axiosAdmin } from '../../../../service/AxiosAdmin';
+import { Button, Select } from 'antd';
 
-ChartJS.register(RadialLinearScale,LinearScale, CategoryScale,BarElement, PointElement, LineElement, RadarController, Title, Tooltip, Legend);
+ChartJS.register(RadialLinearScale, LinearScale, CategoryScale, BarElement, PointElement, LineElement, RadarController, Title, Tooltip, Legend);
+
+const { Option } = Select;
 
 export default function CLOChartComponent({ descriptions, setDescriptions }) {
   const [selectedRadar, setSelectedRadar] = useState([]);
   const [radarChartData, setRadarChartData] = useState({ labels: [], datasets: [] });
   const [originalRadarData, setOriginalRadarData] = useState([]);
   const [allLabels, setAllLabels] = useState([]);
+  const [showFilter, setShowFilter] = useState(false);
 
   const fetchRadarChartData = async () => {
     try {
@@ -29,7 +33,7 @@ export default function CLOChartComponent({ descriptions, setDescriptions }) {
               label: subject.subjectName,
               data: {},
               fill: true,
-              backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.2)`,
+              // backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.2)`,
               borderColor: `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`,
               pointBackgroundColor: '#6FDCE3',
               pointBorderColor: '#fff',
@@ -98,11 +102,8 @@ export default function CLOChartComponent({ descriptions, setDescriptions }) {
     });
   }, [selectedRadar]);
 
-  const handleRadarSelection = (event) => {
-    const { value, checked } = event.target;
-    setSelectedRadar(prev =>
-      checked ? [...prev, value] : prev.filter(radar => radar !== value)
-    );
+  const handleRadarSelection = (value) => {
+    setSelectedRadar(value);
   };
 
   const radarChartOptions = {
@@ -135,27 +136,35 @@ export default function CLOChartComponent({ descriptions, setDescriptions }) {
 
   return (
     <div className='mx-2'>
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Select Radar to Display</h2>
-        <div className='flex'>
-          {originalRadarData.map((dataset, index) => (
-            <div key={index} className="mb-2">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  value={dataset.label}
-                  checked={selectedRadar.includes(dataset.label)}
-                  onChange={handleRadarSelection}
-                  className="mr-2"
-                />
-                {dataset.label}
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
       <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">CLO Data (Radar Chart)</h2>
+        <div className="mb-6">
+          <Button
+            onClick={() => setShowFilter(!showFilter)}
+            className="flex justify-start rounded">
+            {showFilter ? 'Hide Filter' : 'Show Filter'}
+          </Button>
+          {showFilter && (
+            <div className='flex flex-wrap mt-4'>
+              <div>
+                <p>Chọn môn học</p>
+              </div>
+              <Select
+                mode="multiple"
+                placeholder="Chọn năm học"
+                value={selectedRadar}
+                onChange={handleRadarSelection}
+                className="w-full"
+              >
+                {originalRadarData.map((dataset, index) => (
+                  <Option key={index} value={dataset.label}>
+                    {dataset.label}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+          )}
+        </div>
+        <h2 className="text-xl font-semibold mb-4">Tỉ lệ đạt của chuẩn đầu ra của môn học</h2>
         <Radar data={radarChartData} options={radarChartOptions} />
       </div>
     </div>

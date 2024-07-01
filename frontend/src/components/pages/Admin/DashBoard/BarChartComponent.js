@@ -142,9 +142,11 @@ const BarChartComponent = ({ filters, setFilters, showFilters, setShowFilters })
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+    <div className="col-span-2 bg-white shadow-md rounded-lg p-6 mb-6">
       <div className="flex items-center">
-        <Button onClick={() => setShowFilters(!showFilters)}>Filter</Button>
+        <Button onClick={() => setShowFilters(!showFilters)}>
+          {showFilters ? 'Hide Filter' : 'Show Filter'}
+        </Button>
       </div>
       {showFilters && (
         <div className="mb-6 p-6 bg-white shadow-md rounded-lg">

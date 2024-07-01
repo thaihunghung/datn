@@ -383,16 +383,14 @@ const Course = (props) => {
 
   return (
     <>
-      <nav className="text-lg mb-4 text-left">
-        <Link to="/admin" className="text-blue-500 hover:underline">Home</Link>
-        <span> / Course</span>
-      </nav>
-      <h2>Course List</h2>
+      <div>
+        <h1 className="text-3xl font-bold text-[#6366F1]">Danh sách khóa học</h1>
+      </div>
 
-      <div className="flex justify-between">
+      <div className="flex justify-between mt-7">
 
         <Button
-          className="mx-7"
+          className="mx-7 bg-[#6366F1] text-[#f0f0f0]"
           onClick={handleOpenAddModal}>
           <p>Tạo mới <PlusOutlined /></p>
         </Button>
@@ -434,14 +432,20 @@ const Course = (props) => {
                 <p>{`Số học sinh: ${course.enrollmentCount}`}</p>
               </CardBody>
               <CardFooter className="flex gap-5">
-                {/* <Tooltip>
-                  <Button onClick={() => handleOpenSettingsModal(course)}>Ẩn</Button>
-                </Tooltip> */}
                 <Tooltip content="Các thao tác với sinh viên">
-                  <Button onClick={() => handleOpenMoreModal(course)}>Student</Button>
+                  <Button
+                    className="bg-[#6366F1] text-[#f0f0f0]"
+                    onClick={() => handleOpenMoreModal(course)}>Sinh viên</Button>
                 </Tooltip>
                 <Tooltip content="Chỉnh sửa môn học">
-                  <Button onClick={() => handleOpenEditModal(course)}>Edit</Button>
+                  <Button
+                    className="bg-[#6366F1] text-[#f0f0f0]"
+                    onClick={() => handleOpenEditModal(course)}>Chỉnh sửa</Button>
+                </Tooltip>
+                <Tooltip>
+                  <Button
+                    className="bg-red-400 text-[#f0f0f0]"
+                    onClick={() => handleOpenSettingsModal(course)}>Ẩn môn học</Button>
                 </Tooltip>
               </CardFooter>
             </Card>

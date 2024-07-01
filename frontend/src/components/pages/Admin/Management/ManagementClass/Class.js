@@ -290,6 +290,9 @@ const Class = (props) => {
             </Button>
           </div>
         </div>
+        <div>
+          <h1 className="text-xl font-bold text-[#6366F1]">Danh sách các lớp</h1>
+        </div>
         <div className="flex justify-between items-center">
           <span className="text-default-400 text-small">Total {totalClasses} classes</span>
           <label className="flex items-center text-default-400 text-small">

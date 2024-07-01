@@ -146,7 +146,7 @@ export default function App(props) {
         );
       case "actions":
         return (
-          <div className="relative flex justify-end items-center gap-2">
+          <div className="relative flex justify-center items-center gap-2">
             <Dropdown>
               <DropdownTrigger>
                 <Button isIconOnly size="sm" variant="light">
@@ -388,6 +388,9 @@ export default function App(props) {
             </Button>
           </div>
         </div>
+        <div>
+          <h1 className="text-xl font-bold text-[#6366F1]">Danh sách giáo viên</h1>
+        </div>
         <div className="flex justify-between items-center">
           <span className="text-default-400 text-small">Total {totalTeachers} teachers</span>
           <label className="flex items-center text-default-400 text-small">
@@ -446,7 +449,7 @@ export default function App(props) {
   const selectedItemsBar = useMemo(() => {
     return (
       selectedKeys.size > 0 && (
-        <div className="flex justify-between items-center text-[#FEFEFE] bg-[#FF8077] py-2 px-4 rounded-lg mb-4">
+        <div className="flex justify-between items-center text-[#FEFEFE] bg-[#6366F1]/75 py-2 px-4 rounded-lg mb-4">
           <div>{selectedKeys.size} selected</div>
           <div className="flex gap-3 ">
             <Tooltip showArrow={true} content={`Tải file excel ${selectedKeys.size} giáo viên`}>
@@ -459,13 +462,13 @@ export default function App(props) {
                 Block
               </Button>
             </Tooltip>
-            <Tooltip showArrow={true} content={`Chuyển ${selectedKeys.size} vào thùng rác`}>
+            {/* <Tooltip showArrow={true} content={`Chuyển ${selectedKeys.size} vào thùng rác`}>
               <Button className="text-[#FEFEFE]" variant="light" color="danger" onClick={() => handleDeleteClick()}>
                 Delete
               </Button>
-            </Tooltip>
+            </Tooltip> */}
             <Tooltip showArrow={true} content="Bỏ chọn">
-              <Button className="text-[#FEFEFE]" variant="light" onClick={handleClearSelection}>
+              <Button className="text-[#FEFEFE] text-2xl" variant="light" onClick={handleClearSelection}>
                 X
               </Button>
             </Tooltip>

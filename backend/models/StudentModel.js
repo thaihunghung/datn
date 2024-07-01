@@ -55,7 +55,7 @@ const StudentModel = sequelize.define('Student', {
 });
 
 StudentModel.belongsTo(ClassModel, {
-  foreignKey: 'class_id' // Định nghĩa khóa ngoại
+  foreignKey: 'class_id'
 });
 
 module.exports = StudentModel;

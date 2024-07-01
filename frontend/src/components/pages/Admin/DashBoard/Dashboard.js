@@ -33,9 +33,12 @@ export default function Dashboard() {
 
   return (
     <div className="p-8">
-      <header className="flex justify-between items-center mb-6">
+      <header className="flex flex-col mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Chào bạn {user.name}. 👋</h1>
+          <h1 className="text-3xl font-bold text-[#6366F1]">Trang chủ</h1>
+        </div>
+        <div>
+          <h2 className="flex justify-start text-xl font-bold ">Chào bạn {user.name}. 👋</h2>
           <p className='text-left'>Dưới đây là các biểu đồ</p>
         </div>
       </header>

@@ -1,12 +1,11 @@
 const express = require('express');
 const SubjectController = require('../controllers/SubjectController');
+const { ensureAuthenticated } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
-// Định nghĩa các route cho chương trình
-
-router.get('/subjects', SubjectController.index);
-router.post('/subject', SubjectController.create);
-router.get('/subject/:subject_id', SubjectController.getByID);
+router.get('/subjects', ensureAuthenticated, SubjectController.index);
+router.post('/subject', ensureAuthenticated, SubjectController.create);
+router.get('/subject/:subject_id', ensureAuthenticated, SubjectController.getByID);
 
 router.get('/subject/getSubjectIdByCourseId/:course_id', SubjectController.getByCourseId);
 

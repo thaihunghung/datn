@@ -15,7 +15,6 @@ const sequelize = new Sequelize(
   }
 );
 
-// Hàm kiểm tra kết nối
 async function testConnection() {
   try {
     await sequelize.authenticate();
@@ -25,7 +24,6 @@ async function testConnection() {
   }
 }
 
-// Gọi hàm kiểm tra kết nối
 testConnection();
 
 module.exports = sequelize;

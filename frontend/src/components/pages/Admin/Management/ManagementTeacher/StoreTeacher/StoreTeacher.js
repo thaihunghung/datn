@@ -245,7 +245,13 @@ export default function BlockedTeachersPage(props) {
                 ))}
               </DropdownMenu>
             </Dropdown>
+            <Button color="secondary" onClick={() => navigate('/admin/teacher')}>
+              Manage Teacher
+            </Button>
           </div>
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-[#6366F1]">Danh sách giáo viên bị chặn</h1>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-default-400 text-small">Total {totalBlockedTeachers} blocked teachers</span>
@@ -304,7 +310,7 @@ export default function BlockedTeachersPage(props) {
   const selectedItemsBar = useMemo(() => {
     return (
       selectedKeys.size > 0 && (
-        <div className="flex justify-between items-center text-[#FEFEFE] bg-[#FF8077] py-2 px-4 rounded-lg mb-4">
+        <div className="flex justify-between items-center text-[#FEFEFE]  bg-[#6366F1]/75 py-2 px-4 rounded-lg mb-4">
           <div>{selectedKeys.size} selected</div>
           <div className="flex gap-3 ">
             <Tooltip showArrow={true} content={`Unblock ${selectedKeys.size} teachers`}>
@@ -312,13 +318,13 @@ export default function BlockedTeachersPage(props) {
                 Unblock
               </Button>
             </Tooltip>
-            <Tooltip showArrow={true} content={`Chuyển ${selectedKeys.size} vào thùng rác`}>
+            {/* <Tooltip showArrow={true} content={`Chuyển ${selectedKeys.size} vào thùng rác`}>
               <Button className="text-[#FEFEFE]" variant="light" color="danger" onClick={() => handleDeleteClick()}>
                 Delete
               </Button>
-            </Tooltip>
+            </Tooltip> */}
             <Tooltip showArrow={true} content="Clear selection">
-              <Button className="text-[#FEFEFE]" variant="light" onClick={() => setSelectedKeys(new Set([]))}>
+              <Button className="text-[#FEFEFE] text-2xl" variant="light" onClick={() => setSelectedKeys(new Set([]))}>
                 X
               </Button>
             </Tooltip>

@@ -98,10 +98,10 @@ function Nav(props) {
       link: "/admin/management-subject/list"
     },
     { text: "Rubric", link: "/admin/management-rubric/list", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
-    { text: "Giáo viên", link: "/admin/teacher", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
-    { text: "Sinh viên", link: "/admin/student", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
-    { text: "Lớp", link: "/admin/class", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
-    { text: "Lớp môn học", link: "/admin/course", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
+    { text: "Giáo viên", link: "/admin/teacher", icon: <i className={`fa-solid fa-chalkboard-user mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
+    { text: "Sinh viên", link: "/admin/student", icon: <i className={`fa-solid fa-school mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
+    { text: "Lớp", link: "/admin/class", icon: <i className={`fa-solid fa-landmark mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
+    { text: "Lớp môn học", link: "/admin/course", icon: <i className={`fa-brands fa-odnoklassniki mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
   ];
 
   useEffect(() => {
@@ -163,7 +163,7 @@ function Nav(props) {
           </div>
         </div>
         <Drawer
-          title={<span className="text-[#FF8077] text-base font-bold">Menu</span>}
+          title={<span className="text-[#6366F1] text-base font-bold">Menu</span>}
           placement="left"
           onClose={onClose}
           open={openMobileMenu}
@@ -228,7 +228,7 @@ function Nav(props) {
                 {!collapsedNav && (
                   <>
                     <img width={20} alt="" />
-                    <span className="font-bold text-xl mt-[1px]">SET</span>
+                    <span className="font-bold text-xl mt-[1px] text-[#6366F1]">SET</span>
                   </>
                 )}
               </motion.div>
@@ -375,8 +375,9 @@ function Nav(props) {
                         startContent={
                           <i className="fa-solid fa-gear"></i>
                         }
+                        onClick={()=>navigate(`teacher/${currentUser.teacher_id}/profile`)}
                       >
-                        Cài đặt
+                          Cài đặt
                       </DropdownItem>
                     </DropdownSection>
                     <DropdownItem

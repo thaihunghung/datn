@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Modal,
   ModalContent,
@@ -13,10 +13,16 @@ import {
 } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
-import { permissions } from './Data';
-import { capitalize } from '../../Utils/capitalize';
+import { permissions } from "./Data";
+import { capitalize } from "../../Utils/capitalize";
 
-function AddTeacherModal({ isOpen, onOpenChange, onSubmit, newTeacher, setNewTeacher }) {
+function AddTeacherModal({
+  isOpen,
+  onOpenChange,
+  onSubmit,
+  newTeacher,
+  setNewTeacher,
+}) {
   const [fileList, setFileList] = useState([]);
   const [current, setCurrent] = useState(0);
 
@@ -37,21 +43,23 @@ function AddTeacherModal({ isOpen, onOpenChange, onSubmit, newTeacher, setNewTea
 
   const handleDownloadTemplateExcel = async () => {
     try {
-      const response = await axiosAdmin.get('/teacher/template/excel', {
-        responseType: 'blob'
+      const response = await axiosAdmin.get("/teacher/template/excel", {
+        responseType: "blob",
       });
 
       if (response && response.data) {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const a = document.createElement('a');
+        const url = window.URL.createObjectURL(
+          new Blob([response.data])
+        );
+        const a = document.createElement("a");
         a.href = url;
-        a.download = 'Teacher.xlsx';
+        a.download = "Teacher.xlsx";
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('Error downloading file:', error);
+      console.error("Error downloading file:", error);
     }
   };
 
@@ -60,57 +68,96 @@ function AddTeacherModal({ isOpen, onOpenChange, onSubmit, newTeacher, setNewTea
   };
 
   const handleRemoveFile = (indexToRemove) => {
-    setFileList(currentFiles => currentFiles.filter((_, index) => index !== indexToRemove));
+    setFileList((currentFiles) =>
+      currentFiles.filter((_, index) => index !== indexToRemove)
+    );
   };
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Modal
+      className="max-w-lg "
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+    >
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader>Add New Teacher</ModalHeader>
+            <ModalHeader>Tạo giáo viên mới</ModalHeader>
             <ModalBody>
-              <div>Thêm giáo viên bằng file excel</div>
-              <div className="flex justify-between m-1">
-                <div className="card p-3">
+              <div className="text-xl font-bold text-[#6366F1]">
+                Thêm giáo viên bằng file excel
+              </div>
+              <div className="flex justify-between m-1 w-full ">
+                <div className=" flex flex-col card p-3 justify-center items-center">
                   <h3>Tải Mẫu CSV</h3>
-                  <Button onClick={handleDownloadTemplateExcel}> Tải xuống mẫu </Button>
+                  <Button
+                    className="bg-sky-500/75 text-white"
+                    onClick={handleDownloadTemplateExcel}
+                  >
+                    Tải xuống mẫu
+                  </Button>
                 </div>
-                <div className="card p-3">
-                  <div>
+                <div>
+                  <div className="flex flex-col card p-3 justify-center items-center">
                     <h3>Upload File</h3>
-                    <label htmlFor="file-upload" className="cursor-pointer">
-                      <Button auto flat as="span" color="primary">
-                        Select File
+                    <label
+                      htmlFor="file-upload"
+                      className="cursor-pointer"
+                    >
+                      <Button
+                        className="w-[125px]"
+                        auto
+                        flat
+                        as="span"
+                        color="primary"
+                      >
+                        Chọn file
                       </Button>
                     </label>
                     <input
                       id="file-upload"
                       type="file"
-                      style={{ display: 'none' }}
+                      style={{ display: "none" }}
                       onChange={handleFileChange}
                       multiple
                     />
                     {fileList.length > 0 && (
                       <div className="mt-2">
                         <ul>
-                          {fileList.map((file, index) => (
-                            <li key={index} className="flex justify-between items-center">
-                              <p>{file.name}</p>
-                              <Button auto flat color="error" size="xs" onClick={() => handleRemoveFile(index)}>
-                                X
-                              </Button>
-                            </li>
-                          ))}
+                          {fileList.map(
+                            (file, index) => (
+                              <li
+                                key={index}
+                                className="flex justify-between items-center"
+                              >
+                                <p>
+                                  {file.name}
+                                </p>
+                                <Button
+                                  auto
+                                  flat
+                                  color="error"
+                                  size="xs"
+                                  onClick={() =>
+                                    handleRemoveFile(
+                                      index
+                                    )
+                                  }
+                                >
+                                  X
+                                </Button>
+                              </li>
+                            )
+                          )}
                         </ul>
                       </div>
                     )}
                   </div>
                 </div>
-                <div className="card p-3">
-                  <h3>Upload Data</h3>
+                <div className="flex flex-col card p-3 justify-center items-center  ">
+                  <h3>Lưu file</h3>
                   <CustomUpload
-                    endpoint='teacher'
+                    endpoint="teacher"
                     method="POST"
                     setCurrent={setCurrent}
                     fileList={fileList}
@@ -121,28 +168,76 @@ function AddTeacherModal({ isOpen, onOpenChange, onSubmit, newTeacher, setNewTea
 
               <Divider className="my-4" />
 
-              <div>Nhập thông tin</div>
-              <form className="flex flex-col gap-3" onSubmit={(e) => {
-                e.preventDefault();
-                onSubmit(newTeacher);
-                onClose();
-              }}>
-                <Input fullWidth label="Name" name="name" value={newTeacher.name} onChange={handleChange} required />
-                <Input fullWidth label="Email" name="email" type="email" value={newTeacher.email} onChange={handleChange} required />
-                <Select label="Permission" name="permission" value={newTeacher.permission} onChange={handleSelectChange} fullWidth required>
+              <div className="text-xl font-bold text-[#6366F1]">
+                Nhập thông tin
+              </div>
+              <form
+                className="flex flex-col gap-3"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  onSubmit(newTeacher);
+                  onClose();
+                }}
+              >
+                <Input
+                  fullWidth
+                  label="Tên giáo viên"
+                  name="name"
+                  value={newTeacher.name}
+                  onChange={handleChange}
+                  required
+                />
+                <Input
+                  fullWidth
+                  label="Mã giáo viên"
+                  name="teacherName"
+                  value={newTeacher.teacherCode}
+                  onChange={handleChange}
+                  required
+                />
+                <Input
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={newTeacher.email}
+                  onChange={handleChange}
+                  required
+                />
+                <Select
+                  label="Quyền truy cập"
+                  name="permission"
+                  value={newTeacher.permission}
+                  onChange={handleSelectChange}
+                  fullWidth
+                  required
+                >
                   {permissions.map((status) => (
-                    <SelectItem key={status.id} value={status.id}>{capitalize(status.name)}</SelectItem>
+                    <SelectItem
+                      key={status.id}
+                      value={status.id}
+                    >
+                      {capitalize(status.name)}
+                    </SelectItem>
                   ))}
                 </Select>
               </form>
             </ModalBody>
             <ModalFooter>
-              <Button variant="light" onClick={onClose}>Cancel</Button>
-              <Button type="submit" color="primary" onClick={(e) => {
-                e.preventDefault();
-                onSubmit(newTeacher);
-                onClose();
-              }}>Add</Button>
+              <Button variant="light" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                color="primary"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onSubmit(newTeacher);
+                  onClose();
+                }}
+              >
+                Add
+              </Button>
             </ModalFooter>
           </>
         )}
