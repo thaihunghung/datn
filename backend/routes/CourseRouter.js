@@ -151,8 +151,8 @@ router.post('/course', CourseController.create);
 router.put('/course/:id', CourseController.update);
 router.delete('/course/:id', CourseController.delete);
 
-router.get('/course/isDelete/true', CourseController.isDeleteTotrue);
-router.get('/course/isDelete/false', CourseController.isDeleteTofalse);
-router.put('/course/isDelete/:id', CourseController.isdelete);
+router.get('/course/isDelete/true', CourseController.isDeleteToTrue);
+router.get('/course/isDelete/false', CourseController.isDeleteToFalse);
+router.put('/course/isDelete/:id', CourseController.isDelete);
 
 module.exports = router;

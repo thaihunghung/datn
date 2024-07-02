@@ -142,8 +142,8 @@ router.get('/academic-year/:id', AcademicYearController.getByID);
 router.put('/academic-year/:id', AcademicYearController.update);
 router.delete('/academic-year/:id', AcademicYearController.delete);
 
-router.get('/academic-year/isDelete/true', AcademicYearController.isDeleteTotrue);
-router.get('/academic-year/isDelete/false', AcademicYearController.isDeleteTofalse);
+router.get('/academic-year/isDelete/true', AcademicYearController.isDeleteToTrue);
+router.get('/academic-year/isDelete/false', AcademicYearController.isDeleteToFalse);
 
 router.put('/academic-year/isDelete/:id', AcademicYearController.IsDelete);
 module.exports = router;

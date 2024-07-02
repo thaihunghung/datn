@@ -88,7 +88,6 @@ const CourseController = {
         });
       }
 
-      // Cập nhật khóa học với id_semester_academic_year mới
       await CourseModel.create({
         academic_year_id,
         class_id,
@@ -357,7 +356,7 @@ const CourseController = {
     }
   },
   // Get courses with isDelete = true
-  isDeleteTotrue: async (req, res) => {
+  isDeleteToTrue: async (req, res) => {
     try {
       const courses = await CourseModel.findAll({ where: { isDelete: true } });
       if (!courses) {
@@ -370,7 +369,7 @@ const CourseController = {
     }
   },
   // Get courses with isDelete = false
-  isDeleteTofalse: async (req, res) => {
+  isDeleteToFalse: async (req, res) => {
     try {
       const courses = await CourseModel.findAll({ where: { isDelete: false } });
       if (!courses) {
@@ -383,7 +382,7 @@ const CourseController = {
     }
   },
   // Toggle isDelete status of a course
-  isdelete: async (req, res) => {
+  isDelete: async (req, res) => {
     try {
       const { id } = req.params;
       const course = await CourseModel.findOne({ where: { course_id: id } });

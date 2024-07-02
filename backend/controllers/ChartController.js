@@ -141,10 +141,8 @@ const ChartController = {
         `,
         {
           type: Sequelize.QueryTypes.SELECT,
-
         }
       );
-
       res.json(results);
     } catch (error) {
       console.error('Error fetching average scores per subject:', error);

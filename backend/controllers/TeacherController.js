@@ -192,11 +192,6 @@ const TeacherController = {
         where: whereClause,
       });
 
-      // const teachersWithPermissionName = teachers.map(teacher => ({
-      //   ...teacher.dataValues,
-      //   permissionName: getPermissionName(teacher.permission)
-      // }));
-
       return res.json({
         teachers,
         permissionName: getPermissionName(teachers.permission)

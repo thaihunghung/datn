@@ -163,7 +163,7 @@ const StudentController = {
           attributes: ['classCode', 'classNameShort'],
           where: { isDelete: false }
         }],
-        attributes: ['student_id', 'class_id', 'studentCode', 'email', 'name', 'isDelete'],// Lọc ra các trường cần lấy
+        attributes: ['student_id', 'class_id', 'studentCode', 'email', 'name', 'isDelete'],
         where: { isDelete: false }
       });
 
@@ -228,7 +228,7 @@ const StudentController = {
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
-  isDeleteTotrue: async (req, res) => {
+  isDeleteToTrue: async (req, res) => {
     try {
       const students = await StudentModel.findAll(
         {
@@ -248,7 +248,7 @@ const StudentController = {
     }
   },
 
-  isDeleteTofalse: async (req, res) => {
+  isDeleteToFalse: async (req, res) => {
     try {
       const students = await StudentModel.findAll({ where: { isDelete: false } });
       if (!students) {
@@ -407,11 +407,8 @@ const StudentController = {
     }
   },
   saveStudentExcel: async (req, res) => {
-    console.log("dc");
     if (req.files) {
-      console.log("dc1");
       const uploadDirectory = path.join(__dirname, '../uploads');
-
       const filename = req.files[0].filename;
       const filePath = path.join(uploadDirectory, filename);
       const workbook = new ExcelJS.Workbook();

@@ -67,7 +67,7 @@ const SemesterController = {
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
-  isDeleteTotrue: async (req, res) => {
+  isDeleteToTrue: async (req, res) => {
     try {
       const semester = await SemesterModel.findAll({ where: { isDelete: true } });
       if (!semester) {
@@ -80,7 +80,7 @@ const SemesterController = {
     }
   },
 
-  isDeleteTofalse: async (req, res) => {
+  isDeleteToFalse: async (req, res) => {
     try {
       const semester = await SemesterModel.findAll({ where: { isDelete: false } });
       if (!semester) {

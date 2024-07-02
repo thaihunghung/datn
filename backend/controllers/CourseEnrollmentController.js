@@ -25,7 +25,6 @@ const generateUniqueStudentCode = async () => {
 const CourseEnrollmentController = {
   getByID: async (req, res) => {
     try {
-      console.log("aaaaa");
       const { id } = req.params;
       const course = await CourseEnrollmentModel.findAll({
         include: [
@@ -55,11 +54,8 @@ const CourseEnrollmentController = {
   },
   getExcelCourseEnrollmentWithData: async (req, res) => {
     try {
-      console.log('vao')
       const { data } = req.body;
       const { id } = data;
-
-      console.log("req", data);
 
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Students Form');
@@ -73,7 +69,6 @@ const CourseEnrollmentController = {
         }
       });
 
-      console.log("enrollments", enrollments)
       // Trích xuất danh sách student_id
       const studentIds = enrollments.map(enrollment => enrollment.student_id);
 

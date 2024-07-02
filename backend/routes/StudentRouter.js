@@ -204,8 +204,8 @@ router.get('/student-class', StudentController.getAllWithClass);
 router.put('/student/:id', StudentController.update);
 router.delete('/student/:id', StudentController.delete);
 
-router.get('/student/isDelete/true', StudentController.isDeleteTotrue);
-router.get('/student/isDelete/false', StudentController.isDeleteTofalse);
+router.get('/student/isDelete/true', StudentController.isDeleteToTrue);
+router.get('/student/isDelete/false', StudentController.isDeleteToFalse);
 router.put('/student/isDelete/:id', StudentController.isDelete);
 
 router.get('/student/templates/post', StudentController.getFormStudent);

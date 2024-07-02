@@ -33,7 +33,7 @@ const AuthenticateController = {
   },
 
   login: async (req, res) => {
-    const { teacherCode, password } = req.body; 
+    const { teacherCode, password } = req.body;
     try {
       const user = await TeacherModel.findOne({ where: { teacherCode } });
       if (!user) {
@@ -90,7 +90,30 @@ const AuthenticateController = {
       res.status(500).json({ message: 'Lỗi server', error });
     }
   },
-  
+  changePassword: async (req, res) => {
+    const { teacherCode, oldPassword, newPassword } = req.body;
+    try {
+      const user = await TeacherModel.findOne({ where: { teacherCode } });
+      if (!user) {
+        return res.status(404).json({ message: 'Người dùng không tồn tại' });
+      }
+
+      const passwordMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!passwordMatch) {
+        return res.status(400).json({ message: 'Mật khẩu cũ không chính xác' });
+      }
+      
+      user.password = newPassword;
+      await user.save();
+
+      console.log(`Đã thay đổi mật khẩu cho người dùng: ${user.email}`);
+      res.status(200).json({ message: 'Đã thay đổi mật khẩu thành công' });
+    } catch (error) {
+      console.error(`Lỗi thay đổi mật khẩu: ${error.message}`);
+      res.status(500).json({ message: 'Lỗi server', error });
+    }
+  },
+
   logout: async (req, res) => {
     try {
       const refreshToken = req.cookies.refreshToken;

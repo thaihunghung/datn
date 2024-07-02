@@ -194,7 +194,7 @@ const ClassController = {
     }
   },
 
-  isDeleteTotrue: async (req, res) => {
+  isDeleteToTrue: async (req, res) => {
     try {
       const { page, size } = req.query;
 
@@ -238,7 +238,7 @@ const ClassController = {
     }
   },
 
-  isDeleteTofalse: async (req, res) => {
+  isDeleteToFalse: async (req, res) => {
     try {
       const classes = await ClassModel.findAll({ where: { isDelete: false } });
       if (!classes) {

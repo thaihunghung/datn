@@ -144,7 +144,7 @@ router.get('/semester/:id', SemesterController.getByID);
 router.put('/semester/:id', SemesterController.update);
 router.delete('/semester/:id', SemesterController.delete);
 
-router.get('/semester/isDelete/true', SemesterController.isDeleteTotrue);
-router.get('/semester/isDelete/false', SemesterController.isDeleteTofalse);
+router.get('/semester/isDelete/true', SemesterController.isDeleteToTrue);
+router.get('/semester/isDelete/false', SemesterController.isDeleteToFalse);
 router.put('/semester/isDelete/:id', SemesterController.isDelete);
 module.exports = router;

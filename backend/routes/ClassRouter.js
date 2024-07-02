@@ -145,8 +145,8 @@ router.get('/class-teacher', ensureAuthenticated, ClassController.getAllWithTeac
 router.put('/class/:id', ClassController.update);
 router.delete('/class/:id', ClassController.delete);
 
-router.get('/class/isDelete/true', ClassController.isDeleteTotrue);
-router.get('/class/isDelete/false', ClassController.isDeleteTofalse);
+router.get('/class/isDelete/true', ClassController.isDeleteToTrue);
+router.get('/class/isDelete/false', ClassController.isDeleteToFalse);
 router.post('/class/templates/update', ClassController.getExcelWithData);
 
 router.put('/class/isDelete/:id', ClassController.IsDelete);
