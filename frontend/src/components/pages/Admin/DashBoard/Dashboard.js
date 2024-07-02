@@ -3,6 +3,7 @@ import { axiosAdmin } from '../../../../service/AxiosAdmin';
 import BarChartComponent from './BarChartComponent';
 import CLOChartComponent from './CLOChartComponent';
 import PLOChartComponent from './PLOChartComponent';
+import CourseScoresScatterChart from './CourseScoresScatterChart';
 
 export default function Dashboard() {
   const [user, setUser] = useState({});
@@ -52,6 +53,9 @@ export default function Dashboard() {
           showFilters={showFilters}
           setShowFilters={setShowFilters}
         />
+      </div>
+      <div>
+        <CourseScoresScatterChart/>
       </div>
     </div>
   );

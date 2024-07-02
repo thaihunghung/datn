@@ -291,6 +291,64 @@ const ChartController = {
       res.status(500).json({ message: 'Internal Server Error' });
     }
   },
+  getAverageCourseScoresOfStudents: async (req, res) => {
+    console.log("ok", req.body)
+    try {
+      const { course_id_list } = req.body;
+
+      // Xây dựng bộ lọc truy vấn động
+      const courseIdFilter = course_id_list && course_id_list.length > 0 ? 'AND c.course_id IN (:course_id_list)' : '';
+
+      const query = `
+        SELECT
+            c.course_id,
+            c.courseName,
+            s.student_id,
+            s.name AS studentName,
+            a.totalScore AS score,
+            t.teacher_id,
+            t.name AS teacherName,
+            cl.class_id,
+            cl.className
+        FROM
+            courses c
+        JOIN
+            assessments a ON c.course_id = a.course_id
+        JOIN
+            students s ON a.student_id = s.student_id
+
+        JOIN
+            teachers t ON c.teacher_id = t.teacher_id
+        JOIN
+            classes cl ON c.class_id = cl.class_id
+        WHERE
+            c.isDelete = 0
+            AND a.isDelete = 0
+            AND s.isDelete = 0
+            AND t.isDelete = 0
+            AND cl.isDelete = 0
+            AND (
+        c.course_id IN (1) OR 1 IS NULL
+    )
+        ORDER BY
+          c.course_id, s.student_id
+      `;
+
+      const replacements = {
+        ...(course_id_list && course_id_list.length > 0 && { course_id_list })
+      };
+
+      const results = await sequelize.query(query, {
+        type: Sequelize.QueryTypes.SELECT,
+        replacements,
+      });
+
+      res.json(results);
+    } catch (error) {
+      console.error('Error fetching average course scores:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
 
 };
 

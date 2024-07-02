@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, Avatar, Input, Button, Divider, Spacer } from '@nextui-org/react';
 import { useParams } from 'react-router-dom';
 import { axiosAdmin } from '../../../../../../service/AxiosAdmin';
+import StudentLearningOutcomeBarChart from './StudentLearningOutcomeBarChart';
 
 const ProfileStudent = () => {
   const { id } = useParams();
@@ -99,7 +100,11 @@ const ProfileStudent = () => {
         </div>
       </Card>
       <Spacer y={2} />
+      
       <Card className="w-full md:w-2/3 p-4 shadow-lg rounded-lg">
+      <div>
+        <StudentLearningOutcomeBarChart />
+      </div>
         <div className="flex justify-between items-center">
           <Input
             clearable

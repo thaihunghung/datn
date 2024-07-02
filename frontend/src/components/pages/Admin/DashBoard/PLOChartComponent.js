@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { axiosAdmin } from '../../../../service/AxiosAdmin';
 import { Select, Button } from 'antd';
+import { Line } from 'react-chartjs-2';
+import 'chart.js/auto';
 
 const { Option } = Select;
 
@@ -40,51 +40,49 @@ const PLOChartComponent = () => {
     setSelectedPLO(value);
   };
 
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="custom-tooltip bg-indigo-500/50 text-white rounded-md p-1 text-sm">
-          <p className="label">{`${label}`}</p>
-          <p className="intro">{`Tỉ lệ đạt được: ${payload[0].value}%`}</p>
-        </div>
-      );
-    }
+  const ploNames = data.map(plo => plo.name);
+  const ploPercentages = data.map(plo => plo.percentage);
 
-    return null;
+  const chartData = {
+    labels: ploNames,
+    datasets: [
+      {
+        label: 'Tỉ lệ Plo đạt được',
+        data: ploPercentages,
+        fill: false,
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+      },
+    ],
   };
 
   return (
     <div className="plo-chart bg-white shadow-md rounded-lg p-6 mb-6">
-      <Button
-        onClick={() => setShowFilter(!showFilter)}
-        className="flex justify-start rounded mb-4">
-        {showFilter ? 'Hide Filter' : 'Show Filter'}
-      </Button>
-      {showFilter && (
-        <Select
-          mode="multiple"
-          placeholder="Chọn PLO"
-          value={selectedPLO}
-          onChange={handlePLOSelection}
-          className="w-full mb-4"
-        >
-          {originalData.map((plo, index) => (
-            <Option key={index} value={plo.name}>
-              {plo.name}
-            </Option>
-          ))}
-        </Select>
-      )}
-      <h2 className="text-xl font-semibold mb-4">Tỉ lệ đạt được của chuẩn đầu ra chương trình</h2>
-      <ResponsiveContainer width="100%" height={400}>
-        <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis domain={[0, 100]} />
-          <Tooltip content={<CustomTooltip />} />
-          <Line type="monotone" dataKey="percentage" stroke="#8884d8" activeDot={{ r: 8 }} />
-        </LineChart>
-      </ResponsiveContainer>
+      <div className="mb-4">
+        <Button
+          onClick={() => setShowFilter(!showFilter)}
+          className="flex justify-start rounded">
+          {showFilter ? 'Hide Filter' : 'Show Filter'}
+        </Button>
+        {showFilter && (
+          <Select
+            mode="multiple"
+            style={{ width: '100%' }}
+            placeholder="Select PLOs"
+            defaultValue={selectedPLO}
+            onChange={handlePLOSelection}
+          >
+            {originalData.map(plo => (
+              <Option key={plo.name} value={plo.name}>
+                {plo.name}
+              </Option>
+            ))}
+          </Select>
+        )}
+      </div>
+      <h2 className="text-xl font-semibold mb-4">Tỉ lệ đạt của chuẩn đầu ra của chương trình</h2>
+      <Line data={chartData} />
     </div>
   );
 };
