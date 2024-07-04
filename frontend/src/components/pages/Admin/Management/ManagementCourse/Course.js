@@ -429,7 +429,7 @@ const Course = (props) => {
               </CardHeader>
               <CardBody>
                 <p>{`${course.SemesterAcademicYear.semester.descriptionShort} - ${course.SemesterAcademicYear.academic_year.description}`}</p>
-                <p>{`Số học sinh: ${course.enrollmentCount}`}</p>
+                <p>{`Số sinh viên: ${course.enrollmentCount}`}</p>
               </CardBody>
               <CardFooter className="flex gap-5">
                 <Tooltip content="Các thao tác với sinh viên">

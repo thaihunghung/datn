@@ -200,7 +200,7 @@ const DetailCourse = (props) => {
           <p><strong>Lớp học:</strong> {course.class.className}</p>
           <p><strong>Giáo viên giảng dạy:</strong> {course.teacher.name}</p>
           <p><strong>Năm học:</strong> {course.SemesterAcademicYear.semester.descriptionShort}</p>
-          <p><strong>Số lượng học sinh đăng kí:</strong> {course.enrollmentCount}</p>
+          <p><strong>Số lượng sinh viên đăng kí:</strong> {course.enrollmentCount}</p>
           <p><strong className="text-pretty">Mô tả:</strong> {course.subject.description}</p>
         </div>
 

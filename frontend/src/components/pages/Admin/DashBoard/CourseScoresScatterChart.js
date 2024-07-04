@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Select, Button } from 'antd';
-import { Scatter } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { axiosAdmin } from '../../../../service/AxiosAdmin';
 
 const { Option } = Select;
 
-const CourseScoresScatterChart = () => {
+const CourseScoresHistogramChart = () => {
   const [courseData, setCourseData] = useState([]);
   const [scoreData, setScoreData] = useState([]);
   const [selectedCourses, setSelectedCourses] = useState([]);
@@ -58,16 +58,19 @@ const CourseScoresScatterChart = () => {
       x: parseFloat(score),
       y: scoreCounts[score].count,
       students: scoreCounts[score].students
-    }));
+    })).sort((a, b) => a.x - b.x); // Sort scores in ascending order
   };
 
+  const processedData = processData(scoreData);
+
   const chartData = {
+    labels: processedData.map(dataPoint => dataPoint.x),
     datasets: [{
-      label: 'Scatter Dataset',
-      data: processData(scoreData),
-      backgroundColor: 'rgb(255, 99, 132)',
-      pointRadius: 5, // Increase the point size
-      pointHoverRadius: 6 // Increase the point hover size
+      label: 'Histogram Dataset',
+      data: processedData.map(dataPoint => dataPoint.y),
+      backgroundColor: 'rgb(75, 192, 192)',
+      barPercentage: 1.0,
+      categoryPercentage: 1.0
     }]
   };
 
@@ -83,7 +86,10 @@ const CourseScoresScatterChart = () => {
         beginAtZero: true,
         title: {
           display: true,
-          text: 'Số lượng học sinh',
+          text: 'Số lượng sinh viên',
+        },
+        ticks: {
+          stepSize: 1
         }
       }
     },
@@ -94,9 +100,9 @@ const CourseScoresScatterChart = () => {
       tooltip: {
         callbacks: {
           label: function(context) {
-            const dataPoint = context.raw;
-            const studentNames = dataPoint.students.join(',');
-            return `${context.dataset.label}: (${dataPoint.x}, ${dataPoint.y})\nStudents:\n${studentNames}`;
+            const index = context.dataIndex;
+            const students = processedData[index].students.join(', ');
+            return `${context.dataset.label}: ${context.raw}\nStudents:\n${students}`;
           }
         }
       }
@@ -104,7 +110,7 @@ const CourseScoresScatterChart = () => {
   };
 
   return (
-    <div className="course-scores-scatter-chart bg-white shadow-md rounded-lg p-6 mb-6">
+    <div className="course-scores-histogram-chart bg-white shadow-md rounded-lg p-6 mb-6">
       <div className="mb-4">
         <Button
           onClick={() => setShowFilter(!showFilter)}
@@ -127,9 +133,9 @@ const CourseScoresScatterChart = () => {
         )}
       </div>
       <h2 className="text-xl font-bold text-[#6366F1]">Phân bố điểm của lớp Công nghệ phần mền DA20TTB</h2>
-      <Scatter data={chartData} options={chartOptions} />
+      <Bar data={chartData} options={chartOptions} />
     </div>
   );
 };
 
-export default CourseScoresScatterChart;
+export default CourseScoresHistogramChart;

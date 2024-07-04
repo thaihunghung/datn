@@ -119,6 +119,9 @@ const BarChartComponent = ({ filters, setFilters, showFilters, setShowFilters })
       }
     },
     plugins: {
+      legend: {
+        display: false
+      },
       tooltip: {
         callbacks: {
           label: function (context) {

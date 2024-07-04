@@ -39,7 +39,7 @@ const ExcelModal = ({
           <>
             <ModalHeader className="flex flex-col gap-1"> Môn học {selectedCourse.courseCode} - {selectedCourse.courseName}</ModalHeader>
             <ModalBody>
-              <div>Thêm học sinh bằng file excel</div>
+              <div>Thêm sinh viên bằng file excel</div>
               <div className="flex justify-between m-1">
                 <div className="card p-3">
                   <h3>Tải Mẫu CSV</h3>

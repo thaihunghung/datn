@@ -331,7 +331,7 @@ const ChartController = {
         c.course_id IN (1) OR 1 IS NULL
     )
         ORDER BY
-          c.course_id, s.student_id
+          a.totalScore
       `;
 
       const replacements = {

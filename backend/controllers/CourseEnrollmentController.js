@@ -72,7 +72,7 @@ const CourseEnrollmentController = {
       // Trích xuất danh sách student_id
       const studentIds = enrollments.map(enrollment => enrollment.student_id);
 
-      // Lấy thông tin học sinh từ StudentModel dựa trên danh sách student_id
+      // Lấy thông tin sinh viên từ StudentModel dựa trên danh sách student_id
       const students = await StudentModel.findAll({
         include: [{
           model: ClassModel,
