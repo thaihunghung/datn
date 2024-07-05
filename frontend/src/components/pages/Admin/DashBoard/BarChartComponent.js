@@ -49,6 +49,7 @@ const BarChartComponent = ({ filters, setFilters, showFilters, setShowFilters })
           class_id_list: filters.class.map(value => parseInt(value.split(' ')[0])),
           subject_id_list: filters.subject.map(value => parseInt(value.split(' ')[0])),
           course_id_list: filters.course.map(value => parseInt(value.split(' ')[0])),
+          student_code: '',
         };
 
         const response = await axiosAdmin.post('/course/arg-score', {

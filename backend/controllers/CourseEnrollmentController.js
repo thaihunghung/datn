@@ -52,6 +52,38 @@ const CourseEnrollmentController = {
       res.status(500).json({ message: 'Lỗi máy chủ' });
     }
   },
+  getByIDStudent: async (req, res) => {
+    try {
+      const { studentCode } = req.body;
+      console.log("1studentCode", req.body);
+      const course = await CourseEnrollmentModel.findAll({
+        include: [
+          {
+            model: StudentModel,
+            where: {
+              isDelete: false,
+              studentCode: studentCode
+            }
+          },
+          {
+            model: CourseModel,
+            where: { isDelete: false }
+          }
+        ],
+        where: {
+          isDelete: false,
+        }
+
+      });
+      if (!course) {
+        return res.status(404).json({ message: 'Không tìm thấy khóa học' });
+      }
+      res.json(course);
+    } catch (error) {
+      console.error('Lỗi khi tìm kiếm khóa học:', error);
+      res.status(500).json({ message: 'Lỗi máy chủ' });
+    }
+  },
   getExcelCourseEnrollmentWithData: async (req, res) => {
     try {
       const { data } = req.body;
@@ -158,7 +190,7 @@ const CourseEnrollmentController = {
             course_id: id,
             isDelete: false,
           },
-          
+
         },],
         attributes: [],
         where: {

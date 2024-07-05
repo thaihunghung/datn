@@ -137,7 +137,7 @@ const { ensureAuthenticated } = require('../middlewares/authMiddleware');
  *       500:
  *         description: Lỗi server
  */
-router.get('/class',ensureAuthenticated, ClassController.index);
+router.get('/class', ClassController.index);
 router.post('/class', ClassController.create);
 router.get('/class/:id', ClassController.getByID);
 router.get('/class-teacher', ensureAuthenticated, ClassController.getAllWithTeacher);

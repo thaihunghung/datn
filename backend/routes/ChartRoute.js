@@ -9,6 +9,7 @@ router.get('/subject/average/subject', ChartController.averageScoresPerSubject);
 router.get('/students/performance/:student_id', ChartController.getStudentPerformanceByCourse);
 router.post('/course/arg-score', ChartController.getAverageCourseScores);
 router.post('/getAverageCourseScores', ChartController.getAverageCourseScoresOfStudents);
+router.post('/getStudentStatistics', ChartController.getStudentStatistics);
 
 
 module.exports = router;

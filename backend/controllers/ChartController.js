@@ -212,12 +212,14 @@ const ChartController = {
   // average scores by course with optional course_id_list filter
   getAverageCourseScores: async (req, res) => {
     try {
+      console.log("ok")
       const {
         course_id_list,
         subject_id_list,
         academic_year_id_list,
         semester_id_list,
-        class_id_list
+        class_id_list,
+        student_code
       } = req.body.processedFilters;
 
       // Construct dynamic query filters
@@ -226,6 +228,7 @@ const ChartController = {
       const academicYearIdFilter = academic_year_id_list && academic_year_id_list.length > 0 ? 'AND ay.academic_year_id IN (:academic_year_id_list)' : '';
       const semesterIdFilter = semester_id_list && semester_id_list.length > 0 ? 'AND s.semester_id IN (:semester_id_list)' : '';
       const classIdFilter = class_id_list && class_id_list.length > 0 ? 'AND cl.class_id IN (:class_id_list)' : '';
+      const studentCodeFilter = student_code > 0 ? 'AND st.studentCode = :student_code' : '';
 
       const query = `
         SELECT
@@ -239,7 +242,7 @@ const ChartController = {
             t.name AS teacherName,
             cl.class_id,
             cl.className,
-            AVG(a.totalScore) AS averageScore
+            round(AVG(a.totalScore), 2) AS averageScore
         FROM
             courses c
         JOIN
@@ -256,6 +259,8 @@ const ChartController = {
             classes cl ON c.class_id = cl.class_id
         JOIN
             subjects sub ON c.subject_id = sub.subject_id
+        JOIN
+            students st ON a.student_id = st.student_id
         WHERE
             c.isDelete = 0
             AND ay.isDelete = 0
@@ -266,6 +271,7 @@ const ChartController = {
             ${academicYearIdFilter}
             ${semesterIdFilter}
             ${classIdFilter}
+            ${studentCodeFilter}
         GROUP BY
             c.course_id, c.courseName, ay.academic_year_id, ay.description, s.semester_id, s.descriptionShort, t.teacher_id, t.name, cl.class_id, cl.className
         ORDER BY
@@ -277,7 +283,8 @@ const ChartController = {
         ...(subject_id_list && subject_id_list.length > 0 && { subject_id_list }),
         ...(academic_year_id_list && academic_year_id_list.length > 0 && { academic_year_id_list }),
         ...(semester_id_list && semester_id_list.length > 0 && { semester_id_list }),
-        ...(class_id_list && class_id_list.length > 0 && { class_id_list })
+        ...(class_id_list && class_id_list.length > 0 && { class_id_list }),
+        ...(student_code && { student_code })
       };
 
       const results = await sequelize.query(query, {
@@ -291,6 +298,7 @@ const ChartController = {
       res.status(500).json({ message: 'Internal Server Error' });
     }
   },
+
   getAverageCourseScoresOfStudents: async (req, res) => {
     console.log("ok", req.body)
     try {
@@ -346,6 +354,55 @@ const ChartController = {
       res.json(results);
     } catch (error) {
       console.error('Error fetching average course scores:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  },
+  getStudentStatistics: async (req, res) => {
+    try {
+      const { studentCode } = req.body;
+
+      if (!studentCode) {
+        return res.status(400).json({ message: 'Student code is required' });
+      }
+
+      const query = `
+        SELECT
+            s.student_id,
+            s.name AS studentName,
+            SUM(sub.numberCredits) AS totalCredits,
+            round(AVG(a.totalScore),2) AS averageScore,
+            COUNT(DISTINCT c.course_id) AS courseCount
+        FROM
+            students s
+        JOIN
+            course_enrollments ce ON s.student_id = ce.student_id
+        JOIN
+            courses c ON ce.course_id = c.course_id
+        JOIN
+            assessments a ON c.course_id = a.course_id AND a.student_id = s.student_id
+        JOIN
+            subjects sub ON c.subject_id = sub.subject_id
+        WHERE
+            s.studentCode = :studentCode
+            AND s.isDelete = 0
+            AND c.isDelete = 0
+            AND sub.isDelete = 0
+            AND ce.isDelete = 0
+            AND a.isDelete = 0
+        GROUP BY
+            s.student_id, s.name;
+      `;
+
+      const replacements = { studentCode };
+
+      const results = await sequelize.query(query, {
+        type: Sequelize.QueryTypes.SELECT,
+        replacements,
+      });
+
+      res.json(results);
+    } catch (error) {
+      console.error('Error fetching student statistics:', error);
       res.status(500).json({ message: 'Internal Server Error' });
     }
   }

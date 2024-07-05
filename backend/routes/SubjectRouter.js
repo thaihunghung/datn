@@ -3,7 +3,7 @@ const SubjectController = require('../controllers/SubjectController');
 const { ensureAuthenticated } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
-router.get('/subjects', ensureAuthenticated, SubjectController.index);
+router.get('/subjects', SubjectController.index);
 router.post('/subject', ensureAuthenticated, SubjectController.create);
 router.get('/subject/:subject_id', ensureAuthenticated, SubjectController.getByID);
 
