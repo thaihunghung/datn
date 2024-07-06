@@ -57,7 +57,7 @@ const BarChartComponent = ({ filters, setFilters, showFilters, setShowFilters })
         });
         const data = response.data;
 
-        const labels = data.map(course => course.courseName);
+        const labels = data.map(course => course.courseCode);
         const scores = data.map(course => course.averageScore);
 
         setBarChartData({

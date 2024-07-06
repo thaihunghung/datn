@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Navbar,
   NavbarBrand,
@@ -13,12 +13,32 @@ import {
   Avatar,
 } from "@nextui-org/react";
 import { CloseOutlined, SearchOutlined } from '@ant-design/icons';
+import { axiosAdmin } from '../../../../service/AxiosAdmin';
 
 const Header = ({ studentCode, setStudentCode }) => {
+  const [activeItem, setActiveItem] = useState('home');
+  const [student, setStudent] = useState('');
+
   const handleInputChange = (event) => {
     setStudentCode(event.target.value);
   };
 
+  const handleItemClick = (item) => {
+    console.log("item", item)
+    setActiveItem(item);
+  };
+
+  useEffect(() => {
+    const fetchStudent = async () => {
+      const response = await axiosAdmin.post('/students/getAllByStudentCode', {
+        studentCode
+      });
+      setStudent(response.data[0])
+    }
+    console.log("student", student)
+    fetchStudent();
+
+  }, [studentCode])
   console.log("studentCode", studentCode)
   return (
     <Navbar maxWidth="full" isBordered>
@@ -29,27 +49,32 @@ const Header = ({ studentCode, setStudentCode }) => {
               <span className="bg-purple-600 text-white rounded-full px-2 py-1 mr-2">
                 SET
               </span>
-              LA
+              CNTT
             </div>
           </div>
         </NavbarBrand>
-        <NavbarContent className="hidden sm:flex gap-8">
-          <NavbarItem>
-            <Link className='text-large' color="foreground" href="#">
-              Features
+        {/* <NavbarContent className="hidden sm:flex gap-24">
+          <NavbarItem isActive={activeItem === 'home'} >
+            <Link className='text-large'
+              color={activeItem === 'home' ? 'secondary' : 'foreground'}
+              aria-current="page"
+              href="#"
+              onClick={() => handleItemClick('home')}
+            >
+              Trang chủ
             </Link>
           </NavbarItem>
-          <NavbarItem isActive>
-            <Link className='text-large' href="#" aria-current="page" color="secondary">
-              Customers
+          <NavbarItem isActive={activeItem === 'courses'} >
+            <Link className='text-large'
+              href="#"
+              aria-current="page"
+              color={activeItem === 'courses' ? 'secondary' : 'foreground'}
+              onClick={() => handleItemClick('courses')}
+            >
+              Khóa học
             </Link>
           </NavbarItem>
-          <NavbarItem>
-            <Link className='text-large' color="foreground" href="#">
-              Integrations
-            </Link>
-          </NavbarItem>
-        </NavbarContent>
+        </NavbarContent> */}
       </NavbarContent>
 
       <NavbarContent as="div" className="items-center" justify="end">
@@ -76,23 +101,23 @@ const Header = ({ studentCode, setStudentCode }) => {
               color="secondary"
               name="Jason Hughes"
               size="sm"
-              src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
+              src="https://i.pinimg.com/564x/67/33/40/673340b2196b91f159e06556b4db196e.jpg"
             />
           </DropdownTrigger>
           <DropdownMenu aria-label="Profile Actions" variant="flat">
             <DropdownItem key="profile" className="h-14 gap-2">
-              <p className="font-semibold">Signed in as</p>
-              <p className="font-semibold">zoey@example.com</p>
+              <p className="font-semibold">{student.name }</p>
+              <p className="font-semibold">{student?.email}</p>
             </DropdownItem>
-            <DropdownItem key="settings">My Settings</DropdownItem>
-            <DropdownItem key="team_settings">Team Settings</DropdownItem>
-            <DropdownItem key="analytics">Analytics</DropdownItem>
-            <DropdownItem key="system">System</DropdownItem>
-            <DropdownItem key="configurations">Configurations</DropdownItem>
-            <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
-            <DropdownItem key="logout" color="danger">Log Out</DropdownItem>
+            <DropdownItem key="team_settings">{student.class.classNameShort }</DropdownItem>
+            <DropdownItem key="settings">{student.class.className }</DropdownItem>
           </DropdownMenu>
         </Dropdown>
+        <div className='flex flex-col text-left'>
+          <p>{student?.name}</p>
+          <p>{student?.email}</p>
+        </div>
+
       </NavbarContent>
     </Navbar>
   );

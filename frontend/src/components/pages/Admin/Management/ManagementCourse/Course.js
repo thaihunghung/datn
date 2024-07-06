@@ -12,22 +12,24 @@ import {
   Avatar,
   Tooltip,
 } from "@nextui-org/react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import './Course.css';
 import EditCourseModal from "./EditCourseModal";
 import ExcelModal from "./ExcelModal";
 import AddCourseModal from "./AddCourseModal";
 import { FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import ConfirmAction from "./ConfirmAction";
 
 const Course = (props) => {
+  const navigate = useNavigate();
   const { setCollapsedNav, successNoti, errorNoti } = props;
   const [courses, setCourses] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
   const [totalCourses, setTotalCourses] = useState(0);
   const [selectedCourse, setSelectedCourse] = useState(null);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isConfirmActionOpen, setIsConfirmActionOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -149,7 +151,7 @@ const Course = (props) => {
     fetchSubjects();
     fetchSemesters();
     fetchAcademicYear();
-  }, [errorNoti, isEditModalOpen, isExcelModalOpen, isSettingsModalOpen, isAddModalOpen]);
+  }, [errorNoti, isEditModalOpen, isExcelModalOpen, isConfirmActionOpen, isAddModalOpen]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -257,11 +259,11 @@ const Course = (props) => {
 
   const handleOpenSettingsModal = (course) => {
     setSelectedCourse(course);
-    setIsSettingsModalOpen(true);
+    setIsConfirmActionOpen(true);
   };
 
   const handleCloseSettingsModal = () => {
-    setIsSettingsModalOpen(false);
+    setIsConfirmActionOpen(false);
     setSelectedCourse(null);
   };
 
@@ -386,7 +388,11 @@ const Course = (props) => {
       <div>
         <h1 className="text-3xl font-bold text-[#6366F1]">Danh sách khóa học</h1>
       </div>
-
+      <div className="flex justify-end">
+        <Button color="secondary" onClick={() => navigate('/admin/course/store')}>
+          Manage Blocked
+        </Button>
+      </div>
       <div className="flex justify-between mt-7">
 
         <Button
@@ -512,6 +518,13 @@ const Course = (props) => {
         setFileList={setFileList}
         setCurrent={setCurrent}
         setIsExcelModalOpen={setIsExcelModalOpen}
+      />
+
+      <ConfirmAction
+        isConfirmActionOpen={isConfirmActionOpen}
+        selectedCourse={selectedCourse}
+        setIsConfirmActionOpen={setIsConfirmActionOpen}
+        successNoti= {successNoti}
       />
     </>
   );

@@ -74,6 +74,32 @@ const StudentController = {
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
+  getAllByStudentCode: async (req, res) => {
+    try {
+      const { studentCode } = req.body;
+      const students = await StudentModel.findAll(
+        {
+          include: [{
+            model: ClassModel,
+            attributes: ['classCode', 'classNameShort', 'className'],
+            where: {
+              isDelete: false
+            }
+          }],
+          where: {
+            studentCode: studentCode,
+            isDelete: false
+          }
+        });
+      if (!students) {
+        return res.status(404).json({ message: 'Không tìm thấy students' });
+      }
+      res.json(students);
+    } catch (error) {
+      console.error('Lỗi tìm kiếm students:', error);
+      res.status(500).json({ message: 'Lỗi server' });
+    }
+  },
   // Kết quả học tập
   learningOutcomes: async (req, res) => {
     try {
@@ -230,20 +256,47 @@ const StudentController = {
   },
   isDeleteToTrue: async (req, res) => {
     try {
-      const students = await StudentModel.findAll(
-        {
+      const { page, size } = req.query;
+
+      const attributes = ['student_id', 'class_id', 'studentCode', 'email', 'name', 'createdAt', 'updatedAt', 'isDelete'];
+      const whereClause = { isDelete: true };
+
+      if (page && size) {
+        const offset = (page - 1) * size;
+        const limit = parseInt(size, 10);
+
+        const { count, rows: students } = await StudentModel.findAndCountAll({
+          include: [{
+            model: ClassModel,
+            attributes: ['classCode', 'classNameShort', 'className'],
+            where: {
+              isDelete: false
+            }
+          }],
+          attributes: attributes,
+          where: whereClause,
+          offset: offset,
+          limit: limit
+        });
+
+        return res.json({
+          total: count,
+          students: students
+        });
+      } else {
+        const students = await StudentModel.findAll({
           include: [{
             model: ClassModel,
             attributes: ['classCode']
           }],
-          where: { isDelete: true }
+          attributes: attributes,
+          where: whereClause
         });
-      if (!students) {
-        return res.status(404).json({ message: 'Không tìm thấy students' });
+
+        return res.json(students);
       }
-      res.json(students);
     } catch (error) {
-      console.error('Lỗi tìm kiếm students:', error);
+      console.error('Lỗi khi lấy tất cả sinh viên:', error);
       res.status(500).json({ message: 'Lỗi server' });
     }
   },

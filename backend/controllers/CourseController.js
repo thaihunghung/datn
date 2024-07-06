@@ -18,28 +18,74 @@ const CourseController = {
   // Lấy tất cả các khóa học
   index: async (req, res) => {
     try {
-      const courses = await CourseModel.findAll({
-        include: [{
-          model: ClassModel,
-          where: { isDelete: false }
-        },
-        {
-          model: TeacherModel,
-          where: { isDelete: false },
-          attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher', 'imgURL'],
-        },
-        {
-          model: SubjectModel,
-          where: { isDelete: false }
-        },
-        {
-          model: SemesterAcademicYearModel,
-          where: { isDelete: false }
-        }],
-        where: { isDelete: false }
+      const { page, size } = req.query;
 
-      });
-      res.json(courses);
+      const courseAttributes = ['course_id', 'course_name', 'createdAt', 'updatedAt', 'isDelete'];
+      const whereClause = { isDelete: false };
+
+      if (page && size) {
+        const offset = (page - 1) * size;
+        const limit = parseInt(size, 10);
+
+        const { count, rows: courses } = await CourseModel.findAndCountAll({
+          include: [{
+            model: ClassModel,
+            attributes: ['classCode', 'classNameShort', 'className'],
+            where: { isDelete: false }
+          },
+          {
+            model: TeacherModel,
+            attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher', 'imgURL'],
+            where: { isDelete: false }
+          },
+          {
+            model: SubjectModel,
+            attributes: ['subject_id', 'subject_name'],
+            where: { isDelete: false }
+          },
+          {
+            model: SemesterAcademicYearModel,
+            attributes: ['semester_id', 'academic_year'],
+            where: { isDelete: false }
+          }],
+          attributes: courseAttributes,
+          where: whereClause,
+          offset: offset,
+          limit: limit
+        });
+
+        return res.json({
+          total: count,
+          courses: courses
+        });
+      } else {
+        const courses = await CourseModel.findAll({
+          include: [{
+            model: ClassModel,
+            attributes: ['classCode', 'classNameShort', 'className'],
+            where: { isDelete: false }
+          },
+          {
+            model: TeacherModel,
+            attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher', 'imgURL'],
+            where: { isDelete: false }
+          },
+          {
+            model: SubjectModel,
+            attributes: ['subject_id', 'subject_name'],
+            where: { isDelete: false }
+          },
+          {
+            model: SemesterAcademicYearModel,
+            attributes: ['semester_id', 'academic_year'],
+            where: { isDelete: false }
+          }],
+          attributes: courseAttributes,
+          where: whereClause
+        });
+
+        return res.json(courses);
+      }
     } catch (error) {
       console.error('Lỗi khi lấy tất cả các khóa học:', error);
       res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
@@ -358,14 +404,79 @@ const CourseController = {
   // Get courses with isDelete = true
   isDeleteToTrue: async (req, res) => {
     try {
-      const courses = await CourseModel.findAll({ where: { isDelete: true } });
-      if (!courses) {
-        return res.status(404).json({ message: 'No courses found' });
+      const { page, size } = req.query;
+
+      console.log("req.query", req.query)
+      const courseAttributes = ['course_id', 'courseName','courseCode', 'createdAt', 'updatedAt', 'isDelete'];
+      const whereClause = { isDelete: true };
+
+      if (page && size) {
+        const offset = (page - 1) * size;
+        const limit = parseInt(size, 10);
+
+        const { count, rows: courses } = await CourseModel.findAndCountAll({
+          include: [{
+            model: ClassModel,
+            attributes: ['classCode', 'classNameShort', 'className'],
+            where: { isDelete: false }
+          },
+          {
+            model: TeacherModel,
+            attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher', 'imgURL'],
+            where: { isDelete: false }
+          },
+          {
+            model: SubjectModel,
+            attributes: ['subject_id', 'subjectName'],
+            where: { isDelete: false }
+          },
+          // {
+          //   model: SemesterAcademicYearModel,
+          //   attributes: ['semester_id', 'academic_year'],
+          //   where: { isDelete: false }
+          //   }
+          ],
+          attributes: courseAttributes,
+          where: whereClause,
+          offset: offset,
+          limit: limit
+        });
+
+        return res.json({
+          total: count,
+          courses: courses
+        });
+      } else {
+        const courses = await CourseModel.findAll({
+          include: [{
+            model: ClassModel,
+            attributes: ['classCode', 'classNameShort', 'className'],
+            where: { isDelete: false }
+          },
+          {
+            model: TeacherModel,
+            attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher', 'imgURL'],
+            where: { isDelete: false }
+          },
+          {
+            model: SubjectModel,
+            attributes: ['subject_id', 'subject_name'],
+            where: { isDelete: false }
+          },
+          {
+            model: SemesterAcademicYearModel,
+            attributes: ['semester_id', 'academic_year'],
+            where: { isDelete: false }
+          }],
+          attributes: courseAttributes,
+          where: whereClause
+        });
+
+        return res.json(courses);
       }
-      res.json(courses);
     } catch (error) {
-      console.error('Error finding courses with isDelete true:', error);
-      res.status(500).json({ message: 'Server error' });
+      console.error('Lỗi khi lấy tất cả các khóa học:', error);
+      res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
     }
   },
   // Get courses with isDelete = false

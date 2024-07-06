@@ -212,7 +212,7 @@ const ChartController = {
   // average scores by course with optional course_id_list filter
   getAverageCourseScores: async (req, res) => {
     try {
-      console.log("ok")
+      console.log("ok", req.body)
       const {
         course_id_list,
         subject_id_list,
@@ -230,10 +230,12 @@ const ChartController = {
       const classIdFilter = class_id_list && class_id_list.length > 0 ? 'AND cl.class_id IN (:class_id_list)' : '';
       const studentCodeFilter = student_code > 0 ? 'AND st.studentCode = :student_code' : '';
 
+      console.log("courseIdFilter 1111",courseIdFilter)
       const query = `
         SELECT
             c.course_id,
             c.courseName,
+            c.courseCode,
             ay.academic_year_id,
             ay.description AS academic_year,
             s.semester_id,
