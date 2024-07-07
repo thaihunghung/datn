@@ -2,65 +2,99 @@ const express = require('express');
 const ClassController = require('../controllers/ClassController');
 const router = express.Router();
 const { ensureAuthenticated } = require('../middlewares/authMiddleware');
+const checkPermission = require('../middlewares/permissionMiddleware');
+
+/**
+ * @openapi
+ * tags:
+ *   - name: Classes
+ *     description: Operations related to classes
+ */
 
 /**
  * @openapi
  * /api/admin/class:
  *   get:
- *     summary: Lấy danh sách tất cả các lớp học
- *     description: Trả về danh sách tất cả các lớp học.
+ *     summary: Get a list of all classes
+ *     description: Returns a list of all classes.
+ *     tags: [Classes]
  *     responses:
  *       200:
- *         description: Danh sách các lớp học.
- *       500:
- *         description: Lỗi server
- *   
- *   post:
- *     summary: Tạo một lớp học mới
- *     description: Thêm một lớp học mới vào cơ sở dữ liệu.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Class'
- *     responses:
- *       200:
- *         description: Lớp học được tạo thành công.
- *       500:
- *         description: Lỗi server
- *
- * /api/admin/class/{id}:
- *   get:
- *     summary: Lấy thông tin một lớp học theo ID
- *     description: Trả về thông tin chi tiết của một lớp học.
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID của lớp học cần tìm.
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Thông tin chi tiết của lớp học.
+ *         description: A list of classes.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Class'
- *       404:
- *         description: Không tìm thấy lớp học
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: The class ID.
+ *                         example: 1
+ *                       name:
+ *                         type: string
+ *                         description: The class name.
+ *                         example: Math 101
+ *   post:
+ *     summary: Create a new class
+ *     description: Adds a new class to the database.
+ *     tags: [Classes]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The class name.
+ *                 example: Math 101
+ *     responses:
+ *       200:
+ *         description: Class created successfully.
  *       500:
- *         description: Lỗi server
- *
- *   put:
- *     summary: Cập nhật thông tin của một lớp học
- *     description: Cập nhật thông tin của lớp học dựa trên ID.
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /api/admin/class/{id}:
+ *   get:
+ *     summary: Get a class by ID
+ *     description: Returns the details of a class.
+ *     tags: [Classes]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID của lớp học cần cập nhật.
+ *         description: The ID of the class.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Class details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: Class not found
+ *       500:
+ *         description: Server error
+ *   put:
+ *     summary: Update a class
+ *     description: Updates the information of a class by ID.
+ *     tags: [Classes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the class to update.
  *         schema:
  *           type: integer
  *     requestBody:
@@ -71,83 +105,165 @@ const { ensureAuthenticated } = require('../middlewares/authMiddleware');
  *             $ref: '#/components/schemas/Class'
  *     responses:
  *       200:
- *         description: Cập nhật thành công cho lớp học.
+ *         description: Class updated successfully.
  *       404:
- *         description: Không tìm thấy lớp học
+ *         description: Class not found
  *       500:
- *         description: Lỗi server
- *
+ *         description: Server error
  *   delete:
- *     summary: Xóa một lớp học
- *     description: Xóa lớp học dựa trên ID.
+ *     summary: Delete a class
+ *     description: Deletes a class by ID.
+ *     tags: [Classes]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID của lớp học cần xóa.
+ *         description: The ID of the class to delete.
  *         schema:
  *           type: integer
  *     responses:
  *       200:
- *         description: Lớp học đã được xóa thành công.
+ *         description: Class deleted successfully.
  *       404:
- *         description: Không tìm thấy lớp học
+ *         description: Class not found
  *       500:
- *         description: Lỗi server
- *
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /api/admin/class-teacher:
+ *   get:
+ *     summary: Get all classes with teachers
+ *     description: Returns a list of all classes along with their respective teachers.
+ *     tags: [Classes]
+ *     responses:
+ *       200:
+ *         description: A list of classes with teachers.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       classId:
+ *                         type: integer
+ *                         description: The class ID.
+ *                         example: 1
+ *                       className:
+ *                         type: string
+ *                         description: The class name.
+ *                         example: Math 101
+ *                       teacherName:
+ *                         type: string
+ *                         description: The teacher's name.
+ *                         example: John Doe
+ *       500:
+ *         description: Server error
+ *     security:
+ *       - bearerAuth: []
+ */
+
+/**
+ * @openapi
  * /api/admin/class/isDelete/true:
  *   get:
- *     summary: Lấy danh sách các lớp học đã bị xóa
- *     description: Trả về các lớp học có trạng thái isDelete là true.
+ *     summary: Get deleted classes
+ *     description: Returns a list of classes with isDelete status true.
+ *     tags: [Classes]
  *     responses:
  *       200:
- *         description: Danh sách lớp học đã xóa.
+ *         description: List of deleted classes.
  *       404:
- *         description: Không tìm thấy lớp học nào.
+ *         description: No classes found.
  *       500:
- *         description: Lỗi server
- *
+ *         description: Server error
+ */
+
+/**
+ * @openapi
  * /api/admin/class/isDelete/false:
  *   get:
- *     summary: Lấy danh sách các lớp học chưa bị xóa
- *     description: Trả về các lớp học có trạng thái isDelete là false.
+ *     summary: Get non-deleted classes
+ *     description: Returns a list of classes with isDelete status false.
+ *     tags: [Classes]
  *     responses:
  *       200:
- *         description: Danh sách lớp học chưa bị xóa.
+ *         description: List of non-deleted classes.
  *       404:
- *         description: Không tìm thấy lớp học nào.
+ *         description: No classes found.
  *       500:
- *         description: Lỗi server
-  * /api/admin/class/isDelete/{id}:
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /api/admin/class/isDelete/{id}:
  *   put:
- *     summary: Đảo ngược trạng thái isDelete của một lớp học
- *     description: Cập nhật trạng thái isDelete cho lớp học dựa trên ID.
+ *     summary: Toggle isDelete status of a class
+ *     description: Updates the isDelete status of a class by ID.
+ *     tags: [Classes]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID của lớp học cần cập nhật trạng thái isDelete.
+ *         description: The ID of the class.
  *         schema:
  *           type: integer
  *     responses:
  *       200:
- *         description: Đã đảo ngược trạng thái isDelete thành công cho lớp học.
+ *         description: Class isDelete status toggled successfully.
  *       404:
- *         description: Không tìm thấy lớp học
+ *         description: Class not found
  *       500:
- *         description: Lỗi server
+ *         description: Server error
  */
+
+/**
+ * @openapi
+ * /api/admin/class/templates/update:
+ *   post:
+ *     summary: Get class form template with data
+ *     description: Returns a form template for class information pre-filled with data.
+ *     tags: [Classes]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               data:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                     example: ["75"]
+ *     responses:
+ *       200:
+ *         description: Class form template with data.
+ *       500:
+ *         description: Server error
+ */
+
 router.get('/class', ClassController.index);
-router.post('/class', ClassController.create);
+router.post('/class',ensureAuthenticated, checkPermission(2), ClassController.create);
 router.get('/class/:id', ClassController.getByID);
 router.get('/class-teacher', ensureAuthenticated, ClassController.getAllWithTeacher);
 
-router.put('/class/:id', ClassController.update);
-router.delete('/class/:id', ClassController.delete);
+router.put('/class/:id',ensureAuthenticated, checkPermission(2), ClassController.update);
+router.delete('/class/:id',ensureAuthenticated, checkPermission(3), ClassController.delete);
 
 router.get('/class/isDelete/true', ClassController.isDeleteToTrue);
 router.get('/class/isDelete/false', ClassController.isDeleteToFalse);
-router.post('/class/templates/update', ClassController.getExcelWithData);
+router.post('/class/templates/update',ensureAuthenticated, checkPermission(2), ClassController.getExcelWithData);
 
-router.put('/class/isDelete/:id', ClassController.IsDelete);
+router.put('/class/isDelete/:id',ensureAuthenticated, checkPermission(2), ClassController.IsDelete);
+
 module.exports = router;

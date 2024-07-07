@@ -1,64 +1,100 @@
 const express = require('express');
 const SemesterController = require('../controllers/SemesterController');
+const { ensureAuthenticated } = require('../middlewares/authMiddleware');
+const checkPermission = require('../middlewares/permissionMiddleware');
 const router = express.Router();
+
+/**
+ * @openapi
+ * tags:
+ *   - name: Semesters
+ *     description: Operations related to semesters
+ */
+
 /**
  * @openapi
  * /api/admin/semester:
  *   get:
- *     summary: Lấy danh sách tất cả các học kỳ
- *     description: Trả về danh sách tất cả các học kỳ.
+ *     summary: Get a list of all semesters
+ *     description: Returns a list of all semesters.
+ *     tags: [Semesters]
  *     responses:
  *       200:
- *         description: Danh sách các học kỳ.
- *       500:
- *         description: Lỗi server
- *   
- *   post:
- *     summary: Tạo một học kỳ mới
- *     description: Thêm một học kỳ mới vào cơ sở dữ liệu.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Semester'
- *     responses:
- *       200:
- *         description: Học kỳ được tạo thành công.
- *       500:
- *         description: Lỗi server
- *
- * /api/admin/semester/{id}:
- *   get:
- *     summary: Lấy thông tin một học kỳ theo ID
- *     description: Trả về thông tin chi tiết của một học kỳ.
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID của học kỳ cần tìm.
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Thông tin chi tiết của học kỳ.
+ *         description: A list of semesters.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Semester'
- *       404:
- *         description: Không tìm thấy học kỳ
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: The semester ID.
+ *                         example: 1
+ *                       name:
+ *                         type: string
+ *                         description: The semester name.
+ *                         example: Fall 2024
+ *   post:
+ *     summary: Create a new semester
+ *     description: Adds a new semester to the database.
+ *     tags: [Semesters]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The semester name.
+ *                 example: Fall 2024
+ *     responses:
+ *       200:
+ *         description: Semester created successfully.
  *       500:
- *         description: Lỗi server
- *
- *   put:
- *     summary: Cập nhật thông tin của một học kỳ
- *     description: Cập nhật thông tin của học kỳ dựa trên ID.
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /api/admin/semester/{id}:
+ *   get:
+ *     summary: Get a semester by ID
+ *     description: Returns the details of a semester.
+ *     tags: [Semesters]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID của học kỳ cần cập nhật.
+ *         description: The ID of the semester.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Semester details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: Semester not found
+ *       500:
+ *         description: Server error
+ *   put:
+ *     summary: Update a semester
+ *     description: Updates the information of a semester by ID.
+ *     tags: [Semesters]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the semester to update.
  *         schema:
  *           type: integer
  *     requestBody:
@@ -69,82 +105,95 @@ const router = express.Router();
  *             $ref: '#/components/schemas/Semester'
  *     responses:
  *       200:
- *         description: Cập nhật thành công cho học kỳ.
+ *         description: Semester updated successfully.
  *       404:
- *         description: Không tìm thấy học kỳ
+ *         description: Semester not found
  *       500:
- *         description: Lỗi server
- *
+ *         description: Server error
  *   delete:
- *     summary: Xóa một học kỳ
- *     description: Xóa học kỳ dựa trên ID.
+ *     summary: Delete a semester
+ *     description: Deletes a semester by ID.
+ *     tags: [Semesters]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID của học kỳ cần xóa.
+ *         description: The ID of the semester to delete.
  *         schema:
  *           type: integer
  *     responses:
  *       200:
- *         description: Học kỳ đã được xóa thành công.
+ *         description: Semester deleted successfully.
  *       404:
- *         description: Không tìm thấy học kỳ
+ *         description: Semester not found
  *       500:
- *         description: Lỗi server
- *
+ *         description: Server error
+ */
+
+/**
+ * @openapi
  * /api/admin/semester/isDelete/true:
  *   get:
- *     summary: Lấy danh sách các học kỳ đã bị xóa
- *     description: Trả về các học kỳ có trạng thái isDelete là true.
+ *     summary: Get deleted semesters
+ *     description: Returns a list of semesters with isDelete status true.
+ *     tags: [Semesters]
  *     responses:
  *       200:
- *         description: Danh sách học kỳ đã xóa.
+ *         description: List of deleted semesters.
  *       404:
- *         description: Không tìm thấy học kỳ nào.
+ *         description: No semesters found.
  *       500:
- *         description: Lỗi server
- *
+ *         description: Server error
+ */
+
+/**
+ * @openapi
  * /api/admin/semester/isDelete/false:
  *   get:
- *     summary: Lấy danh sách các học kỳ chưa bị xóa
- *     description: Trả về các học kỳ có trạng thái isDelete là false.
+ *     summary: Get non-deleted semesters
+ *     description: Returns a list of semesters with isDelete status false.
+ *     tags: [Semesters]
  *     responses:
  *       200:
- *         description: Danh sách học kỳ chưa bị xóa.
+ *         description: List of non-deleted semesters.
  *       404:
- *         description: Không tìm thấy học kỳ nào.
+ *         description: No semesters found.
  *       500:
- *         description: Lỗi server
- *
+ *         description: Server error
+ */
+
+/**
+ * @openapi
  * /api/admin/semester/isDelete/{id}:
  *   put:
- *     summary: Đảo ngược trạng thái isDelete của một học kỳ
- *     description: Cập nhật trạng thái isDelete cho học kỳ dựa trên ID.
+ *     summary: Toggle isDelete status of a semester
+ *     description: Updates the isDelete status of a semester by ID.
+ *     tags: [Semesters]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID của học kỳ cần cập nhật trạng thái isDelete.
+ *         description: The ID of the semester.
  *         schema:
  *           type: integer
  *     responses:
  *       200:
- *         description: Đã đảo ngược trạng thái isDelete thành công cho học kỳ.
+ *         description: Semester isDelete status toggled successfully.
  *       404:
- *         description: Không tìm thấy học kỳ
+ *         description: Semester not found
  *       500:
- *         description: Lỗi server
+ *         description: Server error
  */
 
 router.get('/semester', SemesterController.index);
-router.post('/semester', SemesterController.create);
+router.post('/semester', ensureAuthenticated, checkPermission(2),SemesterController.create);
 router.get('/semester/:id', SemesterController.getByID);
 
-router.put('/semester/:id', SemesterController.update);
-router.delete('/semester/:id', SemesterController.delete);
+router.put('/semester/:id',ensureAuthenticated, checkPermission(2), SemesterController.update);
+router.delete('/semester/:id', ensureAuthenticated, checkPermission(2),SemesterController.delete);
 
 router.get('/semester/isDelete/true', SemesterController.isDeleteToTrue);
 router.get('/semester/isDelete/false', SemesterController.isDeleteToFalse);
-router.put('/semester/isDelete/:id', SemesterController.isDelete);
+router.put('/semester/isDelete/:id',ensureAuthenticated, checkPermission(2), SemesterController.isDelete);
+
 module.exports = router;

@@ -4,135 +4,183 @@ const router = express.Router();
 
 /**
  * @openapi
+ * tags:
+ *   - name: AcademicYears
+ *     description: Operations related to academic years
+ */
+
+/**
+ * @openapi
  * /api/admin/academic-year:
  *   get:
- *     summary: Lấy danh sách tất cả các năm học
- *     description: Trả về danh sách tất cả các năm học.
+ *     summary: Get a list of all academic years
+ *     description: Returns a list of all academic years.
+ *     tags: [AcademicYears]
  *     responses:
  *       200:
- *         description: Danh sách các năm học.
- *       500:
- *         description: Lỗi server
- *   
- *   post:
- *     summary: Tạo một năm học mới
- *     description: Thêm một năm học mới vào cơ sở dữ liệu.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           
- *     responses:
- *       200:
- *         description: Năm học được tạo thành công.
- *       500:
- *         description: Lỗi server
- *
- * /api/admin/academic-year/{id}:
- *   get:
- *     summary: Lấy thông tin một năm học theo ID
- *     description: Trả về thông tin chi tiết của một năm học.
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID của năm học cần tìm.
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Thông tin chi tiết của năm học.
+ *         description: A list of academic years.
  *         content:
  *           application/json:
- *             
- *       404:
- *         description: Không tìm thấy năm học
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: The academic year ID.
+ *                         example: 1
+ *                       name:
+ *                         type: string
+ *                         description: The academic year name.
+ *                         example: 2023-2024
+ *   post:
+ *     summary: Create a new academic year
+ *     description: Adds a new academic year to the database.
+ *     tags: [AcademicYears]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The academic year name.
+ *                 example: 2023-2024
+ *     responses:
+ *       200:
+ *         description: Academic year created successfully.
  *       500:
- *         description: Lỗi server
- *
- *   put:
- *     summary: Cập nhật thông tin của một năm học
- *     description: Cập nhật thông tin của năm học dựa trên ID.
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /api/admin/academic-year/{id}:
+ *   get:
+ *     summary: Get an academic year by ID
+ *     description: Returns the details of an academic year.
+ *     tags: [AcademicYears]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID của năm học cần cập nhật.
+ *         description: The ID of the academic year.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Academic year details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: Academic year not found
+ *       500:
+ *         description: Server error
+ *   put:
+ *     summary: Update an academic year
+ *     description: Updates the information of an academic year by ID.
+ *     tags: [AcademicYears]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the academic year to update.
  *         schema:
  *           type: integer
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
- *           
+ *           schema:
+ *             $ref: '#/components/schemas/AcademicYear'
  *     responses:
  *       200:
- *         description: Cập nhật thành công cho năm học.
+ *         description: Academic year updated successfully.
  *       404:
- *         description: Không tìm thấy năm học
+ *         description: Academic year not found
  *       500:
- *         description: Lỗi server
- *
+ *         description: Server error
  *   delete:
- *     summary: Xóa một năm học
- *     description: Xóa năm học dựa trên ID.
+ *     summary: Delete an academic year
+ *     description: Deletes an academic year by ID.
+ *     tags: [AcademicYears]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID của năm học cần xóa.
+ *         description: The ID of the academic year to delete.
  *         schema:
  *           type: integer
  *     responses:
  *       200:
- *         description: Năm học đã được xóa thành công.
+ *         description: Academic year deleted successfully.
  *       404:
- *         description: Không tìm thấy năm học
+ *         description: Academic year not found
  *       500:
- *         description: Lỗi server
- *
+ *         description: Server error
+ */
+
+/**
+ * @openapi
  * /api/admin/academic-year/isDelete/true:
  *   get:
- *     summary: Lấy danh sách các năm học đã bị xóa
- *     description: Trả về các năm học có trạng thái isDelete là true.
+ *     summary: Get deleted academic years
+ *     description: Returns a list of academic years with isDelete status true.
+ *     tags: [AcademicYears]
  *     responses:
  *       200:
- *         description: Danh sách năm học đã xóa.
+ *         description: List of deleted academic years.
  *       404:
- *         description: Không tìm thấy năm học nào.
+ *         description: No academic years found.
  *       500:
- *         description: Lỗi server
- *
+ *         description: Server error
+ */
+
+/**
+ * @openapi
  * /api/admin/academic-year/isDelete/false:
  *   get:
- *     summary: Lấy danh sách các năm học chưa bị xóa
- *     description: Trả về các năm học có trạng thái isDelete là false.
+ *     summary: Get non-deleted academic years
+ *     description: Returns a list of academic years with isDelete status false.
+ *     tags: [AcademicYears]
  *     responses:
  *       200:
- *         description: Danh sách năm học chưa bị xóa.
+ *         description: List of non-deleted academic years.
  *       404:
- *         description: Không tìm thấy năm học nào.
+ *         description: No academic years found.
  *       500:
- *         description: Lỗi server
- *
+ *         description: Server error
+ */
+
+/**
+ * @openapi
  * /api/admin/academic-year/isDelete/{id}:
  *   put:
- *     summary: Đảo ngược trạng thái isDelete của một năm học
- *     description: Cập nhật trạng thái isDelete cho năm học dựa trên ID.
+ *     summary: Toggle isDelete status of an academic year
+ *     description: Updates the isDelete status of an academic year by ID.
+ *     tags: [AcademicYears]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID của năm học cần cập nhật trạng thái isDelete.
+ *         description: The ID of the academic year.
  *         schema:
  *           type: integer
  *     responses:
  *       200:
- *         description: Đã đảo ngược trạng thái isDelete thành công.
+ *         description: Academic year isDelete status toggled successfully.
  *       404:
- *         description: Không tìm thấy năm học
+ *         description: Academic year not found
  *       500:
- *         description: Lỗi server
+ *         description: Server error
  */
 
 router.get('/academic-year', AcademicYearController.index);
@@ -146,4 +194,5 @@ router.get('/academic-year/isDelete/true', AcademicYearController.isDeleteToTrue
 router.get('/academic-year/isDelete/false', AcademicYearController.isDeleteToFalse);
 
 router.put('/academic-year/isDelete/:id', AcademicYearController.IsDelete);
+
 module.exports = router;
