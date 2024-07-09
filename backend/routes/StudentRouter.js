@@ -325,7 +325,7 @@ const { ensureAuthenticated } = require('../middlewares/authMiddleware');
  */
 
 router.get('/students', StudentController.index);
-router.post('/students/getAllByStudentCode',ensureAuthenticated, checkPermission(3), StudentController.getAllByStudentCode);
+router.post('/students/getAllByStudentCode', StudentController.getAllByStudentCode);
 router.post('/student', ensureAuthenticated, checkPermission(3),StudentController.create);
 router.get('/student/:id', StudentController.getByID);
 router.get('/student/class/:id',ensureAuthenticated, StudentController.getAllByClassId);
@@ -337,7 +337,7 @@ router.get('/student/isDelete/true', ensureAuthenticated,StudentController.isDel
 router.get('/student/isDelete/false', ensureAuthenticated,StudentController.isDeleteToFalse);
 router.put('/student/isDelete/:id',ensureAuthenticated, checkPermission(2), StudentController.isDelete);
 
-router.get('/student/:id/learning-outcome', StudentController.learningOutcomes);
+router.get('/student/learning-outcome/:id', StudentController.learningOutcomes);
 router.get('/student-course/:id',ensureAuthenticated, StudentController.getFormStudentByClass);
 
 router.get('/student/templates/post', StudentController.getFormStudent);

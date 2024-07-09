@@ -4,7 +4,7 @@ const sequelize = require("../config/database");
 const ExcelJS = require('exceljs');
 const path = require('path');
 const ClassModel = require("../models/ClassModel");
-const { Sequelize } = require("sequelize");
+const { Sequelize, Op } = require("sequelize");
 const AcademicYearModel = require("../models/AcademicYearModel");
 const SemesterModel = require("../models/SemesterModel");
 const SemesterAcademicYearModel = require("../models/SemesterAcademicYearModel");
@@ -17,29 +17,38 @@ const StudentController = {
   // Lấy tất cả sinh viên
   index: async (req, res) => {
     try {
-      const { page, size } = req.query;
-
+      const { page, size, search } = req.query;
+  
       const attributes = ['student_id', 'class_id', 'studentCode', 'email', 'name', 'createdAt', 'updatedAt', 'isDelete'];
       const whereClause = { isDelete: false };
-
+  
+      if (search) {
+        whereClause[Op.or] = [
+          { studentCode: { [Op.like]: `%${search}%` } },
+          { email: { [Op.like]: `%${search}%` } },
+          { name: { [Op.like]: `%${search}%` } }
+        ];
+      }
+  
       if (page && size) {
         const offset = (page - 1) * size;
         const limit = parseInt(size, 10);
-
+  
         const { count, rows: students } = await StudentModel.findAndCountAll({
           include: [{
             model: ClassModel,
             attributes: ['classCode', 'classNameShort', 'className'],
             where: {
               isDelete: false
-            }
+            },
           }],
           attributes: attributes,
           where: whereClause,
           offset: offset,
-          limit: limit
+          limit: limit,
+          order: ['student_id']
         });
-
+  
         return res.json({
           total: count,
           students: students
@@ -48,19 +57,19 @@ const StudentController = {
         const students = await StudentModel.findAll({
           include: [{
             model: ClassModel,
-            attributes: ['classCode']
+            attributes: ['classCode', 'classNameShort', 'className']
           }],
           attributes: attributes,
           where: whereClause
         });
-
+  
         return res.json(students);
       }
     } catch (error) {
       console.error('Lỗi khi lấy tất cả sinh viên:', error);
       res.status(500).json({ message: 'Lỗi server' });
     }
-  },
+  },  
   getAllByClassId: async (req, res) => {
     try {
       const { id } = req.params;

@@ -47,8 +47,6 @@ const Student = (props) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
-  const hasSearchFilter = Boolean(filterValue);
-
   const handleEditStudent = (item) => {
     if (item && item.student_id) {
       setSelectedStudent(item);
@@ -63,14 +61,14 @@ const Student = (props) => {
     }
   }, [selectedStudent]);
 
-  const getAllStudents = async (page, rowsPerPage) => {
-    const { students, total } = await fetchStudentsData(page, rowsPerPage);
+  const getAllStudents = async (page, rowsPerPage, searchTerm = "") => {
+    const { students, total } = await fetchStudentsData(page, rowsPerPage, searchTerm);
     setStudentData(students);
     setTotalStudents(total);
   };
 
   useEffect(() => {
-    getAllStudents(page, rowsPerPage);
+    getAllStudents(page, rowsPerPage, filterValue);
     const handleResize = () => {
       if (window.innerWidth < 1024) {
         setCollapsedNav(true);
@@ -83,7 +81,7 @@ const Student = (props) => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, filterValue]);
 
   const headerColumns = useMemo(() => {
     if (visibleColumns === "all") return studentColumns;
@@ -91,31 +89,17 @@ const Student = (props) => {
     return studentColumns.filter((column) => Array.from(visibleColumns).includes(column.uid));
   }, [visibleColumns]);
 
-  const filteredItems = useMemo(() => {
-    let filteredStudents = [...studentData];
-
-    if (hasSearchFilter) {
-      filteredStudents = filteredStudents.filter((item) =>
-        item.name.toLowerCase().includes(filterValue.toLowerCase()) ||
-        item.studentCode.toLowerCase().includes(filterValue.toLowerCase()) ||
-        item.email.toLowerCase().includes(filterValue.toLowerCase())
-      );
-    }
-
-    return filteredStudents;
-  }, [studentData, filterValue]);
-
   const pages = Math.ceil(totalStudents / rowsPerPage);
 
   const sortedItems = useMemo(() => {
-    return [...filteredItems].sort((a, b) => {
+    return [...studentData].sort((a, b) => {
       const first = a[sortDescriptor.column];
       const second = b[sortDescriptor.column];
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
     });
-  }, [sortDescriptor, filteredItems]);
+  }, [sortDescriptor, studentData]);
 
   const renderCell = useCallback((item, columnKey) => {
     const cellValue = item[columnKey];
@@ -185,12 +169,8 @@ const Student = (props) => {
   }, []);
 
   const onSearchChange = useCallback((value) => {
-    if (value) {
-      setFilterValue(value);
-      setPage(1);
-    } else {
-      setFilterValue("");
-    }
+    setFilterValue(value);
+    setPage(1);
   }, []);
 
   const onClear = useCallback(() => {
@@ -203,7 +183,7 @@ const Student = (props) => {
       if (deleteId) {
         const response = await axiosAdmin.put(`/student/isDelete/${deleteId}`);
         if (response) {
-          getAllStudents(page, rowsPerPage);
+          getAllStudents(page, rowsPerPage, filterValue);
           successNoti("Chuyển vào thùng rác thành công");
           setDeleteId(null);
         } else {
@@ -289,7 +269,6 @@ const Student = (props) => {
     onRowsPerPageChange,
     totalStudents,
     onSearchChange,
-    hasSearchFilter,
     visibleColumns
   ]);
 
@@ -299,7 +278,7 @@ const Student = (props) => {
         <span className="w-[30%] text-small text-default-400">
           {selectedKeys === "all"
             ? "All items selected"
-            : `${selectedKeys.size} of ${filteredItems.length} selected`}
+            : `${selectedKeys.size} of ${studentData.length} selected`}
         </span>
         <Pagination
           isCompact
@@ -320,7 +299,7 @@ const Student = (props) => {
         </div>
       </div>
     );
-  }, [selectedKeys, filteredItems.length, page, pages, hasSearchFilter]);
+  }, [selectedKeys, studentData.length, page, pages]);
 
   const selectedItemsBar = useMemo(() => {
     const allSelected = selectedKeys === "all";
@@ -396,14 +375,14 @@ const Student = (props) => {
       <AddStudentModal
         isOpen={isAddStudentOpen}
         onOpenChange={setIsAddStudentOpen}
-        fetchStudents={() => getAllStudents(page, rowsPerPage)}
+        fetchStudents={() => getAllStudents(page, rowsPerPage, filterValue)}
       />
 
       <EditStudentModal
         isOpen={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
         student={selectedStudent}
-        fetchStudents={() => getAllStudents(page, rowsPerPage)}
+        fetchStudents={() => getAllStudents(page, rowsPerPage, filterValue)}
       />
     </>
   );

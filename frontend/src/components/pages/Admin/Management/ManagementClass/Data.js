@@ -1,9 +1,9 @@
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 
 // Function to fetch class data from the API
-export const fetchClassesData = async (page, size) => {
+export const fetchClassesData = async (page, size, searchTerm) => {
   try {
-    const response = await axiosAdmin.get(`/class-teacher?page=${page}&size=${size}`);
+    const response = await axiosAdmin.get(`/class-teacher?page=${page}&size=${size}&search=${searchTerm}`);
     const data = response.data;
     if (data.classes) {
       return {

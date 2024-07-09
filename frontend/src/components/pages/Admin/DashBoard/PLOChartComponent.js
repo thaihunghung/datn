@@ -62,23 +62,28 @@ const PLOChartComponent = () => {
       <div className="mb-4">
         <Button
           onClick={() => setShowFilter(!showFilter)}
-          className="flex justify-start rounded">
+          className="flex justify-start rounded mb-3">
           {showFilter ? 'Hide Filter' : 'Show Filter'}
         </Button>
         {showFilter && (
-          <Select
-            mode="multiple"
-            style={{ width: '100%' }}
-            placeholder="Select PLOs"
-            defaultValue={selectedPLO}
-            onChange={handlePLOSelection}
-          >
-            {originalData.map(plo => (
-              <Option key={plo.name} value={plo.name}>
-                {plo.name}
-              </Option>
-            ))}
-          </Select>
+          <div>
+            <p
+              className='text-left mb-1'
+            >Chọn các chuẩn đầu ra hiển thị</p>
+            <Select
+              mode="multiple"
+              style={{ width: '100%' }}
+              placeholder="Select PLOs"
+              defaultValue={selectedPLO}
+              onChange={handlePLOSelection}
+            >
+              {originalData.map(plo => (
+                <Option key={plo.name} value={plo.name}>
+                  {plo.name}
+                </Option>
+              ))}
+            </Select>
+          </div>
         )}
       </div>
       <h2 className="text-xl font-semibold mb-4">Tỉ lệ đạt của chuẩn đầu ra của chương trình</h2>

@@ -34,7 +34,7 @@ const Class = (props) => {
   const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [sortDescriptor, setSortDescriptor] = useState({
-    column: "name",
+    column: "className",
     direction: "ascending",
   });
   const [page, setPage] = useState(1);
@@ -49,12 +49,10 @@ const Class = (props) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState(null);
 
-
   const hasSearchFilter = Boolean(filterValue);
 
   const handleDownloadTemplateExcel = async (id) => {
     try {
-      console.log("selectedClassId", id)
       const response = await axiosAdmin.get(`/student/course/${id}`, {
         responseType: 'blob'
       });
@@ -83,14 +81,14 @@ const Class = (props) => {
     }
   };
 
-  const getAllClass = async (page, rowsPerPage) => {
-    const { classes, total } = await fetchClassesData(page, rowsPerPage);
+  const getAllClass = async (page, rowsPerPage, searchTerm = "") => {
+    const { classes, total } = await fetchClassesData(page, rowsPerPage, searchTerm);
     setClassData(classes);
     setTotalClasses(total);
   };
 
   useEffect(() => {
-    getAllClass(page, rowsPerPage);
+    getAllClass(page, rowsPerPage, filterValue);
     const handleResize = () => {
       if (window.innerWidth < 1024) {
         setCollapsedNav(true);
@@ -103,7 +101,7 @@ const Class = (props) => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, filterValue]);
 
   const headerColumns = useMemo(() => {
     if (visibleColumns === "all") return columns;
@@ -111,31 +109,17 @@ const Class = (props) => {
     return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
   }, [visibleColumns]);
 
-  const filteredItems = useMemo(() => {
-    let filteredClasses = [...classData];
-
-    if (hasSearchFilter) {
-      filteredClasses = filteredClasses.filter((item) =>
-        item.className.toLowerCase().includes(filterValue.toLowerCase()) ||
-        item.classCode.toLowerCase().includes(filterValue.toLowerCase()) ||
-        item.teacher.name.toLowerCase().includes(filterValue.toLowerCase())
-      );
-    }
-
-    return filteredClasses;
-  }, [classData, filterValue]);
-
   const pages = Math.ceil(totalClasses / rowsPerPage);
 
   const sortedItems = useMemo(() => {
-    return [...filteredItems].sort((a, b) => {
+    return [...classData].sort((a, b) => {
       const first = a[sortDescriptor.column];
       const second = b[sortDescriptor.column];
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
     });
-  }, [sortDescriptor, filteredItems]);
+  }, [sortDescriptor, classData]);
 
   const renderCell = useCallback((item, columnKey) => {
     const cellValue = item[columnKey];
@@ -210,12 +194,8 @@ const Class = (props) => {
   }, []);
 
   const onSearchChange = useCallback((value) => {
-    if (value) {
-      setFilterValue(value);
-      setPage(1);
-    } else {
-      setFilterValue("");
-    }
+    setFilterValue(value);
+    setPage(1);
   }, []);
 
   const onClear = useCallback(() => {
@@ -228,7 +208,7 @@ const Class = (props) => {
       if (deleteId) {
         const response = await axiosAdmin.put(`/class/isDelete/${deleteId}`);
         if (response) {
-          getAllClass(page, rowsPerPage);
+          getAllClass(page, rowsPerPage, filterValue);
           successNoti("Chuyển vào thùng rác thành công");
           setDeleteId(null);
         } else {
@@ -324,7 +304,7 @@ const Class = (props) => {
         <span className="w-[30%] text-small text-default-400">
           {selectedKeys === "all"
             ? "All items selected"
-            : `${selectedKeys.size} of ${filteredItems.length} selected`}
+            : `${selectedKeys.size} of ${classData.length} selected`}
         </span>
         <Pagination
           isCompact
@@ -345,7 +325,7 @@ const Class = (props) => {
         </div>
       </div>
     );
-  }, [selectedKeys, filteredItems.length, page, pages, hasSearchFilter]);
+  }, [selectedKeys, classData.length, page, pages]);
 
   const selectedItemsBar = useMemo(() => {
     const allSelected = selectedKeys === "all";
@@ -422,14 +402,14 @@ const Class = (props) => {
       <AddClassModal
         isOpen={isAddClassOpen}
         onOpenChange={setIsAddClassOpen}
-        fetchClasses={() => getAllClass(page, rowsPerPage)}
+        fetchClasses={() => getAllClass(page, rowsPerPage, filterValue)}
       />
       <EditClassModal
         isOpen={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
         initialData={classClick}
         classId={selectedClassId}
-        fetchClasses={() => getAllClass(page, rowsPerPage)}
+        fetchClasses={() => getAllClass(page, rowsPerPage, filterValue)}
       />
     </>
   );

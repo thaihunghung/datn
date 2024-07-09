@@ -3,16 +3,18 @@ import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { axiosAdmin } from '../../../../../../service/AxiosAdmin';
 import { Button, Select } from 'antd';
+import { useParams } from 'react-router-dom';
 const { Option } = Select;
 
 const StudentLearningOutcomeBarChart = () => {
   const [data, setData] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
+  const { id } = useParams();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axiosAdmin.get('/students/1/learning-outcome');
+        const response = await axiosAdmin.get(`/student/learning-outcome/${id}`);
         setData(response.data);
       } catch (error) {
         console.error('Error fetching data:', error);

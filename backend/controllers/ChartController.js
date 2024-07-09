@@ -337,9 +337,7 @@ const ChartController = {
             AND s.isDelete = 0
             AND t.isDelete = 0
             AND cl.isDelete = 0
-            AND (
-        c.course_id IN (1) OR 1 IS NULL
-    )
+            ${courseIdFilter}
         ORDER BY
           a.totalScore
       `;

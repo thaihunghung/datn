@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const ClassModel = require("../models/ClassModel");
 const TeacherModel = require("../models/TeacherModel");
 const ExcelJS = require('exceljs');
@@ -16,15 +17,23 @@ const ClassController = {
   },
   getAllWithTeacher: async (req, res) => {
     try {
-      const { page, size } = req.query;
-
+      const { page, size, search } = req.query;
+  
       const attributes = ['class_id', 'teacher_id', 'className', 'classNameShort', 'classCode', 'isDelete'];
       const whereClause = { isDelete: false };
-
+  
+      if (search) {
+        whereClause[Op.or] = [
+          { className: { [Op.like]: `%${search}%` } },
+          { classCode: { [Op.like]: `%${search}%` } },
+          { '$teacher.name$': { [Op.like]: `%${search}%` } }
+        ];
+      }
+  
       if (page && size) {
         const offset = (page - 1) * size;
         const limit = parseInt(size, 10);
-
+  
         const { count, rows: classes } = await ClassModel.findAndCountAll({
           include: [{
             model: TeacherModel,
@@ -35,7 +44,7 @@ const ClassController = {
           offset: offset,
           limit: limit
         });
-
+  
         return res.json({
           total: count,
           classes: classes
@@ -49,14 +58,14 @@ const ClassController = {
           attributes: attributes,
           where: whereClause
         });
-
+  
         return res.json(classes);
       }
     } catch (error) {
       console.error('Error:', error);
       res.status(500).json({ message: 'Internal Server Error' });
     }
-  },
+  },  
 
   // Lấy một lớp học theo ID
   getByID: async (req, res) => {

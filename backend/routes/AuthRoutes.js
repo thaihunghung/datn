@@ -58,10 +58,10 @@ const passport = require('passport');
  *           schema:
  *             type: object
  *             properties:
- *               username:
+ *               teacherCode:
  *                 type: string
- *                 description: The teacher's username.
- *                 example: teacher123
+ *                 description: The teacher's code.
+ *                 example: 123456
  *               password:
  *                 type: string
  *                 description: The teacher's password.

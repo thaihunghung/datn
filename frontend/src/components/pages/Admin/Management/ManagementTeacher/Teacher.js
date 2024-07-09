@@ -73,13 +73,13 @@ export default function App(props) {
 
   useEffect(() => {
     const loadTeachers = async () => {
-      const { teachers, total } = await fetchTeachersData(page, rowsPerPage);
+      const { teachers, total } = await fetchTeachersData(page, rowsPerPage, filterValue);
       setTeachers(teachers);
       setTotalTeachers(total);
     };
 
     loadTeachers();
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, filterValue]);
 
   const headerColumns = useMemo(() => {
     if (visibleColumns === "all") return columns;
@@ -190,12 +190,8 @@ export default function App(props) {
   }, []);
 
   const onSearchChange = useCallback((value) => {
-    if (value) {
-      setFilterValue(value);
-      setPage(1);
-    } else {
-      setFilterValue("");
-    }
+    setFilterValue(value);
+    setPage(1);
   }, []);
 
   const onClear = useCallback(() => {
@@ -216,7 +212,7 @@ export default function App(props) {
       const selectedIds = Array.from(selectedKeys).map((key) => ({ id: key }));
       const response = await axiosAdmin.patch('/teachers/delete', { data: selectedIds });
       if (response.status === 200) {
-        const { teachers, total } = await fetchTeachersData(page, rowsPerPage);
+        const { teachers, total } = await fetchTeachersData(page, rowsPerPage, filterValue);
         setTeachers(teachers);
         setTotalTeachers(total);
         setIsAddModalOpen(false);
@@ -241,7 +237,7 @@ export default function App(props) {
     try {
       const response = await axiosAdmin.post("/teacher", newTeacher);
       if (response.status === 200) {
-        const { teachers, total } = await fetchTeachersData(page, rowsPerPage);
+        const { teachers, total } = await fetchTeachersData(page, rowsPerPage, filterValue);
         setTeachers(teachers);
         setTotalTeachers(total);
         handleClearSelection();
@@ -263,7 +259,7 @@ export default function App(props) {
       const res = await axiosAdmin.put(`/teacher/${teacher_id}`, { data: values });
       successNoti(res.data.message);
       setIsEditModalOpen(false);
-      const { teachers, total } = await fetchTeachersData(page, rowsPerPage);
+      const { teachers, total } = await fetchTeachersData(page, rowsPerPage, filterValue);
       setTeachers(teachers);
       setTotalTeachers(total);
     } catch (error) {
@@ -281,7 +277,7 @@ export default function App(props) {
       const selectedIds = Array.from(selectedKeys).map((key) => ({ id: key }));
       const response = await axiosAdmin.patch('/teachers/block', { data: selectedIds });
       if (response.status === 200) {
-        const { teachers, total } = await fetchTeachersData(page, rowsPerPage);
+        const { teachers, total } = await fetchTeachersData(page, rowsPerPage, filterValue);
         setTeachers(teachers);
         setTotalTeachers(total);
         setIsAddModalOpen(false);
@@ -462,11 +458,11 @@ export default function App(props) {
                 Block
               </Button>
             </Tooltip>
-            {/* <Tooltip showArrow={true} content={`Chuyển ${selectedKeys.size} vào thùng rác`}>
+            <Tooltip showArrow={true} content={`Chuyển ${selectedKeys.size} vào thùng rác`}>
               <Button className="text-[#FEFEFE]" variant="light" color="danger" onClick={() => handleDeleteClick()}>
                 Delete
               </Button>
-            </Tooltip> */}
+            </Tooltip>
             <Tooltip showArrow={true} content="Bỏ chọn">
               <Button className="text-[#FEFEFE] text-2xl" variant="light" onClick={handleClearSelection}>
                 X

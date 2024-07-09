@@ -30,7 +30,7 @@ const CourseScoresHistogramChart = () => {
     const fetchScoreData = async () => {
       try {
         const response = await axiosAdmin.post('/getAverageCourseScores', 
-          selectedCourses
+          {course_id_list: selectedCourses}
         );
         setScoreData(response.data);
         console.log("data", response.data)
@@ -132,7 +132,7 @@ const CourseScoresHistogramChart = () => {
           </Select>
         )}
       </div>
-      <h2 className="text-xl font-bold text-[#6366F1]">Phân bố điểm của lớp Công nghệ phần mền DA20TTB</h2>
+      <h2 className="text-xl font-bold text-[#6366F1]">Phân bố điểm</h2>
       <Bar data={chartData} options={chartOptions} />
     </div>
   );

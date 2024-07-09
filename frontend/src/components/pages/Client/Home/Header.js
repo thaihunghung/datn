@@ -105,12 +105,13 @@ const Header = ({ studentCode, setStudentCode }) => {
             />
           </DropdownTrigger>
           <DropdownMenu aria-label="Profile Actions" variant="flat">
-            <DropdownItem key="profile" className="h-14 gap-2">
-              <p className="font-semibold">{student.name }</p>
+            
+             <DropdownItem key="profile" className="h-14 gap-2">
+              <p className="font-semibold">{student?.name }</p>
               <p className="font-semibold">{student?.email}</p>
             </DropdownItem>
-            <DropdownItem key="team_settings">{student.class.classNameShort }</DropdownItem>
-            <DropdownItem key="settings">{student.class.className }</DropdownItem>
+            <DropdownItem key="team_settings">{student?.class?.classNameShort }</DropdownItem>
+            <DropdownItem key="settings">{student?.class?.className }</DropdownItem>
           </DropdownMenu>
         </Dropdown>
         <div className='flex flex-col text-left'>
