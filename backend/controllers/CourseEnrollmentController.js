@@ -247,59 +247,66 @@ const CourseEnrollmentController = {
       const emailsSet = new Set();
       const studentCodesSet = new Set();
       const insertPromises = [];
+      const failedRows = [];
+      const failedRowDetails = [];
+      let successfulRows = 0;
 
       const processRow = async (row, rowNumber) => {
         if (rowNumber !== 1) { // Skip the header row
           let email = row.getCell(4).value;
           let studentCode = row.getCell(3).value;
+          let classNameShort = row.getCell(1).value;
 
           if (email && typeof email === 'object' && email.hasOwnProperty('text')) {
             email = email.text;
           }
 
-          let insertStudent = false;
-
           if (!email || emailsSet.has(email)) {
             console.error(`Duplicate or invalid email found at row ${rowNumber}: ${email}`);
+            failedRows.push(rowNumber);
+            failedRowDetails.push(`Duplicate or invalid email: ${email}`);
           } else if (!studentCode || studentCodesSet.has(studentCode)) {
             console.error(`Duplicate or invalid studentCode found at row ${rowNumber}: ${studentCode}`);
+            failedRows.push(rowNumber);
+            failedRowDetails.push(`Duplicate or invalid studentCode: ${studentCode}`);
           } else {
-            const [student] = await sequelize.query(
-              'SELECT * FROM students WHERE studentCode = ? OR email = ?',
-              { replacements: [studentCode, email], type: sequelize.QueryTypes.SELECT }
-            );
+            try {
+              const [student] = await sequelize.query(
+                `SELECT * FROM students
+                                JOIN classes ON students.class_id = classes.class_id
+                                WHERE classes.classNameShort = ? AND students.studentCode = ?`,
+                { replacements: [classNameShort, studentCode], type: sequelize.QueryTypes.SELECT }
+              );
 
-            if (!student) {
-              emailsSet.add(email);
-              studentCodesSet.add(studentCode);
-              insertStudent = true;
+              if (student) {
+                emailsSet.add(email);
+                studentCodesSet.add(studentCode);
 
-              const insertStudentSQL = `INSERT INTO students (class_id, name, studentCode, email)
-                 VALUES ((SELECT class_id FROM classes WHERE classNameShort = ?), ?, ?, ?)`;
-              const studentValues = [
-                row.getCell(1).value,
-                row.getCell(2).value,
-                studentCode,
-                email,
-              ];
-              insertPromises.push(sequelize.query(insertStudentSQL, { replacements: studentValues })
-                .catch(error => {
-                  console.error(`Error inserting row ${rowNumber}: ${error.message}`);
-                }));
+                const insertEnrollmentSQL = `INSERT INTO course_enrollments (student_id, course_id)
+                                                         VALUES (?, ?)`;
+                const enrollmentValues = [
+                  student.student_id,
+                  courseId
+                ];
+                insertPromises.push(sequelize.query(insertEnrollmentSQL, { replacements: enrollmentValues })
+                  .then(() => {
+                    successfulRows++;
+                  })
+                  .catch(error => {
+                    console.error(`Error inserting enrollment for row ${rowNumber}: ${error.message}`);
+                    failedRows.push(rowNumber);
+                    failedRowDetails.push(`Error inserting enrollment: ${error.message}`);
+                  }));
+              } else {
+                console.error(`Student not found in class at row ${rowNumber}: ${studentCode}`);
+                failedRows.push(rowNumber);
+                failedRowDetails.push(`Student not found in class: ${studentCode}`);
+              }
+            } catch (error) {
+              console.error(`Error querying database for row ${rowNumber}: ${error.message}`);
+              failedRows.push(rowNumber);
+              failedRowDetails.push(`Database query error: ${error.message}` );
             }
-          }
-
-          if (insertStudent || !emailsSet.has(email) && !studentCodesSet.has(studentCode)) {
-            const insertEnrollmentSQL = `INSERT INTO course_enrollments (student_id, course_id)
-                                         VALUES ((SELECT student_id FROM students WHERE studentCode = ?), ?)`;
-            const enrollmentValues = [
-              studentCode,
-              courseId
-            ];
-            insertPromises.push(sequelize.query(insertEnrollmentSQL, { replacements: enrollmentValues })
-              .catch(error => {
-                console.error(`Error inserting enrollment for row ${rowNumber}: ${error.message}`);
-              }));
           }
         }
       };
@@ -312,16 +319,21 @@ const CourseEnrollmentController = {
       };
 
       await processAllRows();
-
       await Promise.all(insertPromises);
-
       fs.unlinkSync(filePath); // Remove the uploaded file after processing
-      return res.status(200).json({ message: "Data has been successfully saved to the database." });
+
+      // Sort failedRows in ascending order
+      failedRows.sort((a, b) => a - b);
+      console.log("failedRowDetails", failedRowDetails)
+      return res.status(200).json({
+        message: `Số dòng thêm thành công ${successfulRows}, Dòng thêm không thành công ${failedRows} ${failedRowDetails}`
+      });
 
     } catch (error) {
       console.error('Error processing file:', error);
       return res.status(500).json({ message: "An error occurred while processing the file." });
     }
+
   },
 }
 

@@ -208,7 +208,7 @@ const passport = require('passport');
 router.post('/register', AuthenticateController.register);
 router.post('/login', AuthenticateController.login);
 router.post('/change-password',ensureAuthenticated, AuthenticateController.changePassword);
-router.post('/refresh-token',ensureAuthenticated, TokenController.refreshToken); 
+router.post('/refresh-token', TokenController.refreshToken); 
 router.post('/revoke-token', ensureAuthenticated, TokenController.revokeToken); 
 router.get('/user', ensureAuthenticated, AuthenticateController.getUser);
 router.post('/logout', ensureAuthenticated, AuthenticateController.logout);

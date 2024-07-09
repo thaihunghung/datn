@@ -53,7 +53,7 @@ const Class = (props) => {
 
   const handleDownloadTemplateExcel = async (id) => {
     try {
-      const response = await axiosAdmin.get(`/student/course/${id}`, {
+      const response = await axiosAdmin.get(`/student-course/${id}`, {
         responseType: 'blob'
       });
 
