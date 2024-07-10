@@ -14,18 +14,21 @@ import {
 } from "@nextui-org/react";
 import { CloseOutlined, SearchOutlined } from '@ant-design/icons';
 import { axiosAdmin } from '../../../../service/AxiosAdmin';
+import { message } from 'antd';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 
 const Header = ({ studentCode, setStudentCode }) => {
-  const [activeItem, setActiveItem] = useState('home');
   const [student, setStudent] = useState('');
+  const navigate = useNavigate();
 
-  const handleInputChange = (event) => {
-    setStudentCode(event.target.value);
+  const handleChangePassWord = () => {
+    message.warning("Tính năng đang hoàn thiệt")
   };
 
-  const handleItemClick = (item) => {
-    console.log("item", item)
-    setActiveItem(item);
+  const handleLogout = () => {
+    Cookies.remove('accessTokenStudent')
+    navigate('/')
   };
 
   useEffect(() => {
@@ -35,11 +38,9 @@ const Header = ({ studentCode, setStudentCode }) => {
       });
       setStudent(response.data[0])
     }
-    console.log("student", student)
     fetchStudent();
 
   }, [studentCode])
-  console.log("studentCode", studentCode)
   return (
     <Navbar maxWidth="full" isBordered>
       <NavbarContent justify="start">
@@ -53,45 +54,9 @@ const Header = ({ studentCode, setStudentCode }) => {
             </div>
           </div>
         </NavbarBrand>
-        {/* <NavbarContent className="hidden sm:flex gap-24">
-          <NavbarItem isActive={activeItem === 'home'} >
-            <Link className='text-large'
-              color={activeItem === 'home' ? 'secondary' : 'foreground'}
-              aria-current="page"
-              href="#"
-              onClick={() => handleItemClick('home')}
-            >
-              Trang chủ
-            </Link>
-          </NavbarItem>
-          <NavbarItem isActive={activeItem === 'courses'} >
-            <Link className='text-large'
-              href="#"
-              aria-current="page"
-              color={activeItem === 'courses' ? 'secondary' : 'foreground'}
-              onClick={() => handleItemClick('courses')}
-            >
-              Khóa học
-            </Link>
-          </NavbarItem>
-        </NavbarContent> */}
       </NavbarContent>
 
       <NavbarContent as="div" className="items-center" justify="end">
-        <Input
-          classNames={{
-            base: "max-w-full sm:max-w-[20rem] h-10 ",
-            mainWrapper: "h-full",
-            input: "text-small",
-            inputWrapper: "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
-          }}
-          placeholder="Nhập mã sinh viên ..."
-          size="sm"
-          startContent={<SearchOutlined size={18} />}
-          type="search"
-          value={studentCode}
-          onChange={handleInputChange}
-        />
         <Dropdown placement="bottom-end">
           <DropdownTrigger>
             <Avatar
@@ -105,16 +70,19 @@ const Header = ({ studentCode, setStudentCode }) => {
             />
           </DropdownTrigger>
           <DropdownMenu aria-label="Profile Actions" variant="flat">
-            
-             <DropdownItem key="profile" className="h-14 gap-2">
-              <p className="font-semibold">{student?.name }</p>
-              <p className="font-semibold">{student?.email}</p>
+            <DropdownItem key="team_settings"
+            onClick={()=>handleChangePassWord()}
+            >
+              Đổi mật khẩu
             </DropdownItem>
-            <DropdownItem key="team_settings">{student?.class?.classNameShort }</DropdownItem>
-            <DropdownItem key="settings">{student?.class?.className }</DropdownItem>
+            <DropdownItem key="settings"
+            onClick={()=>handleLogout()}
+            >
+              Đăng xuất
+            </DropdownItem>
           </DropdownMenu>
         </Dropdown>
-        <div className='flex flex-col text-left'>
+        <div className='flex flex-col text-left font-semibold pr-9'>
           <p>{student?.name}</p>
           <p>{student?.email}</p>
         </div>

@@ -3,10 +3,15 @@ import Header from './Header';
 import DashboardCard from './DashboardCard';
 import Chart from './Chart';
 import { AxiosClient } from '../../../../service/AxiosClient';
-import { Button, Select } from 'antd';
+import { Button, message, Select } from 'antd';
+import Cookies from 'js-cookie';
+import { useNavigate, useLocation } from 'react-router-dom';
+import CloChart from './CloChart';
 
 const Home = () => {
-  const [studentCode, setStudentCode] = useState('110120151');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [studentCode, setStudentCode] = useState(location.state?.studentCode || '');
   const [student, setStudent] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
@@ -21,6 +26,32 @@ const Home = () => {
   const [classes, setClasses] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    const token = Cookies.get('accessTokenStudent');
+    if (!token) {
+      navigate('/');
+    }
+    console.log("studentCode", studentCode)
+  }, [navigate, studentCode]);
+
+  useEffect(() => {
+    const fetchStudent = async () => {
+      try {
+        const response =await AxiosClient.get('/student/info')
+    
+      setStudentCode(response.data.studentCode)
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
+          message.warning('Vui long đăng nhập lại');
+        } else {
+          message.error('Đã xảy ra lỗi không mong muốn. Vui lòng thử lại sau.');
+        }
+      }
+    } 
+    console.log("studentcode", studentCode)
+    fetchStudent();
+  }, [studentCode])
 
   useEffect(() => {
     const fetchFiltersData = async () => {
@@ -100,7 +131,7 @@ const Home = () => {
         <div className='mt-4 '>
           <div className="flex items-center">
             <Button
-              className='bg-[#6366F1] text-white'
+              className='bg-[#6366F1] text-white mb-4'
               onClick={() => setShowFilters(!showFilters)}>
               {showFilters ? 'Hide Filter' : 'Show Filter'}
             </Button>
@@ -131,17 +162,6 @@ const Home = () => {
                     options={optionsSemester}
                   />
                 </div>
-                {/* <div>
-                  <label className="block mb-2">Subject</label>
-                  <Select
-                    mode="multiple"
-                    value={filters.subject}
-                    style={{ width: '100%' }}
-                    onChange={(value) => handleFilterChange('subject', value)}
-                    placeholder="Chọn môn học"
-                    options={optionsSubject}
-                  />
-                </div> */}
                 <div>
                   <label className="block mb-2">Course</label>
                   <Select
@@ -157,13 +177,18 @@ const Home = () => {
             </div>
           )}
         </div>
-        <div className="grid grid-cols-3 gap-6 mt-6">
+        <div className="grid grid-cols-3 gap-6">
           <DashboardCard title="Điểm trung bình" value={student?.averageScore} icon="🎓" />
           <DashboardCard title="Số tín chỉ" value={student?.totalCredits} icon="📚" />
           <DashboardCard title="Số môn học" value={student?.courseCount} icon="📋" />
         </div>
         <div>
           <Chart studentCode={studentCode} filters={filters} />
+        </div>
+        <div>
+          <CloChart
+            studentCode={studentCode}
+          />
         </div>
       </div>
     </div>

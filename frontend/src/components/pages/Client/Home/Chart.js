@@ -4,7 +4,6 @@ import 'chart.js/auto';
 import { AxiosClient } from '../../../../service/AxiosClient';
 
 const Chart = ({ studentCode, filters }) => {
-  console.log("studentCode", studentCode)
   const [barChartData, setBarChartData] = useState({
     labels: [],
     datasets: [],
@@ -88,9 +87,9 @@ const Chart = ({ studentCode, filters }) => {
             const courseInfo = data[index];
             const value = context.raw;
             return `
-            Điểm : ${value}
-            Giáo viên: ${courseInfo.teacherName}
-            Class: ${courseInfo.className}
+            Điểm : ${value},
+            Giáo viên: ${courseInfo.teacherName},
+            Khóa học: ${courseInfo.courseName}
             `.trim().split('\n').map(line => line.trim()).join('\n');
           },
           title: function (context) {

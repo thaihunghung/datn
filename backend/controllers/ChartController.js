@@ -405,7 +405,68 @@ const ChartController = {
       console.error('Error fetching student statistics:', error);
       res.status(500).json({ message: 'Internal Server Error' });
     }
-  }
+  },
+  //CLO rate achieved by students by course
+  getCloAchievedByCourse: async (req, res) => {
+    try {
+      const { studentCode, course_id } = req.body;
+  
+      if (!studentCode) {
+        return res.status(400).json({ message: 'Student code is required' });
+      }
+  
+      const query = `
+        SELECT
+            s.student_id,
+            s.name AS studentName,
+            c.course_id,
+            c.courseName,
+            clo.clo_id,
+            clo.cloName,
+            clo.description as cloDescription,
+            SUM(ai.assessmentScore) AS totalScoreAchieved,
+            SUM(ri.maxScore) AS totalMaxScore,
+            round((SUM(ai.assessmentScore) / SUM(ri.maxScore)),2) * 100 AS percentageAchieved
+        FROM
+            students s
+        JOIN
+            assessments a ON s.student_id = a.student_id
+        JOIN
+            courses c ON a.course_id = c.course_id
+        JOIN
+            assessmentItems ai ON a.assessment_id = ai.assessment_id
+        JOIN
+            rubricsItems ri ON ai.rubricsItem_id = ri.rubricsItem_id
+        JOIN
+            clos clo ON ri.clo_id = clo.clo_id
+        WHERE
+            s.studentCode = :studentCode
+            AND c.course_id = :course_id
+            AND s.isDelete = 0
+            AND c.isDelete = 0
+            AND a.isDelete = 0
+            AND ai.isDelete = 0
+            AND ri.isDelete = 0
+            AND clo.isDelete = 0
+        GROUP BY
+            s.student_id, s.name, c.course_id, c.courseName, clo.clo_id, clo.cloName
+        ORDER BY
+            clo.clo_id;
+      `;
+  
+      const replacements = { studentCode, course_id };
+  
+      const results = await sequelize.query(query, {
+        type: sequelize.QueryTypes.SELECT,
+        replacements,
+      });
+  
+      res.json(results);
+    } catch (error) {
+      console.error('Error fetching student statistics:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  },
 
 };
 

@@ -1,4 +1,5 @@
 // import Header from "../components/pages/Client/Header/Header";
+import Login from "../components/pages/Client/Auth/Login";
 import Home from "../components/pages/Client/Home/Home";
 // import Menu from "../components/pages/Client/Menu/Menu";
 import "./Layout.css";
@@ -16,7 +17,8 @@ function Client() {
                 {/* <Menu /> */}
                 <div className="max-w-[2000px] m-auto">
                     <Routes>
-                        <Route path="" element={<Home />} />
+                        <Route path="" element={<Login />} />
+                        <Route path="/dashboard" element={<Home />} />
                     </Routes>
                 </div>
             </div>

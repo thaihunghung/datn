@@ -245,5 +245,6 @@ router.get('/students/performance/:student_id', ChartController.getStudentPerfor
 router.post('/course/arg-score', ChartController.getAverageCourseScores);
 router.post('/getAverageCourseScores', ChartController.getAverageCourseScoresOfStudents);
 router.post('/getStudentStatistics', ChartController.getStudentStatistics);
+router.post('/getCloAchievedByCourse', ChartController.getCloAchievedByCourse);
 
 module.exports = router;

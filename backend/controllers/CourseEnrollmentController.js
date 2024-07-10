@@ -326,7 +326,7 @@ const CourseEnrollmentController = {
       failedRows.sort((a, b) => a - b);
       console.log("failedRowDetails", failedRowDetails)
       return res.status(200).json({
-        message: `Số dòng thêm thành công ${successfulRows}, Dòng thêm không thành công ${failedRows} ${failedRowDetails}`
+        message: `Số dòng thêm thành công ${successfulRows} ${failedRows.length ==0 ? '':`, Dòng thêm không thành công ${failedRows} ${failedRowDetails}`} `
       });
 
     } catch (error) {

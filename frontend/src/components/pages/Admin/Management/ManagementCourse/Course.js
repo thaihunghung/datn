@@ -458,13 +458,15 @@ const Course = (props) => {
           </div>
         ))}
       </div>
-      <Pagination
-        total={Math.ceil(totalCourses / pageSize)}
-        current={currentPage}
-        pageSize={pageSize}
-        onChange={handlePageChange}
-        css={{ mt: '16px', textAlign: 'center' }}
-      />
+      <div className="flex justify-center">
+        <Pagination
+          total={Math.ceil(totalCourses / pageSize)}
+          current={currentPage}
+          pageSize={pageSize}
+          onChange={handlePageChange}
+          css={{ mt: '16px', textAlign: 'center' }}
+        />
+      </div>
 
       {/* Add Modal */}
       <AddCourseModal
@@ -524,7 +526,7 @@ const Course = (props) => {
         isConfirmActionOpen={isConfirmActionOpen}
         selectedCourse={selectedCourse}
         setIsConfirmActionOpen={setIsConfirmActionOpen}
-        successNoti= {successNoti}
+        successNoti={successNoti}
       />
     </>
   );

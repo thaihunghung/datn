@@ -5,6 +5,8 @@ const AuthenticateController = require('../controllers/AuthenticateController');
 const TokenController = require('../controllers/TokenController'); // Import TokenController
 const { ensureAuthenticated } = require('../middlewares/authMiddleware');
 const passport = require('passport');
+const StudentController = require('../controllers/StudentController');
+const authenticateStudent = require('../middlewares/studentMiddleware');
 
 /**
  * @openapi
@@ -210,7 +212,9 @@ router.post('/login', AuthenticateController.login);
 router.post('/change-password',ensureAuthenticated, AuthenticateController.changePassword);
 router.post('/refresh-token', TokenController.refreshToken); 
 router.post('/revoke-token', ensureAuthenticated, TokenController.revokeToken); 
-router.get('/user', ensureAuthenticated, AuthenticateController.getUser);
 router.post('/logout', ensureAuthenticated, AuthenticateController.logout);
+router.post('/student-login', StudentController.login);
+router.get('/user', ensureAuthenticated, AuthenticateController.getUser);
+router.get('/student/info', authenticateStudent, StudentController.getStudentInfo);
 
 module.exports = router;

@@ -33,7 +33,6 @@ export default function CLOChartComponent({ descriptions, setDescriptions }) {
               label: subject.subjectName,
               data: {},
               fill: true,
-              // backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.2)`,
               borderColor: `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`,
               pointBackgroundColor: '#6FDCE3',
               pointBorderColor: '#fff',
@@ -63,10 +62,10 @@ export default function CLOChartComponent({ descriptions, setDescriptions }) {
       setAllLabels(labelsArray);
       setDescriptions(descriptionsMap);
 
-      setRadarChartData({ labels: labelsArray, datasets });
+      // Set default selected radar datasets to 3 subjects
+      setSelectedRadar(datasets.slice(0, 3).map(dataset => dataset.label));
 
-      // Set default selected radar datasets
-      setSelectedRadar(datasets.map(dataset => dataset.label));
+      setRadarChartData({ labels: labelsArray, datasets: datasets.slice(0, 3) });
     } catch (error) {
       console.error('Error fetching radar chart data:', error);
     }

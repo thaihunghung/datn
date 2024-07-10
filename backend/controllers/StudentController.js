@@ -12,16 +12,30 @@ const SubjectModel = require("../models/SubjectModel");
 const CourseModel = require("../models/CourseModel");
 const AssessmentModel = require("../models/AssessmentModel");
 const TeacherModel = require("../models/TeacherModel");
+const jwt = require('jsonwebtoken');
+
+function formatDate(dateString) {
+  // Convert the date string to a Date object
+  const date = new Date(dateString);
+
+  // Extract the day, month, and year
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+  const year = date.getFullYear();
+
+  // Return the formatted date string
+  return `${day}${month}${year}`;
+}
 
 const StudentController = {
   // Lấy tất cả sinh viên
   index: async (req, res) => {
     try {
       const { page, size, search } = req.query;
-  
+
       const attributes = ['student_id', 'class_id', 'studentCode', 'email', 'name', 'createdAt', 'updatedAt', 'isDelete'];
       const whereClause = { isDelete: false };
-  
+
       if (search) {
         whereClause[Op.or] = [
           { studentCode: { [Op.like]: `%${search}%` } },
@@ -29,11 +43,11 @@ const StudentController = {
           { name: { [Op.like]: `%${search}%` } }
         ];
       }
-  
+
       if (page && size) {
         const offset = (page - 1) * size;
         const limit = parseInt(size, 10);
-  
+
         const { count, rows: students } = await StudentModel.findAndCountAll({
           include: [{
             model: ClassModel,
@@ -48,7 +62,7 @@ const StudentController = {
           limit: limit,
           order: ['student_id']
         });
-  
+
         return res.json({
           total: count,
           students: students
@@ -62,14 +76,14 @@ const StudentController = {
           attributes: attributes,
           where: whereClause
         });
-  
+
         return res.json(students);
       }
     } catch (error) {
       console.error('Lỗi khi lấy tất cả sinh viên:', error);
       res.status(500).json({ message: 'Lỗi server' });
     }
-  },  
+  },
   getAllByClassId: async (req, res) => {
     try {
       const { id } = req.params;
@@ -587,7 +601,56 @@ const StudentController = {
       res.status(500).json({ error: 'Internal server error' });
     }
   },
+  login: async (req, res) => {
+    const { studentCode, password } = req.body;
+    try {
+      const user = await StudentModel.findOne({ where: { studentCode } });
+      if (!user) {
+        return res.status(400).json({ message: 'Mã sinh viên hoặc mật khẩu không đúng' });
+      }
+      const formattedDate = formatDate(user.date_of_birth);
 
+      console.log("pass", password)
+      console.log("formattedDate", formattedDate)
+
+      if (password !== formattedDate) {
+        return res.status(400).json({ message: 'Mã sinh viên hoặc mật khẩu không đúng1' });
+      }
+
+      const payload = { id: user.studentCode };
+      const accessTokenStudent = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30m' });
+
+      // Đặt token trong cookies
+      res.cookie('accessTokenStudent', accessTokenStudent, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge: 30 * 60 * 1000 });
+
+      res.json({
+        message: 'Đăng nhập thành công',
+        accessTokenStudent,
+      });
+    } catch (error) {
+      console.error(`Lỗi đăng nhập: ${error.message}`);
+      res.status(500).json({ message: 'Lỗi server', error });
+    }
+  },
+  getStudentInfo: async (req, res) => {
+    try {
+      const student = await StudentModel.findOne({ where: { studentCode: req.user.studentCode } });
+      if (!student) {
+        return res.status(404).json({ message: 'Student not found' });
+      }
+
+      res.json({
+        studentCode: student.studentCode,
+        name: student.name,
+        dateOfBirth: student.date_of_birth,
+        email: student.email,
+        // Add other fields as necessary
+      });
+    } catch (error) {
+      console.error(`Error fetching student info: ${error.message}`);
+      res.status(500).json({ message: 'Server error', error });
+    }
+  }
 };
 
 module.exports = StudentController;
