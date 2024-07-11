@@ -246,5 +246,6 @@ router.post('/course/arg-score', ChartController.getAverageCourseScores);
 router.post('/getAverageCourseScores', ChartController.getAverageCourseScoresOfStudents);
 router.post('/getStudentStatistics', ChartController.getStudentStatistics);
 router.post('/getCloAchievedByCourse', ChartController.getCloAchievedByCourse);
+router.post('/getPloPercentageContainSubject', ChartController.getPloPercentageContainSubject);
 
 module.exports = router;

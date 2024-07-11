@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Select, Button } from 'antd';
 import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
@@ -11,7 +10,7 @@ const CourseScoresHistogramChart = () => {
   const [courseData, setCourseData] = useState([]);
   const [scoreData, setScoreData] = useState([]);
   const [selectedCourses, setSelectedCourses] = useState([]);
-  const [showFilter, setShowFilter] = useState(false);
+  const [showFilter, setShowFilter] = useState(true);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -114,7 +113,7 @@ const CourseScoresHistogramChart = () => {
       <div className="mb-4">
         <Button
           onClick={() => setShowFilter(!showFilter)}
-          className="flex justify-start rounded">
+          className="flex justify-start rounded mb-2">
           {showFilter ? 'Hide Filter' : 'Show Filter'}
         </Button>
         {showFilter && (

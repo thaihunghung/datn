@@ -132,9 +132,7 @@ const BarChartComponent = ({ filters, setFilters, showFilters, setShowFilters })
             return `
             Average Score: ${value}
             Teacher: ${courseInfo.teacherName}
-            Semester: ${courseInfo.semester}
-            Academic Year: ${courseInfo.academic_year}
-            Class: ${courseInfo.className}
+            Course: ${courseInfo.courseName}
             `.trim().split('\n').map(line => line.trim()).join('\n');
           },
           title: function (context) {

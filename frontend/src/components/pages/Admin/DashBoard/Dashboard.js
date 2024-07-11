@@ -4,6 +4,7 @@ import BarChartComponent from './BarChartComponent';
 import CLOChartComponent from './CLOChartComponent';
 import PLOChartComponent from './PLOChartComponent';
 import CourseScoresScatterChart from './CourseScoresScatterChart';
+import StackedBarChart from './StackedBarChart';
 
 export default function Dashboard() {
   const [user, setUser] = useState({});
@@ -55,7 +56,10 @@ export default function Dashboard() {
         />
       </div>
       <div>
-        <CourseScoresScatterChart/>
+        <StackedBarChart />
+      </div>
+      <div>
+        <CourseScoresScatterChart />
       </div>
     </div>
   );
