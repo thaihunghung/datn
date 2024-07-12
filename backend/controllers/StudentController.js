@@ -31,11 +31,12 @@ const StudentController = {
   // Lấy tất cả sinh viên
   index: async (req, res) => {
     try {
-      const { page, size, search } = req.query;
-
+      const { page, size, search, teacher_id } = req.query;
+  
       const attributes = ['student_id', 'class_id', 'studentCode', 'email', 'name', 'createdAt', 'updatedAt', 'isDelete'];
       const whereClause = { isDelete: false };
-
+      const whereClauseTeacher = { isDelete: false };
+  
       if (search) {
         whereClause[Op.or] = [
           { studentCode: { [Op.like]: `%${search}%` } },
@@ -43,18 +44,20 @@ const StudentController = {
           { name: { [Op.like]: `%${search}%` } }
         ];
       }
-
+  
+      if (teacher_id) {
+        whereClauseTeacher.teacher_id = teacher_id; // Adjust according to your actual data structure
+      }
+  
       if (page && size) {
         const offset = (page - 1) * size;
         const limit = parseInt(size, 10);
-
+  
         const { count, rows: students } = await StudentModel.findAndCountAll({
           include: [{
             model: ClassModel,
             attributes: ['classCode', 'classNameShort', 'className'],
-            where: {
-              isDelete: false
-            },
+            where: whereClauseTeacher,
           }],
           attributes: attributes,
           where: whereClause,
@@ -62,7 +65,7 @@ const StudentController = {
           limit: limit,
           order: ['student_id']
         });
-
+  
         return res.json({
           total: count,
           students: students
@@ -76,7 +79,7 @@ const StudentController = {
           attributes: attributes,
           where: whereClause
         });
-
+  
         return res.json(students);
       }
     } catch (error) {

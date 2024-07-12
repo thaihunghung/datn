@@ -398,7 +398,7 @@ const Course = (props) => {
         <Button
           className="mx-7 bg-[#6366F1] text-[#f0f0f0]"
           onClick={handleOpenAddModal}>
-          <p>Tạo mới <PlusOutlined /></p>
+          <p>Create new <PlusOutlined /></p>
         </Button>
 
         <Input

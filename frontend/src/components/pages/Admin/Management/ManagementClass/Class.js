@@ -262,7 +262,7 @@ const Class = (props) => {
             <Button color="primary" endContent={<i className="fa-solid fa-plus"></i>}
               onClick={() => setIsAddClassOpen(true)}
             >
-              Tạo mới
+              Create new
             </Button>
 
             <Button color="secondary" onClick={() => navigate('/admin/class/store')}>

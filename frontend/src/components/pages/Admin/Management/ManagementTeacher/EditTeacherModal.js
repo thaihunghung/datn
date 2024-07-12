@@ -25,10 +25,11 @@ function EditTeacherModal({ isOpen, onOpenChange, onSubmit, editTeacher, setEdit
   const handleSelectChange = (e) => {
     setEditTeacher((prev) => ({
       ...prev,
-      status: e.target.value,
+      permission: e.target.value,
     }));
   };
 
+  console.log("editTeacher", editTeacher)
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
       <ModalContent>
@@ -63,13 +64,14 @@ function EditTeacherModal({ isOpen, onOpenChange, onSubmit, editTeacher, setEdit
                 <Select
                   label="Permission"
                   name="permission"
-                  value={editTeacher.permission}
+                  defaultSelectedKeys={[editTeacher.permission]}
+                  value={editTeacher?.permission}
                   onChange={handleSelectChange}
                   fullWidth
                 >
                   {permissions.map((permission) => (
-                    <SelectItem key={permission.id} value={permission.id}>
-                      {capitalize(permission.name)}
+                    <SelectItem key={permission?.id} value={permission?.id}>
+                      {capitalize(permission?.name)}
                     </SelectItem>
                   ))}
                 </Select>

@@ -1,21 +1,23 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-
 import { User, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection, ScrollShadow, Button } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { Tooltip } from "antd";
 import { motion } from "framer-motion";
 import { Drawer, Menu } from "antd";
 import Cookies from 'js-cookie';
-
 import './Header.css'
 import { AxiosClient } from "../../../../../service/AxiosClient";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+
 function Nav(props) {
   const { collapsedNav, setCollapsedNav, setSpinning } = props;
   const navigate = useNavigate();
   const location = useLocation();
   const isActive = (path) => location.pathname.startsWith(path);
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
+  const [permission, setPermission] = useState();
+  const [submenuVisible, setSubmenuVisible] = useState({});
+  const [currentUser, setCurrentUser] = useState(null);
 
   const showDrawer = () => {
     setOpenMobileMenu(true);
@@ -24,8 +26,6 @@ function Nav(props) {
   const onClose = () => {
     setOpenMobileMenu(false);
   };
-  const [submenuVisible, setSubmenuVisible] = useState({});
-  const [currentUser, setCurrentUser] = useState(null);
 
   // Toggle submenu visibility
   const toggleSubmenu = (text) => {
@@ -45,6 +45,59 @@ function Nav(props) {
     return location.pathname === href ? 'Admin_tab-active' : '';
   };
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axiosAdmin.get(`${process.env.REACT_APP_API_DOMAIN_CLIENT}/user`);
+        const user = response.data;
+        Cookies.set('teacher_id', user.teacher_id, {
+          expires: 1, // Cookie expires in 1 day
+          secure: true, // Cookie is only sent over HTTPS
+          sameSite: 'Strict' // Prevents CSRF
+        });
+        console.log(user);
+        setPermission(user.permission);
+        setCurrentUser(user);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        navigate('/login');
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    navTab.forEach((tab) => {
+      if (tab.submenu) {
+        tab.submenu.forEach((submenuItem) => {
+          if (location.pathname.startsWith(submenuItem.link)) {
+            setSubmenuVisible((prev) => ({
+              ...prev,
+              [tab.text]: true,
+            }));
+          }
+        });
+      }
+    });
+  }, [location.pathname]);
+
+  const handleLogout = async () => {
+    try {
+      const response = await AxiosClient.post(`/logout`);
+      setSpinning(false);
+      Cookies.remove('teacher_id');
+      navigate('/login');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleToggleNav = () => {
+    setCollapsedNav(!collapsedNav);
+  };
+
+  // Define the navigation tabs conditionally
   const navTab = [
     { text: "Tổng quan", link: "/admin", icon: <i className={`text-[FF8077] fa-solid fa-house mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
     { text: "Chấm điểm", link: "/admin/management-grading/list", icon: <i className={`fa-solid fa-feather-pointed mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
@@ -98,62 +151,16 @@ function Nav(props) {
       link: "/admin/management-subject/list"
     },
     { text: "Rubric", link: "/admin/management-rubric/list", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
-    { text: "Giáo viên", link: "/admin/teacher", icon: <i className={`fa-solid fa-chalkboard-user mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
     { text: "Sinh viên", link: "/admin/student", icon: <i className={`fa-solid fa-school mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
-    { text: "Lớp", link: "/admin/class", icon: <i className={`fa-solid fa-landmark mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
     { text: "Lớp môn học", link: "/admin/course", icon: <i className={`fa-brands fa-odnoklassniki mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
   ];
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axiosAdmin.get(`${process.env.REACT_APP_API_DOMAIN_CLIENT}/user`);
-        const user = response.data;
-        Cookies.set('teacher_id', user.teacher_id, {
-          expires: 1, // Cookie expires in 1 day
-          secure: true, // Cookie is only sent over HTTPS
-          sameSite: 'Strict' // Prevents CSRF
-        });
-        console.log(user);
-        setCurrentUser(user);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        navigate('/login');
-      }
-    };
+  // Conditionally add the "Giáo viên" tab
+  if (permission === 2 || permission === 3) {
+    navTab.splice(5, 0, { text: "Lớp", link: "/admin/class", icon: <i className={`fa-solid fa-landmark mr-${collapsedNav ? "0" : "3"} w-4`}></i> },);
+    navTab.splice(6, 0, { text: "Giáo viên", link: "/admin/teacher", icon: <i className={`fa-solid fa-chalkboard-user mr-${collapsedNav ? "0" : "3"} w-4`}></i> });
+  }
 
-    fetchUser();
-  }, []);
-
-  useEffect(() => {
-    navTab.forEach((tab) => {
-      if (tab.submenu) {
-        tab.submenu.forEach((submenuItem) => {
-          if (location.pathname.startsWith(submenuItem.link)) {
-            setSubmenuVisible((prev) => ({
-              ...prev,
-              [tab.text]: true,
-            }));
-          }
-        });
-      }
-    });
-  }, [location.pathname]);
-
-  const handleLogout = async () => {
-    try {
-      const response = await AxiosClient.post(`/logout`);
-      setSpinning(false);
-      Cookies.remove('teacher_id');
-      navigate('/login');
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleToggleNav = () => {
-    setCollapsedNav(!collapsedNav);
-  };
   return (
     <div >
       <div className="block sm:hidden lg:hidden xl:hidden">
@@ -375,9 +382,9 @@ function Nav(props) {
                         startContent={
                           <i className="fa-solid fa-gear"></i>
                         }
-                        onClick={()=>navigate(`teacher/${currentUser.teacher_id}/profile`)}
+                        onClick={() => navigate(`teacher/${currentUser.teacher_id}/profile`)}
                       >
-                          Cài đặt
+                        Cài đặt
                       </DropdownItem>
                     </DropdownSection>
                     <DropdownItem
@@ -406,4 +413,3 @@ function Nav(props) {
 }
 
 export default Nav;
-

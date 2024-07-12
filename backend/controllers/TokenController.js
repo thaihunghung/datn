@@ -16,9 +16,11 @@ const TokenController = {
     try {
       const storedToken = await RefreshTokenModel.findOne({ where: { token: refreshToken } });
 
+      console.log('storedToken', storedToken)
       if (!storedToken || storedToken.revoked || storedToken.expired) {
         return res.status(400).json({ message: 'Refresh token không hợp lệ' });
       }
+
 
       const decoded = jwt.verify(refreshToken,  process.env.JWT_SECRET);
       const user = await TeacherModel.findByPk(decoded.id);

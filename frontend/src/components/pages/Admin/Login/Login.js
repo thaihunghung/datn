@@ -16,7 +16,7 @@ const Login = ({ onLoginSuccess }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.post(`${process.env.REACT_APP_API_DOMAIN_CLIENT}/refresh-token`, {}, {
+        const response = await axiosAdmin.post(`${process.env.REACT_APP_API_DOMAIN_CLIENT}/user`, {}, {
           withCredentials: true
         });
 

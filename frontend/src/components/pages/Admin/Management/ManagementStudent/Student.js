@@ -32,7 +32,7 @@ const Student = (props) => {
   const [filterValue, setFilterValue] = useState("");
   const [selectedKeys, setSelectedKeys] = useState(new Set([]));
   const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [sortDescriptor, setSortDescriptor] = useState({
     column: "name",
     direction: "ascending",
@@ -117,6 +117,12 @@ const Student = (props) => {
             {item.class.classNameShort}
           </>
         );
+        case "className":
+          return (
+            <>
+              {item.class.className}
+            </>
+          );
       case "actions":
         return (
           <div className="flex justify-center items-center gap-2">
@@ -237,7 +243,7 @@ const Student = (props) => {
             <Button color="primary" endContent={<i className="fa-solid fa-plus"></i>}
               onClick={() => setIsAddStudentOpen(true)}
             >
-              Tạo mới
+              Create new
             </Button>
 
             <Button color="secondary" onClick={() => navigate('/admin/student/store')}>
@@ -256,9 +262,9 @@ const Student = (props) => {
               className="bg-transparent outline-none text-default-400 text-small"
               onChange={onRowsPerPageChange}
             >
-              <option value="5">5</option>
               <option value="10">10</option>
               <option value="15">15</option>
+              <option value="20">20</option>
             </select>
           </label>
         </div>
@@ -336,7 +342,7 @@ const Student = (props) => {
         bottomContent={bottomContent}
         bottomContentPlacement="outside"
         classNames={{
-          wrapper: "max-h-[382px]",
+          wrapper: "max-h-[500px]",
         }}
         selectedKeys={selectedKeys}
         selectionMode="multiple"

@@ -3,8 +3,17 @@ import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 // Function to fetch student data from the API
 export const fetchStudentsData = async (page, size, searchTerm) => {
   try {
-    const response = await axiosAdmin.get(`/students?page=${page}&size=${size}&search=${searchTerm}`);
-    const data = response.data;
+    const responseUser = await axiosAdmin.get(`${process.env.REACT_APP_API_DOMAIN_CLIENT}/user`);
+
+    let studentsResponse;
+    if (responseUser.data.permission == 1) {
+      const teacher_id = responseUser.data.teacher_id;
+      studentsResponse = await axiosAdmin.get(`/students?page=${page}&size=${size}&search=${searchTerm}&teacher_id=${teacher_id}`);
+    } else {
+      studentsResponse = await axiosAdmin.get(`/students?page=${page}&size=${size}&search=${searchTerm}`);
+    }
+
+    const data = studentsResponse.data;
     if (data.students) {
       return {
         students: data.students,

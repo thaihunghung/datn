@@ -61,20 +61,20 @@ import FormMultipleGrading from '../components/pages/Admin/Management/Management
 import StoreClass from '../components/pages/Admin/Management/ManagementClass/StoreClass/StoreClass';
 import ProfileStudent from '../components/pages/Admin/Management/ManagementStudent/Profile/ProfileStudent';
 import StoreCourse from '../components/pages/Admin/Management/ManagementCourse/StoreCourse/StoreCourse';
+import NotFound from '../components/pages/Admin/Utils/NotFoundPage/NotFound';
 
 
-function Admin(props) {
+function Admin({ user }) {
   const [collapsedNav, setCollapsedNav] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [spinning, setSpinning] = useState(false);
-  const { user } = props;
+  const [permission, setPermission] = useState();
 
   const successNoti = (msg) => {
     messageApi.open({
       type: 'success',
       content: msg,
     });
-    console.log("scsc");
   };
   const errorNoti = (msg) => {
     messageApi.open({
@@ -82,6 +82,14 @@ function Admin(props) {
       content: msg,
     });
   };
+  console.log("permission", user)
+
+  useEffect(() => {
+    if (user) {
+      setPermission(user.permission)
+      console.log("permission", user)
+    }
+  }, [user])
 
   return (
     <div className="Admin flex flex-col sm:flex-row lg:flex-row xl:flex-row  h-[100vh] bg-[#FEFEFE]">
@@ -158,17 +166,25 @@ function Admin(props) {
           <Route path="/student/:id/profile" element={<ProfileStudent collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
           <Route path="/student/store" element={<StoreStudent collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
 
-          <Route path="/class" element={<Class collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
-          <Route path="/class/store" element={<StoreClass collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
+          {permission == 2 || permission == 3 && (
+            <>
+              <Route path="/class" element={<Class collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
+              <Route path="/class/store" element={<StoreClass collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
+            </>
+          )}
 
           <Route path="/course" element={<Course collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
           <Route path="/course/:id" element={<DetailCourse collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
           <Route path="/course/store" element={<StoreCourse collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
 
-          <Route path="/teacher" element={<Teacher collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
-          <Route path="/teacher/store" element={<StoreTeacher collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
+          {permission === 3 && (
+            <>
+              <Route path="/teacher" element={<Teacher collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
+              <Route path="/teacher/store" element={<StoreTeacher collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
+            </>
+          )}
           <Route path="/teacher/:id/profile" element={<TeacherProfile collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
-
+          <Route path="*" element={<NotFound />} /> {/* Add this line */}
         </Routes>
       </div>
     </div>
