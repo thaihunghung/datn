@@ -1,20 +1,25 @@
-// BarChartComponent.jsx
+// BoxPlotComponent.jsx
 import React, { useEffect, useState } from 'react';
-import { Bar } from 'react-chartjs-2';
+import Plot from 'react-plotly.js';
 import { Select, Button } from 'antd';
 import { axiosAdmin } from '../../../../service/AxiosAdmin';
 
-const BarChartComponent = ({ filters, setFilters, showFilters, setShowFilters }) => {
-  const [barChartData, setBarChartData] = useState({
-    labels: [],
-    datasets: []
-  });
-  const [barChartInfo, setBarChartInfo] = useState([]);
+const BoxPlotComponent = ({ filters, setFilters, showFilters, setShowFilters, user }) => {
+  const [boxPlotData, setBoxPlotData] = useState([]);
   const [semesters, setSemesters] = useState([]);
   const [academicYears, setAcademicYears] = useState([]);
   const [classes, setClasses] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [teacherId, setTeacherId] = useState();
+  const [permission, setPermission] = useState();
+
+  useEffect(() => {
+    if (user && user.teacher_id) {
+      setTeacherId(user.teacher_id);
+      setPermission(user.permission);
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchFiltersData = async () => {
@@ -24,7 +29,10 @@ const BarChartComponent = ({ filters, setFilters, showFilters, setShowFilters })
           axiosAdmin.get('/academic-year'),
           axiosAdmin.get('/class'),
           axiosAdmin.get('/subjects'),
-          axiosAdmin.get('/course-all'),
+          axiosAdmin.post('/course-all', {
+            teacher_id: teacherId,
+            permission: permission
+          }),
         ]);
 
         setSemesters(semestersRes.data);
@@ -38,10 +46,10 @@ const BarChartComponent = ({ filters, setFilters, showFilters, setShowFilters })
     };
 
     fetchFiltersData();
-  }, []);
+  }, [permission, teacherId]);
 
   useEffect(() => {
-    const fetchBarChartData = async () => {
+    const fetchBoxPlotData = async () => {
       try {
         const processedFilters = {
           academic_year_id_list: filters.year.map(value => parseInt(value.split(' ')[0])),
@@ -50,6 +58,8 @@ const BarChartComponent = ({ filters, setFilters, showFilters, setShowFilters })
           subject_id_list: filters.subject.map(value => parseInt(value.split(' ')[0])),
           course_id_list: filters.course.map(value => parseInt(value.split(' ')[0])),
           student_code: '',
+          teacher_id: teacherId,
+          permission: permission
         };
 
         const response = await axiosAdmin.post('/course/arg-score', {
@@ -57,28 +67,29 @@ const BarChartComponent = ({ filters, setFilters, showFilters, setShowFilters })
         });
         const data = response.data;
 
-        const labels = data.map(course => course.courseCode);
-        const scores = data.map(course => course.averageScore);
+        const coursesMap = data.reduce((acc, student) => {
+          const courseName = student.courseName;
+          if (!acc[courseName]) {
+            acc[courseName] = [];
+          }
+          acc[courseName].push(student.score);
+          return acc;
+        }, {});
 
-        setBarChartData({
-          labels,
-          datasets: [{
-            label: 'Average Scores',
-            data: scores,
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1
-          }]
-        });
+        const plotData = Object.keys(coursesMap).map(course => ({
+          type: 'box',
+          name: course,
+          y: coursesMap[course]
+        }));
 
-        setBarChartInfo(data);
+        setBoxPlotData(plotData);
       } catch (error) {
-        console.error('Error fetching bar chart data:', error);
+        console.error('Error fetching box plot data:', error);
       }
     };
 
-    fetchBarChartData();
-  }, [filters]);
+    fetchBoxPlotData();
+  }, [filters, permission, teacherId]);
 
   const handleFilterChange = (name, values) => {
     setFilters(prev => ({
@@ -111,37 +122,6 @@ const BarChartComponent = ({ filters, setFilters, showFilters, setShowFilters })
     value: `${item.subject_id} - ${item.subjectCode} - ${item.subjectName}`,
     label: item.subjectName,
   }));
-
-  const barChartOptions = {
-    scales: {
-      y: {
-        beginAtZero: true,
-        max: 10
-      }
-    },
-    plugins: {
-      legend: {
-        display: false
-      },
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            const index = context.dataIndex;
-            const courseInfo = barChartInfo[index];
-            const value = context.raw;
-            return `
-            Average Score: ${value}
-            Teacher: ${courseInfo.teacherName}
-            Course: ${courseInfo.courseName}
-            `.trim().split('\n').map(line => line.trim()).join('\n');
-          },
-          title: function (context) {
-            return context[0].label;
-          }
-        }
-      }
-    }
-  };
 
   return (
     <div className="col-span-2 bg-white shadow-md rounded-lg p-6 mb-6">
@@ -176,17 +156,19 @@ const BarChartComponent = ({ filters, setFilters, showFilters, setShowFilters })
                 options={optionsSemester}
               />
             </div>
-            <div>
-              <label className="block mb-2">Lớp học</label>
-              <Select
-                mode="multiple"
-                value={filters.class}
-                style={{ width: '100%' }}
-                onChange={(value) => handleFilterChange('class', value)}
-                placeholder="Chọn lớp"
-                options={optionsClass}
-              />
-            </div>
+            {permission > 1 && (
+              <div>
+                <label className="block mb-2">Lớp học</label>
+                <Select
+                  mode="multiple"
+                  value={filters.class}
+                  style={{ width: '100%' }}
+                  onChange={(value) => handleFilterChange('class', value)}
+                  placeholder="Chọn lớp"
+                  options={optionsClass}
+                />
+              </div>
+            )}
             <div>
               <label className="block mb-2">Subject</label>
               <Select
@@ -213,9 +195,21 @@ const BarChartComponent = ({ filters, setFilters, showFilters, setShowFilters })
         </div>
       )}
       <h2 className="text-xl font-semibold mb-4">Điểm trung bình của khóa học</h2>
-      <Bar data={barChartData} options={barChartOptions} />
+      <Plot
+        data={boxPlotData}
+        layout={{ 
+          title: 'Box Plot of Course Scores', 
+          yaxis: { 
+            range: [0, 10],  // Set y-axis range
+            title: '',  // Hide y-axis title
+          },
+          xaxis: { showticklabels: false },  // Hide x-axis tick labels
+          width: 1200,  // Increase width
+          height: 600   // Increase height
+        }}
+      />
     </div>
   );
 };
 
-export default BarChartComponent;
+export default BoxPlotComponent;

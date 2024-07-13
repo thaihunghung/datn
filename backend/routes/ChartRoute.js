@@ -238,8 +238,8 @@ const router = express.Router();
  *         description: Server error
  */
 
-router.get('/achieved-rate/clo/percentage', ChartController.getCloPercentage);
-router.get('/achieved-rate/plo/percentage', ChartController.getPloPercentage);
+router.post('/achieved-rate/clo/percentage', ChartController.getCloPercentage);
+router.post('/achieved-rate/plo/percentage', ChartController.getPloPercentage);
 router.get('/subject/average/subject', ChartController.averageScoresPerSubject);
 router.get('/students/performance/:student_id', ChartController.getStudentPerformanceByCourse);
 router.post('/course/arg-score', ChartController.getAverageCourseScores);
@@ -247,5 +247,6 @@ router.post('/getAverageCourseScores', ChartController.getAverageCourseScoresOfS
 router.post('/getStudentStatistics', ChartController.getStudentStatistics);
 router.post('/getCloAchievedByCourse', ChartController.getCloAchievedByCourse);
 router.post('/getPloPercentageContainSubject', ChartController.getPloPercentageContainSubject);
+router.post('/getScoreStudentByCourseAndTeacher', ChartController.getScoreStudentByCourseAndTeacher);
 
 module.exports = router;

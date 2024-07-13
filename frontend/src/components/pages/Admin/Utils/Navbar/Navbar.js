@@ -384,7 +384,7 @@ function Nav(props) {
                         }
                         onClick={() => navigate(`teacher/${currentUser.teacher_id}/profile`)}
                       >
-                        Cài đặt
+                        Xem chi tiết
                       </DropdownItem>
                     </DropdownSection>
                     <DropdownItem

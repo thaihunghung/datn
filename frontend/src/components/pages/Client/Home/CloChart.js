@@ -56,14 +56,14 @@ const CloChart = ({ studentCode }) => {
   const generateColors = (count) => {
     const colors = [];
     for (let i = 0; i < count; i++) {
-      const hue = (i * 360 / count) % 360;
-      colors.push(`hsl(${hue}, 70%, 50%)`);
+      const color = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.6)`;
+      colors.push(color);
     }
     return colors;
   };
 
   const backgroundColors = generateColors(data.length);
-  const borderColors = backgroundColors.map(color => color.replace('70%', '90%'));
+  const borderColors = backgroundColors.map(color => color.replace('0.6', '1'));
 
   const chartData = {
     labels: cloNames,
@@ -76,7 +76,44 @@ const CloChart = ({ studentCode }) => {
     }]
   };
 
+  const customGridLinePlugin = {
+    id: 'customGridLine',
+    afterDraw: (chart) => {
+      if (chart.config.type !== 'polarArea') return;
+
+      const { ctx, chartArea: { top, left, bottom, right }, scales: { r } } = chart;
+
+      const yAxis = r;
+      const ticks = yAxis.ticks;
+      const valueIndex = ticks.findIndex(tick => tick.value === 50);
+
+      if (valueIndex >= 0) {
+        const tick = ticks[valueIndex];
+        const y = yAxis.getDistanceFromCenterForValue(tick.value);
+
+        ctx.save();
+        ctx.strokeStyle = 'red';
+        ctx.beginPath();
+        ctx.arc(yAxis.xCenter, yAxis.yCenter, y, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+  };
+
   const options = {
+    scales: {
+      r: {
+        min: 0,
+        max: 100,
+        ticks: {
+          stepSize: 10,
+          callback: function (value) {
+            return value;
+          }
+        }
+      }
+    },
     plugins: {
       title: {
         display: true,
@@ -90,7 +127,8 @@ const CloChart = ({ studentCode }) => {
             return `${description}: ${percentage}%`;
           }
         }
-      }
+      },
+      customGridLine: {}
     }
   };
 
@@ -124,7 +162,7 @@ const CloChart = ({ studentCode }) => {
           <h3 className="text-center mb-4">
             CLO Achievement Percentages
           </h3>
-          <PolarArea data={chartData} options={options} />
+          <PolarArea data={chartData} options={options} plugins={[customGridLinePlugin]} />
         </CardBody>
       </Card>
     </div>

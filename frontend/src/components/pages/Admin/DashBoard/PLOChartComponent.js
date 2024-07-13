@@ -6,16 +6,35 @@ import 'chart.js/auto';
 
 const { Option } = Select;
 
-const PLOChartComponent = () => {
+const PLOChartComponent = ({ user }) => {
   const [data, setData] = useState([]);
   const [originalData, setOriginalData] = useState([]);
   const [selectedPLO, setSelectedPLO] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
+  const [teacherId, setTeacherId] = useState();
+  const [permission, setPermission] = useState();
+
+  useEffect(() => {
+    if (user && user.teacher_id) {
+      console.log("User info:", user);
+      setTeacherId(user.teacher_id);
+      setPermission(user.permission);
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchData = async () => {
+      console.log("Fetching data with:", { teacherId, permission });
+
+      if (!teacherId || !permission) return;
+      
       try {
-        const response = await axiosAdmin.get('/achieved-rate/plo/percentage');
+        const response = await axiosAdmin.post('/achieved-rate/plo/percentage', {
+          teacher_id: teacherId,
+          permission: permission
+        });
+        console.log("Response data:", response.data);
+
         const ploData = response.data[0].plos.map((plo) => ({
           name: plo.ploName,
           percentage: (plo.percentage_score * 100).toFixed(2),
@@ -29,12 +48,12 @@ const PLOChartComponent = () => {
     };
 
     fetchData();
-  }, []);
+  }, [teacherId, permission]);
 
   useEffect(() => {
     const filteredData = originalData.filter(plo => selectedPLO.includes(plo.name));
     setData(filteredData);
-  }, [selectedPLO]);
+  }, [selectedPLO, originalData]);
 
   const handlePLOSelection = (value) => {
     setSelectedPLO(value);
@@ -57,6 +76,41 @@ const PLOChartComponent = () => {
     ],
   };
 
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'PLOs',
+        },
+      },
+      y: {
+        title: {
+          display: false,
+          text: 'Percentage',
+        },
+        beginAtZero: true,
+        min: 0,
+        max: 100,
+      },
+    },
+    plugins: {
+      legend: {
+        display: false,
+        position: 'top',
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            return `${context.label}: ${context.raw}%`;
+          },
+        },
+      },
+    },
+  };
+
   return (
     <div className="plo-chart bg-white shadow-md rounded-lg p-6 mb-6">
       <div className="mb-4">
@@ -67,9 +121,7 @@ const PLOChartComponent = () => {
         </Button>
         {showFilter && (
           <div>
-            <p
-              className='text-left mb-1'
-            >Chọn các chuẩn đầu ra hiển thị</p>
+            <p className='text-left mb-1'>Chọn các chuẩn đầu ra hiển thị</p>
             <Select
               mode="multiple"
               style={{ width: '100%' }}
@@ -87,7 +139,9 @@ const PLOChartComponent = () => {
         )}
       </div>
       <h2 className="text-xl font-semibold mb-4">Tỉ lệ đạt của chuẩn đầu ra của chương trình</h2>
-      <Line data={chartData} />
+      <div className="h-[600px] w-full">
+        <Line data={chartData} options={chartOptions} />
+      </div>
     </div>
   );
 };

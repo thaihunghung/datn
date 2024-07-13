@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import { Line, Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { AxiosClient } from '../../../../service/AxiosClient';
 
@@ -69,6 +69,23 @@ const Chart = ({ studentCode, filters }) => {
     fetchChartData();
   }, [filters, studentCode]);
 
+  const customGridLinePlugin = {
+    id: 'customGridLine',
+    afterDraw: (chart) => {
+      const { ctx, chartArea: { top, left, bottom, right }, scales: { y } } = chart;
+
+      ctx.save();
+      ctx.strokeStyle = 'red';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      const yPixel = y.getPixelForValue(5);  // Assuming the y-axis is from 0 to 10
+      ctx.moveTo(left, yPixel);
+      ctx.lineTo(right, yPixel);
+      ctx.stroke();
+      ctx.restore();
+    }
+  };
+
   const barChartOptions = {
     scales: {
       y: {
@@ -96,19 +113,20 @@ const Chart = ({ studentCode, filters }) => {
             return context[0].label;
           }
         }
-      }
+      },
+      customGridLine: {}
     }
   };
 
   return (
-    <div className='grid grid-cols-2 mt-5'>
+    <div className='grid grid-cols-1 mt-5'>
       <div className='flex flex-col bg-white rounded-lg items-center shadow-md m-2'>
         <h3>Line Chart</h3>
-        <Line className='p-4' data={lineChartData} options={barChartOptions} />
+        <Line className='p-4' data={lineChartData} options={barChartOptions} plugins={[customGridLinePlugin]} />
       </div>
       <div className='flex flex-col bg-white p-6 rounded-lg items-center shadow-md m-2'>
         <h3>Bar Chart</h3>
-        <Bar className='p-4' data={barChartData} options={barChartOptions} />
+        <Bar className='p-4' data={barChartData} options={barChartOptions} plugins={[customGridLinePlugin]} />
       </div>
     </div>
   );

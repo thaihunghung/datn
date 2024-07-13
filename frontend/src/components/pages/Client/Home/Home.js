@@ -38,9 +38,9 @@ const Home = () => {
   useEffect(() => {
     const fetchStudent = async () => {
       try {
-        const response =await AxiosClient.get('/student/info')
-    
-      setStudentCode(response.data.studentCode)
+        const response = await AxiosClient.get('/student/info')
+
+        setStudentCode(response.data.studentCode)
       } catch (error) {
         if (error.response && error.response.status === 401) {
           message.warning('Vui long đăng nhập lại');
@@ -48,7 +48,7 @@ const Home = () => {
           message.error('Đã xảy ra lỗi không mong muốn. Vui lòng thử lại sau.');
         }
       }
-    } 
+    }
     console.log("studentcode", studentCode)
     fetchStudent();
   }, [studentCode])
@@ -182,13 +182,15 @@ const Home = () => {
           <DashboardCard title="Số tín chỉ" value={student?.totalCredits} icon="📚" />
           <DashboardCard title="Số môn học" value={student?.courseCount} icon="📋" />
         </div>
-        <div>
-          <Chart studentCode={studentCode} filters={filters} />
-        </div>
-        <div>
-          <CloChart
-            studentCode={studentCode}
-          />
+        <div className="grid grid-cols-2">
+          <div>
+            <Chart studentCode={studentCode} filters={filters} />
+          </div>
+          <div className='mt-6'>
+            <CloChart
+              studentCode={studentCode}
+            />
+          </div>
         </div>
       </div>
     </div>

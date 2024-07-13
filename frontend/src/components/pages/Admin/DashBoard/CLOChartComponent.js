@@ -8,16 +8,29 @@ ChartJS.register(RadialLinearScale, LinearScale, CategoryScale, BarElement, Poin
 
 const { Option } = Select;
 
-export default function CLOChartComponent({ descriptions, setDescriptions }) {
+export default function CLOChartComponent({ descriptions, setDescriptions, user, permission }) {
   const [selectedRadar, setSelectedRadar] = useState([]);
   const [radarChartData, setRadarChartData] = useState({ labels: [], datasets: [] });
   const [originalRadarData, setOriginalRadarData] = useState([]);
   const [allLabels, setAllLabels] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
+  const [teacherId, setTeacherId] = useState();
+
+  useEffect(() => {
+    if (user && user.teacher_id) {
+      setTeacherId(user.teacher_id);
+    }
+  }, [user]);
 
   const fetchRadarChartData = async () => {
+    if (!teacherId) return;
+
     try {
-      const response = await axiosAdmin.get('/achieved-rate/clo/percentage');
+      console.log("teacher_id", teacherId);
+      const response = await axiosAdmin.post('/achieved-rate/clo/percentage', {
+        teacher_id: teacherId,
+        permission: permission
+       });
       const data = response.data;
 
       const labelsSet = new Set();
@@ -73,7 +86,7 @@ export default function CLOChartComponent({ descriptions, setDescriptions }) {
 
   useEffect(() => {
     fetchRadarChartData();
-  }, []);
+  }, [teacherId]);
 
   useEffect(() => {
     const selectedDatasets = originalRadarData.filter(dataset => selectedRadar.includes(dataset.label));
@@ -164,7 +177,9 @@ export default function CLOChartComponent({ descriptions, setDescriptions }) {
           )}
         </div>
         <h2 className="text-xl font-semibold mb-4">Tỉ lệ đạt của chuẩn đầu ra của môn học</h2>
+        <div className='h-[600px] w-full'>
         <Radar data={radarChartData} options={radarChartOptions} />
+        </div>
       </div>
     </div>
   );

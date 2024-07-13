@@ -1,21 +1,32 @@
 import React, { useEffect, useState } from 'react';
+import Plot from 'react-plotly.js';
 import { Select, Button } from 'antd';
-import { Bar } from 'react-chartjs-2';
-import 'chart.js/auto';
 import { axiosAdmin } from '../../../../service/AxiosAdmin';
 
 const { Option } = Select;
 
-const CourseScoresHistogramChart = () => {
+const CourseScoresHistogramChart = ({ user }) => {
   const [courseData, setCourseData] = useState([]);
   const [scoreData, setScoreData] = useState([]);
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [showFilter, setShowFilter] = useState(true);
+  const [teacherId, setTeacherId] = useState();
+  const [permission, setPermission] = useState();
+
+  useEffect(() => {
+    if (user && user.teacher_id) {
+      setTeacherId(user.teacher_id);
+      setPermission(user.permission);
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await axiosAdmin.get('/course-all');
+        const response = await axiosAdmin.post('/course-all', {
+          teacher_id: teacherId,
+          permission: permission
+        });
         setCourseData(response.data);
       } catch (error) {
         console.error('Error fetching course data:', error);
@@ -23,30 +34,33 @@ const CourseScoresHistogramChart = () => {
     };
 
     fetchCourses();
-  }, []);
+  }, [teacherId, permission]);
 
   useEffect(() => {
     const fetchScoreData = async () => {
       try {
-        const response = await axiosAdmin.post('/getAverageCourseScores', 
-          {course_id_list: selectedCourses}
+        const response = await axiosAdmin.post('/getAverageCourseScores',
+          {
+            course_id_list: selectedCourses,
+            teacher_id: teacherId,
+            permission: permission
+          }
         );
         setScoreData(response.data);
-        console.log("data", response.data)
       } catch (error) {
         console.error('Error fetching score data:', error);
       }
     };
 
-    console.log("selectedCourses", selectedCourses)
     fetchScoreData();
-  }, [selectedCourses]);
+  }, [selectedCourses, teacherId, permission]);
 
   const handleCourseSelection = (value) => {
     setSelectedCourses(value);
   };
 
   const processData = (data) => {
+    const totalScores = data.length;
     const scoreCounts = data.reduce((acc, score) => {
       acc[score.score] = acc[score.score] || { count: 0, students: [] };
       acc[score.score].count += 1;
@@ -55,56 +69,49 @@ const CourseScoresHistogramChart = () => {
     }, {});
     return Object.keys(scoreCounts).map(score => ({
       x: parseFloat(score),
-      y: scoreCounts[score].count,
+      y: (scoreCounts[score].count / totalScores) * 100,
       students: scoreCounts[score].students
     })).sort((a, b) => a.x - b.x); // Sort scores in ascending order
   };
 
   const processedData = processData(scoreData);
 
-  const chartData = {
-    labels: processedData.map(dataPoint => dataPoint.x),
-    datasets: [{
-      label: 'Histogram Dataset',
-      data: processedData.map(dataPoint => dataPoint.y),
-      backgroundColor: 'rgb(75, 192, 192)',
-      barPercentage: 1.0,
-      categoryPercentage: 1.0
-    }]
+  const barTrace = {
+    type: 'bar',
+    x: processedData.map(dataPoint => dataPoint.x),
+    y: processedData.map(dataPoint => dataPoint.y),
+    name: 'Percentage of Scores',
+    marker: {
+      color: 'rgba(75, 192, 192, 0.5)'
+    },
+    hovertemplate: 'Điểm: %{x}, Tỉ lệ: %{y:.3f}%<extra></extra>'
   };
 
-  const chartOptions = {
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Điểm',
-        }
-      },
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Số lượng sinh viên',
-        },
-        ticks: {
-          stepSize: 1
-        }
-      }
+  const lineTrace = {
+    type: 'scatter',
+    mode: 'lines+markers',
+    x: processedData.map(dataPoint => dataPoint.x),
+    y: processedData.map(dataPoint => dataPoint.y),
+    name: 'Trend of Scores',
+    line: {
+      color: 'rgba(75, 192, 192, 1)'
     },
-    plugins: {
-      legend: {
-        display: false
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-            const index = context.dataIndex;
-            const students = processedData[index].students.join(', ');
-            return `${context.dataset.label}: ${context.raw}\nStudents:\n${students}`;
-          }
-        }
-      }
+    hovertemplate: 'Điểm: %{x}, Tỉ lệ: %{y:.3f}%<extra></extra>'
+  };
+
+  const layout = {
+    title: 'Phân bố điểm',
+    xaxis: {
+      title: 'Điểm',
+      range: [0, 10],
+      tick0: 0,
+      dtick: 1
+    },
+    yaxis: {
+      title: 'Tỉ lệ %',
+      // range: [0, 100],
+      tick0: 0,
+      dtick: 1
     }
   };
 
@@ -132,7 +139,10 @@ const CourseScoresHistogramChart = () => {
         )}
       </div>
       <h2 className="text-xl font-bold text-[#6366F1]">Phân bố điểm</h2>
-      <Bar data={chartData} options={chartOptions} />
+      <Plot
+        data={[barTrace, lineTrace]}
+        layout={layout}
+      />
     </div>
   );
 };

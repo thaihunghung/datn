@@ -190,7 +190,7 @@ const Course = (props) => {
       handleCloseEditModal();
     } catch (err) {
       console.error("Error updating course: ", err.message);
-      errorNoti('Error updating course', 'Please try again later.');
+      // errorNoti('Error updating course', 'Please try again later.');
     }
   };
 

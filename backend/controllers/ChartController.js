@@ -6,43 +6,55 @@ const ChartController = {
   // tỉ lệ đạt được clo trên subject
   getCloPercentage: async (req, res) => {
     console.log("okok");
+    const { teacher_id, permission } = req.body;
+
+    // Xây dựng bộ lọc truy vấn động
+    const teacherFilter = teacher_id && permission == 1 ? 'AND t.teacher_id = :teacher_id' : '';
     try {
       const results = await sequelize.query(
         `SELECT
-              s.subject_id,
-              s.subjectName,
-              c.clo_id,
-              c.cloName,
-              SUM(ai.assessmentScore) AS totalScoreAchieved,
-              SUM(ri.maxScore) AS totalMaxScore,
-              ROUND((SUM(ai.assessmentScore) / SUM(ri.maxScore)),4) AS percentage_score
-          FROM
-              assessmentItems ai
-          JOIN
-              rubricsItems ri ON ai.rubricsItem_id = ri.rubricsItem_id
-          JOIN
-              rubrics r ON ri.rubric_id = r.rubric_id
-          JOIN
-              subjects s ON r.subject_id = s.subject_id
-          JOIN
-              clos c ON ri.clo_id = c.clo_id
-          WHERE
-              ai.isDelete = 0
-              AND ri.isDelete = 0
-              AND r.isDelete = 0
-              AND s.isDelete = 0
-              AND c.isDelete = 0
-          GROUP BY
-              s.subject_id, s.subjectName, c.clo_id, c.cloName
-          ORDER BY
-              s.subject_id, c.clo_id;
+            s.subject_id,
+            s.subjectName,
+            c.clo_id,
+            c.cloName,
+            SUM(ai.assessmentScore) AS totalScoreAchieved,
+            SUM(ri.maxScore) AS totalMaxScore,
+            ROUND((SUM(ai.assessmentScore) / SUM(ri.maxScore)), 4) AS percentage_score
+        FROM
+            assessmentItems ai
+        JOIN
+            rubricsItems ri ON ai.rubricsItem_id = ri.rubricsItem_id
+        JOIN
+            rubrics r ON ri.rubric_id = r.rubric_id
+        JOIN
+            subjects s ON r.subject_id = s.subject_id
+        JOIN
+            clos c ON ri.clo_id = c.clo_id
+        JOIN
+            courses cs ON s.subject_id = cs.subject_id
+        JOIN
+            teachers t ON cs.teacher_id = t.teacher_id
+        WHERE
+            ai.isDelete = 0
+            AND ri.isDelete = 0
+            AND r.isDelete = 0
+            AND s.isDelete = 0
+            AND c.isDelete = 0
+            AND cs.isDelete = 0
+            ${teacherFilter}
+        GROUP BY
+            s.subject_id, s.subjectName, c.clo_id, c.cloName
+        ORDER BY
+            s.subject_id, c.clo_id;
         `,
         {
           type: Sequelize.QueryTypes.SELECT,
+          replacements: { teacher_id }
         }
       );
+
       const formattedResults = results.reduce((acc, result) => {
-        const { subject_id, subjectName, clo_id, cloName, description, percentage_score } = result;
+        const { subject_id, subjectName, clo_id, cloName, percentage_score } = result;
 
         if (!acc[subject_id]) {
           acc[subject_id] = {
@@ -55,7 +67,6 @@ const ChartController = {
         acc[subject_id].clos.push({
           clo_id,
           cloName,
-          description,
           percentage_score
         });
 
@@ -68,31 +79,86 @@ const ChartController = {
       res.status(500).json({ message: 'Internal Server Error' });
     }
   },
-  getPloPercentage: async (req, res) => {
+  getScoreStudentByCourseAndTeacher: async (req, res) => {
+    const { course_id , teacher_id } = req.body;
+    
     try {
       const results = await sequelize.query(
         `SELECT
-             
-              plo.plo_id,
-              plo.ploName,
-              SUM(ai.assessmentScore) AS totalScoreAchieved,
-              SUM(ri.maxScore) AS totalMaxScore,
-              ROUND((SUM(ai.assessmentScore) / SUM(ri.maxScore)), 4) AS percentage_score
-          FROM
-              assessmentItems ai
-          JOIN rubricsItems ri ON ai.rubricsItem_id = ri.rubricsItem_id
-          JOIN rubrics r ON ri.rubric_id = r.rubric_id
-          JOIN subjects s ON r.subject_id = s.subject_id
-          JOIN plos plo ON ri.plo_id = plo.plo_id
-          WHERE
-              ai.isDelete = 0 AND ri.isDelete = 0 AND r.isDelete = 0 AND s.isDelete = 0 AND plo.isDelete = 0
-          GROUP BY
-              plo.plo_id,
-              plo.ploName
-          ORDER BY
-              plo.plo_id,plo.ploName;`,
+            st.student_id,
+            st.name AS studentName,
+            c.course_id,
+            c.courseName,
+            t.teacher_id,
+            t.name AS teacherName,
+            a.totalScore AS studentScore
+        FROM
+            students st
+        JOIN
+            assessments a ON st.student_id = a.student_id
+        JOIN
+            courses c ON a.course_id = c.course_id
+        JOIN
+            teachers t ON c.teacher_id = t.teacher_id
+        WHERE
+            c.isDelete = 0 AND a.isDelete = 0 AND st.isDelete = 0
+            and t.teacher_id = :teacher_id
+            and c.course_id = :course_id
+        ORDER BY
+            st.student_id, c.course_id;
+            `,
         {
           type: Sequelize.QueryTypes.SELECT,
+          replacements: { teacher_id, course_id }
+        }
+      );
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
+  ,
+  getPloPercentage: async (req, res) => {
+    console.log(" req.body55", req.body)
+    const { teacher_id, permission } = req.body;
+
+    // Xây dựng bộ lọc truy vấn động
+    const teacherFilter = teacher_id && permission == 1 ? 'AND t.teacher_id = :teacher_id' : '';
+
+    try {
+      const results = await sequelize.query(
+        `SELECT
+                s.subject_id,
+                s.subjectName,
+                plo.plo_id,
+                plo.ploName,
+                SUM(ai.assessmentScore) AS totalScoreAchieved,
+                SUM(ri.maxScore) AS totalMaxScore,
+                ROUND((SUM(ai.assessmentScore) / SUM(ri.maxScore)), 4) AS percentage_score
+            FROM
+                assessmentItems ai
+            JOIN rubricsItems ri ON ai.rubricsItem_id = ri.rubricsItem_id
+            JOIN rubrics r ON ri.rubric_id = r.rubric_id
+            JOIN subjects s ON r.subject_id = s.subject_id
+            JOIN plos plo ON ri.plo_id = plo.plo_id
+            JOIN courses cs ON s.subject_id = cs.subject_id
+            JOIN teachers t ON cs.teacher_id = t.teacher_id
+            WHERE
+                ai.isDelete = 0
+                AND ri.isDelete = 0
+                AND r.isDelete = 0
+                AND s.isDelete = 0
+                AND plo.isDelete = 0
+                AND cs.isDelete = 0
+                ${teacherFilter}
+            GROUP BY
+                s.subject_id, s.subjectName, plo.plo_id, plo.ploName
+            ORDER BY
+                s.subject_id, plo.plo_id;
+            `,
+        {
+          type: Sequelize.QueryTypes.SELECT,
+          replacements: { teacher_id }
         }
       );
 
@@ -122,6 +188,7 @@ const ChartController = {
       res.status(500).json({ message: 'Internal Server Error' });
     }
   },
+
   getPloPercentageContainSubject: async (req, res) => {
     try {
       const results = await sequelize.query(
@@ -175,27 +242,27 @@ const ChartController = {
           type: Sequelize.QueryTypes.SELECT,
         }
       );
-  
+
       // Process the results to format the output
       const ploMap = new Map();
-  
+
       results.forEach(item => {
         const { plo_id, ploName, subjectName, subjectContributionPercentage } = item;
-  
+
         if (!ploMap.has(plo_id)) {
           ploMap.set(plo_id, { ploName, totalPercentage: 0, subjects: [] });
         }
-  
+
         const ploData = ploMap.get(plo_id);
         ploData.totalPercentage += subjectContributionPercentage;
         ploData.subjects.push({
           subjectName: subjectName,
           contributionPercentage: subjectContributionPercentage
         });
-  
+
         ploMap.set(plo_id, ploData);
       });
-  
+
       const formattedResults = [];
       ploMap.forEach((value, key) => {
         formattedResults.push({
@@ -205,16 +272,20 @@ const ChartController = {
           subjects: value.subjects
         });
       });
-  
+
       res.json(formattedResults);
     } catch (error) {
       console.error('Error:', error);
       res.status(500).json({ message: 'Internal Server Error' });
     }
   },
-  
+
   // diểm trung bình của subject
   averageScoresPerSubject: async (req, res) => {
+    const { teacher_id, permission } = req.body;
+
+    // Xây dựng bộ lọc truy vấn động
+    const teacherFilter = teacher_id && permission == 1 ? 'where t.teacher_id = :teacher_id' : '';
     try {
       const results = await sequelize.query(
         `SELECT
@@ -223,15 +294,16 @@ const ChartController = {
             s.subjectName AS subjectName
         FROM
             assessments AS a
-        LEFT JOIN courses AS c
-            ON a.course_id = c.course_id
-        LEFT JOIN subjects AS s
-            ON c.subject_id = s.subject_id
+        JOIN courses AS c ON a.course_id = c.course_id
+        JOIN subjects AS s ON c.subject_id = s.subject_id
+        JOIN teachers AS t ON c.teacher_id = t.teacher_id
+        ${teacherFilter}
         GROUP BY
             s.subject_id, s.subjectName;
         `,
         {
           type: Sequelize.QueryTypes.SELECT,
+          replacements: { teacher_id }
         }
       );
       res.json(results);
@@ -310,7 +382,9 @@ const ChartController = {
         academic_year_id_list,
         semester_id_list,
         class_id_list,
-        student_code
+        student_code,
+        teacher_id,
+        permission
       } = req.body.processedFilters;
 
       // Construct dynamic query filters
@@ -320,71 +394,62 @@ const ChartController = {
       const semesterIdFilter = semester_id_list && semester_id_list.length > 0 ? 'AND s.semester_id IN (:semester_id_list)' : '';
       const classIdFilter = class_id_list && class_id_list.length > 0 ? 'AND cl.class_id IN (:class_id_list)' : '';
       const studentCodeFilter = student_code > 0 ? 'AND st.studentCode = :student_code' : '';
+      const teacherFilter = teacher_id && permission == 1 ? 'and t.teacher_id = :teacher_id' : '';
 
       console.log("courseIdFilter 1111", courseIdFilter)
       const query = `
         SELECT
+            st.student_id,
+            st.studentCode,
+            st.name AS studentName,
             c.course_id,
             c.courseName,
-            c.courseCode,
+            sub.subject_id,
+            sub.subjectName,
             ay.academic_year_id,
-            ay.description AS academic_year,
-            s.semester_id,
-            s.descriptionShort AS semester,
-            t.teacher_id,
-            t.name AS teacherName,
+            ay.description AS academicYear,
+            sem.semester_id,
+            sem.descriptionShort AS semester,
             cl.class_id,
             cl.className,
-            ROUND(SUM(ai.assessmentScore) / SUM(ri.maxScore) * 10, 2) AS averageScore
-        FROM
-            courses c
-        JOIN semester_academic_years say ON
-            c.id_semester_academic_year = say.id_semester_academic_year
-        JOIN academic_years ay ON
-            say.academic_year_id = ay.academic_year_id
-        JOIN semesters s ON
-            say.semester_id = s.semester_id
-        JOIN assessments a ON
-            c.course_id = a.course_id
-        JOIN assessmentItems ai ON
-            a.assessment_id = ai.assessment_id
-        JOIN rubricsItems ri ON
-            ai.rubricsItem_id = ri.rubricsItem_id
-        JOIN teachers t ON
-            c.teacher_id = t.teacher_id
-        JOIN classes cl ON
-            c.class_id = cl.class_id
-        JOIN subjects sub ON
-            c.subject_id = sub.subject_id
-        JOIN students st ON
-            a.student_id = st.student_id
-        WHERE
-            c.isDelete = 0 
-            AND ay.isDelete = 0 
-            AND s.isDelete = 0 
-            AND a.isDelete = 0
-            AND ai.isDelete = 0
-            AND ri.isDelete = 0
-            ${courseIdFilter}
-            ${subjectIdFilter}
-            ${academicYearIdFilter}
-            ${semesterIdFilter}
-            ${classIdFilter}
-            ${studentCodeFilter}
-        GROUP BY
-            c.course_id,
-            c.courseName,
-            c.courseCode,
-            ay.academic_year_id,
-            ay.description,
-            s.semester_id,
-            s.descriptionShort,
             t.teacher_id,
-            t.name,
-            cl.class_id,
-            cl.className
+            t.name AS teacherName,
+            a.totalScore AS score
+        FROM
+            students st
+        JOIN
+            assessments a ON st.student_id = a.student_id
+        JOIN
+            courses c ON a.course_id = c.course_id
+        JOIN
+            subjects sub ON c.subject_id = sub.subject_id
+        JOIN
+            semester_academic_years say ON c.id_semester_academic_year = say.id_semester_academic_year
+        JOIN
+            academic_years ay ON say.academic_year_id = ay.academic_year_id
+        JOIN
+            semesters sem ON say.semester_id = sem.semester_id
+        JOIN
+            classes cl ON c.class_id = cl.class_id
+        JOIN
+            teachers t ON c.teacher_id = t.teacher_id
+        WHERE
+            st.isDelete = 0
+            AND a.isDelete = 0
+            AND c.isDelete = 0
+            AND sub.isDelete = 0
+            AND ay.isDelete = 0
+            AND sem.isDelete = 0
+            AND cl.isDelete = 0
+            ${teacherFilter}
+            ${studentCodeFilter}
+            ${classIdFilter}
+            ${subjectIdFilter}
+            ${semesterIdFilter}
+            ${academicYearIdFilter}
+            ${courseIdFilter}
         ORDER BY
-            ay.academic_year_id, s.semester_id, c.course_id;
+            st.student_id, c.course_id, t.teacher_id;
       `;
 
       const replacements = {
@@ -393,7 +458,8 @@ const ChartController = {
         ...(academic_year_id_list && academic_year_id_list.length > 0 && { academic_year_id_list }),
         ...(semester_id_list && semester_id_list.length > 0 && { semester_id_list }),
         ...(class_id_list && class_id_list.length > 0 && { class_id_list }),
-        ...(student_code && { student_code })
+        ...(student_code && { student_code }),
+        ...(teacher_id && { teacher_id })
       };
 
       const results = await sequelize.query(query, {
@@ -410,11 +476,11 @@ const ChartController = {
 
   getAverageCourseScoresOfStudents: async (req, res) => {
     try {
-      const { course_id_list } = req.body;
+      const { course_id_list, teacher_id, permission } = req.body;
 
       // Xây dựng bộ lọc truy vấn động
       const courseIdFilter = course_id_list && course_id_list.length > 0 ? 'AND c.course_id IN (:course_id_list)' : '';
-
+      const teacherFilter = teacher_id && permission == 1 ? 'and t.teacher_id = :teacher_id' : '';
       const query = `
         SELECT
             c.course_id,
@@ -444,13 +510,15 @@ const ChartController = {
             AND cl.isDelete = 0
             AND a.totalScore > 0
             ${courseIdFilter}
+            ${teacherFilter}
         ORDER BY
             a.totalScore;
 
       `;
 
       const replacements = {
-        ...(course_id_list && course_id_list.length > 0 && { course_id_list })
+        ...(course_id_list && course_id_list.length > 0 && { course_id_list }),
+        teacher_id
       };
 
       const results = await sequelize.query(query, {

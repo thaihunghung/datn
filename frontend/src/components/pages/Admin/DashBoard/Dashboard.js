@@ -3,13 +3,15 @@ import { axiosAdmin } from '../../../../service/AxiosAdmin';
 import BarChartComponent from './BarChartComponent';
 import CLOChartComponent from './CLOChartComponent';
 import PLOChartComponent from './PLOChartComponent';
-import CourseScoresScatterChart from './CourseScoresScatterChart';
+import CourseScoresScatterChart from './CourseScoresHistogramChart';
 import StackedBarChart from './StackedBarChart';
+import StudentScore from './StudentScore';
 
 export default function Dashboard() {
   const [user, setUser] = useState({});
   const [descriptions, setDescriptions] = useState({});
   const [showFilters, setShowFilters] = useState(false);
+  const [permission, setPermission] = useState();
   const [filters, setFilters] = useState({
     year: [],
     semester: [],
@@ -23,7 +25,7 @@ export default function Dashboard() {
       try {
         const response = await axiosAdmin.get(`${process.env.REACT_APP_API_DOMAIN_CLIENT}/user`);
         const user = response.data;
-
+        setPermission(response.data.permission)
         setUser(user);
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -46,20 +48,44 @@ export default function Dashboard() {
       </header>
 
       <div className='grid grid-cols-2 mx-3'>
-        <CLOChartComponent descriptions={descriptions} setDescriptions={setDescriptions} />
-        <PLOChartComponent />
+        <CLOChartComponent
+          permission={permission}
+          user={user}
+          descriptions={descriptions}
+          setDescriptions={setDescriptions}
+        />
+        <PLOChartComponent
+          permission={permission}
+          user={user}
+        />
+        {permission > 1 && (
+          <div className='col-span-2'>
+            <StackedBarChart
+              user={user}
+            />
+          </div>
+        )}
+        {permission == 1 && (
+          <div className='col-span-2'>
+            <StudentScore
+              user={user}
+            />
+          </div>
+        )}
         <BarChartComponent
+          permission={permission}
+          user={user}
           filters={filters}
           setFilters={setFilters}
           showFilters={showFilters}
           setShowFilters={setShowFilters}
         />
       </div>
+
       <div>
-        <StackedBarChart />
-      </div>
-      <div>
-        <CourseScoresScatterChart />
+        <CourseScoresScatterChart
+          user={user}
+        />
       </div>
     </div>
   );

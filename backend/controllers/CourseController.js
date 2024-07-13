@@ -92,14 +92,40 @@ const CourseController = {
     }
   },
   getAll: async (req, res) => {
+    const { teacher_id, permission } = req.body;
+
+    // Xây dựng bộ lọc truy vấn động
+    const teacherFilter = teacher_id && permission == 1 ? 'where t.teacher_id = :teacher_id' : '';
     try {
-      const courses = await CourseModel.findAll({
-        where: { isDelete: false }
-      });
-      res.json(courses);
+      const results = await sequelize.query(
+        `SELECT
+            c.course_id,
+            c.courseName,
+            c.courseCode,
+            s.subject_id,
+            s.subjectName,
+            t.teacher_id,
+            t.name AS teacherName
+        FROM
+            courses c
+        JOIN
+            subjects s ON c.subject_id = s.subject_id
+        JOIN
+            teachers t ON c.teacher_id = t.teacher_id
+        ${teacherFilter}
+           
+        ORDER BY
+            c.course_id;
+        `,
+        {
+          type: Sequelize.QueryTypes.SELECT,
+          replacements: { teacher_id }
+        }
+      );
+      res.json(results);
     } catch (error) {
-      console.error('Lỗi khi lấy tất cả các khóa học:', error);
-      res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
+      console.error('Error fetching average scores per subject:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
     }
   },
 
