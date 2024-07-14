@@ -112,7 +112,9 @@ const CourseScoresHistogramChart = ({ user }) => {
       // range: [0, 100],
       tick0: 0,
       dtick: 1
-    }
+    },
+    width: 1100,
+    height: 600
   };
 
   return (

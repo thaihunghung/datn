@@ -95,7 +95,7 @@ const CourseController = {
     const { teacher_id, permission } = req.body;
 
     // Xây dựng bộ lọc truy vấn động
-    const teacherFilter = teacher_id && permission == 1 ? 'where t.teacher_id = :teacher_id' : '';
+    const teacherFilter = teacher_id && permission == 1 ? 'and t.teacher_id = :teacher_id' : '';
     try {
       const results = await sequelize.query(
         `SELECT
@@ -112,6 +112,7 @@ const CourseController = {
             subjects s ON c.subject_id = s.subject_id
         JOIN
             teachers t ON c.teacher_id = t.teacher_id
+        where c.isDelete = 0
         ${teacherFilter}
            
         ORDER BY

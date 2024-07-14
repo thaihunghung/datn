@@ -6,6 +6,7 @@ import PLOChartComponent from './PLOChartComponent';
 import CourseScoresScatterChart from './CourseScoresHistogramChart';
 import StackedBarChart from './StackedBarChart';
 import StudentScore from './StudentScore';
+import ParallelCoordinatesChartComponent from './ParallelCoordinatesChartComponent';
 
 export default function Dashboard() {
   const [user, setUser] = useState({});
@@ -54,17 +55,26 @@ export default function Dashboard() {
           descriptions={descriptions}
           setDescriptions={setDescriptions}
         />
+
         <PLOChartComponent
           permission={permission}
           user={user}
         />
-        {permission > 1 && (
+        <div className='col-span-2'>
+          <ParallelCoordinatesChartComponent
+            permission={permission}
+            user={user}
+            descriptions={descriptions}
+            setDescriptions={setDescriptions}
+          />
+        </div>
+        {/* {permission > 1 && (
           <div className='col-span-2'>
             <StackedBarChart
               user={user}
             />
           </div>
-        )}
+        )} */}
         {permission == 1 && (
           <div className='col-span-2'>
             <StudentScore

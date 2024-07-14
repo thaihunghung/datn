@@ -80,8 +80,8 @@ const ChartController = {
     }
   },
   getScoreStudentByCourseAndTeacher: async (req, res) => {
-    const { course_id , teacher_id } = req.body;
-    
+    const { course_id, teacher_id } = req.body;
+
     try {
       const results = await sequelize.query(
         `SELECT
@@ -154,7 +154,7 @@ const ChartController = {
             GROUP BY
                 s.subject_id, s.subjectName, plo.plo_id, plo.ploName
             ORDER BY
-                s.subject_id, plo.plo_id;
+                plo.plo_id, s.subject_id ;
             `,
         {
           type: Sequelize.QueryTypes.SELECT,
@@ -192,86 +192,59 @@ const ChartController = {
   getPloPercentageContainSubject: async (req, res) => {
     try {
       const results = await sequelize.query(
-        `WITH totalPloScore AS (
-              SELECT
-                  plo.plo_id,
-                  plo.ploName,
-                  SUM(ai.assessmentScore) AS totalScoreAchieved,
-                  SUM(ri.maxScore) AS totalMaxScore,
-                  ROUND((SUM(ai.assessmentScore) / SUM(ri.maxScore)), 4) AS percentage_score
-              FROM
-                  assessmentItems ai
-              JOIN rubricsItems ri ON ai.rubricsItem_id = ri.rubricsItem_id
-              JOIN rubrics r ON ri.rubric_id = r.rubric_id
-              JOIN plos plo ON ri.plo_id = plo.plo_id
-              WHERE
-                  ai.isDelete = 0 AND ri.isDelete = 0 AND r.isDelete = 0 AND plo.isDelete = 0
-              GROUP BY
-                  plo.plo_id,
-                  plo.ploName
-          )
-  
-          -- Tính tỷ lệ đóng góp của từng môn học vào tổng phần trăm của PLO
-          SELECT
-              plo.plo_id,
-              plo.ploName,
-              s.subject_id,
-              s.subjectName,
-              SUM(ai.assessmentScore) AS subjectScoreAchieved,
-              ROUND(SUM(ai.assessmentScore) / tps.totalScoreAchieved * tps.percentage_score * 100, 2) AS subjectContributionPercentage
-          FROM
-              assessmentItems ai
-          JOIN rubricsItems ri ON ai.rubricsItem_id = ri.rubricsItem_id
-          JOIN rubrics r ON ri.rubric_id = r.rubric_id
-          JOIN subjects s ON r.subject_id = s.subject_id
-          JOIN plos plo ON ri.plo_id = plo.plo_id
-          JOIN totalPloScore tps ON plo.plo_id = tps.plo_id
-          WHERE
-              ai.isDelete = 0 AND ri.isDelete = 0 AND r.isDelete = 0 AND s.isDelete = 0 AND plo.isDelete = 0
-              
-          GROUP BY
-              plo.plo_id,
-              plo.ploName,
-              s.subject_id,
-              s.subjectName,
-              tps.totalScoreAchieved,
-              tps.percentage_score
-          ORDER BY
-              plo.plo_id, s.subject_id;`,
+        `SELECT
+                s.student_id,
+                s.name AS student_name,
+                subj.subject_id,
+                subj.subjectName AS subject_name,
+                p.plo_id,
+                p.ploName AS plo_name,
+                SUM(ai.assessmentScore) AS total_assessment_score,
+                SUM(ri.maxScore) AS total_max_score,
+                (SUM(ai.assessmentScore) / SUM(ri.maxScore)) AS score_ratio
+            FROM
+                students s
+            JOIN
+                course_enrollments ce ON s.student_id = ce.student_id
+            JOIN
+                courses c ON ce.course_id = c.course_id
+            JOIN
+                assessments a ON c.course_id = a.course_id AND s.student_id = a.student_id
+            JOIN
+                assessmentItems ai ON a.assessment_id = ai.assessment_id
+            JOIN
+                rubricsItems ri ON ai.rubricsItem_id = ri.rubricsItem_id
+            JOIN
+                plos p ON ri.plo_id = p.plo_id
+            JOIN
+                subjects subj ON c.subject_id = subj.subject_id
+            GROUP BY
+                s.student_id, subj.subject_id, p.plo_id
+            ORDER BY
+                p.plo_id, s.student_id, subj.subject_id;`,
         {
           type: Sequelize.QueryTypes.SELECT,
         }
       );
 
       // Process the results to format the output
-      const ploMap = new Map();
-
-      results.forEach(item => {
-        const { plo_id, ploName, subjectName, subjectContributionPercentage } = item;
-
-        if (!ploMap.has(plo_id)) {
-          ploMap.set(plo_id, { ploName, totalPercentage: 0, subjects: [] });
+      const formattedResults = results.reduce((acc, row) => {
+        const { plo_name, subject_name, student_id, student_name, total_assessment_score, total_max_score, score_ratio } = row;
+        if (!acc[plo_name]) {
+          acc[plo_name] = {};
         }
-
-        const ploData = ploMap.get(plo_id);
-        ploData.totalPercentage += subjectContributionPercentage;
-        ploData.subjects.push({
-          subjectName: subjectName,
-          contributionPercentage: subjectContributionPercentage
+        if (!acc[plo_name][subject_name]) {
+          acc[plo_name][subject_name] = [];
+        }
+        acc[plo_name][subject_name].push({
+          student_id,
+          student_name,
+          total_assessment_score,
+          total_max_score,
+          score_ratio,
         });
-
-        ploMap.set(plo_id, ploData);
-      });
-
-      const formattedResults = [];
-      ploMap.forEach((value, key) => {
-        formattedResults.push({
-          plo_id: key,
-          ploName: value.ploName,
-          totalPercentage: value.totalPercentage.toFixed(2),
-          subjects: value.subjects
-        });
-      });
+        return acc;
+      }, {});
 
       res.json(formattedResults);
     } catch (error) {

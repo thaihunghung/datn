@@ -1,4 +1,3 @@
-// BoxPlotComponent.jsx
 import React, { useEffect, useState } from 'react';
 import Plot from 'react-plotly.js';
 import { Select, Button } from 'antd';
@@ -72,15 +71,35 @@ const BoxPlotComponent = ({ filters, setFilters, showFilters, setShowFilters, us
           if (!acc[courseName]) {
             acc[courseName] = [];
           }
-          acc[courseName].push(student.score);
+          acc[courseName].push(student);
           return acc;
         }, {});
 
-        const plotData = Object.keys(coursesMap).map(course => ({
-          type: 'box',
-          name: course,
-          y: coursesMap[course]
-        }));
+        const plotData = Object.keys(coursesMap).map(course => {
+          const scores = coursesMap[course].map(student => student.score);
+          const studentNames = coursesMap[course].map(student => student.studentName);
+
+          const max = Math.max(...scores);
+          const min = Math.min(...scores);
+          const sortedScores = [...scores].sort((a, b) => a - b);
+          const q1 = sortedScores[Math.floor(sortedScores.length / 4)];
+          const q3 = sortedScores[Math.floor(3 * sortedScores.length / 4)];
+          const median = sortedScores[Math.floor(sortedScores.length / 2)];
+
+          const maxStudent = studentNames[scores.indexOf(max)];
+          const minStudent = studentNames[scores.indexOf(min)];
+          const q1Student = studentNames[scores.indexOf(q1)];
+          const q3Student = studentNames[scores.indexOf(q3)];
+          const medianStudent = studentNames[scores.indexOf(median)];
+          console.log("maxStudent", maxStudent)
+          return {
+            type: 'box',
+            name: course,
+            y: scores,
+            boxpoints: 'all', // Display all points
+            text: studentNames, // Display student names
+          };
+        });
 
         setBoxPlotData(plotData);
       } catch (error) {
@@ -124,7 +143,7 @@ const BoxPlotComponent = ({ filters, setFilters, showFilters, setShowFilters, us
   }));
 
   return (
-    <div className="col-span-2 bg-white shadow-md rounded-lg p-6 mb-6">
+    <div className="col-span-2 bg-white shadow-md rounded-lg p-3 mb-6">
       <div className="flex items-center">
         <Button onClick={() => setShowFilters(!showFilters)}>
           {showFilters ? 'Hide Filter' : 'Show Filter'}
@@ -197,15 +216,15 @@ const BoxPlotComponent = ({ filters, setFilters, showFilters, setShowFilters, us
       <h2 className="text-xl font-semibold mb-4">Điểm trung bình của khóa học</h2>
       <Plot
         data={boxPlotData}
-        layout={{ 
-          title: 'Box Plot of Course Scores', 
-          yaxis: { 
+        layout={{
+          title: 'Box Plot of Course Scores',
+          yaxis: {
             range: [0, 10],  // Set y-axis range
             title: '',  // Hide y-axis title
           },
           xaxis: { showticklabels: false },  // Hide x-axis tick labels
-          width: 1200,  // Increase width
-          height: 600   // Increase height
+          width: 1100, 
+          height: 600
         }}
       />
     </div>

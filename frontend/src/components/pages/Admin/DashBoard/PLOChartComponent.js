@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { axiosAdmin } from '../../../../service/AxiosAdmin';
 import { Select, Button } from 'antd';
-import { Line } from 'react-chartjs-2';
-import 'chart.js/auto';
+import Plot from 'react-plotly.js';
 
 const { Option } = Select;
 
@@ -16,7 +15,6 @@ const PLOChartComponent = ({ user }) => {
 
   useEffect(() => {
     if (user && user.teacher_id) {
-      console.log("User info:", user);
       setTeacherId(user.teacher_id);
       setPermission(user.permission);
     }
@@ -24,8 +22,6 @@ const PLOChartComponent = ({ user }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log("Fetching data with:", { teacherId, permission });
-
       if (!teacherId || !permission) return;
       
       try {
@@ -33,7 +29,6 @@ const PLOChartComponent = ({ user }) => {
           teacher_id: teacherId,
           permission: permission
         });
-        console.log("Response data:", response.data);
 
         const ploData = response.data[0].plos.map((plo) => ({
           name: plo.ploName,
@@ -62,53 +57,53 @@ const PLOChartComponent = ({ user }) => {
   const ploNames = data.map(plo => plo.name);
   const ploPercentages = data.map(plo => plo.percentage);
 
-  const chartData = {
-    labels: ploNames,
-    datasets: [
-      {
-        label: 'Tỉ lệ Plo đạt được',
-        data: ploPercentages,
-        fill: false,
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1,
+  const chartData = [
+    {
+      type: 'bar',
+      x: ploNames,
+      y: ploPercentages,
+      text: ploPercentages.map(String),
+      textposition: 'auto',
+      hoverinfo: 'x+y',
+      marker: {
+        color: 'rgba(75, 192, 192, 0.6)',
+        line: {
+          color: 'rgba(75, 192, 192, 1)',
+          width: 1.5,
+        },
       },
-    ],
-  };
+    },
+  ];
 
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'PLOs',
-        },
-      },
-      y: {
-        title: {
-          display: false,
-          text: 'Percentage',
-        },
-        beginAtZero: true,
-        min: 0,
-        max: 100,
+  const chartLayout = {
+    title: {
+      text: 'Tỉ lệ đạt của chuẩn đầu ra của chương trình',
+      font: {
+        size: 24,
       },
     },
-    plugins: {
-      legend: {
-        display: false,
-        position: 'top',
-      },
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            return `${context.label}: ${context.raw}%`;
-          },
+    xaxis: {
+      title: {
+        text: 'PLOs',
+        font: {
+          size: 18,
         },
       },
+      tickangle: -45,
     },
+    yaxis: {
+      title: {
+        font: {
+          size: 18,
+        },
+      },
+      range: [0, 100],
+      gridcolor: 'rgba(200, 200, 200, 0.3)',
+    },
+    width: 550,
+    height: 600,
+    plot_bgcolor: 'rgba(240, 240, 240, 0.9)',
+    paper_bgcolor: 'rgba(255, 255, 255, 1)',
   };
 
   return (
@@ -139,8 +134,8 @@ const PLOChartComponent = ({ user }) => {
         )}
       </div>
       <h2 className="text-xl font-semibold mb-4">Tỉ lệ đạt của chuẩn đầu ra của chương trình</h2>
-      <div className="h-[600px] w-full">
-        <Line data={chartData} options={chartOptions} />
+      <div className="">
+        <Plot data={chartData} layout={chartLayout} />
       </div>
     </div>
   );
