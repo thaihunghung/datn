@@ -5,7 +5,7 @@ import { axiosAdmin } from '../../../../service/AxiosAdmin';
 
 const { Option } = Select;
 
-export default function LineChartComponent({ user, permission }) {
+export default function HeatMapComponent({ user, permission }) {
   const [selectedSubjects, setSelectedSubjects] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [originalData, setOriginalData] = useState([]);
@@ -41,13 +41,16 @@ export default function LineChartComponent({ user, permission }) {
         subjectsData.push(subjectData);
       });
 
-      const labelsArray = Array.from(labelsSet);
+      const labelsArray = Array.from(labelsSet).sort((a, b) => {
+        const numA = parseInt(a.replace(/\D/g, ''), 10);
+        const numB = parseInt(b.replace(/\D/g, ''), 10);
+        return numA - numB;
+      });
 
       setOriginalData(subjectsData);
       setAllLabels(labelsArray);
 
       setSelectedSubjects(subjectsData.map(dataset => dataset.subjectName));
-      // setChartData(subjectsData.slice(0, 3));
     } catch (error) {
       console.error('Error fetching chart data:', error);
     }
@@ -66,16 +69,15 @@ export default function LineChartComponent({ user, permission }) {
     setSelectedSubjects(value);
   };
 
-  const plotData = chartData.map((data, index) => {
-    return {
-      type: 'scatter',
-      mode: 'lines+markers',
-      name: data.subjectName,
-      x: allLabels,
-      y: allLabels.map(label => data[label]),
-      line: { color: `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})` }
-    };
-  });
+  const plotData = [{
+    z: chartData.map(data => allLabels.map(label => data[label])),
+    x: allLabels,
+    y: chartData.map(data => data.subjectName),
+    type: 'heatmap',
+    colorscale: 'Viridis',
+    zmin: 0,
+    zmax: 100
+  }];
 
   return (
     <div className='mx-2'>
@@ -121,15 +123,26 @@ export default function LineChartComponent({ user, permission }) {
                 title: 'PLO',
               },
               yaxis: {
-               
-                range: [0, 100]
+                title: 'Môn học',
+                automargin: true,
+                // tickangle: -45,
               },
-              width: 1100, 
+              width: 900,
               height: 500,
               plot_bgcolor: 'rgba(240, 240, 240, 0.9)',
               paper_bgcolor: 'rgba(255, 255, 255, 1)',
-              margin: { l: 50, r: 50, b: 100, t: 100, pad: 4 }
+              margin: { l: 150, r: 50, b: 100, t: 100, pad: 4 },
+              coloraxis: {
+                colorscale: 'Viridis',
+                cmin: 0,
+                cmax: 100,
+                colorbar: {
+                  title: 'Percentage',
+                  ticksuffix: '%'
+                }
+              }
             }}
+            config={{ displayModeBar: true }}
           />
         </div>
       </div>

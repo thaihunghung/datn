@@ -6,7 +6,7 @@ import PLOChartComponent from './PLOChartComponent';
 import CourseScoresScatterChart from './CourseScoresHistogramChart';
 import StackedBarChart from './StackedBarChart';
 import StudentScore from './StudentScore';
-import ParallelCoordinatesChartComponent from './ParallelCoordinatesChartComponent';
+import ParallelCoordinatesChartComponent from './HeatMapComponent';
 
 export default function Dashboard() {
   const [user, setUser] = useState({});
