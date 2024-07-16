@@ -1,6 +1,9 @@
 const jwt = require('jsonwebtoken');
 const RefreshTokenModel = require('../models/RefreshTokenModel');
 const TeacherModel = require('../models/TeacherModel');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const TokenController = {
   refreshToken: async (req, res) => {
@@ -13,11 +16,13 @@ const TokenController = {
     try {
       const storedToken = await RefreshTokenModel.findOne({ where: { token: refreshToken } });
 
+      console.log('storedToken', storedToken)
       if (!storedToken || storedToken.revoked || storedToken.expired) {
         return res.status(400).json({ message: 'Refresh token không hợp lệ' });
       }
 
-      const decoded = jwt.verify(refreshToken, 'your_jwt_secret');
+
+      const decoded = jwt.verify(refreshToken,  process.env.JWT_SECRET);
       const user = await TeacherModel.findByPk(decoded.id);
 
       if (!user) {
@@ -25,8 +30,8 @@ const TokenController = {
       }
 
       const payload = { id: user.teacher_id,permission: user.permission  };
-      const newAccessToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '30m' });
-      const newRefreshToken = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '7d' });
+      const newAccessToken = jwt.sign(payload,  process.env.JWT_SECRET, { expiresIn: '30m' });
+      const newRefreshToken = jwt.sign(payload,  process.env.JWT_SECRET, { expiresIn: '7d' });
 
       // Đánh dấu refresh token cũ là đã thu hồi và hết hạn
       storedToken.revoked = true;

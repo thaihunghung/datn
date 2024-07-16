@@ -36,30 +36,39 @@ const TeacherController = {
   // Lấy tất cả các giáo viên
   index: async (req, res) => {
     try {
-      const { page, size } = req.query;
-
-      const attributes = ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher','imgURL'];
+      const { page, size, search } = req.query;
+  
+      const attributes = ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher', 'imgURL'];
       const whereClause = {
         isDelete: false,
         isBlock: false
       };
-
+  
+      if (search) {
+        whereClause[Op.or] = [
+          { name: { [Op.like]: `%${search}%` } },
+          { teacherCode: { [Op.like]: `%${search}%` } },
+          { email: { [Op.like]: `%${search}%` } },
+          { typeTeacher: { [Op.like]: `%${search}%` } }
+        ];
+      }
+  
       if (page && size) {
         const offset = (page - 1) * size;
         const limit = parseInt(size, 10);
-
+  
         const { count, rows: teachers } = await TeacherModel.findAndCountAll({
           attributes: attributes,
           where: whereClause,
           offset: offset,
           limit: limit
         });
-
+  
         const teachersWithPermissionName = teachers.map(teacher => ({
           ...teacher.dataValues,
           permissionName: getPermissionName(teacher.permission)
         }));
-
+  
         return res.json({
           total: count,
           teachers: teachersWithPermissionName
@@ -69,12 +78,12 @@ const TeacherController = {
           attributes: attributes,
           where: whereClause
         });
-
+  
         const teachersWithPermissionName = teachers.map(teacher => ({
           ...teacher.dataValues,
           permissionName: getPermissionName(teacher.permission)
         }));
-
+  
         return res.json(teachersWithPermissionName);
       }
     } catch (error) {
@@ -191,11 +200,6 @@ const TeacherController = {
         attributes: attributes,
         where: whereClause,
       });
-
-      // const teachersWithPermissionName = teachers.map(teacher => ({
-      //   ...teacher.dataValues,
-      //   permissionName: getPermissionName(teacher.permission)
-      // }));
 
       return res.json({
         teachers,

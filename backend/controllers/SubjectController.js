@@ -619,35 +619,7 @@ const SubjectController = {
       return res.status(500).json({ message: 'Server error' });
     }
   },
-  // phần trăm clo theo suject
-  averageScoresPerSubject: async (req, res) => {
-    try {
-      const results = await sequelize.query(
-        `SELECT
-            ROUND(AVG(a.totalScore), 2) AS averageScore,
-            s.subject_id AS subject_id,
-            s.subjectName AS subjectName
-        FROM
-            assessments AS a
-        LEFT JOIN courses AS c
-            ON a.course_id = c.course_id
-        LEFT JOIN subjects AS s
-            ON c.subject_id = s.subject_id
-        GROUP BY
-            s.subject_id, s.subjectName;
-        `,
-        {
-          type: Sequelize.QueryTypes.SELECT,
-
-        }
-      );
-
-      res.json(results);
-    } catch (error) {
-      console.error('Error fetching average scores per subject:', error);
-      res.status(500).json({ message: 'Internal Server Error' });
-    }
-  }
+  
 
 };
 

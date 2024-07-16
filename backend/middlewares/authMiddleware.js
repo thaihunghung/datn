@@ -1,6 +1,9 @@
 const jwt = require('jsonwebtoken');
 const RefreshTokenModel = require('../models/RefreshTokenModel');
 const TeacherModel = require('../models/TeacherModel');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 module.exports = {
   ensureAuthenticated: async (req, res, next) => {
@@ -10,7 +13,7 @@ module.exports = {
     }
 
     try {
-      const decoded = jwt.verify(token, 'your_jwt_secret');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await TeacherModel.findByPk(decoded.id);
       if (!user) {
         return res.status(401).json({ message: 'Invalid access token' });

@@ -3,35 +3,36 @@ import {
   Card,
   Input,
   Pagination,
-  Modal,
   Button,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   CardBody,
   CardFooter,
   CardHeader,
   Select,
   SelectItem,
   Avatar,
-  ModalContent,
   Tooltip,
 } from "@nextui-org/react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import './Course.css';
-import CustomUpload from "../../CustomUpload/CustomUpload";
+import EditCourseModal from "./EditCourseModal";
+import ExcelModal from "./ExcelModal";
+import AddCourseModal from "./AddCourseModal";
+import { FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import ConfirmAction from "./ConfirmAction";
 
 const Course = (props) => {
+  const navigate = useNavigate();
   const { setCollapsedNav, successNoti, errorNoti } = props;
   const [courses, setCourses] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
   const [totalCourses, setTotalCourses] = useState(0);
   const [selectedCourse, setSelectedCourse] = useState(null);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isConfirmActionOpen, setIsConfirmActionOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isMoreModalOpen, setIsMoreModalOpen] = useState(false);
+  const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [form, setForm] = useState({
     courseName: "",
     class_id: "",
@@ -92,7 +93,7 @@ const Course = (props) => {
         setTotalCourses(response.data.length);
       } catch (err) {
         console.error("Error fetching courses: ", err.message);
-        successNoti('Error fetching courses', 'Please try again later');
+        errorNoti('Error fetching courses', 'Please try again later');
       }
     };
 
@@ -150,7 +151,7 @@ const Course = (props) => {
     fetchSubjects();
     fetchSemesters();
     fetchAcademicYear();
-  }, [successNoti, isEditModalOpen, isMoreModalOpen, isSettingsModalOpen]);
+  }, [errorNoti, isEditModalOpen, isExcelModalOpen, isConfirmActionOpen, isAddModalOpen]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -177,7 +178,6 @@ const Course = (props) => {
         subject_id: form.subject_id,
         semester_id: form.semester_id,
         academic_year_id: form.academic_year_id,
-        // id_semester_academic_year: form.id_semester_academic_year,
         courseCode: `${selectedClass.classCode} - ${selectedSubject.subjectCode}`
       };
 
@@ -190,7 +190,40 @@ const Course = (props) => {
       handleCloseEditModal();
     } catch (err) {
       console.error("Error updating course: ", err.message);
-      successNoti('Error updating course', 'Please try again later.');
+      // errorNoti('Error updating course', 'Please try again later.');
+    }
+  };
+
+  const handleAddSubmit = async () => {
+    console.log("save", form)
+    try {
+      const selectedClass = classes.find(cls => cls.class_id === form.class_id);
+      const selectedSubject = subjects.find(subject => subject.subject_id === form.subject_id);
+
+      if (!selectedClass || !selectedSubject) {
+        throw new Error("Invalid class or subject selection");
+      }
+
+      const data = {
+        courseName: form.courseName,
+        class_id: form.class_id,
+        teacher_id: form.teacher_id,
+        subject_id: form.subject_id,
+        semester_id: form.semester_id,
+        academic_year_id: form.academic_year_id,
+        courseCode: `${selectedClass.classCode} - ${selectedSubject.subjectCode}`
+      };
+
+      await axiosAdmin.post(`/course`, { data: data });
+      successNoti('Add Successful', 'The course has been added successfully.');
+      const response = await axiosAdmin.get("/course-course-enrollment");
+      setCourses(response.data);
+      setFilteredCourses(response.data);
+      setTotalCourses(response.data.length);
+      handleCloseAddModal();
+    } catch (err) {
+      console.error("Error adding course: ", err.message);
+      errorNoti('Error adding course', 'Please try again later.');
     }
   };
 
@@ -226,11 +259,11 @@ const Course = (props) => {
 
   const handleOpenSettingsModal = (course) => {
     setSelectedCourse(course);
-    setIsSettingsModalOpen(true);
+    setIsConfirmActionOpen(true);
   };
 
   const handleCloseSettingsModal = () => {
-    setIsSettingsModalOpen(false);
+    setIsConfirmActionOpen(false);
     setSelectedCourse(null);
   };
 
@@ -255,12 +288,30 @@ const Course = (props) => {
 
   const handleOpenMoreModal = (course) => {
     setSelectedCourse(course);
-    setIsMoreModalOpen(true);
+    setIsExcelModalOpen(true);
   };
 
   const handleCloseMoreModal = () => {
-    setIsMoreModalOpen(false);
+    setIsExcelModalOpen(false);
     setSelectedCourse(null);
+  };
+
+  const handleOpenAddModal = () => {
+    setForm({
+      courseName: "",
+      class_id: "",
+      teacher_id: "",
+      subject_id: "",
+      semester_id: "",
+      academic_year_id: "",
+      yearX: "",
+      yearY: "",
+    });
+    setIsAddModalOpen(true);
+  };
+
+  const handleCloseAddModal = () => {
+    setIsAddModalOpen(false);
   };
 
   const handleFormChange = (e) => {
@@ -307,6 +358,7 @@ const Course = (props) => {
 
   const handleDownloadTemplateExcel = async () => {
     try {
+      console.log("selectedCourse.course_id", selectedCourse)
       const response = await axiosAdmin.get(`/course-enrollment/course/${selectedCourse.course_id}/student`, {
         responseType: 'blob'
       });
@@ -333,20 +385,33 @@ const Course = (props) => {
 
   return (
     <>
-      <nav className="text-lg mb-4 text-left">
-        <Link to="/admin" className="text-blue-500 hover:underline">Home</Link>
-        <span> / Course</span>
-      </nav>
-      <h2>Course List</h2>
+      <div>
+        <h1 className="text-3xl font-bold text-[#6366F1]">Danh sách khóa học</h1>
+      </div>
+      <div className="flex justify-end">
+        <Button color="secondary" onClick={() => navigate('/admin/course/store')}>
+          Manage Blocked
+        </Button>
+      </div>
+      <div className="flex justify-between mt-7">
 
-      <Input
-        clearable
-        bordered
-        fullWidth
-        placeholder="Search courses, class, teacher"
-        css={{ mb: 20 }}
-        onChange={handleSearch}
-      />
+        <Button
+          className="mx-7 bg-[#6366F1] text-[#f0f0f0]"
+          onClick={handleOpenAddModal}>
+          <p>Create new <PlusOutlined /></p>
+        </Button>
+
+        <Input
+          className="w-[40%] mx-7"
+          clearable
+          bordered
+          fullWidth
+          placeholder="Search courses, class, teacher"
+          css={{ mb: 20 }}
+          onChange={handleSearch}
+        />
+      </div>
+
 
       <div className="grid grid-cols-2 gap-5 m-5">
         {currentCourses.map((course) => (
@@ -370,348 +435,99 @@ const Course = (props) => {
               </CardHeader>
               <CardBody>
                 <p>{`${course.SemesterAcademicYear.semester.descriptionShort} - ${course.SemesterAcademicYear.academic_year.description}`}</p>
-                <p>{`Số học sinh: ${course.enrollmentCount}`}</p>
+                <p>{`Số sinh viên: ${course.enrollmentCount}`}</p>
               </CardBody>
               <CardFooter className="flex gap-5">
-                {/* <Tooltip>
-                  <Button onClick={() => handleOpenSettingsModal(course)}>Ẩn</Button>
-                </Tooltip> */}
                 <Tooltip content="Các thao tác với sinh viên">
-                  <Button onClick={() => handleOpenMoreModal(course)}>Student</Button>
+                  <Button
+                    className="bg-[#6366F1] text-[#f0f0f0]"
+                    onClick={() => handleOpenMoreModal(course)}>Sinh viên</Button>
                 </Tooltip>
                 <Tooltip content="Chỉnh sửa môn học">
-                  <Button onClick={() => handleOpenEditModal(course)}>Edit</Button>
+                  <Button
+                    className="bg-[#6366F1] text-[#f0f0f0]"
+                    onClick={() => handleOpenEditModal(course)}>Chỉnh sửa</Button>
+                </Tooltip>
+                <Tooltip>
+                  <Button
+                    className="bg-red-400 text-[#f0f0f0]"
+                    onClick={() => handleOpenSettingsModal(course)}>Ẩn môn học</Button>
                 </Tooltip>
               </CardFooter>
             </Card>
           </div>
         ))}
       </div>
-      <Pagination
-        total={totalCourses}
-        initialPage={currentPage}
-        pageSize={pageSize}
-        onChange={handlePageChange}
-        css={{ mt: '16px', textAlign: 'center' }}
+      <div className="flex justify-center">
+        <Pagination
+          total={Math.ceil(totalCourses / pageSize)}
+          current={currentPage}
+          pageSize={pageSize}
+          onChange={handlePageChange}
+          css={{ mt: '16px', textAlign: 'center' }}
+        />
+      </div>
+
+      {/* Add Modal */}
+      <AddCourseModal
+        isAddModalOpen={isAddModalOpen}
+        handleCloseAddModal={handleCloseAddModal}
+        handleAddSubmit={handleAddSubmit}
+        form={form}
+        setForm={setForm}
+        subjects={subjects}
+        classes={classes}
+        academicYears={academicYears}
+        semesters={semesters}
+        teachers={teachers}
+        showYearInputs={showYearInputs}
+        toggleYearInputs={toggleYearInputs}
+        isInvalid={isInvalid}
+        handleYearXChange={handleYearXChange}
+        handleSaveAcademicYear={handleSaveAcademicYear}
+        setIsAddModalOpen={setIsAddModalOpen}
       />
 
-      {/* Settings Modal */}
-      <Modal
-        backdrop="opaque"
-        isOpen={isSettingsModalOpen}
-        onOpenChange={setIsSettingsModalOpen}
-        size="2xl"
-        radius="lg"
-        classNames={{
-          body: "py-6",
-          backdrop: "bg-[#292f46]/50 backdrop-opacity-40",
-          base: "border-[#292f46] bg-[#fefefe] dark:bg-[#19172c] text-[#292f46]",
-          // header: "border-b-[1px] border-[#292f46]",
-          // footer: "border-t-[1px] border-[#292f46]",
-          closeButton: "hover:bg-white/5 active:bg-white/10",
-        }}
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">Settings</ModalHeader>
-              <ModalBody>
-                <p>
-                  Settings content goes here.
-                </p>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="foreground" variant="light" onPress={handleCloseSettingsModal}>
-                  Close
-                </Button>
-                <Button className="bg-[#6f4ef2] shadow-lg shadow-indigo-500/20" onPress={handleCloseSettingsModal}>
-                  Action
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-
       {/* Edit Modal */}
-      <Modal
-        backdrop="opaque"
-        isOpen={isEditModalOpen}
-        onOpenChange={(isOpen) => setIsEditModalOpen(isOpen)}
-        radius="lg"
-        classNames={{
-          body: "py-6",
-          backdrop: "bg-[#292f46]/50 backdrop-opacity-40",
-          base: "border-[#292f46] bg-[#fefefe] dark:bg-[#19172c] text-[#292f46]",
-          header: "border-b-[1px] border-[#292f46]",
-          footer: "border-t-[1px] border-[#292f46]",
-          closeButton: "hover:bg-white/5 active:bg-white/10",
-        }}
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">Edit Course</ModalHeader>
-              <ModalBody>
-                <Input
-                  clearable
-                  bordered
-                  fullWidth
-                  label="Course Name"
-                  name="courseName"
-                  value={form.courseName}
-                  onChange={handleFormChange}
-                  css={{ mb: 20 }}
-                />
-                <Select
-                  labelPlacement="outside"
-                  variant="underlined"
-                  label="Học phần"
-                  placeholder="Lựa chọn học phần"
-                  defaultSelectedKeys={[form.subject_id]}
-                  value={form.class_id}
-                  onChange={(e) => setForm({ ...form, subject_id: parseInt(e.target.value) })}
-                  css={{ mb: 20 }}
-                >
-                  {subjects.map((item) => (
-                    <SelectItem key={item.subject_id} value={item.subject_id}>
-                      {item.subjectName}
-                    </SelectItem>
-                  ))}
-                </Select>
+      <EditCourseModal
+        isEditModalOpen={isEditModalOpen}
+        handleCloseEditModal={handleCloseEditModal}
+        handleEditSubmit={handleEditSubmit}
+        form={form}
+        setForm={setForm}
+        subjects={subjects}
+        classes={classes}
+        academicYears={academicYears}
+        semesters={semesters}
+        teachers={teachers}
+        showYearInputs={showYearInputs}
+        toggleYearInputs={toggleYearInputs}
+        isInvalid={isInvalid}
+        handleYearXChange={handleYearXChange}
+        handleSaveAcademicYear={handleSaveAcademicYear}
+        setIsEditModalOpen={setIsEditModalOpen}
+      />
 
-                <div className="flex items-center mb-4 justify-end">
-                  {showYearInputs == false && (
-                    <Select
-                      variant="underlined"
-                      labelPlacement="outside"
-                      label="Năm học"
-                      placeholder="Chọn năm học"
-                      defaultSelectedKeys={[form.academic_year_id]}
-                      value={form.academic_year_id}
-                      onChange={(e) => setForm({ ...form, academic_year_id: parseInt(e.target.value) })}
-                      css={{ mb: 20 }}
-                    >
-                      {academicYears.map((item) => (
-                        <SelectItem key={item.academic_year_id} value={item.academic_year_id}>
-                          {item.description}
-                        </SelectItem>
-                      ))}
-                    </Select>
-                  )}
 
-                  <Tooltip showArrow={true} content="Click để tạo năm học mới">
-                    <Button
-                      isIconOnly
-                      onClick={toggleYearInputs}
-                      className="ml-2">
-                      <i class="fa-solid fa-plus"></i>
-                    </Button>
-                  </Tooltip>
+      {/* Excel Modal */}
+      <ExcelModal
+        isExcelModalOpen={isExcelModalOpen}
+        handleCloseMoreModal={handleCloseMoreModal}
+        selectedCourse={selectedCourse}
+        handleDownloadTemplateExcel={handleDownloadTemplateExcel}
+        handleFileChange={handleFileChange}
+        fileList={fileList}
+        setFileList={setFileList}
+        setCurrent={setCurrent}
+        setIsExcelModalOpen={setIsExcelModalOpen}
+      />
 
-                </div>
-                {showYearInputs && (
-                  <div>
-                    <div className="absolute -mt-14 text-small font-semibold">
-                      Nhập năm bắt đầu, năm kết thúc tự động tăng 1
-                    </div>
-                    <div className="flex justify-between items-center gap-2 mt-0 justify-items-center">
-                      <p>Năm học</p>
-                      <div className="flex items-center gap-4 w-[80%] justify-items-center text-center text-sm">
-                        <Input
-                          className="text-center"
-                          isInvalid={isInvalid}
-                          type="number"
-                          label="Năm bắt đầu"
-                          value={form.yearX}
-                          onChange={handleYearXChange}
-                          variant="bordered"
-                        />
-                        <p> - </p>
-                        <Input
-                          isInvalid={isInvalid}
-                          type="number"
-                          label="Năm kết thúc"
-                          readOnly
-                          value={form.yearY}
-                          onChange={(e) => setForm({ ...form, yearY: e.target.value })}
-                          variant="bordered"
-                        />
-                        <Button onClick={() => handleSaveAcademicYear()}>
-                          Chọn
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                <Select
-                  variant="underlined"
-                  labelPlacement="outside"
-                  label="Học ký"
-                  placeholder="Chọn học kỳ"
-                  defaultSelectedKeys={[form.semester_id]}
-                  value={form.semester_id}
-                  onChange={(e) => setForm({ ...form, semester_id: parseInt(e.target.value) })}
-                  css={{ mb: 20 }}
-                >
-                  {semesters.map((item) => (
-                    <SelectItem key={item.semester_id} value={item.semester_id}>
-                      {item.descriptionLong}
-                    </SelectItem>
-                  ))}
-                </Select>
-                <Select
-                  labelPlacement="outside"
-                  label="Lớp học"
-                  placeholder="Chọn lớp học"
-                  defaultSelectedKeys={[form.class_id]}
-                  value={form.class_id}
-                  onChange={(e) => setForm({ ...form, class_id: parseInt(e.target.value) })}
-                  css={{ mb: 20 }}
-                >
-                  {classes.map((item) => (
-                    <SelectItem key={item.class_id} value={item.class_id}>
-                      {item.className}
-                    </SelectItem>
-                  ))}
-                </Select>
-
-                <Select
-                  items={teachers}
-                  onChange={(e) => setForm({ ...form, teacher_id: parseInt(e.target.value) })}
-                  value={form.teacher_id}
-                  defaultSelectedKeys={[form.teacher_id]}
-                  label="Assigned to"
-                  placeholder="Select a user"
-                  labelPlacement="outside"
-                  classNames={{
-                    base: "max-w-xs",
-                    trigger: "h-12",
-                  }}
-                  renderValue={(items) => {
-                    return items.map((item) => (
-                      <div key={item.data.key} className="flex items-center gap-2">
-                        <Avatar
-                          alt={item.data.name}
-                          className="flex-shrink-0"
-                          size="sm"
-                          src={item.data.imgURL}
-                        />
-                        <div className="flex flex-col">
-                          <span>{item.data.name}</span>
-                          <span className="text-default-500 text-tiny">({item.data.email})</span>
-                        </div>
-                      </div>
-                    ));
-                  }}
-                >
-                  {(teacher) => (
-                    <SelectItem key={teacher.teacher_id} textValue={teacher.name}>
-                      <div className="flex gap-2 items-center">
-                        <Avatar alt={teacher.name} className="flex-shrink-0" size="sm" src={teacher.imgURL} />
-                        <div className="flex flex-col">
-                          <span className="text-small">{teacher.name}</span>
-                          <span className="text-tiny text-default-400">{teacher.email}</span>
-                        </div>
-                      </div>
-                    </SelectItem>
-                  )}
-                </Select>
-                {/* Add other fields similarly */}
-              </ModalBody>
-              <ModalFooter>
-                <Button color="foreground" variant="light" onPress={handleCloseEditModal}>
-                  Close
-                </Button>
-                <Button className="bg-[#6f4ef2] shadow-lg shadow-indigo-500/20" onPress={handleEditSubmit}>
-                  Save
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-
-      {/* More Modal */}
-      <Modal
-        size="2xl"
-        backdrop="opaque"
-        isOpen={isMoreModalOpen}
-        onOpenChange={setIsMoreModalOpen}
-        radius="lg"
-        classNames={{
-          body: "py-6",
-          // backdrop: "bg-[#292f46]/50 backdrop-opacity-40",
-          base: "border-[#292f46] bg-[#fefefe] dark:bg-[#19172c] text-[#292f46]",
-          // header: "border-b-[1px] border-[#292f46]",
-          // footer: "border-t-[1px] border-[#292f46]",
-          closeButton: "hover:bg-white/5 active:bg-white/10",
-          backdrop: "bg-gradient-to-t from-zinc-900 to-zinc-900/10 backdrop-opacity-20"
-        }}
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1"> Môn học {selectedCourse.courseCode} - {selectedCourse.courseName}</ModalHeader>
-              <ModalBody>
-                <div>Thêm học sinh bằng file excel</div>
-                <div className="flex justify-between m-1">
-                  <div className="card p-3">
-                    <h3>Tải Mẫu CSV</h3>
-                    <Button onClick={handleDownloadTemplateExcel}> Tải xuống mẫu </Button>
-                  </div>
-                  <div className="card p-3">
-                    <div>
-                      <h3>Upload File</h3>
-                      <label htmlFor="file-upload" className="cursor-pointer">
-                        <Button auto flat as="span" color="primary">
-                          Select File
-                        </Button>
-                      </label>
-                      <input
-                        id="file-upload"
-                        type="file"
-                        style={{ display: 'none' }}
-                        onChange={handleFileChange}
-                        multiple
-                      />
-                      {/* Display the filenames below the button */}
-                      {/* Display the filenames below the button with a remove button */}
-                      {fileList.length > 0 && (
-                        <div className="mt-2">
-                          <ul>
-                            {fileList.map((file, index) => (
-                              <li key={index} className="flex justify-between items-center">
-                                <p>{file.name}</p>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="card p-3">
-                    <h3>Upload Data</h3>
-                    <CustomUpload
-                      Data={selectedCourse.course_id}
-                      endpoint='course-enrollment'
-                      method="POST"
-                      fileList={fileList}
-                      setFileList={setFileList}
-                      setCurrent={setCurrent}
-                    />
-                  </div>
-                </div>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="foreground" variant="light" onPress={handleCloseMoreModal}>
-                  Close
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <ConfirmAction
+        isConfirmActionOpen={isConfirmActionOpen}
+        selectedCourse={selectedCourse}
+        setIsConfirmActionOpen={setIsConfirmActionOpen}
+        successNoti={successNoti}
+      />
     </>
   );
 };

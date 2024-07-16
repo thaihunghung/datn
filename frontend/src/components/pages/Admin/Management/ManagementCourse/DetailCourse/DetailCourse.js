@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { axiosAdmin } from "../../../../../../service/AxiosAdmin";
-import { Button, Space, Table, Tooltip, Upload } from "antd";
+import { Button, Input, Space, Table, Tooltip, Upload } from "antd";
 import CustomUpload from "../../../CustomUpload/CustomUpload";
 import { DeleteFilled, EditFilled, UploadOutlined } from "@ant-design/icons";
-import { Chip,Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@nextui-org/react";
+import { Chip, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@nextui-org/react";
+import Search from "antd/es/input/Search";
 
 const DetailCourse = (props) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -14,9 +15,10 @@ const DetailCourse = (props) => {
   const [course, setCourse] = useState(null);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const { Search } = Input;
   const [fileList, setFileList] = useState([]);
   const [current, setCurrent] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     handleLoadStudents();
@@ -32,7 +34,6 @@ const DetailCourse = (props) => {
 
     fetchCourse();
   }, [id]);
-
 
   const state = {
     onRemove: (file) => {
@@ -107,6 +108,11 @@ const DetailCourse = (props) => {
   if (!course) {
     return <div>Loading...</div>;
   }
+
+  const filteredStudents = students.filter(student =>
+    student.Student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.Student.studentCode.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const columns = [
     {
@@ -187,30 +193,36 @@ const DetailCourse = (props) => {
         }}
       />
       <div className="p-4">
-        <nav className="text-lg mb-4 text-left">
-          <Link to="/admin" className="text-blue-500 hover:underline">Home</Link>
-          <span> / </span>
-          <Link to="/admin/course" className="text-blue-500 hover:underline">Course</Link>
-          <span> / Chi tiết</span>
-        </nav>
-
-        <h2 className="text-2xl font-bold mb-4">{`${course.courseCode} ${course.courseName}`}</h2>
+        <h2 className="text-2xl font-bold text-[#6366F1] mb-4">{`${course.courseCode} ${course.courseName}`}</h2>
         <div className="flex gap-2 flex-col bg-white p-6 rounded shadow-md text-left">
           <p><strong>Tên môn học:</strong> {course.courseName}</p>
           <p><strong>Lớp học:</strong> {course.class.className}</p>
           <p><strong>Giáo viên giảng dạy:</strong> {course.teacher.name}</p>
           <p><strong>Năm học:</strong> {course.SemesterAcademicYear.semester.descriptionShort}</p>
-          <p><strong>Số lượng học sinh đăng kí:</strong> {course.enrollmentCount}</p>
+          <p><strong>Số lượng sinh viên đăng kí:</strong> {course.enrollmentCount}</p>
           <p><strong className="text-pretty">Mô tả:</strong> {course.subject.description}</p>
         </div>
+        <div>
+          <h1 className="text-xl font-bold text-[#6366F1] mt-5">Danh sách sinh viên</h1>
+        </div>
+        <div className="flex justify-end mb-4">
 
+          <Search
+            placeholder="input search text"
+            allowClear
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: 400,
+            }}
+          />
+        </div>
         <div className="mt-4 border rounded">
           <Table
             columns={columns}
-            dataSource={students}
+            dataSource={filteredStudents}
             loading={loading}
             rowKey="id_detail_courses"
-            response = "true"
+            response="true"
             pagination={{ pageSize: 10 }}
           />
         </div>
@@ -247,15 +259,6 @@ const DetailCourse = (props) => {
             </div>
           </div>
         </div>
-
-        <button
-          type="button"
-          onClick={handleDownloadStudent}
-          disabled={loading}
-          className="bg-blue-500 text-white py-2 px-4 rounded mt-4 hover:bg-blue-600 disabled:opacity-50"
-        >
-          tải danh sách
-        </button>
       </div>
     </>
   );

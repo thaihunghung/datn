@@ -18,41 +18,163 @@ const CourseController = {
   // Lấy tất cả các khóa học
   index: async (req, res) => {
     try {
-      const courses = await CourseModel.findAll({
-        include: [{
-          model: ClassModel,
-          where: { isDelete: false }
-        },
-        {
-          model: TeacherModel,
-          where: { isDelete: false }
-        },
-        {
-          model: SubjectModel,
-          where: { isDelete: false }
-        },
-        {
-          model: SemesterAcademicYearModel,
-          where: { isDelete: false }
-        }],
-        where: { isDelete: false }
+      const { page, size } = req.query;
 
-      });
-      res.json(courses);
+      const courseAttributes = ['course_id', 'course_name', 'createdAt', 'updatedAt', 'isDelete'];
+      const whereClause = { isDelete: false };
+
+      if (page && size) {
+        const offset = (page - 1) * size;
+        const limit = parseInt(size, 10);
+
+        const { count, rows: courses } = await CourseModel.findAndCountAll({
+          include: [{
+            model: ClassModel,
+            attributes: ['classCode', 'classNameShort', 'className'],
+            where: { isDelete: false }
+          },
+          {
+            model: TeacherModel,
+            attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher', 'imgURL'],
+            where: { isDelete: false }
+          },
+          {
+            model: SubjectModel,
+            attributes: ['subject_id', 'subject_name'],
+            where: { isDelete: false }
+          },
+          {
+            model: SemesterAcademicYearModel,
+            attributes: ['semester_id', 'academic_year'],
+            where: { isDelete: false }
+          }],
+          attributes: courseAttributes,
+          where: whereClause,
+          offset: offset,
+          limit: limit
+        });
+
+        return res.json({
+          total: count,
+          courses: courses
+        });
+      } else {
+        const courses = await CourseModel.findAll({
+          include: [{
+            model: ClassModel,
+            attributes: ['classCode', 'classNameShort', 'className'],
+            where: { isDelete: false }
+          },
+          {
+            model: TeacherModel,
+            attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher', 'imgURL'],
+            where: { isDelete: false }
+          },
+          {
+            model: SubjectModel,
+            attributes: ['subject_id', 'subject_name'],
+            where: { isDelete: false }
+          },
+          {
+            model: SemesterAcademicYearModel,
+            attributes: ['semester_id', 'academic_year'],
+            where: { isDelete: false }
+          }],
+          attributes: courseAttributes,
+          where: whereClause
+        });
+
+        return res.json(courses);
+      }
     } catch (error) {
       console.error('Lỗi khi lấy tất cả các khóa học:', error);
       res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
     }
   },
+  getAll: async (req, res) => {
+    const { teacher_id, permission } = req.body;
+
+    // Xây dựng bộ lọc truy vấn động
+    const teacherFilter = teacher_id && permission == 1 ? 'and t.teacher_id = :teacher_id' : '';
+    try {
+      const results = await sequelize.query(
+        `SELECT
+            c.course_id,
+            c.courseName,
+            c.courseCode,
+            s.subject_id,
+            s.subjectName,
+            t.teacher_id,
+            t.name AS teacherName
+        FROM
+            courses c
+        JOIN
+            subjects s ON c.subject_id = s.subject_id
+        JOIN
+            teachers t ON c.teacher_id = t.teacher_id
+        where c.isDelete = 0
+        ${teacherFilter}
+           
+        ORDER BY
+            c.course_id;
+        `,
+        {
+          type: Sequelize.QueryTypes.SELECT,
+          replacements: { teacher_id }
+        }
+      );
+      res.json(results);
+    } catch (error) {
+      console.error('Error fetching average scores per subject:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  },
 
   // Tạo một khóa học mới
   create: async (req, res) => {
+    const {
+      academic_year_id,
+      class_id,
+      courseCode,
+      courseName,
+      semester_id,
+      subject_id,
+      teacher_id
+    } = req.body.data;
+
+    console.log(req.body);
     try {
-      const { data } = req.body;
-      const newCourse = await CourseModel.create(data);
-      res.json(newCourse);
+      // Kiểm tra sự tồn tại của cặp semester_id và academic_year_id
+      let semesterAcademicYear = await SemesterAcademicYearModel.findOne({
+        where: {
+          semester_id,
+          academic_year_id
+        }
+      });
+
+      // Nếu không tồn tại, tạo mới
+      if (!semesterAcademicYear) {
+        semesterAcademicYear = await SemesterAcademicYearModel.create({
+          semester_id,
+          academic_year_id,
+          isDelete: 0
+        });
+      }
+
+      await CourseModel.create({
+        academic_year_id,
+        class_id,
+        courseCode,
+        courseName,
+        id_semester_academic_year: semesterAcademicYear.id_semester_academic_year,
+        semester_id,
+        subject_id,
+        teacher_id
+      });
+
+      res.json({ message: `Tạo thành công khóa học` });
     } catch (error) {
-      console.error('Lỗi khi tạo khóa học:', error);
+      console.error('Lỗi khi cập nhật khóa học:', error);
       res.status(500).json({ message: 'Lỗi máy chủ' });
     }
   },
@@ -77,6 +199,7 @@ const CourseController = {
           },
           {
             model: TeacherModel,
+            attributes: ['teacher_id', 'name', 'email', 'typeTeacher', 'teacherCode', 'permission', 'imgURL'],
             where: { isDelete: false },
           },
           {
@@ -306,20 +429,85 @@ const CourseController = {
     }
   },
   // Get courses with isDelete = true
-  isDeleteTotrue: async (req, res) => {
+  isDeleteToTrue: async (req, res) => {
     try {
-      const courses = await CourseModel.findAll({ where: { isDelete: true } });
-      if (!courses) {
-        return res.status(404).json({ message: 'No courses found' });
+      const { page, size } = req.query;
+
+      console.log("req.query", req.query)
+      const courseAttributes = ['course_id', 'courseName','courseCode', 'createdAt', 'updatedAt', 'isDelete'];
+      const whereClause = { isDelete: true };
+
+      if (page && size) {
+        const offset = (page - 1) * size;
+        const limit = parseInt(size, 10);
+
+        const { count, rows: courses } = await CourseModel.findAndCountAll({
+          include: [{
+            model: ClassModel,
+            attributes: ['classCode', 'classNameShort', 'className'],
+            where: { isDelete: false }
+          },
+          {
+            model: TeacherModel,
+            attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher', 'imgURL'],
+            where: { isDelete: false }
+          },
+          {
+            model: SubjectModel,
+            attributes: ['subject_id', 'subjectName'],
+            where: { isDelete: false }
+          },
+          // {
+          //   model: SemesterAcademicYearModel,
+          //   attributes: ['semester_id', 'academic_year'],
+          //   where: { isDelete: false }
+          //   }
+          ],
+          attributes: courseAttributes,
+          where: whereClause,
+          offset: offset,
+          limit: limit
+        });
+
+        return res.json({
+          total: count,
+          courses: courses
+        });
+      } else {
+        const courses = await CourseModel.findAll({
+          include: [{
+            model: ClassModel,
+            attributes: ['classCode', 'classNameShort', 'className'],
+            where: { isDelete: false }
+          },
+          {
+            model: TeacherModel,
+            attributes: ['teacher_id', 'name', 'teacherCode', 'email', 'permission', 'typeTeacher', 'imgURL'],
+            where: { isDelete: false }
+          },
+          {
+            model: SubjectModel,
+            attributes: ['subject_id', 'subject_name'],
+            where: { isDelete: false }
+          },
+          {
+            model: SemesterAcademicYearModel,
+            attributes: ['semester_id', 'academic_year'],
+            where: { isDelete: false }
+          }],
+          attributes: courseAttributes,
+          where: whereClause
+        });
+
+        return res.json(courses);
       }
-      res.json(courses);
     } catch (error) {
-      console.error('Error finding courses with isDelete true:', error);
-      res.status(500).json({ message: 'Server error' });
+      console.error('Lỗi khi lấy tất cả các khóa học:', error);
+      res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
     }
   },
   // Get courses with isDelete = false
-  isDeleteTofalse: async (req, res) => {
+  isDeleteToFalse: async (req, res) => {
     try {
       const courses = await CourseModel.findAll({ where: { isDelete: false } });
       if (!courses) {
@@ -332,7 +520,7 @@ const CourseController = {
     }
   },
   // Toggle isDelete status of a course
-  isdelete: async (req, res) => {
+  isDelete: async (req, res) => {
     try {
       const { id } = req.params;
       const course = await CourseModel.findOne({ where: { course_id: id } });
@@ -347,63 +535,6 @@ const CourseController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
-  //
-  getCourseAssessmentScores: async (req, res) => {
-    console.log("okok");
-    try {
-      const results = await sequelize.query(
-        `SELECT 
-                s.subject_id,
-                s.subjectName,
-                clo.clo_id,
-                clo.cloName,
-                (SUM(ai.assessmentScore) / SUM(ri.maxScore)) AS percentage_score
-            FROM 
-                assessmentItems ai
-            JOIN 
-                rubricsItems ri ON ai.rubricsItem_id = ri.rubricsItem_id
-            JOIN 
-                clos clo ON ri.clo_id = clo.clo_id
-            JOIN 
-                subjects s ON clo.subject_id = s.subject_id
-            WHERE 
-                ai.isDelete = 0
-            GROUP BY 
-                s.subject_id, s.subjectName, clo.clo_id, clo.cloName
-            ORDER BY 
-                clo.cloName;`,
-        {
-          type: Sequelize.QueryTypes.SELECT,
-        }
-      );
-      const formattedResults = results.reduce((acc, result) => {
-        const { subject_id, subjectName, clo_id, cloName, percentage_score } = result;
-
-        if (!acc[subject_id]) {
-          acc[subject_id] = {
-            subject_id,
-            subjectName,
-            clos: []
-          };
-        }
-
-        acc[subject_id].clos.push({
-          clo_id,
-          cloName,
-          percentage_score
-        });
-
-        return acc;
-      }, {});
-
-      res.json(Object.values(formattedResults));
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ message: 'Internal Server Error' });
-    }
-  }
-
-
 };
 
 module.exports = CourseController;

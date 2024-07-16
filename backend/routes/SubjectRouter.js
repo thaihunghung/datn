@@ -1,12 +1,11 @@
 const express = require('express');
 const SubjectController = require('../controllers/SubjectController');
+const { ensureAuthenticated } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
-// Định nghĩa các route cho chương trình
-
 router.get('/subjects', SubjectController.index);
-router.post('/subject', SubjectController.create);
-router.get('/subject/:subject_id', SubjectController.getByID);
+router.post('/subject', ensureAuthenticated, SubjectController.create);
+router.get('/subject/:subject_id', ensureAuthenticated, SubjectController.getByID);
 
 router.get('/subject/getSubjectIdByCourseId/:course_id', SubjectController.getByCourseId);
 
@@ -33,9 +32,6 @@ router.put('/subject/:subject_id/soft-delete', SubjectController.toggleSoftDelet
 
 router.get('/subject/templates/post', SubjectController.getFormPost);
 router.post('/subject/templates/update', SubjectController.getFormUpdate);
-
-//chart
-router.get('/subject/average/subject', SubjectController.averageScoresPerSubject);
 
 
 module.exports = router;

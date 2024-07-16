@@ -1,66 +1,237 @@
 const express = require('express');
 const CourseController = require('../controllers/CourseController');
-const StudentController = require('../controllers/StudentController');
+const { ensureAuthenticated } = require('../middlewares/authMiddleware');
+const checkPermission = require('../middlewares/permissionMiddleware');
 const router = express.Router();
+
+/**
+ * @openapi
+ * tags:
+ *   - name: Courses
+ *     description: Operations related to courses
+ */
 
 /**
  * @openapi
  * /api/admin/course:
  *   get:
- *     summary: Lấy danh sách tất cả các khóa học
- *     description: Trả về danh sách tất cả các khóa học.
+ *     summary: Get a list of all courses
+ *     description: Returns a list of all courses.
+ *     tags: [Courses]
  *     responses:
  *       200:
- *         description: Danh sách các khóa học.
- *       500:
- *         description: Lỗi server
- *   
- *   post:
- *     summary: Tạo một khóa học mới
- *     description: Thêm một khóa học mới vào cơ sở dữ liệu.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Course'
- *     responses:
- *       200:
- *         description: Khóa học được tạo thành công.
- *       500:
- *         description: Lỗi server
- *
- * /api/admin/course/{id}:
- *   get:
- *     summary: Lấy thông tin một khóa học theo ID
- *     description: Trả về thông tin chi tiết của một khóa học.
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID của khóa học cần tìm.
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Thông tin chi tiết của khóa học.
+ *         description: A list of courses.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Course'
- *       404:
- *         description: Không tìm thấy khóa học
- *       500:
- *         description: Lỗi server
- *
- *   put:
- *     summary: Cập nhật thông tin của một khóa học
- *     description: Cập nhật thông tin của khóa học dựa trên ID.
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: The course ID.
+ *                         example: 1
+ *                       name:
+ *                         type: string
+ *                         description: The course name.
+ *                         example: Introduction to Programming
+ */
+
+/**
+ * @openapi
+ * /api/admin/course-all:
+ *   get:
+ *     summary: Get all courses including deleted ones
+ *     description: Returns a list of all courses including those marked as deleted.
+ *     tags: [Courses]
+ *     responses:
+ *       200:
+ *         description: A list of all courses.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: The course ID.
+ *                         example: 1
+ *                       name:
+ *                         type: string
+ *                         description: The course name.
+ *                         example: Introduction to Programming
+ */
+
+/**
+ * @openapi
+ * /api/admin/course/{id}:
+ *   get:
+ *     summary: Get a course by ID
+ *     description: Returns the details of a course.
+ *     tags: [Courses]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID của khóa học cần cập nhật.
+ *         description: The ID of the course.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Course details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: Course not found
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /api/admin/course/getByTeacher/{id_teacher}:
+ *   get:
+ *     summary: Get courses by teacher ID
+ *     description: Returns a list of courses taught by a specific teacher.
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: id_teacher
+ *         required: true
+ *         description: The ID of the teacher.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of courses taught by the teacher.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: No courses found for the teacher
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /api/admin/course/course-enrollment/{id}:
+ *   get:
+ *     summary: Get a course with enrollments by course ID
+ *     description: Returns the details of a course along with its enrollments.
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the course.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Course details with enrollments.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: Course not found
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /api/admin/course-course-enrollment:
+ *   get:
+ *     summary: Get all courses with enrollments
+ *     description: Returns a list of all courses along with their enrollments.
+ *     tags: [Courses]
+ *     responses:
+ *       200:
+ *         description: List of courses with enrollments.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: The course ID.
+ *                         example: 1
+ *                       name:
+ *                         type: string
+ *                         description: The course name.
+ *                         example: Introduction to Programming
+ *                       enrollments:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             studentId:
+ *                               type: integer
+ *                               description: The student ID.
+ *                               example: 1
+ *                             studentName:
+ *                               type: string
+ *                               description: The student name.
+ *                               example: John Doe
+ */
+
+/**
+ * @openapi
+ * /api/admin/course:
+ *   post:
+ *     summary: Create a new course
+ *     description: Adds a new course to the database.
+ *     tags: [Courses]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The course name.
+ *                 example: Introduction to Programming
+ *     responses:
+ *       200:
+ *         description: Course created successfully.
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /api/admin/course/{id}:
+ *   put:
+ *     summary: Update a course
+ *     description: Updates the information of a course by ID.
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the course to update.
  *         schema:
  *           type: integer
  *     requestBody:
@@ -71,88 +242,104 @@ const router = express.Router();
  *             $ref: '#/components/schemas/Course'
  *     responses:
  *       200:
- *         description: Cập nhật thành công cho khóa học.
+ *         description: Course updated successfully.
  *       404:
- *         description: Không tìm thấy khóa học
+ *         description: Course not found
  *       500:
- *         description: Lỗi server
- *
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /api/admin/course/{id}:
  *   delete:
- *     summary: Xóa một khóa học
- *     description: Xóa khóa học dựa trên ID.
+ *     summary: Delete a course
+ *     description: Deletes a course by ID.
+ *     tags: [Courses]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID của khóa học cần xóa.
+ *         description: The ID of the course to delete.
  *         schema:
  *           type: integer
  *     responses:
  *       200:
- *         description: Khóa học đã được xóa thành công.
+ *         description: Course deleted successfully.
  *       404:
- *         description: Không tìm thấy khóa học
+ *         description: Course not found
  *       500:
- *         description: Lỗi server
-  * /api/admin/course/isDelete/true:
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /api/admin/course/isDelete/true:
  *   get:
- *     summary: Lấy danh sách các khóa học đã bị xóa
- *     description: Trả về các khóa học có trạng thái isDelete là true.
+ *     summary: Get deleted courses
+ *     description: Returns a list of courses with isDelete status true.
+ *     tags: [Courses]
  *     responses:
  *       200:
- *         description: Danh sách khóa học đã xóa.
+ *         description: List of deleted courses.
  *       404:
- *         description: Không tìm thấy khóa học nào.
+ *         description: No courses found.
  *       500:
- *         description: Lỗi server
- *
+ *         description: Server error
+ */
+
+/**
+ * @openapi
  * /api/admin/course/isDelete/false:
  *   get:
- *     summary: Lấy danh sách các khóa học chưa bị xóa
- *     description: Trả về các khóa học có trạng thái isDelete là false.
+ *     summary: Get non-deleted courses
+ *     description: Returns a list of courses with isDelete status false.
+ *     tags: [Courses]
  *     responses:
  *       200:
- *         description: Danh sách khóa học chưa bị xóa.
+ *         description: List of non-deleted courses.
  *       404:
- *         description: Không tìm thấy khóa học nào.
+ *         description: No courses found.
  *       500:
- *         description: Lỗi server
- *
+ *         description: Server error
+ */
+
+/**
+ * @openapi
  * /api/admin/course/isDelete/{id}:
  *   put:
- *     summary: Đảo ngược trạng thái isDelete của một khóa học
- *     description: Cập nhật trạng thái isDelete cho khóa học dựa trên ID.
+ *     summary: Toggle isDelete status of a course
+ *     description: Updates the isDelete status of a course by ID.
+ *     tags: [Courses]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID của khóa học cần cập nhật trạng thái isDelete.
+ *         description: The ID of the course.
  *         schema:
  *           type: integer
  *     responses:
  *       200:
- *         description: Đã đảo ngược trạng thái isDelete thành công.
+ *         description: Course isDelete status toggled successfully.
  *       404:
- *         description: Không tìm thấy khóa học
+ *         description: Course not found
  *       500:
- *         description: Lỗi server
+ *         description: Server error
  */
 
 router.get('/course', CourseController.index);
+router.post('/course-all', CourseController.getAll);
 router.get('/course/:id', CourseController.getByID);
 router.get('/course/getByTeacher/:id_teacher', CourseController.getByIDTeacher);
-
-
 router.get('/course/course-enrollment/:id', CourseController.getByIdWithCourseEnrollment);
 router.get('/course-course-enrollment', CourseController.getAllWithCourseEnrollment);
 
-router.post('/course', CourseController.create);
-router.put('/course/:id', CourseController.update);
-router.delete('/course/:id', CourseController.delete);
+router.post('/course',ensureAuthenticated, checkPermission(2), CourseController.create);
+router.put('/course/:id', ensureAuthenticated, checkPermission(2),CourseController.update);
+router.delete('/course/:id',ensureAuthenticated, checkPermission(3),  CourseController.delete);
 
-router.get('/course/isDelete/true', CourseController.isDeleteTotrue);
-router.get('/course/isDelete/false', CourseController.isDeleteTofalse);
-router.put('/course/isDelete/:id', CourseController.isdelete);
+router.get('/course/isDelete/true', CourseController.isDeleteToTrue);
+router.get('/course/isDelete/false', CourseController.isDeleteToFalse);
+router.put('/course/isDelete/:id',ensureAuthenticated, checkPermission(3), CourseController.isDelete);
 
-router.get('/courses/assessment-scores', CourseController.getCourseAssessmentScores);
 module.exports = router;

@@ -1,111 +1,74 @@
-// Student.js
-
-import React, { useEffect, useState, useRef } from "react";
-import { Button, Select, Tooltip, Input, Space, Table } from 'antd';
-import { Link, useLocation } from "react-router-dom";
-import { DeleteFilled, EditFilled, SearchOutlined } from '@ant-design/icons';
-import './Student.css'
-
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import {
-  Modal, Chip,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter, useDisclosure
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Input,
+  Button,
+  Tooltip,
+  Pagination,
+  DropdownItem,
+  DropdownMenu,
+  Dropdown,
+  DropdownTrigger,
 } from "@nextui-org/react";
+import { Link, useNavigate } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import { SearchOutlined, DeleteFilled, EditFilled, EyeOutlined } from '@ant-design/icons';
+import { fetchStudentsData, studentColumns } from "./StudentData";
+import ConfirmAction from "./ConfirmAction";
+import AddStudentModal from "./AddStudentModal";
+import EditStudentModal from "./EditStudentModal";
+import { capitalize } from "../../Utils/capitalize";
+
+const INITIAL_VISIBLE_COLUMNS = ["studentCode", "name", "email", "classNameShort", "actions"];
 
 const Student = (props) => {
+  const navigate = useNavigate();
   const { setCollapsedNav, successNoti } = props;
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
+  const [filterValue, setFilterValue] = useState("");
+  const [selectedKeys, setSelectedKeys] = useState(new Set([]));
+  const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortDescriptor, setSortDescriptor] = useState({
+    column: "name",
+    direction: "ascending",
+  });
+  const [page, setPage] = useState(1);
   const [studentData, setStudentData] = useState([]);
+  const [totalStudents, setTotalStudents] = useState(0);
   const [deleteId, setDeleteId] = useState(null);
-  const [classOptions, setClassOptions] = useState([]);
-  const [selectedClass, setSelectedClass] = useState('');
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("");
+  const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
-  const getAllStudent = async () => {
-    try {
-      const student = await axiosAdmin.get('/student-class');
-      console.log("ssssâ", student.data);
-
-      const newStudents = student.data.map((student) => {
-        return {
-          key: student.student_id,
-          name: student.name,
-          studentCode: student.studentCode,
-          class_id: student.class_id,
-          classCode: student.class.classCode,
-          email: student.email,
-          created_at: student.createdAt,
-          updated_at: student.updatedAt,
-          // action: student.student_id,
-        };
-      });
-
-      setStudentData(newStudents);
-      console.log("ssss", studentData);
-    } catch (err) {
-      console.log("Error: " + err.message);
-    };
-  }
-
-  const getAllStudentByClass = async () => {
-    try {
-      const student = await axiosAdmin.get(`/student/class/${selectedClass}`);
-      setStudentData(student.data)
-      console.log(student.data);
-    } catch (err) {
-      console.log("Error: " + err.message);
-    };
-  }
-
-  const GetAllCodeClass = async () => {
-    try {
-      const response = await axiosAdmin.get('/class'); // use axios or your axiosAdmin instance
-      const options = response.data.map(classItem => ({
-        value: `${classItem.class_id.toString()}-${classItem.classCode}`,
-        label: classItem.classCode
-      }));
-      setClassOptions(options);
-      console.log(classOptions);
-    } catch (error) {
-      console.error('Lỗi khi get dữ liệu:', error);
-    }
-  };
-
-  const handleClassChange = (value) => {
-    const classId = parseInt(value.toString().charAt(0));
-    if (!isNaN(classId) || classId == selectedClass) {
-      setSelectedClass(classId);
-      console.log("select:", classId);
-      console.log("okoko2");
+  const handleEditStudent = (item) => {
+    if (item && item.student_id) {
+      setSelectedStudent(item);
     } else {
-      console.log("okoko");
-      getAllStudent();
+      console.error("Invalid student data", item);
     }
   };
 
-  const handleChangeIdDelete = async (id) => {
-    try {
-      const response = await axiosAdmin.put(`/student/isDelete/${id}`);
-      if (response) {
-        console.log("Response data:", response.data); // Debug statement
-        getAllStudent();
-        successNoti("Chuyển vào thùng rác thành công");
-      }
-    } catch (err) {
-      console.log("Error: " + err.message);
+  useEffect(() => {
+    if (selectedStudent !== null) {
+      setIsEditModalOpen(true);
     }
-  }
+  }, [selectedStudent]);
+
+  const getAllStudents = async (page, rowsPerPage, searchTerm = "") => {
+    const { students, total } = await fetchStudentsData(page, rowsPerPage, searchTerm);
+    setStudentData(students);
+    setTotalStudents(total);
+  };
 
   useEffect(() => {
-    getAllStudentByClass();
-  }, [selectedClass])
-
-  useEffect(() => {
-    getAllStudent();
-    GetAllCodeClass();
+    getAllStudents(page, rowsPerPage, filterValue);
     const handleResize = () => {
       if (window.innerWidth < 1024) {
         setCollapsedNav(true);
@@ -118,270 +81,317 @@ const Student = (props) => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
+  }, [page, rowsPerPage, filterValue]);
+
+  const headerColumns = useMemo(() => {
+    if (visibleColumns === "all") return studentColumns;
+
+    return studentColumns.filter((column) => Array.from(visibleColumns).includes(column.uid));
+  }, [visibleColumns]);
+
+  const pages = Math.ceil(totalStudents / rowsPerPage);
+
+  const sortedItems = useMemo(() => {
+    return [...studentData].sort((a, b) => {
+      const first = a[sortDescriptor.column];
+      const second = b[sortDescriptor.column];
+      const cmp = first < second ? -1 : first > second ? 1 : 0;
+
+      return sortDescriptor.direction === "descending" ? -cmp : cmp;
+    });
+  }, [sortDescriptor, studentData]);
+
+  const renderCell = useCallback((item, columnKey) => {
+    const cellValue = item[columnKey];
+
+    switch (columnKey) {
+      case "studentCode":
+        return cellValue;
+      case "name":
+        return cellValue;
+      case "email":
+        return cellValue;
+      case "classNameShort":
+        return (
+          <>
+            {item.class.classNameShort}
+          </>
+        );
+        case "className":
+          return (
+            <>
+              {item.class.className}
+            </>
+          );
+      case "actions":
+        return (
+          <div className="flex justify-center items-center gap-2">
+            <Tooltip content="Xem thông tin sinh viên">
+              <Button color="secondary" isIconOnly auto onClick={() => navigate(`${item.student_id}/profile`)}>
+                <EyeOutlined />
+              </Button>
+            </Tooltip>
+            <Tooltip content="Cập nhật thông tin sinh viên">
+              <Button isIconOnly auto onClick={() => handleEditStudent(item)}>
+                <EditFilled />
+              </Button>
+            </Tooltip>
+            <Tooltip content="Chuyển vào thùng rác">
+              <Button
+                isIconOnly
+                auto
+                color="warning"
+                onClick={() => {
+                  setIsConfirmOpen(true);
+                  setConfirmMessage('Bạn có chắc muốn ẩn đi sinh viên này chứ');
+                  setDeleteId(item.student_id);
+                }}
+              >
+                <DeleteFilled />
+              </Button>
+            </Tooltip>
+          </div>
+        );
+      default:
+        return cellValue;
+    }
   }, []);
 
-  const searchInput = useRef(null);
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-  };
-  const handleReset = (clearFilters) => {
-    clearFilters();
-  };
-  const getColumnSearchProps = (dataIndex) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
-      <div
-        style={{
-          padding: 8,
-        }}
-        onKeyDown={(e) => e.stopPropagation()}
-      >
-        <Input
-          ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
-          value={selectedKeys[0]}
-          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{
-            marginBottom: 8,
-            display: 'block',
-          }}
-        />
-        <Space>
-          <Button
-            type="primary"
-            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
-            icon={<SearchOutlined />}
-            size="small"
-            style={{
-              width: 90,
-            }}
-          >
-            Search
-          </Button>
-          <Button
-            onClick={() => clearFilters && handleReset(clearFilters)}
-            size="small"
-            style={{
-              width: 90,
-            }}
-          >
-            Reset
-          </Button>
-        </Space>
-      </div>
-    ),
-    filterIcon: (filtered) => (
-      <SearchOutlined
-        style={{
-          color: filtered ? '#1677ff' : undefined,
-        }}
-      />
-    ),
-    onFilter: (value, record) =>
-      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownOpenChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 100);
-      }
-    },
-    render: (text) =>
-      text
-  });
-
-  const columns = [
-    {
-      title: (
-        <Tooltip title="Thông tin chi tiết về sinh viên">
-          Tên sinh viên
-        </Tooltip>
-      ),
-      dataIndex: 'name',
-      key: 'name',
-      width: '40%',
-      ...getColumnSearchProps('name'),
-      // render: (text) => (              //tooltip từng dòng của cột
-      //   <Tooltip title="Thông tin chi tiết">
-      //     {text}
-      //   </Tooltip>
-      // ),
-    },
-    {
-      title: 'Mã số sinh viên',
-      dataIndex: 'studentCode',
-      key: 'studentCode',
-      width: '30%',
-      ...getColumnSearchProps('studentCode'),
-      sorter: (a, b) => parseInt(a.studentCode) - parseInt(b.studentCode),// cần quan tâm kiểu dữ liệu
-      sortDirections: ['descend', 'ascend'],
-    },
-    {
-      title: 'Mã lớp',
-      dataIndex: 'classCode',
-      key: 'classCode',
-      filters: [
-        {
-          text: '2020',
-          value: "DA20",
-        },
-        {
-          text: '2021',
-          value: 'DA21',
-        },
-      ],
-      onFilter: (value, record) => record.classCode.startsWith(value),
-      filterSearch: true,
-      ...getColumnSearchProps('classCode'),
-      width: '20%',
-      // sorter: (a, b) => a.classCode - b.classCode,
-      // sortDirections: ['descend', 'ascend'],
-    },
-    {
-      title: 'Hành động',
-      dataIndex: 'action',
-      key: 'action',
-      render: (value, record) => (
-        <Space>
-          <Link to={`update/${record.key}`}>
-            <Tooltip title="Cập nhật thông tin sinh viên">
-              <Button icon={<EditFilled />}/>
-            </Tooltip>
-          </Link>
-          <Tooltip title="Chuyển vào thùng rác">
-            <Button onClick={() => {
-              onOpen();
-              setDeleteId(record.key);
-              console.log("delete", record.key);
-            }} icon={<DeleteFilled />} />
-          </Tooltip>
-        </Space>
-      ),
-      width: '10%',
+  const onNextPage = useCallback(() => {
+    if (page < pages) {
+      setPage(page + 1);
     }
-  ];
+  }, [page, pages]);
 
-  const onChange = (pagination, filters, sorter, extra) => {
-    console.log('params', pagination, filters, sorter, extra);
+  const onPreviousPage = useCallback(() => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  }, [page]);
+
+  const onRowsPerPageChange = useCallback((e) => {
+    setRowsPerPage(Number(e.target.value));
+    setPage(1);
+  }, []);
+
+  const onSearchChange = useCallback((value) => {
+    setFilterValue(value);
+    setPage(1);
+  }, []);
+
+  const onClear = useCallback(() => {
+    setFilterValue("");
+    setPage(1);
+  }, []);
+
+  const handleDeleteClick = async () => {
+    try {
+      if (deleteId) {
+        const response = await axiosAdmin.put(`/student/isDelete/${deleteId}`);
+        if (response) {
+          getAllStudents(page, rowsPerPage, filterValue);
+          successNoti("Chuyển vào thùng rác thành công");
+          setDeleteId(null);
+        } else {
+          console.error("Failed to delete student");
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting student:', error);
+    }
   };
 
-  return (
+  const handleClearSelection = () => {
+    setSelectedKeys(new Set([]));
+  };
 
-    <>
-      <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
-        <ConfirmAction
-          onOpenChange={onOpenChange}
-          isOpen={isOpen}
-          onConfirm={() => {
-            if (deleteId) {
-              handleChangeIdDelete(deleteId);
-              setDeleteId(null);
-            }
-          }}
-        />
-        <div>
-          <div className="w-fit flex justify-start text-base font-bold rounded-lg mb-5">
-            <Link to={"/admin/student"} className="rounded-lg bg-blue-600">
-              <div className="p-5 text-white rounded-lg">
-                DS Sinh viên
-              </div>
-            </Link>
-            <Link to={"/admin/student/store"}>
-              <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
-                Kho lưu trữ
-              </div>
-            </Link>
-            <Link to={"/admin/student/create"}>
-              <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
-                Thêm sinh viên
-              </div>
-            </Link>
-            <Link to={"/admin/student/update"}>
-              <div className="p-5 hover:bg-blue-600 hover:text-white rounded-lg">
-                Cập nhật
-              </div>
-            </Link>
-            {/* <Link to={"/admin/student/po-plo"}>
-            <div className="p-5 hover:bg-slate-600 hover:text-white">
-              PO-PLO
-            </div>
-          </Link> */}
+  const topContent = useMemo(() => {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-between gap-3 items-end">
+          <Input
+            isClearable
+            className="w-full sm:max-w-[44%]"
+            placeholder="Search by student name, student code, or email..."
+            startContent={<SearchOutlined />}
+            value={filterValue}
+            onClear={() => onClear()}
+            onValueChange={onSearchChange}
+          />
+          <div className="flex gap-3">
+            <Dropdown>
+              <DropdownTrigger className="hidden sm:flex">
+                <Button endContent={<i className="fa-solid fa-chevron-down"></i>} variant="flat">
+                  Columns
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                disallowEmptySelection
+                aria-label="Table Columns"
+                closeOnSelect={false}
+                selectedKeys={visibleColumns}
+                selectionMode="multiple"
+                onSelectionChange={setVisibleColumns}
+              >
+                {studentColumns.map((column) => (
+                  <DropdownItem key={column.uid} className="capitalize">
+                    {capitalize(column.name)}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+            <Button color="primary" endContent={<i className="fa-solid fa-plus"></i>}
+              onClick={() => setIsAddStudentOpen(true)}
+            >
+              Create new
+            </Button>
+
+            <Button color="secondary" onClick={() => navigate('/admin/student/store')}>
+              Manage Blocked
+            </Button>
           </div>
         </div>
+        <div>
+          <h1 className="text-xl font-bold text-[#6366F1]">Danh sách sinh viên</h1>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-default-400 text-small">Total {totalStudents} students</span>
+          <label className="flex items-center text-default-400 text-small">
+            Rows per page:
+            <select
+              className="bg-transparent outline-none text-default-400 text-small"
+              onChange={onRowsPerPageChange}
+            >
+              <option value="10">10</option>
+              <option value="15">15</option>
+              <option value="20">20</option>
+            </select>
+          </label>
+        </div>
       </div>
+    );
+  }, [
+    filterValue,
+    onRowsPerPageChange,
+    totalStudents,
+    onSearchChange,
+    visibleColumns
+  ]);
+
+  const bottomContent = useMemo(() => {
+    return (
+      <div className="py-2 px-2 flex justify-between items-center mt-5">
+        <span className="w-[30%] text-small text-default-400">
+          {selectedKeys === "all"
+            ? "All items selected"
+            : `${selectedKeys.size} of ${studentData.length} selected`}
+        </span>
+        <Pagination
+          isCompact
+          showControls
+          showShadow
+          color="primary"
+          page={page}
+          total={pages}
+          onChange={setPage}
+        />
+        <div className="hidden sm:flex w-[30%] justify-end gap-2">
+          <Button isDisabled={page <= 1} size="sm" variant="flat" onPress={onPreviousPage}>
+            Previous
+          </Button>
+          <Button isDisabled={page >= pages} size="sm" variant="flat" onPress={onNextPage}>
+            Next
+          </Button>
+        </div>
+      </div>
+    );
+  }, [selectedKeys, studentData.length, page, pages]);
+
+  const selectedItemsBar = useMemo(() => {
+    const allSelected = selectedKeys === "all";
+    const selectedCount = allSelected ? rowsPerPage : selectedKeys.size;
+
+    return (
+      selectedCount > 0 && (
+        <div className="flex justify-between items-center text-[#FEFEFE] bg-[#FF8077] py-2 px-4 rounded-lg mb-4">
+          <div>{selectedCount} selected</div>
+          <div className="flex gap-3 ">
+            <Tooltip showArrow={true} content={`Chuyển ${selectedCount} vào thùng rác`}>
+              <Button className="text-[#FEFEFE]" variant="light" color="danger" onClick={() => handleDeleteClick()}>
+                Ẩn sinh viên
+              </Button>
+            </Tooltip>
+            <Tooltip showArrow={true} content="Bỏ chọn">
+              <Button className="text-[#FEFEFE]" variant="light" onClick={handleClearSelection}>
+                X
+              </Button>
+            </Tooltip>
+          </div>
+        </div>
+      )
+    );
+  }, [selectedKeys, handleDeleteClick, handleClearSelection, totalStudents]);
+
+  return (
+    <>
+      {selectedItemsBar}
       <Table
-        columns={columns}
-        dataSource={studentData}
-        onChange={onChange}
-        pagination={{
-          defaultPageSize: 10,
-          responsive: true,
-          style: { justifyContent: "center" }
+        className="text-left"
+        aria-label="Example table with custom cells, pagination and sorting"
+        isHeaderSticky
+        bottomContent={bottomContent}
+        bottomContentPlacement="outside"
+        classNames={{
+          wrapper: "max-h-[500px]",
         }}
+        selectedKeys={selectedKeys}
+        selectionMode="multiple"
+        sortDescriptor={sortDescriptor}
+        topContent={topContent}
+        topContentPlacement="outside"
+        onSelectionChange={setSelectedKeys}
+        onSortChange={setSortDescriptor}
+      >
+        <TableHeader columns={headerColumns}>
+          {(column) => (
+            <TableColumn
+              key={column.uid}
+              align={column.uid === "actions" ? "center" : "start"}
+              allowsSorting={column.sortable}
+            >
+              {column.name}
+            </TableColumn>
+          )}
+        </TableHeader>
+
+        <TableBody emptyContent={"No students found"} items={sortedItems}>
+          {(item) => (
+            <TableRow key={item.student_id}>
+              {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+      <ConfirmAction
+        isOpen={isConfirmOpen}
+        onOpenChange={setIsConfirmOpen}
+        onConfirm={handleDeleteClick}
+        message={confirmMessage}
+      />
+      <AddStudentModal
+        isOpen={isAddStudentOpen}
+        onOpenChange={setIsAddStudentOpen}
+        fetchStudents={() => getAllStudents(page, rowsPerPage, filterValue)}
+      />
+
+      <EditStudentModal
+        isOpen={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        student={selectedStudent}
+        fetchStudents={() => getAllStudents(page, rowsPerPage, filterValue)}
       />
     </>
-
   );
-}
+};
 
 export default Student;
-
-function ConfirmAction(props) {
-  const { isOpen, onOpenChange, onConfirm } = props;
-  const handleOnOKClick = (onClose) => {
-    onClose();
-    console.log('thanđ');
-    if (typeof onConfirm === 'function') {
-      onConfirm();
-    }
-  }
-  return (
-    <Modal
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      motionProps={{
-        variants: {
-          enter: {
-            y: 0,
-            opacity: 1,
-            transition: {
-              duration: 0.2,
-              ease: "easeOut",
-            },
-          },
-          exit: {
-            y: -20,
-            opacity: 0,
-            transition: {
-              duration: 0.1,
-              ease: "easeIn",
-            },
-          },
-        }
-      }}
-    >
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader>Cảnh báo</ModalHeader>
-            <ModalBody>
-              <p className="text-[16px]">
-                Chương trình sẽ được chuyển vào
-                <Chip radius="sm" className="bg-zinc-200">
-                  <i class="fa-solid fa-trash-can-arrow-up mr-2"></i>
-                  Kho lưu trữ
-                </Chip> và có thể khôi phục lại, tiếp tục thao tác?
-              </p>
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="light" onClick={onClose}>
-                Huỷ
-              </Button>
-              <Button color="danger" className="font-medium" onClick={() => handleOnOKClick(onClose)}>
-                Chuyển
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
-    </Modal>
-  )
-}

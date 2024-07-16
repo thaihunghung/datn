@@ -9,7 +9,7 @@ const checkPermission = (requiredPermission) => {
         return res.status(401);
       }
 
-      const decoded = jwt.verify(accessToken, 'your_jwt_secret');
+      const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
       const { permission } = decoded;
 
       if (permission < requiredPermission) {
