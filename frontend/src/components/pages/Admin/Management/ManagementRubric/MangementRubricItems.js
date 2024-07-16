@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 import { Table, Tooltip, Button, message } from 'antd';
-import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+// import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavRubricItems from "../../Utils/DropdownAndNav/DropdownAndNavRubricItems";
 import CreateRubicItems from "./CreateRubicItems";
+import BeautifulDND from "../../Utils/BeautifulDND/BeautifulDND";
 
 const MangementRubricItems = (nav) => {
     const { id } = useParams();
@@ -212,6 +213,10 @@ const MangementRubricItems = (nav) => {
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7 bg-[#f5f5f5]-500">
+            
+            
+               <BeautifulDND />
+
             <DropdownAndNavRubricItems />
             <div className="my-5 flex justify-center items-start flex-col sm:flex-col lg:flex-row xl:fex-row">
                 <div className="text-lg leading-8 italic font-bold text-[#FF9908] flex-1 text-justify">Tên học phần:{' ' + rubicData.rubricName}</div>
@@ -278,6 +283,7 @@ const MangementRubricItems = (nav) => {
 
                 </div>
             </div>
+
         </div>
     );
 }
