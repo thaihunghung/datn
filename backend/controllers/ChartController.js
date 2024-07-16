@@ -196,7 +196,7 @@ const ChartController = {
                 s.student_id,
                 s.name AS student_name,
                 subj.subject_id,
-                subj.subjectName AS subject_name,
+                subj.subjectName AS subjectName,
                 p.plo_id,
                 p.ploName AS plo_name,
                 SUM(ai.assessmentScore) AS total_assessment_score,
@@ -229,14 +229,14 @@ const ChartController = {
 
       // Process the results to format the output
       const formattedResults = results.reduce((acc, row) => {
-        const { plo_name, subject_name, student_id, student_name, total_assessment_score, total_max_score, score_ratio } = row;
+        const { plo_name, subjectName, student_id, student_name, total_assessment_score, total_max_score, score_ratio } = row;
         if (!acc[plo_name]) {
           acc[plo_name] = {};
         }
-        if (!acc[plo_name][subject_name]) {
-          acc[plo_name][subject_name] = [];
+        if (!acc[plo_name][subjectName]) {
+          acc[plo_name][subjectName] = [];
         }
-        acc[plo_name][subject_name].push({
+        acc[plo_name][subjectName].push({
           student_id,
           student_name,
           total_assessment_score,

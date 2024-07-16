@@ -1,3 +1,5 @@
+// src/components/PLOChartComponent.js
+
 import React, { useEffect, useState } from 'react';
 import { axiosAdmin } from '../../../../service/AxiosAdmin';
 import { Select, Button } from 'antd';
@@ -23,20 +25,29 @@ const PLOChartComponent = ({ user }) => {
   useEffect(() => {
     const fetchData = async () => {
       if (!teacherId || !permission) return;
-      
+
       try {
         const response = await axiosAdmin.post('/achieved-rate/plo/percentage', {
           teacher_id: teacherId,
-          permission: permission
+          permission: permission,
         });
 
-        const ploData = response.data[0].plos.map((plo) => ({
-          name: plo.ploName,
-          percentage: (plo.percentage_score * 100).toFixed(2),
-        }));
-        setData(ploData);
-        setOriginalData(ploData);
-        setSelectedPLO(ploData.map(plo => plo.name));
+        const ploData = response.data.flatMap(subject => 
+          subject.plos.map(plo => ({
+            name: plo.ploName,
+            percentage: (plo.percentage_score * 100).toFixed(2),
+          }))
+        );
+
+        const uniquePLOData = Array.from(new Set(ploData.map(plo => plo.name)))
+          .map(name => ploData.find(plo => plo.name === name));
+
+        // Sort the uniquePLOData by name
+        uniquePLOData.sort((a, b) => a.name.localeCompare(b.name));
+
+        setData(uniquePLOData);
+        setOriginalData(uniquePLOData);
+        setSelectedPLO(uniquePLOData.map(plo => plo.name));
       } catch (error) {
         console.error('Error fetching PLO data:', error);
       }
@@ -93,6 +104,7 @@ const PLOChartComponent = ({ user }) => {
     },
     yaxis: {
       title: {
+        text: 'Percentage (%)',
         font: {
           size: 18,
         },
@@ -111,7 +123,8 @@ const PLOChartComponent = ({ user }) => {
       <div className="mb-4">
         <Button
           onClick={() => setShowFilter(!showFilter)}
-          className="flex justify-start rounded mb-3">
+          className="flex justify-start rounded mb-3"
+        >
           {showFilter ? 'Hide Filter' : 'Show Filter'}
         </Button>
         {showFilter && (

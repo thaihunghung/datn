@@ -31,7 +31,7 @@ const StoreCourse = (props) => {
   const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [sortDescriptor, setSortDescriptor] = useState({
-    column: "course_name",
+    column: "courseName",
     direction: "ascending",
   });
   const [page, setPage] = useState(1);
@@ -107,7 +107,7 @@ const StoreCourse = (props) => {
 
     if (hasSearchFilter) {
       filteredCourses = filteredCourses.filter((item) =>
-        item.course_name.toLowerCase().includes(filterValue.toLowerCase()) ||
+        item.courseName.toLowerCase().includes(filterValue.toLowerCase()) ||
         item.course_id.toLowerCase().includes(filterValue.toLowerCase()) ||
         item.teacher.name.toLowerCase().includes(filterValue.toLowerCase())
       );
@@ -134,7 +134,7 @@ const StoreCourse = (props) => {
     switch (columnKey) {
       case "course_id":
         return cellValue;
-      case "course_name":
+      case "courseName":
         return cellValue;
       case "teacherName":
         return (

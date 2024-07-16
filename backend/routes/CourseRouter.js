@@ -31,14 +31,22 @@ const router = express.Router();
  *                   items:
  *                     type: object
  *                     properties:
- *                       id:
+ *                       course_id:
  *                         type: integer
  *                         description: The course ID.
  *                         example: 1
- *                       name:
+ *                       courseName:
  *                         type: string
  *                         description: The course name.
- *                         example: Introduction to Programming
+ *                         example: course name
+ *                       class:
+ *                         type: object
+ *                       teacher:
+ *                         type: object
+ *                       subject:
+ *                         type: object
+ *                       SemesterAcademicYear:
+ *                         type: object
  */
 
 /**

@@ -20,7 +20,7 @@ const CourseController = {
     try {
       const { page, size } = req.query;
 
-      const courseAttributes = ['course_id', 'course_name', 'createdAt', 'updatedAt', 'isDelete'];
+      const courseAttributes = ['course_id', 'courseName', 'createdAt', 'updatedAt', 'isDelete'];
       const whereClause = { isDelete: false };
 
       if (page && size) {
@@ -40,12 +40,12 @@ const CourseController = {
           },
           {
             model: SubjectModel,
-            attributes: ['subject_id', 'subject_name'],
+            attributes: ['subject_id', 'subjectName'],
             where: { isDelete: false }
           },
           {
             model: SemesterAcademicYearModel,
-            attributes: ['semester_id', 'academic_year'],
+            attributes: ['semester_id', 'academic_year_id'],
             where: { isDelete: false }
           }],
           attributes: courseAttributes,
@@ -72,12 +72,12 @@ const CourseController = {
           },
           {
             model: SubjectModel,
-            attributes: ['subject_id', 'subject_name'],
+            attributes: ['subject_id', 'subjectName'],
             where: { isDelete: false }
           },
           {
             model: SemesterAcademicYearModel,
-            attributes: ['semester_id', 'academic_year'],
+            attributes: ['semester_id', 'academic_year_id'],
             where: { isDelete: false }
           }],
           attributes: courseAttributes,
@@ -487,7 +487,7 @@ const CourseController = {
           },
           {
             model: SubjectModel,
-            attributes: ['subject_id', 'subject_name'],
+            attributes: ['subject_id', 'subjectName'],
             where: { isDelete: false }
           },
           {
