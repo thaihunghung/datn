@@ -5,7 +5,6 @@ const sequelize = require("../config/database");
 const ChartController = {
   // tỉ lệ đạt được clo trên subject
   getCloPercentage: async (req, res) => {
-    console.log("okok");
     const { teacher_id, permission } = req.body;
 
     // Xây dựng bộ lọc truy vấn động
@@ -80,7 +79,13 @@ const ChartController = {
     }
   },
   getScoreStudentByCourseAndTeacher: async (req, res) => {
-    const { course_id, teacher_id } = req.body;
+    console.log("req.body", req.body)
+    const { course_id_list, teacher_id, permission } = req.body;
+    console.log("req.body",permission)
+
+
+    const courseIdFilter = course_id_list && course_id_list.length > 0 ? 'AND c.course_id IN (:course_id_list)' : '';
+    const teacherFilter = teacher_id && permission == 1 ? 'AND t.teacher_id = :teacher_id' : '';
 
     try {
       const results = await sequelize.query(
@@ -102,14 +107,14 @@ const ChartController = {
             teachers t ON c.teacher_id = t.teacher_id
         WHERE
             c.isDelete = 0 AND a.isDelete = 0 AND st.isDelete = 0
-            and t.teacher_id = :teacher_id
-            and c.course_id = :course_id
+            ${teacherFilter}
+            ${courseIdFilter}
         ORDER BY
             st.student_id, c.course_id;
             `,
         {
           type: Sequelize.QueryTypes.SELECT,
-          replacements: { teacher_id, course_id }
+          replacements: { teacher_id, course_id_list }
         }
       );
       res.json(results);

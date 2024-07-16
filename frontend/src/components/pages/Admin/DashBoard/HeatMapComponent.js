@@ -74,7 +74,11 @@ export default function HeatMapComponent({ user, permission }) {
     x: allLabels,
     y: chartData.map(data => data.subjectName),
     type: 'heatmap',
-    colorscale: 'Viridis',
+    colorscale: [
+      [0, 'rgb(71, 147, 175, 0.3)'], //lowest value
+      [0.5, 'rgb(255, 196, 112, 0.9)'], // middle value
+      [1, 'rgb(221, 87, 70, 1)'] //highest value
+    ],
     zmin: 0,
     zmax: 100
   }];
@@ -133,7 +137,6 @@ export default function HeatMapComponent({ user, permission }) {
               paper_bgcolor: 'rgba(255, 255, 255, 1)',
               margin: { l: 150, r: 50, b: 100, t: 100, pad: 4 },
               coloraxis: {
-                colorscale: 'Viridis',
                 cmin: 0,
                 cmax: 100,
                 colorbar: {
