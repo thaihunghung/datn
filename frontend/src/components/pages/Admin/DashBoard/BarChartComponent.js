@@ -98,6 +98,8 @@ const BoxPlotComponent = ({ filters, setFilters, showFilters, setShowFilters, us
             y: scores,
             boxpoints: 'all', // Display all points
             text: studentNames, // Display student names
+            // jitter: 0.5,
+            // pointpos: 0,
           };
         });
 
@@ -223,7 +225,7 @@ const BoxPlotComponent = ({ filters, setFilters, showFilters, setShowFilters, us
             title: '',  // Hide y-axis title
           },
           xaxis: { showticklabels: false },  // Hide x-axis tick labels
-          width: 1100, 
+          width: 1100,
           height: 600
         }}
       />

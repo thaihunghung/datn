@@ -125,7 +125,7 @@ const ChartController = {
   ,
   getPloPercentage: async (req, res) => {
     console.log(" req.body55", req.body)
-    const { teacher_id, permission } = req.body;
+    const { teacher_id, permission, studentCode } = req.body;
 
     // Xây dựng bộ lọc truy vấn động
     const teacherFilter = teacher_id && permission == 1 ? 'AND t.teacher_id = :teacher_id' : '';
@@ -451,7 +451,109 @@ const ChartController = {
       res.status(500).json({ message: 'Internal Server Error' });
     }
   },
+  getAverageCourseScoresByStudent: async (req, res) => {
+    try {
+      console.log("ok", req.body)
+      const {
+        course_id_list,
+        subject_id_list,
+        academic_year_id_list,
+        semester_id_list,
+        class_id_list,
+        student_code,
 
+      } = req.body.processedFilters;
+
+      // Construct dynamic query filters
+      const courseIdFilter = course_id_list && course_id_list.length > 0 ? 'AND c.course_id IN (:course_id_list)' : '';
+      const subjectIdFilter = subject_id_list && subject_id_list.length > 0 ? 'AND sub.subject_id IN (:subject_id_list)' : '';
+      const academicYearIdFilter = academic_year_id_list && academic_year_id_list.length > 0 ? 'AND ay.academic_year_id IN (:academic_year_id_list)' : '';
+      const semesterIdFilter = semester_id_list && semester_id_list.length > 0 ? 'AND s.semester_id IN (:semester_id_list)' : '';
+      const classIdFilter = class_id_list && class_id_list.length > 0 ? 'AND cl.class_id IN (:class_id_list)' : '';
+      const studentCodeFilter = student_code > 0 ?
+       `AND (:student_code IS NULL OR c.course_id IN (
+        SELECT ce_inner.course_id
+        FROM course_enrollments ce_inner
+        JOIN students st_inner ON ce_inner.student_id = st_inner.student_id
+        WHERE st_inner.studentCode = :student_code
+    ))` : '';
+      // const teacherFilter = teacher_id && permission == 1 ? 'and t.teacher_id = :teacher_id' : '';
+
+      console.log("courseIdFilter 1111", courseIdFilter)
+      const query = `
+        SELECT
+            st.student_id,
+            st.studentCode,
+            st.name AS studentName,
+            c.course_id,
+            c.courseName,
+            c.courseCode,
+            sub.subject_id,
+            sub.subjectName,
+            ay.academic_year_id,
+            ay.description AS academicYear,
+            sem.semester_id,
+            sem.descriptionShort AS semester,
+            cl.class_id,
+            cl.className,
+            t.teacher_id,
+            t.name AS teacherName,
+            a.totalScore AS score
+        FROM
+            courses c
+        JOIN
+            course_enrollments ce ON ce.course_id = c.course_id
+        JOIN
+            students st ON st.student_id = ce.student_id
+        JOIN
+            teachers t ON t.teacher_id = c.teacher_id
+        JOIN
+            assessments a ON a.course_id = c.course_id AND a.student_id = st.student_id
+        JOIN
+            subjects sub ON c.subject_id = sub.subject_id
+        JOIN
+            semester_academic_years say ON c.id_semester_academic_year = say.id_semester_academic_year
+        JOIN
+            academic_years ay ON say.academic_year_id = ay.academic_year_id
+        JOIN
+            semesters sem ON say.semester_id = sem.semester_id
+        JOIN
+            classes cl ON c.class_id = cl.class_id
+        WHERE
+            c.isDelete = 0
+            AND a.isDelete = 0
+            AND st.isDelete = 0
+            AND t.isDelete = 0
+            ${studentCodeFilter}
+            ${classIdFilter}
+            ${subjectIdFilter}
+            ${semesterIdFilter}
+            ${academicYearIdFilter}
+            ${courseIdFilter}
+        ORDER BY
+            st.student_id, c.course_id;;
+      `;
+
+      const replacements = {
+        ...(course_id_list && course_id_list.length > 0 && { course_id_list }),
+        ...(subject_id_list && subject_id_list.length > 0 && { subject_id_list }),
+        ...(academic_year_id_list && academic_year_id_list.length > 0 && { academic_year_id_list }),
+        ...(semester_id_list && semester_id_list.length > 0 && { semester_id_list }),
+        ...(class_id_list && class_id_list.length > 0 && { class_id_list }),
+        ...(student_code && { student_code }),
+      };
+
+      const results = await sequelize.query(query, {
+        type: Sequelize.QueryTypes.SELECT,
+        replacements,
+      });
+
+      res.json(results);
+    } catch (error) {
+      console.error('Error fetching average course scores:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  },
   getAverageCourseScoresOfStudents: async (req, res) => {
     try {
       const { course_id_list, teacher_id, permission } = req.body;

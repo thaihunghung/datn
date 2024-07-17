@@ -6,7 +6,7 @@ import PLOChartComponent from './PLOChartComponent';
 import CourseScoresScatterChart from './CourseScoresHistogramChart';
 import StackedBarChart from './StackedBarChart';
 import StudentScore from './StudentScore';
-import ParallelCoordinatesChartComponent from './HeatMapComponent';
+import HeatMapComponent from './HeatMapComponent';
 
 export default function Dashboard() {
   const [user, setUser] = useState({});
@@ -61,7 +61,7 @@ export default function Dashboard() {
           user={user}
         />
         <div className='col-span-2'>
-          <ParallelCoordinatesChartComponent
+          <HeatMapComponent
             permission={permission}
             user={user}
             descriptions={descriptions}
