@@ -148,12 +148,12 @@ const StoreCourse = (props) => {
             {item.class.classCode}
           </>
         );
-        case "className":
-          return (
-            <>
-              {item.class.className}
-            </>
-          );
+      case "className":
+        return (
+          <>
+            {item.class.className}
+          </>
+        );
       case "actions":
         return (
           <div className="flex justify-center items-center gap-2">
@@ -250,7 +250,7 @@ const StoreCourse = (props) => {
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button endContent={<i className="fa-solid fa-chevron-down"></i>} variant="flat">
-                  Columns
+                  Cột
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
@@ -269,7 +269,7 @@ const StoreCourse = (props) => {
               </DropdownMenu>
             </Dropdown>
             <Button color="secondary" onClick={() => navigate('/admin/course')}>
-              Manage Course
+              Danh sách khóa học
             </Button>
           </div>
         </div>
@@ -279,7 +279,7 @@ const StoreCourse = (props) => {
         <div className="flex justify-between items-center">
           <span className="text-default-400 text-small">Total {totalCourses} courses</span>
           <label className="flex items-center text-default-400 text-small">
-            Rows per page:
+            Số dòng hiển thị:
             <select
               className="bg-transparent outline-none text-default-400 text-small"
               onChange={onRowsPerPageChange}
@@ -320,10 +320,10 @@ const StoreCourse = (props) => {
         />
         <div className="hidden sm:flex w-[30%] justify-end gap-2">
           <Button isDisabled={page <= 1} size="sm" variant="flat" onPress={onPreviousPage}>
-            Previous
+            Trước
           </Button>
           <Button isDisabled={page >= pages} size="sm" variant="flat" onPress={onNextPage}>
-            Next
+            Sau
           </Button>
         </div>
       </div>
@@ -341,7 +341,7 @@ const StoreCourse = (props) => {
           <div className="flex gap-3 ">
             <Tooltip showArrow={true} content={`Move ${selectedCount} to trash`}>
               <Button className="text-[#FEFEFE]" variant="light" color="danger" onClick={() => handleDeleteClick()}>
-                Hide Course
+                Ẩn khóa học
               </Button>
             </Tooltip>
             <Tooltip showArrow={true} content="Clear selection">

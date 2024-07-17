@@ -212,10 +212,10 @@ const AddCourseModal = ({
             </ModalBody>
             <ModalFooter>
               <Button color="foreground" variant="light" onPress={handleCloseAddModal}>
-                Close
+                Đóng
               </Button>
               <Button className="bg-[#6f4ef2] shadow-lg shadow-indigo-500/20" onPress={handleAddSubmit}>
-                Add
+                Tạo
               </Button>
             </ModalFooter>
           </>

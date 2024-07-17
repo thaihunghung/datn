@@ -26,7 +26,7 @@ const ProfileStudent = () => {
     // Fetch learning outcomes data from API
     const fetchLearningOutcomes = async () => {
       try {
-        const response = await axiosAdmin.get(`/students/${id}/learning-outcome`);
+        const response = await axiosAdmin.get(`/student/learning-outcome/${id}`);
         console.log("Learning outcomes data", response.data);
         setLearningOutcomes(response.data);
         setFilteredOutcomes(response.data);
@@ -57,7 +57,7 @@ const ProfileStudent = () => {
 
   return (
     <div className="flex flex-col md:flex-row p-4 gap-5">
-      <Card className="w-full md:w-1/3 p-4 shadow-lg rounded-lg">
+      <Card className="w-[400px] md:w-1/3 p-4 shadow-lg rounded-lg fixed top-0 mt-10">
         <div className="flex items-center space-x-4">
           <Avatar
             src="https://img.freepik.com/free-vector/illustration-user-avatar-icon_53876-5907.jpg"
@@ -101,10 +101,10 @@ const ProfileStudent = () => {
       </Card>
       <Spacer y={2} />
       
-      <Card className="w-full md:w-2/3 p-4 shadow-lg rounded-lg">
-      <div>
-        <StudentLearningOutcomeBarChart />
-      </div>
+      <Card className="w-full md:w-2/3 p-4 shadow-lg rounded-lg ml-[450px]">
+        <div>
+          <StudentLearningOutcomeBarChart />
+        </div>
         <div className="flex justify-between items-center">
           <Input
             clearable

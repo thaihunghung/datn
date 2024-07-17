@@ -1,5 +1,3 @@
-// src/components/PLOChartComponent.js
-
 import React, { useEffect, useState } from 'react';
 import { axiosAdmin } from '../../../../service/AxiosAdmin';
 import { Select, Button } from 'antd';
@@ -32,10 +30,11 @@ const PLOChartComponent = ({ user }) => {
           permission: permission,
         });
 
-        const ploData = response.data.flatMap(subject => 
+        const ploData = response.data.flatMap(subject =>
           subject.plos.map(plo => ({
             name: plo.ploName,
             percentage: (plo.percentage_score * 100).toFixed(2),
+            description: plo.description
           }))
         );
 
@@ -67,15 +66,20 @@ const PLOChartComponent = ({ user }) => {
 
   const ploNames = data.map(plo => plo.name);
   const ploPercentages = data.map(plo => plo.percentage);
+  const ploDescriptions = data.map(plo => plo.description);
 
   const chartData = [
     {
       type: 'bar',
       x: ploNames,
       y: ploPercentages,
-      text: ploPercentages.map(String),
-      textposition: 'auto',
-      hoverinfo: 'x+y',
+      text: ploDescriptions.map((desc, index) => `${desc}`),
+      textposition: 'none',
+      hovertemplate:
+        '<b>PLO:</b> %{x}<br>' +
+        '<b>Percentage:</b> %{y:.2f}%<br>' +
+        '<b>Description:</b> %{text}<br>' +
+        '<extra></extra>',
       marker: {
         color: 'rgba(75, 192, 192, 0.6)',
         line: {
@@ -104,7 +108,7 @@ const PLOChartComponent = ({ user }) => {
     },
     yaxis: {
       title: {
-        text: 'Percentage (%)',
+        text: 'Phần trăm (%)',
         font: {
           size: 18,
         },
@@ -116,6 +120,16 @@ const PLOChartComponent = ({ user }) => {
     height: 600,
     plot_bgcolor: 'rgba(240, 240, 240, 0.9)',
     paper_bgcolor: 'rgba(255, 255, 255, 1)',
+    hoverlabel: {
+      bgcolor: "white",
+      bordercolor: "black",
+      font: {
+        size: 12,
+        color: "black"
+      },
+      align: "left",
+      wraplength: 300
+    },
   };
 
   return (

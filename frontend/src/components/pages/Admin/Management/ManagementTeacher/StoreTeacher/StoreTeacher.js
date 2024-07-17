@@ -256,7 +256,7 @@ export default function BlockedTeachersPage(props) {
         <div className="flex justify-between items-center">
           <span className="text-default-400 text-small">Total {totalBlockedTeachers} blocked teachers</span>
           <label className="flex items-center text-default-400 text-small">
-            Rows per page:
+            Số dòng hiển thị:
             <select
               className="bg-transparent outline-none text-default-400 text-small"
               onChange={onRowsPerPageChange}

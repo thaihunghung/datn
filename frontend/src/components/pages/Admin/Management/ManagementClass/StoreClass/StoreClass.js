@@ -248,7 +248,7 @@ const StoreClass = (props) => {
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button endContent={<i className="fa-solid fa-chevron-down"></i>} variant="flat">
-                  Columns
+                  Cột
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
@@ -267,14 +267,14 @@ const StoreClass = (props) => {
               </DropdownMenu>
             </Dropdown>
             <Button color="secondary" onClick={() => navigate('/admin/class')}>
-              Manage Class
+              Danh sách lớp
             </Button>
           </div>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-default-400 text-small">Total {totalClasses} classes</span>
           <label className="flex items-center text-default-400 text-small">
-            Rows per page:
+            Số dòng hiển thị:
             <select
               className="bg-transparent outline-none text-default-400 text-small"
               onChange={onRowsPerPageChange}
@@ -314,10 +314,10 @@ const StoreClass = (props) => {
         />
         <div className="hidden sm:flex w-[30%] justify-end gap-2">
           <Button isDisabled={page <= 1} size="sm" variant="flat" onPress={onPreviousPage}>
-            Previous
+            Trước
           </Button>
           <Button isDisabled={page >= pages} size="sm" variant="flat" onPress={onNextPage}>
-            Next
+            Sau
           </Button>
         </div>
       </div>

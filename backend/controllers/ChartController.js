@@ -16,6 +16,7 @@ const ChartController = {
             s.subjectName,
             c.clo_id,
             c.cloName,
+            c.description,
             SUM(ai.assessmentScore) AS totalScoreAchieved,
             SUM(ri.maxScore) AS totalMaxScore,
             ROUND((SUM(ai.assessmentScore) / SUM(ri.maxScore)), 4) AS percentage_score
@@ -53,7 +54,7 @@ const ChartController = {
       );
 
       const formattedResults = results.reduce((acc, result) => {
-        const { subject_id, subjectName, clo_id, cloName, percentage_score } = result;
+        const { subject_id, subjectName, description, clo_id, cloName, percentage_score } = result;
 
         if (!acc[subject_id]) {
           acc[subject_id] = {
@@ -66,6 +67,7 @@ const ChartController = {
         acc[subject_id].clos.push({
           clo_id,
           cloName,
+          description,
           percentage_score
         });
 
@@ -81,7 +83,7 @@ const ChartController = {
   getScoreStudentByCourseAndTeacher: async (req, res) => {
     console.log("req.body", req.body)
     const { course_id_list, teacher_id, permission } = req.body;
-    console.log("req.body",permission)
+    console.log("req.body", permission)
 
 
     const courseIdFilter = course_id_list && course_id_list.length > 0 ? 'AND c.course_id IN (:course_id_list)' : '';
@@ -124,7 +126,6 @@ const ChartController = {
   }
   ,
   getPloPercentage: async (req, res) => {
-    console.log(" req.body55", req.body)
     const { teacher_id, permission, studentCode } = req.body;
 
     // Xây dựng bộ lọc truy vấn động
@@ -137,6 +138,7 @@ const ChartController = {
                 s.subjectName,
                 plo.plo_id,
                 plo.ploName,
+                plo.description,
                 SUM(ai.assessmentScore) AS totalScoreAchieved,
                 SUM(ri.maxScore) AS totalMaxScore,
                 ROUND((SUM(ai.assessmentScore) / SUM(ri.maxScore)), 4) AS percentage_score
@@ -168,7 +170,7 @@ const ChartController = {
       );
 
       const formattedResults = results.reduce((acc, result) => {
-        const { subject_id, subjectName, plo_id, ploName, percentage_score } = result;
+        const { subject_id, subjectName,description, plo_id, ploName, percentage_score } = result;
 
         if (!acc[subject_id]) {
           acc[subject_id] = {
@@ -181,6 +183,7 @@ const ChartController = {
         acc[subject_id].plos.push({
           plo_id,
           ploName,
+          description,
           percentage_score
         });
 
@@ -471,7 +474,7 @@ const ChartController = {
       const semesterIdFilter = semester_id_list && semester_id_list.length > 0 ? 'AND s.semester_id IN (:semester_id_list)' : '';
       const classIdFilter = class_id_list && class_id_list.length > 0 ? 'AND cl.class_id IN (:class_id_list)' : '';
       const studentCodeFilter = student_code > 0 ?
-       `AND (:student_code IS NULL OR c.course_id IN (
+        `AND (:student_code IS NULL OR c.course_id IN (
         SELECT ce_inner.course_id
         FROM course_enrollments ce_inner
         JOIN students st_inner ON ce_inner.student_id = st_inner.student_id

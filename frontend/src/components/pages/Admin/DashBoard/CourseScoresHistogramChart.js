@@ -9,7 +9,7 @@ const CourseScoresHistogramChart = ({ user }) => {
   const [courseData, setCourseData] = useState([]);
   const [scoreData, setScoreData] = useState([]);
   const [selectedCourses, setSelectedCourses] = useState([]);
-  const [showFilter, setShowFilter] = useState(true);
+  const [showFilter, setShowFilter] = useState(false);
   const [teacherId, setTeacherId] = useState();
   const [permission, setPermission] = useState();
 
@@ -130,7 +130,6 @@ const CourseScoresHistogramChart = ({ user }) => {
           </Select>
         )}
       </div>
-      <h2 className="text-xl font-bold text-[#6366F1]">Phân bố điểm</h2>
       <Plot
         data={histogramTraces}
         layout={layout}

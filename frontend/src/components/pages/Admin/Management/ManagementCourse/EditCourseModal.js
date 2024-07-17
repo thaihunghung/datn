@@ -217,10 +217,10 @@ const EditCourseModal = ({
             </ModalBody>
             <ModalFooter>
               <Button color="foreground" variant="light" onPress={handleCloseEditModal}>
-                Close
+                Đóng
               </Button>
               <Button className="bg-[#6f4ef2] shadow-lg text-white shadow-indigo-500/20" onPress={handleEditSubmit}>
-                Save
+                Lưu
               </Button>
             </ModalFooter>
           </>

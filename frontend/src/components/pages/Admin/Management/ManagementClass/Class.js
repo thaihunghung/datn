@@ -241,7 +241,7 @@ const Class = (props) => {
           <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button endContent={<i className="fa-solid fa-chevron-down"></i>} variant="flat">
-                  Columns
+                  Cột
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
@@ -262,11 +262,11 @@ const Class = (props) => {
             <Button color="primary" endContent={<i className="fa-solid fa-plus"></i>}
               onClick={() => setIsAddClassOpen(true)}
             >
-              Create new
+              Tạo mới
             </Button>
 
             <Button color="secondary" onClick={() => navigate('/admin/class/store')}>
-              Manage Blocked
+              Danh sách chặn
             </Button>
           </div>
         </div>
@@ -276,7 +276,7 @@ const Class = (props) => {
         <div className="flex justify-between items-center">
           <span className="text-default-400 text-small">Total {totalClasses} classes</span>
           <label className="flex items-center text-default-400 text-small">
-            Rows per page:
+            Số dòng hiển thị:
             <select
               className="bg-transparent outline-none text-default-400 text-small"
               onChange={onRowsPerPageChange}
@@ -317,10 +317,10 @@ const Class = (props) => {
         />
         <div className="hidden sm:flex w-[30%] justify-end gap-2">
           <Button isDisabled={page <= 1} size="sm" variant="flat" onPress={onPreviousPage}>
-            Previous
+            Trước
           </Button>
           <Button isDisabled={page >= pages} size="sm" variant="flat" onPress={onNextPage}>
-            Next
+            Sau
           </Button>
         </div>
       </div>
@@ -334,7 +334,7 @@ const Class = (props) => {
     return (
       selectedCount > 0 && (
         <div className="flex justify-between items-center text-[#FEFEFE] bg-[#FF8077] py-2 px-4 rounded-lg mb-4">
-          <div>{selectedCount} selected</div>
+          <div>{selectedCount} Chọn</div>
           <div className="flex gap-3 ">
             <Tooltip showArrow={true} content={`Chuyển ${selectedCount} vào thùng rác`}>
               <Button className="text-[#FEFEFE]" variant="light" color="danger" onClick={() => handleDeleteClick()}>

@@ -228,7 +228,6 @@ const Course = (props) => {
   };
 
   const handleSaveAcademicYear = async () => {
-    console.log("vao")
     try {
       const response = await axiosAdmin.post('/academic-year', { data: form.yearX })
 
@@ -268,7 +267,6 @@ const Course = (props) => {
   };
 
   const handleOpenEditModal = (course) => {
-    console.log("form click", form)
     setSelectedCourse(course);
     setForm({
       courseName: course.courseName,
@@ -390,7 +388,7 @@ const Course = (props) => {
       </div>
       <div className="flex justify-end">
         <Button color="secondary" onClick={() => navigate('/admin/course/store')}>
-          Manage Blocked
+          Danh sách ẩn
         </Button>
       </div>
       <div className="flex justify-between mt-7">
@@ -398,7 +396,7 @@ const Course = (props) => {
         <Button
           className="mx-7 bg-[#6366F1] text-[#f0f0f0]"
           onClick={handleOpenAddModal}>
-          <p>Create new <PlusOutlined /></p>
+          <p>Tạo mới <PlusOutlined /></p>
         </Button>
 
         <Input
@@ -443,15 +441,15 @@ const Course = (props) => {
                     className="bg-[#6366F1] text-[#f0f0f0]"
                     onClick={() => handleOpenMoreModal(course)}>Sinh viên</Button>
                 </Tooltip>
-                <Tooltip content="Chỉnh sửa môn học">
+                <Tooltip content="Chỉnh sửa khóa học">
                   <Button
                     className="bg-[#6366F1] text-[#f0f0f0]"
                     onClick={() => handleOpenEditModal(course)}>Chỉnh sửa</Button>
                 </Tooltip>
-                <Tooltip>
+                <Tooltip content="Ẩn khóa học">
                   <Button
                     className="bg-red-400 text-[#f0f0f0]"
-                    onClick={() => handleOpenSettingsModal(course)}>Ẩn môn học</Button>
+                    onClick={() => handleOpenSettingsModal(course)}>Ẩn khóa học</Button>
                 </Tooltip>
               </CardFooter>
             </Card>

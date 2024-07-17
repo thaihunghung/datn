@@ -227,7 +227,7 @@ const DetailCourse = (props) => {
           />
         </div>
 
-        <div className='flex flex-col w-full  sm:flex-col sm:w-full lg:flex-row xl:flex-row justify-around'>
+        {/* <div className='flex flex-col w-full  sm:flex-col sm:w-full lg:flex-row xl:flex-row justify-around'>
           <div className='w-full sm:w-[80%] lg:w-[30%] xl:w-[30%]  flex justify-start items-center'>
             <div className='p-10 w-full mt-10 h-fix sm:h-fix  lg:min-h-[250px] xl:min-h-[250px] border-blue-500 border-1 flex flex-col items-center justify-center  gap-5 rounded-lg'>
               <div><p className='w-full text-center'>Tải Mẫu CSV</p></div>
@@ -258,7 +258,7 @@ const DetailCourse = (props) => {
               />
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </>
   );
