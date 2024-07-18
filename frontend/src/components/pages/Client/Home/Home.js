@@ -187,7 +187,7 @@ const Home = () => {
           <div>
             <Chart studentCode={studentCode} filters={filters} />
           </div>
-          <div className='mt-6'>
+          <div className='mt-2'>
             <CloChart
               studentCode={studentCode}
             />

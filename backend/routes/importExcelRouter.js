@@ -16,7 +16,6 @@ const SubjectController = require('../controllers/SubjectController');
 const AssessmentsController = require('../controllers/AssessmentsController');
 const CourseEnrollmentController = require('../controllers/CourseEnrollmentController');
 const TeacherController = require('../controllers/TeacherController');
- 
 const uploadDirectory = path.join(__dirname, '../uploads');
 
 const storage = multer.diskStorage({
@@ -29,6 +28,375 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+
+/**
+ * @openapi
+ * tags:
+ *   - name: Save Excel
+ *     description: Operations related to saving Excel files
+ */
+
+/**
+ * @openapi
+ * /program:
+ *   post:
+ *     summary: Process and save program template
+ *     tags: [Save Excel]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Program template processed and saved
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /po:
+ *   post:
+ *     summary: Process and save PO template
+ *     tags: [Save Excel]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: PO template processed and saved
+ *       500:
+ *         description: Server error
+ */
+
+
+/**
+ * @openapi
+ * /plo:
+ *   post:
+ *     summary: Process and save PLO template
+ *     tags: [Save Excel]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: PLO template processed and saved
+ *       500:
+ *         description: Server error
+ */
+
+
+/**
+ * @openapi
+ * /student:
+ *   post:
+ *     summary: Save student Excel file
+ *     tags: [Save Excel]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Student Excel file saved
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /teacher:
+ *   post:
+ *     summary: Save teacher Excel file
+ *     tags: [Save Excel]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Teacher Excel file saved
+ *       500:
+ *         description: Server error
+ */
+
+
+/**
+ * @openapi
+ * /clo:
+ *   post:
+ *     summary: Process and save CLO template
+ *     tags: [Save Excel]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: CLO template processed and saved
+ *       500:
+ *         description: Server error
+ */
+
+
+/**
+ * @openapi
+ * /chapter:
+ *   post:
+ *     summary: Process and save chapter template
+ *     tags: [Save Excel]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Chapter template processed and saved
+ *       500:
+ *         description: Server error
+ */
+
+
+/**
+ * @openapi
+ * /subject:
+ *   post:
+ *     summary: Process and save subject template
+ *     tags: [Save Excel]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Subject template processed and saved
+ *       500:
+ *         description: Server error
+ */
+
+
+/**
+ * @openapi
+ * /assessment:
+ *   post:
+ *     summary: Process and save assessment template
+ *     tags: [Save Excel]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Assessment template processed and saved
+ *       500:
+ *         description: Server error
+ */
+
+
+/**
+ * @openapi
+ * /course-enrollment:
+ *   post:
+ *     summary: Save course enrollment Excel file
+ *     tags: [Save Excel]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Course enrollment Excel file saved
+ *       500:
+ *         description: Server error
+ */
+
+
+/**
+ * @openapi
+ * /student/update:
+ *   put:
+ *     summary: Update students from Excel file
+ *     tags: [Save Excel]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Students updated from Excel file
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /po/update:
+ *   put:
+ *     summary: Update PO template
+ *     tags: [Save Excel]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: PO template updated
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /plo/update:
+ *   put:
+ *     summary: Update PLO template
+ *     tags: [Save Excel]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: PLO template updated
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /clo/update:
+ *   put:
+ *     summary: Update CLO template
+ *     tags: [Save Excel]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: CLO template updated
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /chapter/update:
+ *   put:
+ *     summary: Update chapter template
+ *     tags: [Save Excel]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Chapter template updated
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /subject/update:
+ *   put:
+ *     summary: Update subject template
+ *     tags: [Save Excel]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Subject template updated
+ *       500:
+ *         description: Server error
+ */
 
 router.post('/program', upload.any(), ProgramsController.processSaveTemplate);
 router.post('/po', upload.any(), PoController.processSaveTemplatePo);

@@ -325,7 +325,7 @@ export default function App(props) {
           <Input
             isClearable
             className="w-full sm:max-w-[44%]"
-            placeholder="Search by name, teacher code ..."
+            placeholder="Tìm kiếm theo tên, mã giáo viên ..."
             startContent={<i className="fa-solid fa-magnifying-glass"></i>}
             value={filterValue}
             onClear={() => onClear()}
@@ -335,7 +335,7 @@ export default function App(props) {
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button endContent={<i className="fa-solid fa-chevron-down"></i>} variant="flat">
-                  Permission
+                  Quyền
                 </Button>
               </DropdownTrigger>
               <DropdownMenu

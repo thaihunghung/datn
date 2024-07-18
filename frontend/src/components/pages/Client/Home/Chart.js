@@ -88,7 +88,7 @@ const Chart = ({ studentCode, filters }) => {
 
   return (
     <div className='grid grid-cols-1'>
-      <div className='flex flex-col bg-white rounded-xl items-center shadow-md m-2 mt-6'>
+      <div className='flex flex-col bg-white rounded-xl items-center shadow-md m-2 mt-2'>
         <Plot
           className='p-4'
           data={[...boxPlotData, ...lineChartData]}

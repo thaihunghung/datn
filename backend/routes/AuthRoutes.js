@@ -1,4 +1,3 @@
-// routes/teacherRoutes.js
 const express = require('express');
 const router = express.Router();
 const AuthenticateController = require('../controllers/AuthenticateController');
@@ -201,6 +200,66 @@ const authenticateStudent = require('../middlewares/studentMiddleware');
  *     responses:
  *       200:
  *         description: Logout successful.
+ *       401:
+ *         description: Unauthorized.
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /api/student-login:
+ *   post:
+ *     summary: Student login
+ *     description: Authenticates a student and returns a JWT token.
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               studentCode:
+ *                 type: string
+ *                 description: The student's code.
+ *                 example: student123
+ *               password:
+ *                 type: string
+ *                 description: The student's password.
+ *                 example: password123
+ *     responses:
+ *       200:
+ *         description: Login successful.
+ *       401:
+ *         description: Unauthorized.
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @openapi
+ * /api/student/info:
+ *   get:
+ *     summary: Get authenticated student's information
+ *     description: Returns the details of the authenticated student.
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Student details retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                   description: The student's name.
+ *                   example: John Doe
+ *                 email:
+ *                   type: string
+ *                   description: The student's email.
+ *                   example: john.doe@example.com
  *       401:
  *         description: Unauthorized.
  *       500:

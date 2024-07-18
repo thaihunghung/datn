@@ -59,8 +59,8 @@ const CloChart = ({ studentCode }) => {
       theta: cloNames,
       fill: 'toself',
       name: 'CLO Achievement',
-      text: descriptions,
-      hoverinfo: 'text+percentages'
+      text: descriptions.map((desc, index) => `${desc}: ${percentages[index]}%`),
+      hoverinfo: 'text'
     }
   ];
 
@@ -71,6 +71,8 @@ const CloChart = ({ studentCode }) => {
         range: [0, 100]
       }
     },
+    width: 630,
+    height: 440,
     showlegend: false,
     title: 'CLO Achievement Percentages'
   };
