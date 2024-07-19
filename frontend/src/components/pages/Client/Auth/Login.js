@@ -49,7 +49,7 @@ const Login = () => {
               <input
                 type="text"
                 className="login__input"
-                placeholder="User name / Email"
+                placeholder="Mã sinh viên"
                 value={studentCode}
                 onChange={(e) => setStudentCode(e.target.value)}
               />
@@ -59,7 +59,7 @@ const Login = () => {
               <input
                 type="password"
                 className="login__input"
-                placeholder="Password"
+                placeholder="Mật khẩu"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />

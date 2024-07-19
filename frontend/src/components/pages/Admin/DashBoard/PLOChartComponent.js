@@ -160,7 +160,6 @@ const PLOChartComponent = ({ user }) => {
           </div>
         )}
       </div>
-      <h2 className="text-xl font-semibold mb-4">Tỉ lệ đạt của chuẩn đầu ra của chương trình</h2>
       <div className="">
         <Plot data={chartData} layout={chartLayout} />
       </div>
