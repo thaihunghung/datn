@@ -9,10 +9,28 @@ const path = require('path');
 const CloController = {
   index: async (req, res) => {
     try {
-      const clos = await CloModel.findAll();
+      const { subject_id, isDelete } = req.query; // Sử dụng query parameters để lấy subject_id và trạng thái isDelete
+
+      // Xây dựng điều kiện where
+      const whereCondition = {};
+      if (subject_id) {
+        whereCondition.subject_id = subject_id;
+      }
+      if (isDelete !== undefined) {
+        whereCondition.isDelete = JSON.parse(isDelete); // Chuyển đổi chuỗi thành boolean
+      }
+
+      const clos = await CloModel.findAll({
+        where: whereCondition
+      });
+
+      if (!clos.length) {
+        return res.status(404).json({ message: 'No CLOs found' });
+      }
+
       res.status(200).json(clos);
     } catch (error) {
-      console.error('Error getting all CLOs:', error);
+      console.error('Error getting CLOs:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
   },
@@ -57,8 +75,8 @@ const CloController = {
 
   getByID: async (req, res) => {
     try {
-      const { clo_id } = req.params;
-      const clo = await CloModel.findOne({ where: { clo_id: clo_id } });
+      const { id } = req.params;
+      const clo = await CloModel.findOne({ where: { clo_id: id } });
       if (!clo) {
         return res.status(404).json({ message: 'CLO not found' });
       }
@@ -71,14 +89,14 @@ const CloController = {
 
   update: async (req, res) => {
     try {
-      const { clo_id } = req.params;
+      const { id } = req.params;
       const { data } = req.body;
-      const clo = await CloModel.findOne({ where: { clo_id: clo_id } });
+      const clo = await CloModel.findOne({ where: { clo_id: id } });
       if (!clo) {
         return res.status(404).json({ message: 'CLO not found' });
       }
-      await CloModel.update(data, { where: { clo_id: clo_id } });
-      res.status(200).json({ message: `Successfully updated CLO with ID: ${clo_id}` });
+      await CloModel.update(data, { where: { clo_id: id } });
+      res.status(200).json({ message: `Successfully updated CLO with ID: ${id}` });
     } catch (error) {
       console.error('Error updating CLO:', error);
       res.status(500).json({ message: 'Internal server error' });
@@ -87,14 +105,14 @@ const CloController = {
 
   delete: async (req, res) => {
     try {
-      const { clo_id } = req.params;
-      const clo = await CloModel.findOne({ where: { clo_id: clo_id } });
-      await CloChapterModel.destroy({ where: { clo_id: clo_id } });
-      await PloCloModel.destroy({ where: { clo_id: clo_id } });
+      const { id } = req.params;
+      const clo = await CloModel.findOne({ where: { clo_id: id } });
+      await CloChapterModel.destroy({ where: { clo_id: id } });
+      await PloCloModel.destroy({ where: { clo_id: id } });
       if (!clo) {
         return res.status(404).json({ message: 'CLO not found' });
       }
-      await CloModel.destroy({ where: { clo_id: clo_id } });
+      await CloModel.destroy({ where: { clo_id: id } });
       res.status(200).json({ message: 'Successfully deleted CLO' });
     } catch (error) {
       console.error('Error deleting CLO:', error);
@@ -163,13 +181,13 @@ const CloController = {
   },
   toggleSoftDeleteById: async (req, res) => {
     try {
-      const { clo_id } = req.params;
-      const clo = await CloModel.findOne({ where: { clo_id: clo_id } });
+      const { id } = req.params;
+      const clo = await CloModel.findOne({ where: { clo_id: id } });
       if (!clo) {
         return res.status(404).json({ message: 'clo not found' });
       }
       const updatedIsDeleted = !clo.isDelete;
-      await CloModel.update({ isDelete: updatedIsDeleted }, { where: { clo_id: clo_id } });
+      await CloModel.update({ isDelete: updatedIsDeleted }, { where: { clo_id: id } });
 
       res.status(200).json({ message: `Toggled isDelete status to ${updatedIsDeleted}` });
 

@@ -32,8 +32,8 @@ const RubricController = {
   // Get rubric by ID
   getByID: async (req, res) => {
     try {
-      const { rubric_id } = req.params;
-      const rubric = await RubricModel.findOne({ where: { rubric_id: rubric_id } });
+      const { id } = req.params;
+      const rubric = await RubricModel.findOne({ where: { rubric_id: id } });
       if (!rubric) {
         return res.status(404).json({ message: 'rubric not found' });
       }
@@ -48,14 +48,14 @@ const RubricController = {
   // Update rubric
   update: async (req, res) => {
     try {
-      const { rubric_id } = req.params;
+      const { id } = req.params;
       const { data } = req.body;
-      const rubric = await RubricModel.findOne({ where: { rubric_id: rubric_id } });
+      const rubric = await RubricModel.findOne({ where: { rubric_id: id } });
       if (!rubric) {
         return res.status(404).json({ message: 'rubric not found' });
       }
-      const updatedrubric = await RubricModel.update(data, { where: { rubric_id: rubric_id } });
-      res.json({ message: `Successfully updated rubric with ID: ${rubric_id}` });
+      const updatedrubric = await RubricModel.update(data, { where: { rubric_id: id } });
+      res.json({ message: `Successfully updated rubric with ID: ${id}` });
     } catch (error) {
       console.error('Error updating rubric:', error);
       res.status(500).json({ message: 'Server error' });
@@ -64,8 +64,8 @@ const RubricController = {
   // Delete rubric
   delete: async (req, res) => {
     try {
-      const { rubric_id } = req.params;
-      const rubric = await RubricModel.findOne({ where: { rubric_id: rubric_id } });
+      const { id } = req.params;
+      const rubric = await RubricModel.findOne({ where: { rubric_id: id } });
       if (!rubric) {
         return res.status(404).json({ message: 'rubric not found' });
       }
@@ -209,15 +209,58 @@ const RubricController = {
       res.status(500).json({ message: 'Internal server error' });
     }
   },
+
+  getRubricsForCheckScore: async (req, res) => {
+    try {
+      const { teacher_id, isDelete } = req.query;
+
+      const whereCondition = { teacher_id: teacher_id };
+
+      if (isDelete !== undefined) {
+        whereCondition.isDelete = isDelete === 'true';
+      } else {
+        whereCondition.isDelete = false;
+      }
+
+      const rubrics = await RubricModel.findAll({ where: whereCondition });
+      const rubricIds = rubrics.map(rubric => rubric.rubric_id);
+
+      const results = await RubricItemModel.findAll({
+        attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('maxScore')), 'total_score']],
+        where: { rubric_id: rubricIds, isDelete: whereCondition.isDelete },
+        group: ['rubric_id']
+      });
+
+      const rubricScores = results.map(result => ({
+        rubric_id: result.rubric_id,
+        total_score: result.dataValues.total_score
+      }));
+
+      for (const rubric of rubrics) {
+        const rubricsItemsForRubricItem = rubricScores.filter(rubricsItem => rubricsItem.rubric_id === rubric.rubric_id);
+        rubric.dataValues.RubricItem = rubricsItemsForRubricItem;
+      }
+
+      res.json({ rubric: rubrics });
+    } catch (error) {
+      console.error('Error getting all rubrics:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+
+
+
+
+
   toggleSoftDeleteById: async (req, res) => {
     try {
-      const { rubric_id } = req.params;
-      const rubric = await RubricModel.findOne({ where: { rubric_id: rubric_id } });
+      const { id } = req.params;
+      const rubric = await RubricModel.findOne({ where: { rubric_id: id } });
       if (!rubric) {
         return res.status(404).json({ message: 'rubric not found' });
       }
       const updatedIsDeleted = !rubric.isDelete;
-      await RubricModel.update({ isDelete: updatedIsDeleted }, { where: { rubric_id: rubric_id } });
+      await RubricModel.update({ isDelete: updatedIsDeleted }, { where: { rubric_id: id } });
 
       res.status(200).json({ message: `Toggled isDelete status to ${updatedIsDeleted}` });
 
@@ -336,14 +379,14 @@ const RubricController = {
           // ChapterModel.findAll({ where: { subject_id: rubric.subject_id } })
         ]);
         // Gán kết quả cho các thuộc tính của rubric
-        const rubricIds = rubricItems.map(rubric => rubric.rubricsItem_id);
+        // const rubricIds = rubricItems.map(rubric => rubric.rubricsItem_id);
 
-        const qualityLevels = await qualityLevelsModel.findAll({ where: { rubricsItem_id: rubricIds } });
-        // Lặp qua mỗi rubricItem
-        for (const rubricItem of rubricItems) {
-          const qualityLevelsForRubricItem = qualityLevels.filter(qualityLevel => qualityLevel.rubricsItem_id === rubricItem.rubricsItem_id);
-          rubricItem.dataValues.qualityLevel = qualityLevelsForRubricItem;
-        }
+        // const qualityLevels = await qualityLevelsModel.findAll({ where: { rubricsItem_id: rubricIds } });
+        // // Lặp qua mỗi rubricItem
+        // for (const rubricItem of rubricItems) {
+        //   const qualityLevelsForRubricItem = qualityLevels.filter(qualityLevel => qualityLevel.rubricsItem_id === rubricItem.rubricsItem_id);
+        //   rubricItem.dataValues.qualityLevel = qualityLevelsForRubricItem;
+        // }
         rubric.dataValues.rubricItems = rubricItems;
         rubric.dataValues.CloData = Clos;
         //rubric.dataValues.PloCloData = PloClo;
@@ -358,6 +401,64 @@ const RubricController = {
       res.status(500).json({ message: 'Internal server error' });
     }
   },
+  getItemsByRubricId: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { isDelete } = req.query;
+
+      const rubric = await RubricModel.findOne({
+        where: { rubric_id: id },
+        include: [{
+          model: SubjectModel,
+          attributes: ['subject_id', 'subjectName']
+        }]
+      });
+
+      if (!rubric) {
+        return res.status(404).json({ message: 'Rubric not found' });
+      }
+
+      const rubricItems = await RubricItemModel.findAll({
+        where: {
+          rubric_id: rubric.rubric_id,
+          isDelete: isDelete === 'true'
+        },
+        include: [{
+          model: CloModel,
+          attributes: ['clo_id', 'cloName', 'description']
+        }, {
+          model: ChapterModel,
+          attributes: ['chapter_id', 'chapterName', 'description']
+        }, {
+          model: PloModel,
+          attributes: ['plo_id', 'ploName', 'description']
+        }]
+      });
+
+      // const rubricIds = rubricItems.map(item => item.rubricsItem_id);
+      // const qualityLevels = await qualityLevelsModel.findAll({ where: { rubricsItem_id: rubricIds } });
+
+      // for (const rubricItem of rubricItems) {
+      //   const qualityLevelsForRubricItem = qualityLevels.filter(qualityLevel => qualityLevel.rubricsItem_id === rubricItem.rubricsItem_id);
+      //   rubricItem.dataValues.qualityLevel = qualityLevelsForRubricItem;
+      // }
+
+      const Clos = await CloModel.findAll({ where: { subject_id: rubric.subject_id } });
+      // const Chapters = await ChapterModel.findAll({ where: { subject_id: rubric.subject_id } });
+      // const PloClo = await PloCloModel.findAll({ where: { clo_id: rubric.clo_id } });
+
+      rubric.dataValues.rubricItems = rubricItems;
+      rubric.dataValues.CloData = Clos;
+      // rubric.dataValues.PloCloData = PloClo;
+      // rubric.dataValues.ChapterData = Chapters;
+
+      return res.json({ rubric: rubric });
+
+    } catch (error) {
+      console.error('Error getting rubric items:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
 };
 
 module.exports = RubricController;

@@ -8,16 +8,38 @@ import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
 import Cookies from "js-cookie";
 import CreateRubic from "./CreateRubic";
+import ModalUpdateRubric from "./ModalUpdateRubric";
 
 const ManagementRubric = (nav) => {
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
+    const [currentTeacher, setCurrentTeacher] = useState(null);
+    const [DataSubject, setDataSubject] = useState([]);
     const navigate = useNavigate();
     const teacher_id = Cookies.get('teacher_id');
     if (!teacher_id) {
         navigate('/login');
     }
+    const handleEditClick = (teacher) => {
+        setCurrentTeacher(teacher);
+        setEditRubric(teacher);
+        setIsEditModalOpen(true);
+      };
+
+      const getAllSubject = async () => {
+        try {
+            const response = await axiosAdmin.get(`/subjects/isDelete/false`);
+            if (response.data) {
+                setDataSubject(response.data);
+            }
+            console.log(response);
+        } catch (error) {
+            console.error("Error fetching subjects:", error);
+            message.error('Error fetching subjects');
+        }
+    }
+
+
     const [isOpenModalCreate, setIsOpenModalCreate] = useState(false);
     const handleOpenModalCreate = () => setIsOpenModalCreate(true);
     const handleCloseModalCreate = () => setIsOpenModalCreate(false);
@@ -28,6 +50,16 @@ const ManagementRubric = (nav) => {
 
     const [rubicData, setRubicData] = useState([]);
     const [deleteId, setDeleteId] = useState(null);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editRubric, setEditRubric] = useState({
+        rubric_id: "",
+        subject_id: "",
+        teacher_id: "",
+        rubricName: "",
+        comment: "",
+      });
+
 
     const rowSelection = {
         selectedRowKeys,
@@ -41,6 +73,30 @@ const ManagementRubric = (nav) => {
         setSelectedRowKeys([]);
         setSelectedRow([]);
     };
+    const handleEditFormSubmit = async (values, teacher_id) => {
+        console.log("editRubric");
+        console.log(editRubric);
+        // if (!teacher_id) {
+        //   console.error("No teacher selected for editing");
+        //   return;
+        // }
+    
+        // try {
+        //   const res = await axiosAdmin.put(`/teacher/${teacher_id}`, { data: values });
+        //   successNoti(res.data.message);
+        //   setIsEditModalOpen(false);
+        //   const { teachers, total } = await fetchTeachersData(page, rowsPerPage, filterValue);
+        //   setTeachers(teachers);
+        //   setTotalTeachers(total);
+        // } catch (error) {
+        //   console.error("Error updating teacher:", error);
+        //   if (error.response && error.response.data && error.response.data.message) {
+        //     errorNoti(error.response.data.message);
+        //   } else {
+        //     errorNoti("Error updating teacher");
+        //   }
+        // }
+      };
     const columns = [
         {
             title: "Tên rubric",
@@ -105,27 +161,35 @@ const ManagementRubric = (nav) => {
                 </div>
             ),
             dataIndex: "action",
-            render: (_id) => (
+            render: (Rubric) => (
                 <div className="flex items-center justify-center w-full gap-2">
-                    <Link to={`/admin/management-rubric/update/${_id}`}>
+                    {/* <Link to={`/admin/management-rubric/update/${_id}`}> */}
                         <Tooltip title="Chỉnh sửa">
                             <Button
                                 isIconOnly
                                 variant="light"
                                 radius="full"
                                 size="sm"
+                                className="bg-[#AF84DD]"
+                                onClick={() => {handleEditClick(Rubric) }}
                             >
                                 <i className="fa-solid fa-pen"></i>
                             </Button>
                         </Tooltip>
-                    </Link>
+                    {/* </Link> */}
+
+
+
+
+                    
                     <Tooltip title="Xoá">
                         <Button
                             isIconOnly
                             variant="light"
                             radius="full"
                             size="sm"
-                            onClick={() => { onOpen(); setDeleteId(_id); }}
+                            onClick={() => { onOpen(); setDeleteId(Rubric.rubric_id); }}
+                            className="bg-[#FF8077]"
                         >
                             <i className="fa-solid fa-trash-can"></i>
                         </Button>
@@ -137,6 +201,7 @@ const ManagementRubric = (nav) => {
                                 variant="light"
                                 radius="full"
                                 size="sm"
+                                className="bg-[#FF9908] "
                             >
                                 <i className="fa-solid fa-feather-pointed"></i>
                             </Button>
@@ -150,8 +215,16 @@ const ManagementRubric = (nav) => {
 
     const getAllRubricIsDeleteFalse = async () => {
         try {
-            const response = await axiosAdmin.get(`/rubrics/teacher/${teacher_id}/checkscore`);
+            const response = await axiosAdmin.get(`/rubrics/checkScore?teacher_id=${teacher_id}&isDelete=false`);
             const updatedRubricData = response.data.rubric.map((rubric) => {
+                const Rubric = {
+                    rubric_id: rubric.rubric_id,
+                    subject_id: rubric.subject_id,
+                    teacher_id: rubric.teacher_id,
+                    rubricName: rubric.rubricName,
+                    comment: rubric.comment,
+                }
+
                 const status = {
                     status: rubric.RubricItem.length === 0 ? false : true,
                     _id: rubric.rubric_id
@@ -161,7 +234,7 @@ const ManagementRubric = (nav) => {
                     name: rubric.rubricName,
                     status: status,
                     point: rubric.RubricItem[0]?.total_score ? rubric.RubricItem[0].total_score : 0.0,
-                    action: rubric.rubric_id
+                    action: Rubric
                 };
             });
             setRubicData(updatedRubricData);
@@ -177,7 +250,7 @@ const ManagementRubric = (nav) => {
             rubric_id: selectedRowKeys,
         };
         try {
-            const response = await axiosAdmin.put('/rubrics/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/rubrics/softDelete', { data });
             await getAllRubricIsDeleteFalse();
             handleUnSelect();
             message.success(response.data.message);
@@ -189,7 +262,7 @@ const ManagementRubric = (nav) => {
 
     const handleSoftDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/rubric/${_id}/soft-delete`);
+            const response = await axiosAdmin.put(`/rubric/${_id}/softDelete`);
             await getAllRubricIsDeleteFalse();
             handleUnSelect();
             message.success(response.data.message);
@@ -200,7 +273,9 @@ const ManagementRubric = (nav) => {
     };
 
     useEffect(() => {
+        
         getAllRubricIsDeleteFalse()
+        getAllSubject()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -217,6 +292,16 @@ const ManagementRubric = (nav) => {
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7">
+            <ModalUpdateRubric 
+                    isOpen={isEditModalOpen}
+                    onOpenChange={setIsEditModalOpen}
+                    onSubmit={handleEditFormSubmit}
+                    editRubric={editRubric}
+                    setEditRubric={setEditRubric}
+                    DataSubject={DataSubject}
+            
+            
+            /> 
             <ConfirmAction
                 onOpenChange={onOpenChange}
                 isOpen={isOpen}

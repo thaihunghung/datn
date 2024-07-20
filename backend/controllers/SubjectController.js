@@ -24,12 +24,57 @@ const validTypes = [
 ];
 
 const SubjectController = {
-  index: async (req, res) => {
+  getSubjects: async (req, res) => {
     try {
-      const subjects = await SubjectModel.findAll();
+      const { teacher_id, isDelete, course_id } = req.query;
+
+      // Điều kiện lọc subjects
+      const whereCondition = {};
+      if (teacher_id) {
+        whereCondition.teacher_id = teacher_id;
+      }
+      if (isDelete !== undefined) {
+        whereCondition.isDelete = JSON.parse(isDelete); // Chuyển đổi chuỗi thành boolean
+      }
+
+      // Nếu có course_id, tìm subject dựa trên course_id
+      if (course_id) {
+        const course = await CourseModel.findOne({ where: { course_id } });
+        if (!course) {
+          return res.status(404).json({ message: 'Course not found' });
+        }
+
+        const subject = await SubjectModel.findOne({ where: { subject_id: course.subject_id } });
+        if (!subject) {
+          return res.status(404).json({ message: 'Subject not found' });
+        }
+
+        return res.status(200).json(subject);
+      }
+
+      // Lấy subjects theo điều kiện lọc
+      const subjects = await SubjectModel.findAll({
+        where: whereCondition
+      });
+
+      // Nếu không có subjects, trả về 404
+      if (!subjects.length) {
+        return res.status(404).json({ message: 'No subjects found' });
+      }
+
+      // Lấy CLOs và Chapters liên quan cho các subjects
+      const subjectIds = subjects.map(subject => subject.subject_id);
+      const Clos = await CloModel.findAll({ where: { subject_id: subjectIds } });
+      const Chapters = await ChapterModel.findAll({ where: { subject_id: subjectIds } });
+
+      for (const subject of subjects) {
+        subject.dataValues.CLO = Clos.filter(clos => clos.subject_id === subject.subject_id);
+        subject.dataValues.CHAPTER = Chapters.filter(chapter => chapter.subject_id === subject.subject_id);
+      }
+
       res.status(200).json(subjects);
     } catch (error) {
-      console.error('Error fetching all subjects:', error);
+      console.error('Error fetching subjects:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
   },
@@ -47,14 +92,57 @@ const SubjectController = {
 
   getByID: async (req, res) => {
     try {
-      const { subject_id } = req.params;
-      const subject = await SubjectModel.findOne({ where: { subject_id: subject_id } });
+      const { id } = req.params;
+      const { include_clos, include_chapters, only_clo_ids, only_chapter_ids } = req.query;
+
+      // Tìm thông tin subject
+      const subject = await SubjectModel.findOne({ where: { subject_id: id } });
       if (!subject) {
         return res.status(404).json({ message: 'Subject not found' });
       }
-      res.status(200).json(subject);
+
+      // Khởi tạo response với thông tin subject
+      const response = { subject };
+
+      // Nếu query include_clos = true, thêm CLOs vào response
+      if (include_clos === 'true') {
+        const clos = await CloModel.findAll({
+          where: { subject_id: id, isDelete: false },
+          attributes: ['clo_id', 'cloName', 'description']
+        });
+        response.clos = clos.length ? clos : [];
+      }
+
+      // Nếu query include_chapters = true, thêm Chapters vào response
+      if (include_chapters === 'true') {
+        const chapters = await ChapterModel.findAll({
+          where: { subject_id: id, isDelete: false },
+          attributes: ['chapter_id', 'chapterName', 'description']
+        });
+        response.chapters = chapters.length ? chapters : [];
+      }
+
+      // Nếu query only_clo_ids = true, chỉ trả về IDs của CLOs
+      if (only_clo_ids === 'true') {
+        const cloIds = await CloModel.findAll({
+          where: { subject_id: id, isDelete: false },
+          attributes: ['clo_id']
+        });
+        response.clo_ids = cloIds.map(clo => clo.clo_id);
+      }
+
+      // Nếu query only_chapter_ids = true, chỉ trả về IDs của Chapters
+      if (only_chapter_ids === 'true') {
+        const chapterIds = await ChapterModel.findAll({
+          where: { subject_id: id, isDelete: false },
+          attributes: ['chapter_id']
+        });
+        response.chapter_ids = chapterIds.map(chapter => chapter.chapter_id);
+      }
+
+      res.status(200).json(response);
     } catch (error) {
-      console.error('Error fetching subject by ID:', error);
+      console.error('Error fetching subject details:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
   },
@@ -138,7 +226,32 @@ const SubjectController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+  getRubricsBySubjectId: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { teacher_id } = req.query;
 
+      const subject = await SubjectModel.findOne({ where: { subject_id: id } });
+      if (!subject) {
+        return res.status(404).json({ message: 'Subject not found' });
+      }
+
+      const whereConditions = { subject_id: id };
+      if (teacher_id) {
+        whereConditions.teacher_id = teacher_id;
+      }
+
+      const rubrics = await RubricModel.findAll({ where: whereConditions });
+      if (!rubrics.length) {
+        return res.status(404).json({ message: 'Rubrics not found' });
+      }
+
+      res.status(200).json(rubrics);
+    } catch (error) {
+      console.error('Error finding rubrics:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
 
   getByCourseId: async (req, res) => {
     try {
@@ -166,14 +279,14 @@ const SubjectController = {
 
   update: async (req, res) => {
     try {
-      const { subject_id } = req.params;
+      const { id } = req.params;
       const { data } = req.body;
-      const subject = await SubjectModel.findOne({ where: { subject_id: subject_id } });
+      const subject = await SubjectModel.findOne({ where: { subject_id: id } });
       if (!subject) {
         return res.status(404).json({ message: 'Subject not found' });
       }
-      await SubjectModel.update(data, { where: { subject_id: subject_id } });
-      res.status(200).json({ message: `Successfully updated subject with ID: ${subject_id}` });
+      await SubjectModel.update(data, { where: { subject_id: id } });
+      res.status(200).json({ message: `Successfully updated subject with ID: ${id}` });
     } catch (error) {
       console.error('Error updating subject:', error);
       res.status(500).json({ message: 'Internal server error' });
@@ -182,8 +295,8 @@ const SubjectController = {
 
   delete: async (req, res) => {
     try {
-      const { subject_id } = req.params;
-      const subject = await SubjectModel.findOne({ where: { subject_id: subject_id } });
+      const { id } = req.params;
+      const subject = await SubjectModel.findOne({ where: { subject_id: id } });
       if (!subject) {
         return res.status(404).json({ message: 'Subject not found' });
       }
@@ -336,13 +449,13 @@ const SubjectController = {
   },
   toggleSoftDeleteById: async (req, res) => {
     try {
-      const { subject_id } = req.params;
-      const subject = await SubjectModel.findOne({ where: { subject_id: subject_id } });
+      const { id } = req.params;
+      const subject = await SubjectModel.findOne({ where: { subject_id: id } });
       if (!subject) {
         return res.status(404).json({ message: 'subject not found' });
       }
       const updatedIsDeleted = !subject.isDelete;
-      await SubjectModel.update({ isDelete: updatedIsDeleted }, { where: { subject_id: subject_id } });
+      await SubjectModel.update({ isDelete: updatedIsDeleted }, { where: { subject_id: id } });
 
       res.status(200).json({ message: `Toggled isDelete status to ${updatedIsDeleted}` });
 

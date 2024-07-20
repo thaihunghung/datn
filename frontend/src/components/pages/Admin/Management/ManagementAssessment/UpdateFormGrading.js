@@ -73,7 +73,7 @@ const UpdateFormGrading = (nav) => {
     try {
       const data = { totalScore: totalScore }
 
-      await axiosAdmin.put(`/assessment/${assessment_id}/updateStotalScore`, { data: data })
+      await axiosAdmin.put(`/assessment/${assessment_id}/totalScore`, { data: data })
       const dataAssessmentItem = selectedValues.map(item => {
         const { maxScore, CheckGrading, ...rest } = item;
         return {
@@ -116,7 +116,7 @@ const UpdateFormGrading = (nav) => {
     try {
       // /assessments/:assessment_id/items
 
-      const response = await axiosAdmin.get(`/assessments/${assessment_id}/items`);
+      const response = await axiosAdmin.get(`/assessment/${assessment_id}/items`);
       //console.log(response?.data);
       setRubicData(response?.data?.Rubric)
       setRubicItemsData(response?.data?.Rubric?.RubricItems)

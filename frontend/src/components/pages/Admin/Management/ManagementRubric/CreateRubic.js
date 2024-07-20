@@ -109,7 +109,7 @@ const CreateRubic = (nav) => {
                     <ModalContent>
                         {(onClose) => (
                             <>
-                                <ModalHeader className="flex flex-col gap-1 text-[#FF9908]"> Tạo mới</ModalHeader>
+                                <ModalHeader className="flex flex-col gap-1 text-[#FF9908]"> Create Rubric</ModalHeader>
                                 <ModalBody>
                                     <div className='flex flex-col sm:flex-col sm:items-start lg:flex-row  xl:flex-row  justify-center items-center gap-2'>
                                         <div className='flex-1 w-full sm:w-full items-center p-5 pb-0 sm:pb-0 lg:pb-5 xl:pb-5  justify-center flex flex-col gap-2 sm:flex-col lg:flex-col xl:flex-col'>

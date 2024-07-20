@@ -147,7 +147,7 @@ const ManagementAssessment = (nav) => {
 
   const getAllAssessmentIsDeleteFalse = async () => {
     try {
-      const response = await axiosAdmin.get(`/assessments/teacher/${teacher_id}`);
+      const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}`);
       const updatedPoData = response.data.map((subject) => {
         const action = {
           _id: subject.assessment_id,

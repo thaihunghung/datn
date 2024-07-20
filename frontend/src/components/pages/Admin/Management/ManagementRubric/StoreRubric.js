@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Table, Tooltip, Button, message } from 'antd';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
-
+import Cookies from "js-cookie";
 const StoreRubric = (nav) => {
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
+    const navigate = useNavigate();
+    const teacher_id = Cookies.get('teacher_id');
+    if (!teacher_id) {
+        navigate('/login');
+    }
     const [selectedRow, setSelectedRow] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -118,7 +122,7 @@ const StoreRubric = (nav) => {
 
     const getAllRubricIsDeleteTrue = async () => {
         try {
-            const response = await axiosAdmin.get(`/rubrics/archive/teacher/${1}/checkscore`);
+            const response = await axiosAdmin.get(`/rubrics/checkScore?teacher_id=${teacher_id}&isDelete=true`);
             const updatedRubricData = response.data.rubric.map((rubric) => {
                 const status = {
                     status: rubric.RubricItem.length === 0 ? false : true,
@@ -174,7 +178,7 @@ const StoreRubric = (nav) => {
             rubric_id: selectedRowKeys,
         };
         try {
-            const response = await axiosAdmin.put('/rubrics/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/rubrics/softDelete', { data });
             getAllRubricIsDeleteTrue();
             handleUnSelect();
             message.success(response.data.message);
@@ -186,7 +190,7 @@ const StoreRubric = (nav) => {
 
     const handleRestoreById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/rubric/${_id}/soft-delete`);
+            const response = await axiosAdmin.put(`/rubric/${_id}/softDelete`);
             await getAllRubricIsDeleteTrue();
             handleUnSelect();
             message.success(response.data.message);

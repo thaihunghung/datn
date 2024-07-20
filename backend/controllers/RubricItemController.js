@@ -64,8 +64,8 @@ const RubricItemController = {
 
   getByID: async (req, res) => {
     try {
-      const { rubricsitem_id } = req.params;
-      const rubrics_item = await RubricItemModel.findOne({ where: { rubricsitem_id: rubricsitem_id } });
+      const { id } = req.params;
+      const rubrics_item = await RubricItemModel.findOne({ where: { rubricsitem_id: id } });
       if (!rubrics_item) {
         return res.status(404).json({ message: 'rubrics_item not found' });
       }
@@ -79,9 +79,9 @@ const RubricItemController = {
 
   update: async (req, res) => {
     try {
-      const { rubricsitem_id } = req.params;
+      const { id } = req.params;
       const { data } = req.body;
-      const rubrics_item = await RubricItemModel.findOne({ where: { rubricsitem_id: rubricsitem_id } });
+      const rubrics_item = await RubricItemModel.findOne({ where: { rubricsitem_id: id } });
       if (!rubrics_item) {
         return res.status(404).json({ message: 'rubrics_item not found' });
       }
@@ -95,8 +95,8 @@ const RubricItemController = {
 
   delete: async (req, res) => {
     try {
-      const { rubricsitem_id } = req.params;
-      await RubricItemModel.destroy({ where: { rubricsitem_id: rubricsitem_id } });
+      const { id } = req.params;
+      await RubricItemModel.destroy({ where: { rubricsitem_id: id } });
       res.status(200).json({ message: 'Successfully deleted rubrics_item' });
     } catch (error) {
       console.error('Error deleting rubrics_item:', error);
@@ -161,8 +161,8 @@ const RubricItemController = {
 
   toggleSoftDeleteById: async (req, res) => {
     try {
-      const { rubricsitem_id } = req.params;
-      const RubricItem = await RubricItemModel.findOne({ where: { rubricsitem_id: rubricsitem_id } });
+      const { id } = req.params;
+      const RubricItem = await RubricItemModel.findOne({ where: { rubricsitem_id: id } });
       if (!RubricItem) {
         return res.status(404).json({ message: 'RubricItem not found' });
       }

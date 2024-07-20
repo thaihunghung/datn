@@ -218,12 +218,11 @@ const ManagementAssessmentGrading = (nav) => {
     return result;
   }
 
-
-  
   const getAllAssessmentIsDeleteFalse = async () => {
     try {
-      const response = await axiosAdmin.get(`/assessments/${descriptionURL}/teacher/${teacher_id}`);
+      const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}&description=${descriptionURL}`);
       console.log(response?.data);
+      
       // console.log("description", description);
       const updatedPoData = response?.data?.map((subject) => {
         const student = {

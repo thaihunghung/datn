@@ -53,10 +53,14 @@ const CreateRubicItems = (nav) => {
 
   const getOneRubricById = async () => {
     try {
+      console.log("response.data");
       const response = await axiosAdmin.get(`/rubric/${id}`);
+      
+      console.log(response.data);
       if (response.status === 200) {
-        const clo_ids = await axiosAdmin.get(`/subject/${response.data.subject_id}/find-clo-ids`);
-        setDataClo(clo_ids.data)
+        const clo_ids = await axiosAdmin.get(`/subject/${response.data.subject_id}?include_clos=true`);
+        console.log(clo_ids);
+        //setDataClo(clo_ids.data)
       }
 
     } catch (error) { }
@@ -208,12 +212,13 @@ const CreateRubicItems = (nav) => {
                           textValue={items.cloName}
                         >
                           <span className='text-base text-wrap text-left'>{items.cloName}{". "}{items.description}</span>
-                          {/* <Tooltip content={items.description} className='font-bold'>
-                            {items.cloName}
-                          </Tooltip> */}
+                        
                         </Option>
                       ))}
                     </Select>
+                      {/* <Tooltip content={items.description} className='font-bold'>
+                            {items.cloName}
+                          </Tooltip> */}
                     <div className='text-left w-full font-bold'>Chọn Plo:</div>
                     <Select
                       defaultValue="Chọn loại"

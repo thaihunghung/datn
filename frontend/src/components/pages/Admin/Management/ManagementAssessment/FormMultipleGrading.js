@@ -489,7 +489,9 @@ const FormMultipleGrading = (nav) => {
     //   throw error;
     // }
     try {
-      const response = await axiosAdmin.get(`/assessments/${descriptionURL}/teacher/${teacher_id}`);
+      //const response = await axiosAdmin.get(`/assessments/${descriptionURL}/teacher/${teacher_id}`);
+      const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}&description=${descriptionURL}`);
+
       if (response.data) {
         setAssessment(response?.data);
       }

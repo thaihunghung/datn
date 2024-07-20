@@ -12,12 +12,48 @@ const path = require('path');
 const ChapterController = {
   index: async (req, res) => {
     try {
-      const chapters = await ChapterModel.findAll();
-      res.status(200).json(chapters);
+      const { subject_id, isDelete } = req.query;
+
+      if (subject_id && isDelete !== undefined) {
+        // Handle request for archived chapters by subject ID
+        const chapters = await ChapterModel.findAll({
+          where: { subject_id: subject_id, isDelete: JSON.parse(isDelete) },
+          include: [{
+            model: SubjectModel,
+            attributes: ['subject_id', 'subjectName']
+          }]
+        });
+
+        if (chapters.length === 0) {
+          return res.status(404).json({ message: 'No chapters found' });
+        }
+
+        return res.status(200).json(chapters);
+      } else if (subject_id) {
+        // Handle request for chapters by subject ID
+        const chapters = await ChapterModel.findAll({
+          where: { subject_id: subject_id, isDelete: false },
+          include: [{
+            model: SubjectModel,
+            attributes: ['subject_id', 'subjectName']
+          }]
+        });
+
+        if (chapters.length === 0) {
+          return res.status(404).json({ message: 'No chapters found' });
+        }
+
+        return res.status(200).json(chapters);
+      } else {
+        // Handle request for all chapters
+        const chapters = await ChapterModel.findAll();
+        return res.status(200).json(chapters);
+      }
     } catch (error) {
-      console.error('Error getting all chapters:', error);
+      console.error('Error handling chapter requests:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
+
   },
 
   create: async (req, res) => {
@@ -34,8 +70,8 @@ const ChapterController = {
 
   getByID: async (req, res) => {
     try {
-      const { chapter_id } = req.params;
-      const chapter = await ChapterModel.findOne({ where: { chapter_id: chapter_id } });
+      const { id } = req.params;
+      const chapter = await ChapterModel.findOne({ where: { chapter_id: id } });
       if (!chapter) {
         return res.status(404).json({ message: 'Chapter not found' });
       }
@@ -88,14 +124,14 @@ const ChapterController = {
 
   update: async (req, res) => {
     try {
-      const { chapter_id } = req.params;
+      const { id } = req.params;
       const { data } = req.body;
-      const chapter = await ChapterModel.findOne({ where: { chapter_id: chapter_id } });
+      const chapter = await ChapterModel.findOne({ where: { chapter_id: id } });
       if (!chapter) {
         return res.status(404).json({ message: 'Chapter not found' });
       }
-      const updatedChapter = await ChapterModel.update(data, { where: { chapter_id: chapter_id } });
-      res.status(200).json({ message: `Successfully updated chapter with ID: ${chapter_id}` });
+      const updatedChapter = await ChapterModel.update(data, { where: { chapter_id: id } });
+      res.status(200).json({ message: `Successfully updated chapter with ID: ${id}` });
     } catch (error) {
       console.error('Error updating chapter:', error);
       res.status(500).json({ message: 'Server error' });
@@ -104,8 +140,8 @@ const ChapterController = {
 
   delete: async (req, res) => {
     try {
-      const { chapter_id } = req.params;
-      await ChapterModel.destroy({ where: { chapter_id: chapter_id } });
+      const { id } = req.params;
+      await ChapterModel.destroy({ where: { chapter_id: id } });
       res.status(200).json({ message: 'Successfully deleted chapter' });
     } catch (error) {
       console.error('Error deleting chapter:', error);
@@ -174,13 +210,13 @@ const ChapterController = {
 
   toggleSoftDeleteById: async (req, res) => {
     try {
-      const { chapter_id } = req.params;
-      const chapter = await ChapterModel.findOne({ where: { chapter_id: chapter_id } });
+      const { id } = req.params;
+      const chapter = await ChapterModel.findOne({ where: { chapter_id: id } });
       if (!chapter) {
         return res.status(404).json({ message: 'Chapter not found' });
       }
       const updatedIsDeleted = !chapter.isDelete;
-      await ChapterModel.update({ isDelete: updatedIsDeleted }, { where: { chapter_id: chapter_id } });
+      await ChapterModel.update({ isDelete: updatedIsDeleted }, { where: { chapter_id: id } });
       res.status(200).json({ message: `Successfully toggled isDelete status to ${updatedIsDeleted}` });
     } catch (error) {
       console.error('Error updating isDelete status:', error);

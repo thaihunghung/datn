@@ -21,9 +21,9 @@ const AssessmentItemsController = {
   },
   update: async (req, res) => {
     try {
-      const { assessmentItem_id } = req.params;
+      const { id } = req.params;
       const { data } = req.body;
-      const updated = await AssessmentItemModel.update(data, { where: { assessmentItem_id: assessmentItem_id } });
+      const updated = await AssessmentItemModel.update(data, { where: { assessmentItem_id: id } });
       if (updated[0] === 0) {
         return res.status(404).json({ message: 'items not found' });
       }

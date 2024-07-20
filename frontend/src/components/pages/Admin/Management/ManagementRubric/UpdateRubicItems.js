@@ -52,7 +52,7 @@ const UpdateRubicItems = () => {
     try {
       const response = await axiosAdmin.get(`/rubric/${id}`);
       if (response.status === 200) {
-        const clo_ids = await axiosAdmin.get(`/subject/${response.data.subject_id}/find-clo-ids`);
+        const clo_ids = await axiosAdmin.get(`/subject/${response.data.subject_id}?only_clo_ids=true`);
         setDataClo(clo_ids.data);
       }
     } catch (error) {
@@ -89,7 +89,7 @@ const UpdateRubicItems = () => {
 
       const GetChapterByCloID = async (cloId) => {
         try {
-          const response = await axiosAdmin.get(`/clo-chapter/clo/${cloId}/find-chapter`);
+          const response = await axiosAdmin.get(`/clo-chapter?clo_id=${cloId}`);
           setDataChapter(response.data);
         } catch (error) {
           console.error('Error fetching Chapter by CLO ID:', error);
@@ -98,7 +98,7 @@ const UpdateRubicItems = () => {
 
       const GetPloByCloID = async (cloId) => {
         try {
-          const response = await axiosAdmin.get(`/plo-clo/clo/${cloId}/find-plo`);
+          const response = await axiosAdmin.get(`/plo-clo?clo_id=${cloId}`);
           setDataPlo(response.data);
         } catch (error) {
           console.error('Error fetching PLO by CLO ID:', error);

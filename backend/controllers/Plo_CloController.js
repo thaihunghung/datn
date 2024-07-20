@@ -4,12 +4,49 @@ const PloModel = require('../models/PloModel');
 const Plo_CloController = {
 
   // Get all PloClo
-  getAll: async (req, res) => {
+  index: async (req, res) => {
     try {
-      const PoPlo = await PloCloModel.findAll();
-      res.json(PoPlo);
+      const { id_clos, clo_id } = req.query;
+
+      if (id_clos) {
+        // Handle request for multiple CLO IDs
+        const cloIds = id_clos.split(',').map(id => parseInt(id, 10));
+
+        const ploClos = await PloCloModel.findAll({
+          where: {
+            clo_id: cloIds
+          }
+        });
+
+        if (ploClos.length === 0) {
+          return res.status(404).json({ message: 'No PLO-CLOs found for the given CLO IDs' });
+        }
+
+        return res.status(200).json(ploClos);
+      } else if (clo_id) {
+        // Handle request for a single CLO ID
+        const poPlo = await PloCloModel.findAll({
+          where: { clo_id: clo_id },
+        });
+
+        const ploIds = poPlo.map(item => item.plo_id);
+
+        if (ploIds.length === 0) {
+          return res.status(404).json({ message: 'No PLOs found for the given CLO ID' });
+        }
+
+        const plos = await PloModel.findAll({
+          where: { plo_id: ploIds },
+        });
+
+        return res.status(200).json(plos);
+      } else {
+        // Handle request for all PLO-CLOs
+        const poPlo = await PloCloModel.findAll();
+        return res.status(200).json(poPlo);
+      }
     } catch (error) {
-      console.error('Error getting all PloClo:', error);
+      console.error('Error handling PLO-CLO requests:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
   },

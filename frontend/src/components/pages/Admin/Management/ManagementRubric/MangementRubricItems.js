@@ -145,7 +145,7 @@ const MangementRubricItems = (nav) => {
     //dem va create
     const GetRubicAndItemsById = async () => {
         try {
-            const response = await axiosAdmin.get(`/rubric/${id}/items/isDelete/false`);
+            const response = await axiosAdmin.get(`/rubric/${id}/items?isDelete=false`);
             const rubric = response.data?.rubric || {};
 
             const RubricData = {
