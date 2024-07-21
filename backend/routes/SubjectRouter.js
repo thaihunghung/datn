@@ -739,7 +739,6 @@ router.get('/subject/:id', SubjectController.getByID);
 router.get('/subject/:id/rubrics', SubjectController.getRubricsBySubjectId);
 router.put('/subject/:id', SubjectController.update);
 router.delete('/subject/:id', SubjectController.delete);
-
 router.post('/subject', ensureAuthenticated, SubjectController.create);
 router.get('/subjects/isDelete/false', SubjectController.isDeleteTofalse);
 router.get('/subjects/isDelete/true', SubjectController.isDeleteTotrue);

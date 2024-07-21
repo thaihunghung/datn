@@ -243,7 +243,7 @@ const Subject = (nav) => {
     };
     console.log(data)
     try {
-      const response = await axiosAdmin.put('/subjects/soft-delete-multiple', { data });
+      const response = await axiosAdmin.put('/subjects/softDelete', { data });
       await getAllSubjectIsDeleteFalse();
       handleUnSelect();
       message.success(response.data.message);
@@ -255,7 +255,7 @@ const Subject = (nav) => {
 
   const handleSoftDeleteById = async (_id) => {
     try {
-      const response = await axiosAdmin.put(`/subject/${_id}/soft-delete`);
+      const response = await axiosAdmin.put(`/subject/${_id}/softDelete`);
       await getAllSubjectIsDeleteFalse();
       handleUnSelect();
       message.success(response.data.message);

@@ -99,7 +99,7 @@ const StoreSubject = (nav) => {
           };
           console.log(data)
           try {
-            const response = await axiosAdmin.put('/subjects/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/subjects/softDelete', { data });
             await getAllSubjectIsDeleteTrue();
             handleUnSelect();
             message.success(response.data.message);
@@ -111,7 +111,7 @@ const StoreSubject = (nav) => {
 
     const handleRestoreById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/subject/${_id}/soft-delete`);
+            const response = await axiosAdmin.put(`/subject/${_id}/softDelete`);
             await getAllSubjectIsDeleteTrue();
             handleUnSelect();
             message.success(response.data.message);
@@ -123,7 +123,7 @@ const StoreSubject = (nav) => {
 
     const getAllSubjectIsDeleteTrue = async () => {
         try {
-            const response = await axiosAdmin.get(`/subjects/archive/teacher/${teacher_id}`);
+            const response = await axiosAdmin.get(`/subjects/isDelete/true`);
             const updatedSubjectData = response.data.map((subject) => {
                 return {
                     key: subject.subject_id,
@@ -146,7 +146,7 @@ const StoreSubject = (nav) => {
       };
       console.log(data)
       try {
-        const response = await axiosAdmin.delete('/subjects/delete/multiple', { params: data });
+        const response = await axiosAdmin.delete('/subjects/multiple', { params: data });
 
         await getAllSubjectIsDeleteTrue();
           handleUnSelect();

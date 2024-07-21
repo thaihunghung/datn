@@ -104,7 +104,7 @@ const Chapter = (nav) => {
     };
     const getAllChapter = async () => {
         try {
-            const response = await axiosAdmin.get(`/chapter/subject/${id}`);
+            const response = await axiosAdmin.get(`/chapters?subject_id=${id}&isDelete=false`);
             const updatedPoData = response.data.map((po) => {
                 return {
                     key: po.chapter_id,
@@ -128,7 +128,7 @@ const Chapter = (nav) => {
         };
         console.log(data)
         try {
-            const response = await axiosAdmin.put('/chapters/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/chapters/softDelete', { data });
             await getAllChapter();
             handleUnSelect();
             message.success(response.data.message);
@@ -140,7 +140,7 @@ const Chapter = (nav) => {
 
     const handleSoftDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/chapter/${_id}/soft-delete`);
+            const response = await axiosAdmin.put(`/chapter/${_id}/softDelete`);
             await getAllChapter();
             handleUnSelect();
             message.success(response.data.message);

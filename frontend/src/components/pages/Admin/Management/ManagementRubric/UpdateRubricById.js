@@ -54,7 +54,7 @@ const UpdateRubricById = (nav) => {
 
     const getAllSubject = async () => {
         try {
-            const response = await axiosAdmin.get(`/subjects/teacher/${teacher_id}`);
+            const response = await axiosAdmin.get(`/subjects/isDelete/false`);
             if (response.data) {
                 setSubject(response.data);
             }

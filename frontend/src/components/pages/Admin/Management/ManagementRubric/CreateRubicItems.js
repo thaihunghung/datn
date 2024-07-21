@@ -57,10 +57,11 @@ const CreateRubicItems = (nav) => {
       const response = await axiosAdmin.get(`/rubric/${id}`);
       
       console.log(response.data);
+      console.log("clo_ids");
       if (response.status === 200) {
         const clo_ids = await axiosAdmin.get(`/subject/${response.data.subject_id}?include_clos=true`);
         console.log(clo_ids);
-        //setDataClo(clo_ids.data)
+        setDataClo(clo_ids?.data?.clos)
       }
 
     } catch (error) { }
@@ -75,7 +76,7 @@ const CreateRubicItems = (nav) => {
       setSelectedChapter(null)
       const GetChapterByCloID = async (cloId) => {
         try {
-          const response = await axiosAdmin.get(`/clo-chapter/clo/${cloId}/find-chapter`);
+          const response = await axiosAdmin.get(`/clo-chapter?clo_id=${cloId}`);
           console.log("Chapter ID", cloId);
           console.log(response.data);
           setDataChapter(response.data);
@@ -87,7 +88,7 @@ const CreateRubicItems = (nav) => {
 
       const GetPloByCloID = async (cloId) => {
         try {
-          const response = await axiosAdmin.get(`/plo-clo/clo/${cloId}/find-plo`);
+          const response = await axiosAdmin.get(`/plo-clo?clo_id=${cloId}`);
           console.log("PLO ID", cloId);
           console.log(response.data);
           setDataPlo(response.data);
@@ -127,7 +128,7 @@ const CreateRubicItems = (nav) => {
         }
       };
 
-      const response = await axiosAdmin.post(`/rubric-item/checkscore`, { data });
+      const response = await axiosAdmin.post(`/rubric-item/checkScore`, { data });
       if (response.status === 201) {
         message.success('Rubric item created successfully');
         rubricData()
@@ -244,7 +245,7 @@ const CreateRubicItems = (nav) => {
                       defaultValue="Chọn loại"
                       value={selectedChapter}
                       onChange={handleChapterSelectChange}
-                      size="large"
+                      // size="large"
                       className="w-full h-full"
                     >
                       {Chapter.map((items) => (
@@ -267,7 +268,7 @@ const CreateRubicItems = (nav) => {
                       defaultValue="Chọn điểm"
                       value={score}
                       onChange={handleScoreChange}
-                      size="large"
+                      // size="large"
                       className="w-full"
                     >
                       {DataScore.map((TypeSubject) => (

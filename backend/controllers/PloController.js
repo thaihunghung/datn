@@ -107,15 +107,15 @@ const PloController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
-  isDeleteToTrue: async (req, res) => {
-    try {
-      const pos = await PO.findAll({ where: { isDelete: true } });
-      res.json(pos);
-    } catch (error) {
-      console.error('Error finding deleted POs:', error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  },
+  // isDeleteToTrue: async (req, res) => {
+  //   try {
+  //     const pos = await PO.findAll({ where: { isDelete: true } });
+  //     res.json(pos);
+  //   } catch (error) {
+  //     console.error('Error finding deleted POs:', error);
+  //     res.status(500).json({ message: 'Server error' });
+  //   }
+  // },
   // Get PLOs where isDelete is true
   isDeleteTotrue: async (req, res) => {
     try {
@@ -157,25 +157,8 @@ const PloController = {
       res.status(500).json({ message: 'Internal server error' });
     }
   },
-  toggleSoftDeleteById: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const plo = await PloModel.findOne({ where: { plo_id: id } });
-      if (!plo) {
-        return res.status(404).json({ message: 'plo not found' });
-      }
-      const updatedIsDeleted = !plo.isDelete;
-      await PloModel.update({ isDelete: updatedIsDeleted }, { where: { plo_id: id } });
 
-      res.status(200).json({ message: `Toggled isDelete status to ${updatedIsDeleted}` });
-
-
-    } catch (error) {
-      console.error('Error toggling PlO delete statuses:', error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  },
-
+  
   softDeleteMultiple: async (req, res) => {
     try {
       const { data } = req.body;
@@ -201,6 +184,27 @@ const PloController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
+
+  toggleSoftDeleteById: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const plo = await PloModel.findOne({ where: { plo_id: id } });
+      if (!plo) {
+        return res.status(404).json({ message: 'plo not found' });
+      }
+      const updatedIsDeleted = !plo.isDelete;
+      await PloModel.update({ isDelete: updatedIsDeleted }, { where: { plo_id: id } });
+
+      res.status(200).json({ message: `Toggled isDelete status to ${updatedIsDeleted}` });
+
+
+    } catch (error) {
+      console.error('Error toggling PlO delete statuses:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
+
+  
 
   getFormPost: async (req, res) => {
     const workbook = new ExcelJS.Workbook();

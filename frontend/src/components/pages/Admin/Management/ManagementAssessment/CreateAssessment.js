@@ -58,7 +58,7 @@ const CreateAssessment = (nav) => {
 
     const getRubricBySubject = async (idSubject) => {
         try {
-            const response = await axiosAdmin.get(`/subject/${idSubject}/rubrics/teacher/${teacher_id}`);
+            const response = await axiosAdmin.get(`/subject/${idSubject}/rubrics?teacher_id=${teacher_id}`);
             if (response.data) {
                 //console.log(response.data);
                 setDataRubric(response.data);
@@ -105,7 +105,7 @@ const CreateAssessment = (nav) => {
     useEffect(() => {
         const getAllRubricIsDeleteFalse = async () => {
             try {
-                const response = await axiosAdmin.get(`/rubrics/teacher/${teacher_id}/checkscore`);
+                const response = await axiosAdmin.get(`/rubrics/checkScore?teacher_id=${teacher_id}&isDelete=false`);
                 const updatedRubricData = response.data.rubric.map((rubric) => {
                     const status = {
                         status: rubric.RubricItem.length === 0 ? false : true,

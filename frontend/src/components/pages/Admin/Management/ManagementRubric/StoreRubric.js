@@ -149,7 +149,7 @@ const StoreRubric = (nav) => {
             rubric_id: selectedRowKeys,
         }
         try {
-            const response = await axiosAdmin.delete('/rubrics/delete/multiple', { params: data });
+            const response = await axiosAdmin.delete('/rubrics/multiple', { params: data });
             handleUnSelect();
             message.success(response.data.message);
             getAllRubricIsDeleteTrue()

@@ -129,7 +129,7 @@ const ManagePo = (nav) => {
         };
         console.log(data)
         try {
-            const response = await axiosAdmin.put('/pos/soft-delete-multiple', { data: data });
+            const response = await axiosAdmin.put('/pos/softDelete', { data: data });
             await getAllPo();
             handleUnSelect();
             message.success(response.data.message);
@@ -141,7 +141,7 @@ const ManagePo = (nav) => {
 
     const handleSoftDeleteById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/po/${_id}/soft-delete`);
+            const response = await axiosAdmin.put(`/po/${_id}/softDelete`);
             await getAllPo();
             handleUnSelect();
             message.success(response.data.message);

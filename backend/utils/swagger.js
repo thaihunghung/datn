@@ -287,6 +287,172 @@ const swaggerOptions = {
           },
           required: ['programName', 'description'],
         },
+        Po: {
+          type: 'object',
+          properties: {
+            po_id: {
+              type: 'integer',
+              description: 'Unique identifier for the PO'
+            },
+            description: {
+              type: 'string',
+              description: 'Description of the PO'
+            },
+            poName: {
+              type: "string",
+              description: "Name of the PO"
+            },
+            program_id: {
+              type: "integer",
+              description: "ID of the associated program"
+            },
+            isDelete: {
+              type: "boolean",
+              description: "Delete status of the PO"
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              description: "Timestamp when the PO was created"
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              description: "Timestamp when the PO was last updated"
+            },
+          required: ['description', 'poName', 'program_id'],
+          }
+        },
+        Plo: {
+          type: 'object',
+          properties: {
+            plo_id: {
+              type: 'integer',
+              description: 'Unique identifier for the PLO',
+            },
+            description: {
+              type: 'string',
+              description: 'Description of the PLO',
+            },
+            ploName: {
+              type: 'string',
+              description: 'Name of the PLO',
+            },
+            program_id: {
+              type: 'integer',
+              description: 'ID of the associated program',
+            },
+            isDelete: {
+              type: 'boolean',
+              description: 'Deletion status (false: not deleted, true: deleted)',
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Timestamp when the PLO was created',
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Timestamp when the PLO was last updated',
+            },
+          },
+          required: ['ploName', 'description', 'program_id'],
+        },
+        Chapter: {
+          type: 'object',
+          properties: {
+            chapter_id: {
+              type: 'integer',
+              description: 'Unique identifier for the Chapter',
+            },
+            chapterName: {
+              type: 'string',
+              description: 'Name of the Chapter',
+            },
+            description: {
+              type: 'string',
+              description: 'Description of the Chapter',
+            },
+            subject_id: {
+              type: 'integer',
+              description: 'ID of the associated subject',
+            },
+            isDelete: {
+              type: 'boolean',
+              description: 'Deletion status (false: not deleted, true: deleted)',
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Timestamp when the Chapter was created',
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Timestamp when the Chapter was last updated',
+            },
+          },
+          required: ['chapterName', 'subject_id'],
+        },
+        Assessment: {
+          type: 'object',
+          properties: {
+            assessment_id: {
+              type: 'integer',
+              description: 'Unique identifier for the Assessment',
+            },
+            teacher_id: {
+              type: 'integer',
+              description: 'ID of the teacher who conducted the assessment',
+            },
+            student_id: {
+              type: 'integer',
+              description: 'ID of the student being assessed',
+            },
+            rubric_id: {
+              type: 'integer',
+              description: 'ID of the rubric used for the assessment',
+            },
+            course_id: {
+              type: 'integer',
+              description: 'ID of the course associated with the assessment',
+            },
+            totalScore: {
+              type: 'number',
+              format: 'float',
+              description: 'Total score given in the assessment',
+            },
+            description: {
+              type: 'string',
+              description: 'Additional description of the assessment',
+            },
+            date: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Date when the assessment was conducted',
+            },
+            place: {
+              type: 'string',
+              description: 'Place where the assessment was conducted',
+            },
+            isDelete: {
+              type: 'boolean',
+              description: 'Deletion status (false: not deleted, true: deleted)',
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Timestamp when the Assessment was created',
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Timestamp when the Assessment was last updated',
+            },
+          },
+          required: ['teacher_id', 'student_id', 'rubric_id', 'course_id'],
+        },
       },
     }
 

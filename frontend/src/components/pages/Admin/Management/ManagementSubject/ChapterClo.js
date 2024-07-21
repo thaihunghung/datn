@@ -19,7 +19,7 @@ const ChapterClo = (nav) => {
 
     const GetAllClo = async () => {
         try {
-            const response = await axiosAdmin.get(`/clo/subject/${id}`);
+            const response = await axiosAdmin.get(`/clos?subject_id=${id}&isDelete=false`);
 
             //console.log(response.data);
             setClos(response.data);
@@ -30,8 +30,8 @@ const ChapterClo = (nav) => {
 
     const GetArrChapterBySubjectID = async () => {
         try {
-            const response = await axiosAdmin.get(`/subject/${id}/find-chapter-ids`);
-            setChapterArr(response.data);
+            const response = await axiosAdmin.get(`/subject/${id}/?only_chapter_ids=true`);
+            setChapterArr(response?.data?.chapter_ids);
             //console.log(response.data); 
             //message.success('CLOs fetched successfully.');
         } catch (error) {
@@ -46,8 +46,8 @@ const ChapterClo = (nav) => {
 
     const GetAllPlo = async () => {
         try {
-            const response = await axiosAdmin.get(`/chapter/subject/${id}`);
-            setChapter(response.data)
+            const response = await axiosAdmin.get(`/chapters?subject_id=${id}&isDelete=false`);
+            setChapter(response?.data)
         } catch (error) {
             console.error('Error fetching PLOs:', error);
         }
@@ -87,11 +87,13 @@ const ChapterClo = (nav) => {
     const GetAllChapterClo = async () => {
         try {
             //ChapterArr is []
-            const data = {
-                id_Chapters: ChapterArr
-            }
-            console.log(data);
-            const response = await axiosAdmin.post('/clo-chapter/id_Chapters', { data: data });
+            const chapterIds = JSON.stringify(ChapterArr); // Chuyển đổi mảng ChapterArr thành chuỗi JSON
+
+                // Thực hiện yêu cầu GET với tham số truy vấn
+                const response = await axiosAdmin.get('/clo-chapter', {
+                    params: { chapter_ids: chapterIds }
+                });
+
 
             const id_clo_chapters = response.data.map(item => ({ chapter_id: item.chapter_id, clo_id: item.clo_id }));
             console.log(id_clo_chapters)

@@ -255,7 +255,7 @@ const FormMultipleGrading = (nav) => {
     try {
       const data = { totalScore: Score }
 
-      await axiosAdmin.put(`/assessment/${dataSaveAssessment[0].assessment_id}/updateStotalScore`, { data: data })
+      await axiosAdmin.put(`/assessment/${dataSaveAssessment[0].assessment_id}/totalScore`, { data: data })
 
       const dataAssessmentItem = dataSaveAssessment.map(item => {
         const { CheckSave, ...rest } = item;
@@ -460,7 +460,7 @@ const FormMultipleGrading = (nav) => {
 
   const GetRubricData = async () => {
     try {
-      const response = await axiosAdmin.get(`/rubric/${rubric_id}/items/isDelete/false`);
+      const response = await axiosAdmin.get(`/rubric/${rubric_id}/items?isDelete=false`);
       //console.log(response.data);
       setRubicData(response.data.rubric)
       setRubicItemsData(response.data.rubric.rubricItems)
@@ -492,7 +492,7 @@ const FormMultipleGrading = (nav) => {
       //const response = await axiosAdmin.get(`/assessments/${descriptionURL}/teacher/${teacher_id}`);
       const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}&description=${descriptionURL}`);
 
-      if (response.data) {
+      if (response.data) { 
         setAssessment(response?.data);
       }
       console.log("assessments");

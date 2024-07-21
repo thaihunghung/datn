@@ -92,7 +92,7 @@ const StoreClo = (nav) => {
             clo_id: selectedRowKeys,
         }
         try {
-            const response = await axiosAdmin.put('/clos/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/clos/softDelete', { data });
             handleUnSelect();
             message.success(response.data.message);
             getAllClo()
@@ -104,7 +104,7 @@ const StoreClo = (nav) => {
 
     const handleRestoreById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/clo/${_id}/soft-delete`);
+            const response = await axiosAdmin.put(`/clo/${_id}/softDelete`);
             handleUnSelect();
             message.success(response.data.message);
             getAllClo()
@@ -117,14 +117,14 @@ const StoreClo = (nav) => {
 
     const getAllClo = async () => {
         try {
-            const response = await axiosAdmin.get(`/clo/archive/subject/${id}`);
-            const updatedPloData = response.data.map((plo) => {
+            const response = await axiosAdmin.get(`/clos?subject_id=${id}&isDelete=true`);
+            const updatedPloData = response.data.map((clo) => {
                 return {
-                    key: plo.clo_id,
-                    name: plo.cloName,
-                    description: plo.description,
-                    isDeleted: plo.isDelete,
-                    action: plo.clo_id,
+                    key: clo.clo_id,
+                    name: clo.cloName,
+                    description: clo.description,
+                    isDeleted: clo.isDelete,
+                    action: clo.clo_id,
                 };
             });
             setPosListData(updatedPloData);
@@ -141,7 +141,7 @@ const StoreClo = (nav) => {
       };
       console.log(data)
       try {
-        const response = await axiosAdmin.delete('/clos/delete/multiple', { params: data });
+        const response = await axiosAdmin.delete('/clos/multiple', { params: data });
 
         await getAllClo();
           handleUnSelect();

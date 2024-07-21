@@ -23,12 +23,14 @@ const PLO_CLO = require('../controllers/Plo_CloController');
  *         required: false
  *         schema:
  *           type: string
+ *           example: '[1,2,3]'  # Example of a JSON array as a string
  *       - name: clo_id
  *         in: query
- *         description: CLO ID to retrieve related PLO records.
+ *         description: Single CLO ID to retrieve related PLO records.
  *         required: false
  *         schema:
  *           type: integer
+ *           example: 1  # Example of a single CLO ID
  *     responses:
  *       200:
  *         description: Successfully retrieved PLO-CLO data.
@@ -41,10 +43,13 @@ const PLO_CLO = require('../controllers/Plo_CloController');
  *                 properties:
  *                   id_plo_clo:
  *                     type: integer
+ *                     example: 1
  *                   clo_id:
  *                     type: integer
+ *                     example: 1
  *                   plo_id:
  *                     type: integer
+ *                     example: 101
  *       404:
  *         description: No data found based on the provided query parameters.
  *         content:
@@ -66,6 +71,7 @@ const PLO_CLO = require('../controllers/Plo_CloController');
  *                   type: string
  *                   example: Internal server error
  */
+
 /**
  * @openapi
  * /api/admin/plo-clo:

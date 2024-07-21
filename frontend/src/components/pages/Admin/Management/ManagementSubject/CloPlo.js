@@ -16,7 +16,7 @@ const CloPlo = (nav) => {
 
     const GetAllClo = async () => {
         try {
-            const response = await axiosAdmin.get(`/clo/subject/${id}`);
+            const response = await axiosAdmin.get(`clos?subject_id=${id}&isDelete=false`);
 
             // console.log(response.data);
             setClos(response.data);
@@ -27,9 +27,9 @@ const CloPlo = (nav) => {
 
     const GetArrCloBySubjectID = async () => {
         try {
-            const response = await axiosAdmin.get(`/subject/${id}/find-clo-ids`);
-            setCloArr(response.data);
-            console.log(response.data);
+            const response = await axiosAdmin.get(`/subject/${id}?only_clo_ids=true`);
+            setCloArr(response?.data?.clo_ids);
+            console.log(response?.data?.clo_ids);
             //message.success('CLOs fetched successfully.');
         } catch (error) {
             console.error('Error fetching CLOs:', error);
@@ -84,10 +84,15 @@ const CloPlo = (nav) => {
     const GetAllCloPlo = async () => {
         try {
             //CloArr is []
-            const data = {
-                id_clos: CloArr
-            }
-            const response = await axiosAdmin.post('/plo-clo/id_clos', { data: data });
+            const id_clos = JSON.stringify(CloArr);
+
+            // Gửi yêu cầu GET với tham số query
+            const response = await axiosAdmin.get('/plo-clo', {
+                params: {
+                    id_clos: id_clos
+                }
+            });
+
             console.log(response.data);
             console.log("hi");
             const po_plo_ids = response.data.map(item => ({ plo_id: item.plo_id, clo_id: item.clo_id }));

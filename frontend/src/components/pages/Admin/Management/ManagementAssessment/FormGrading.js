@@ -72,7 +72,7 @@ const FormGrading = (nav) => {
     try {
       const data = { totalScore: totalScore }
 
-      await axiosAdmin.put(`/assessment/${assessment_id}/updateStotalScore`, { data: data })
+      await axiosAdmin.put(`/assessment/${assessment_id}/totalScore`, { data: data })
 
       const dataAssessmentItem = selectedValues.map(item => {
         const { maxScore, CheckGrading, ...rest } = item;
@@ -111,7 +111,7 @@ const FormGrading = (nav) => {
   const GetRubricData = async () => {
     try {
 
-      const response = await axiosAdmin.get(`/rubric/${rubric_id}/items/isDelete/false`);
+      const response = await axiosAdmin.get(`/rubric/${rubric_id}/items?isDelete=false`);
       console.log(response.data);
       setRubicData(response.data.rubric)
       setRubicItemsData(response.data.rubric.rubricItems)

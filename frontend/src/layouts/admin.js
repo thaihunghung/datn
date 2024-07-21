@@ -62,6 +62,7 @@ import StoreClass from '../components/pages/Admin/Management/ManagementClass/Sto
 import ProfileStudent from '../components/pages/Admin/Management/ManagementStudent/Profile/ProfileStudent';
 import StoreCourse from '../components/pages/Admin/Management/ManagementCourse/StoreCourse/StoreCourse';
 import NotFound from '../components/pages/Admin/Utils/NotFoundPage/NotFound';
+import ManagementAssessmentGradingTest from '../components/pages/Admin/Management/ManagementAssessment/ManagementAssessmentGradingTest';
 
 
 function Admin({ user }) {
@@ -140,6 +141,12 @@ function Admin({ user }) {
 
           <Route path="/management-grading/list" element={<ManagementAssessment collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
           <Route path="/management-grading/:description" element={<ManagementAssessmentGrading collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
+          <Route path="/management-grading-test" element={<ManagementAssessmentGradingTest collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
+
+          
+          
+          
+          
           <Route path="/management-grading/:description/student-code/:studentCode/assessment/:assessment_id/rubric/:rubric_id" element={<FormGrading collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
 
           <Route path="/management-grading/create" element={<CreateAssessment collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />

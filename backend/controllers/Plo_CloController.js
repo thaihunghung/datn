@@ -10,11 +10,11 @@ const Plo_CloController = {
 
       if (id_clos) {
         // Handle request for multiple CLO IDs
-        const cloIds = id_clos.split(',').map(id => parseInt(id, 10));
-
+        
+        const ids = JSON.parse(id_clos);
         const ploClos = await PloCloModel.findAll({
           where: {
-            clo_id: cloIds
+            clo_id: ids
           }
         });
 

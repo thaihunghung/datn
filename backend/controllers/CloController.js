@@ -35,33 +35,6 @@ const CloController = {
     }
   },
 
-  GetCloBySubjectId: async (req, res) => {
-    try {
-      const { subject_id } = req.params;
-      const clos = await CloModel.findAll({ where: { subject_id: subject_id, isDelete: false } });
-      if (!clos.length) {
-        return res.status(404).json({ message: 'No CLOs found for the given subject ID' });
-      }
-      res.status(200).json(clos);
-    } catch (error) {
-      console.error('Error getting CLOs by subject ID:', error);
-      res.status(500).json({ message: 'Internal server error' });
-    }
-  },
-  GetCloArchiveBySubjectId: async (req, res) => {
-    try {
-      const { subject_id } = req.params;
-      const clos = await CloModel.findAll({ where: { subject_id: subject_id, isDelete: true } });
-      console.log(clos);
-      if (!clos.length) {
-        return res.status(404).json({ message: 'No CLOs found for the given subject ID' });
-      }
-      res.status(200).json(clos);
-    } catch (error) {
-      console.error('Error getting CLOs by subject ID:', error);
-      res.status(500).json({ message: 'Internal server error' });
-    }
-  },
   create: async (req, res) => {
     try {
       const { data } = req.body;
@@ -164,21 +137,7 @@ const CloController = {
     }
   },
 
-  isdelete: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const clo = await CloModel.findOne({ where: { clo_id: id } });
-      if (!clo) {
-        return res.status(404).json({ message: 'CLO not found' });
-      }
-      const updatedIsDeleted = !clo.isDelete;
-      await CloModel.update({ isDelete: updatedIsDeleted }, { where: { clo_id: id } });
-      res.status(200).json({ message: `Successfully toggled isDelete status to ${updatedIsDeleted}` });
-    } catch (error) {
-      console.error('Error toggling isDelete status:', error);
-      res.status(500).json({ message: 'Internal server error' });
-    }
-  },
+
   toggleSoftDeleteById: async (req, res) => {
     try {
       const { id } = req.params;
@@ -224,6 +183,51 @@ const CloController = {
     }
   },
 
+
+  isdelete: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const clo = await CloModel.findOne({ where: { clo_id: id } });
+      if (!clo) {
+        return res.status(404).json({ message: 'CLO not found' });
+      }
+      const updatedIsDeleted = !clo.isDelete;
+      await CloModel.update({ isDelete: updatedIsDeleted }, { where: { clo_id: id } });
+      res.status(200).json({ message: `Successfully toggled isDelete status to ${updatedIsDeleted}` });
+    } catch (error) {
+      console.error('Error toggling isDelete status:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+
+  GetCloBySubjectId: async (req, res) => {
+    try {
+      const { subject_id } = req.params;
+      const clos = await CloModel.findAll({ where: { subject_id: subject_id, isDelete: false } });
+      if (!clos.length) {
+        return res.status(404).json({ message: 'No CLOs found for the given subject ID' });
+      }
+      res.status(200).json(clos);
+    } catch (error) {
+      console.error('Error getting CLOs by subject ID:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+  GetCloArchiveBySubjectId: async (req, res) => {
+    try {
+      const { subject_id } = req.params;
+      const clos = await CloModel.findAll({ where: { subject_id: subject_id, isDelete: true } });
+      console.log(clos);
+      if (!clos.length) {
+        return res.status(404).json({ message: 'No CLOs found for the given subject ID' });
+      }
+      res.status(200).json(clos);
+    } catch (error) {
+      console.error('Error getting CLOs by subject ID:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+  
   getFormPost: async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('CLO');

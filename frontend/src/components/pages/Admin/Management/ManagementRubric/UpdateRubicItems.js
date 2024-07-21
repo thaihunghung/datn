@@ -52,8 +52,9 @@ const UpdateRubicItems = () => {
     try {
       const response = await axiosAdmin.get(`/rubric/${id}`);
       if (response.status === 200) {
-        const clo_ids = await axiosAdmin.get(`/subject/${response.data.subject_id}?only_clo_ids=true`);
-        setDataClo(clo_ids.data);
+        const clo_ids = await axiosAdmin.get(`/subject/${response.data.subject_id}?include_clos=true`);
+        console.log(clo_ids);
+        setDataClo(clo_ids?.data?.clos)
       }
     } catch (error) {
       console.error('Error fetching Rubric:', error);
@@ -141,7 +142,7 @@ const UpdateRubicItems = () => {
     { key: '4', Score: 1.5 },
     { key: '4', Score: 1.75 },
     { key: '4', Score: 2 },
-];
+  ];
   const onCloseModal = () => {
     navigate(`/admin/management-rubric/${id}/rubric-items/list`);
   };
@@ -236,7 +237,6 @@ const UpdateRubicItems = () => {
                   defaultValue='Chọn loại'
                   value={selectedChapter}
                   onChange={handleChapterSelectChange}
-                  size='large'
                   className='w-full h-full'
                 >
                   {Chapter.map((items) => (
@@ -257,14 +257,14 @@ const UpdateRubicItems = () => {
                   size='large'
                   className='w-full'
                 >
-                 {DataScore.map((TypeSubject) => (
-                <Select.Option
-                    key={TypeSubject.key}
-                    value={TypeSubject.Score}
-                >
-                    {TypeSubject.Score}
-                </Select.Option>
-            ))}
+                  {DataScore.map((TypeSubject) => (
+                    <Select.Option
+                      key={TypeSubject.key}
+                      value={TypeSubject.Score}
+                    >
+                      {TypeSubject.Score}
+                    </Select.Option>
+                  ))}
                 </Select>
               </div>
 

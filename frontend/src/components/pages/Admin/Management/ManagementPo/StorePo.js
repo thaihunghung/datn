@@ -90,7 +90,7 @@ const StorePo = (nav) => {
             po_id: selectedRowKeys,
         }
         try {
-            const response = await axiosAdmin.put('/pos/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/pos/softDelete', { data });
             handleUnSelect();
             message.success(response.data.message);
             getAllPo()
@@ -102,7 +102,7 @@ const StorePo = (nav) => {
 
     const handleRestoreById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/po/${_id}/soft-delete`);
+            const response = await axiosAdmin.put(`/po/${_id}/softDelete`);
             handleUnSelect();
             message.success(response.data.message);
             getAllPo()
@@ -138,7 +138,7 @@ const StorePo = (nav) => {
             po_id: selectedRowKeys,
         };
         try {
-            const response = await axiosAdmin.delete('/pos/delete/multiple', { params: data });
+            const response = await axiosAdmin.delete('/pos/multiple', { params: data });
             await getAllPo();
             handleUnSelect();
             message.success(response.data.message);

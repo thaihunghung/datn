@@ -92,7 +92,7 @@ const StoreChapter = (nav) => {
             chapter_id: selectedRowKeys,
         }
         try {
-            const response = await axiosAdmin.put('/chapters/soft-delete-multiple', { data });
+            const response = await axiosAdmin.put('/chapters/softDelete', { data });
             handleUnSelect();
             message.success(response.data.message);
             getAllChapter()
@@ -104,7 +104,7 @@ const StoreChapter = (nav) => {
 
     const handleRestoreById = async (_id) => {
         try {
-            const response = await axiosAdmin.put(`/chapter/${_id}/soft-delete`);
+            const response = await axiosAdmin.put(`/chapter/${_id}/softDelete`);
             handleUnSelect();
             message.success(response.data.message);
             getAllChapter()
@@ -117,7 +117,7 @@ const StoreChapter = (nav) => {
 
     const getAllChapter = async () => {
         try {
-            const response = await axiosAdmin.get(`/chapter/archive/subject/${id}`);
+            const response = await axiosAdmin.get(`/chapters?subject_id=${id}&isDelete=true`);
             const updatedPloData = response.data.map((chapter) => {
                 return {
                     key: chapter.chapter_id,
@@ -140,7 +140,7 @@ const StoreChapter = (nav) => {
         chapter_id: selectedRowKeys,
       };
       try {
-        const response = await axiosAdmin.delete('/chapters/delete/multiple', { params: data });
+        const response = await axiosAdmin.delete('/chapters/multiple', { params: data });
 
         await getAllChapter();
           handleUnSelect();
