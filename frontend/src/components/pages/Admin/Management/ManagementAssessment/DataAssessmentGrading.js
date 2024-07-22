@@ -26,9 +26,6 @@ export const fetchAssessmentDataGrading = async (teacher_id, descriptionURL, sea
         action: action,
       };
     });
-
-    
-
     const uniqueClasses = [...new Set(updatedPoData.map(item => item.class))];
     const classOptions = uniqueClasses.map(className => ({
       value: className,

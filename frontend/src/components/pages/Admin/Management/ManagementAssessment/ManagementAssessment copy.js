@@ -22,7 +22,7 @@ const ManagementAssessment = (nav) => {
   const [selectedRow, setSelectedRow] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [subjects, setSubjects] = useState([]);
+  const [assessments, setAssessment] = useState([]);
 
   const [deleteId, setDeleteId] = useState(null);
 
@@ -163,7 +163,7 @@ const ManagementAssessment = (nav) => {
           action: action
         };
       });
-      setSubjects(updatedPoData);
+      setAssessment(updatedPoData);
       console.log(updatedPoData);
     } catch (error) {
       console.error("Error: " + error.message);
@@ -176,13 +176,13 @@ const ManagementAssessment = (nav) => {
     };
     console.log(data)
     try {
-      const response = await axiosAdmin.put('/subjects/softDelete', { data });
+      const response = await axiosAdmin.put('/assessments/softDelete', { data });
       await getAllAssessmentIsDeleteFalse();
       handleUnSelect();
       message.success(response.data.message);
     } catch (error) {
-      console.error("Error soft deleting subjects:", error);
-      message.error('Error soft deleting subjects');
+      console.error("Error soft deleting assessments:", error);
+      message.error('Error soft deleting assessments');
     }
   };
 
@@ -279,7 +279,7 @@ const ManagementAssessment = (nav) => {
               ...rowSelection,
             }}
             columns={columns}
-            dataSource={subjects}
+            dataSource={assessments}
           />
         </div>
       </div>

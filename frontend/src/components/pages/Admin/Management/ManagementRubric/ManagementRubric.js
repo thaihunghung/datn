@@ -1,281 +1,68 @@
-// ManagementRubric.js
+import React, { useEffect, useState } from 'react';
+import {
+    Table,
+    TableHeader,
+    TableColumn,
+    TableBody,
+    TableRow,
+    TableCell,
+    Input,
+    Button,
+    DropdownTrigger,
+    Dropdown,
+    DropdownMenu,
+    DropdownItem,
+    Chip,
+    Pagination,
+} from '@nextui-org/react';
+import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
+import { Tooltip, message } from 'antd';
+import slugify from 'slugify';
+import { Flex, Progress } from 'antd';
 
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Table, Tooltip, Button, message } from 'antd';
-import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
+import { PlusIcon } from '../ManagementAssessment/PlusIcon';
+import { VerticalDotsIcon } from '../ManagementAssessment/VerticalDotsIcon';
+import { SearchIcon } from '../ManagementAssessment/SearchIcon';
+import { ChevronDownIcon } from '../ManagementAssessment/ChevronDownIcon';
+import { columns, fetchRubricData, } from './DataRubric';
+import { capitalize } from '../../Utils/capitalize';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
-import CreateRubic from "./CreateRubic";
-import ModalUpdateRubric from "./ModalUpdateRubric";
+import BackButton from '../../Utils/BackButton/BackButton';
+
+const statusColorMap = {
+    active: 'success',
+    paused: 'danger',
+    vacation: 'warning',
+};
+
+const INITIAL_VISIBLE_COLUMNS = ['id', 'name', 'point', 'status'];
+const COMPACT_VISIBLE_COLUMNS = ['name'];
 
 const ManagementRubric = (nav) => {
     const { setCollapsedNav } = nav;
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [currentTeacher, setCurrentTeacher] = useState(null);
-    const [DataSubject, setDataSubject] = useState([]);
+    const location = useLocation();
     const navigate = useNavigate();
+    const searchParams = new URLSearchParams(location.search);
+    const descriptionString = searchParams.get('description');
+    let descriptionURL;
+
+    if (descriptionString) {
+        try {
+            const decodedDescription = decodeURIComponent(descriptionString);
+            descriptionURL = decodedDescription;
+            // console.log(descriptionURL); // Logging the result
+        } catch (error) {
+            console.error('Error processing description:', error);
+        }
+    }
+
     const teacher_id = Cookies.get('teacher_id');
     if (!teacher_id) {
         navigate('/login');
     }
-    const handleEditClick = (teacher) => {
-        setCurrentTeacher(teacher);
-        setEditRubric(teacher);
-        setIsEditModalOpen(true);
-      };
-
-      const getAllSubject = async () => {
-        try {
-            const response = await axiosAdmin.get(`/subjects/isDelete/false`);
-            if (response.data) {
-                setDataSubject(response.data);
-            }
-            console.log(response);
-        } catch (error) {
-            console.error("Error fetching subjects:", error);
-            message.error('Error fetching subjects');
-        }
-    }
-
-
-    const [isOpenModalCreate, setIsOpenModalCreate] = useState(false);
-    const handleOpenModalCreate = () => setIsOpenModalCreate(true);
-    const handleCloseModalCreate = () => setIsOpenModalCreate(false);
-
-    const [selectedRow, setSelectedRow] = useState([]);
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    const [loading, setLoading] = useState(false);
-
-    const [rubicData, setRubicData] = useState([]);
-    const [deleteId, setDeleteId] = useState(null);
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [editRubric, setEditRubric] = useState({
-        rubric_id: "",
-        subject_id: "",
-        teacher_id: "",
-        rubricName: "",
-        comment: "",
-      });
-
-
-    const rowSelection = {
-        selectedRowKeys,
-        onChange: (selectedRowKeys, selectedRows) => {
-            setSelectedRow(selectedRows);
-            setSelectedRowKeys(selectedRowKeys);
-        },
-    };
-
-    const handleUnSelect = () => {
-        setSelectedRowKeys([]);
-        setSelectedRow([]);
-    };
-    const handleEditFormSubmit = async (values, teacher_id) => {
-        console.log("editRubric");
-        console.log(editRubric);
-        // if (!teacher_id) {
-        //   console.error("No teacher selected for editing");
-        //   return;
-        // }
-    
-        // try {
-        //   const res = await axiosAdmin.put(`/teacher/${teacher_id}`, { data: values });
-        //   successNoti(res.data.message);
-        //   setIsEditModalOpen(false);
-        //   const { teachers, total } = await fetchTeachersData(page, rowsPerPage, filterValue);
-        //   setTeachers(teachers);
-        //   setTotalTeachers(total);
-        // } catch (error) {
-        //   console.error("Error updating teacher:", error);
-        //   if (error.response && error.response.data && error.response.data.message) {
-        //     errorNoti(error.response.data.message);
-        //   } else {
-        //     errorNoti("Error updating teacher");
-        //   }
-        // }
-      };
-    const columns = [
-        {
-            title: "Tên rubric",
-            dataIndex: "name",
-            render: (record) => (
-                <div className="text-sm min-w-[100px]">
-                    <p className="font-medium">{record}</p>
-                </div>
-            ),
-        },
-        {
-            title: "items",
-            dataIndex: "status",
-            render: (record) => (
-                <div className="text-sm">
-                    {record.status ?
-                        <Link to={`/admin/management-rubric/${record._id}/rubric-items/list`}>
-
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
-                            >
-                                <p>Chỉnh sửa</p>
-                            </Button>
-
-                        </Link>
-
-                        :
-                        <Link to={`/admin/management-rubric/${record._id}/rubric-items/list`}>
-
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
-                            >
-                                <p>Tạo mới</p>
-                            </Button>
-
-                        </Link>
-
-                    }
-                </div>
-            ),
-        },
-        {
-            title: "Tổng điểm",
-            dataIndex: "point",
-            render: (record) => (
-                <div className="text-sm">
-                    <p className="font-medium">{record}</p>
-
-                </div>
-            ),
-        },
-        {
-            title: (
-                <div className="flex items-center justify-center w-full">
-                    <span>Form</span>
-                </div>
-            ),
-            dataIndex: "action",
-            render: (Rubric) => (
-                <div className="flex items-center justify-center w-full gap-2">
-                    {/* <Link to={`/admin/management-rubric/update/${_id}`}> */}
-                        <Tooltip title="Chỉnh sửa">
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
-                                className="bg-[#AF84DD]"
-                                onClick={() => {handleEditClick(Rubric) }}
-                            >
-                                <i className="fa-solid fa-pen"></i>
-                            </Button>
-                        </Tooltip>
-                    {/* </Link> */}
-
-
-
-
-                    
-                    <Tooltip title="Xoá">
-                        <Button
-                            isIconOnly
-                            variant="light"
-                            radius="full"
-                            size="sm"
-                            onClick={() => { onOpen(); setDeleteId(Rubric.rubric_id); }}
-                            className="bg-[#FF8077]"
-                        >
-                            <i className="fa-solid fa-trash-can"></i>
-                        </Button>
-                    </Tooltip>
-                    <Link to={`/admin/management-grading/list`}>
-                        <Tooltip title="Chấm điểm">
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
-                                className="bg-[#FF9908] "
-                            >
-                                <i className="fa-solid fa-feather-pointed"></i>
-                            </Button>
-                        </Tooltip>
-                    </Link>
-                </div>
-            ),
-        },
-
-    ];
-
-    const getAllRubricIsDeleteFalse = async () => {
-        try {
-            const response = await axiosAdmin.get(`/rubrics/checkScore?teacher_id=${teacher_id}&isDelete=false`);
-            const updatedRubricData = response.data.rubric.map((rubric) => {
-                const Rubric = {
-                    rubric_id: rubric.rubric_id,
-                    subject_id: rubric.subject_id,
-                    teacher_id: rubric.teacher_id,
-                    rubricName: rubric.rubricName,
-                    comment: rubric.comment,
-                }
-
-                const status = {
-                    status: rubric.RubricItem.length === 0 ? false : true,
-                    _id: rubric.rubric_id
-                };
-                return {
-                    key: rubric.rubric_id,
-                    name: rubric.rubricName,
-                    status: status,
-                    point: rubric.RubricItem[0]?.total_score ? rubric.RubricItem[0].total_score : 0.0,
-                    action: Rubric
-                };
-            });
-            setRubicData(updatedRubricData);
-            console.log(updatedRubricData);
-        } catch (error) {
-            console.error("Error: " + error.message);
-            message.error('Error fetching Rubric data');
-        }
-    };
-
-    const handleSoftDelete = async () => {
-        const data = {
-            rubric_id: selectedRowKeys,
-        };
-        try {
-            const response = await axiosAdmin.put('/rubrics/softDelete', { data });
-            await getAllRubricIsDeleteFalse();
-            handleUnSelect();
-            message.success(response.data.message);
-        } catch (error) {
-            console.error("Error soft deleting rubrics:", error);
-            message.error('Error soft deleting rubrics');
-        }
-    };
-
-    const handleSoftDeleteById = async (_id) => {
-        try {
-            const response = await axiosAdmin.put(`/rubric/${_id}/softDelete`);
-            await getAllRubricIsDeleteFalse();
-            handleUnSelect();
-            message.success(response.data.message);
-        } catch (error) {
-            console.error(`Error toggling soft delete for rubric with ID ${_id}:`, error);
-            message.error(`Error toggling soft delete for rubric with ID ${_id}`);
-        }
-    };
-
     useEffect(() => {
-        
-        getAllRubricIsDeleteFalse()
-        getAllSubject()
+        //getAllAssessmentIsDeleteFalse()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -284,151 +71,445 @@ const ManagementRubric = (nav) => {
             }
         };
         handleResize();
+        console.log(window.innerWidth)
+        const handleVisibilityChange = () => {
+            if (window.innerWidth < 500) {
+                setVisibleColumns(new Set(COMPACT_VISIBLE_COLUMNS)); // Thay đổi visibleColumns khi cửa sổ nhỏ
+            } else {
+                setVisibleColumns(new Set(INITIAL_VISIBLE_COLUMNS)); // Trả lại visibleColumns khi cửa sổ lớn
+            }
+        }
+        handleVisibilityChange();
+
         window.addEventListener("resize", handleResize);
         return () => {
             window.removeEventListener("resize", handleResize);
         };
     }, []);
 
-    return (
-        <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7">
-            <ModalUpdateRubric 
-                    isOpen={isEditModalOpen}
-                    onOpenChange={setIsEditModalOpen}
-                    onSubmit={handleEditFormSubmit}
-                    editRubric={editRubric}
-                    setEditRubric={setEditRubric}
-                    DataSubject={DataSubject}
-            
-            
-            /> 
-            <ConfirmAction
-                onOpenChange={onOpenChange}
-                isOpen={isOpen}
-                onConfirm={() => {
-                    if (deleteId) {
-                        handleSoftDeleteById(deleteId);
-                        setDeleteId(null);
-                    } else if (selectedRowKeys.length > 0) {
-                        handleSoftDelete();
-                        setSelectedRowKeys([]);
-                    }
-                }}
-            />
-            <DropdownAndNavRubric open={handleOpenModalCreate}/>
-            {/* <Button onClick={handleOpenModalCreate}>tạo mới</Button> */}
-            <div className="w-full my-5">
-                {selectedRowKeys.length !== 0 && (
-                    <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
-                        <p className="text-sm font-medium">
-                            <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
-                            Đã chọn {selectedRow.length} rubric
-                        </p>
-                        <div className="flex items-center gap-2">
-                            <Tooltip
-                                title={`Xoá ${selectedRowKeys.length} rubric`}
-                                getPopupContainer={() =>
-                                    document.querySelector(".Quick__Option")
-                                }
-                            >
-                                <Button isIconOnly variant="light" radius="full" onClick={onOpen}>
-                                    <i className="fa-solid fa-trash-can"></i>
-                                </Button>
-                            </Tooltip>
-                            <Tooltip
-                                title="Bỏ chọn"
-                                getPopupContainer={() =>
-                                    document.querySelector(".Quick__Option")
-                                }
-                            >
+    const [assessments, setAssessment] = useState([]);
+    const [filterValue, setFilterValue] = useState('');
+    const [selectedKeys, setSelectedKeys] = useState(new Set());
+    const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [sortDescriptor, setSortDescriptor] = useState({
+        column: 'age',
+        direction: 'ascending',
+    });
+    const [page, setPage] = useState(1);
+
+    useEffect(() => {
+        const loadTeachers = async () => {
+            const response = await fetchRubricData(teacher_id);
+            console.log(response);
+            setAssessment(response);
+
+
+        };
+        loadTeachers();
+        console.log("assessments loaded", assessments);
+    }, [page, rowsPerPage, filterValue]);
+
+    const pages = Math.ceil(assessments.length / rowsPerPage);
+    const hasSearchFilter = Boolean(filterValue);
+
+    const headerColumns = React.useMemo(() => {
+        if (visibleColumns === 'all') return columns;
+        return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
+    }, [visibleColumns]);
+
+    const filteredItems = React.useMemo(() => {
+        let filteredAssessment = [...assessments];
+
+        if (hasSearchFilter) {
+            filteredAssessment = filteredAssessment.filter((teacher) =>
+                teacher.description.toLowerCase().includes(filterValue.toLowerCase())
+            );
+        }
+
+
+        return filteredAssessment;
+    }, [assessments, filterValue]);
+
+    const handleSelectionChange = (keys) => {
+        // console.log('Keys:', keys);
+        if (keys === 'all') {
+            const startIndex = (page - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const currentPageUsers = filteredItems.slice(startIndex, endIndex).map(user => user.id.toString());
+            setSelectedKeys(prevKeys => {
+                const newKeys = new Set(currentPageUsers);
+                // console.log('Setting new keys:', Array.from(newKeys));
+                return newKeys;
+            });
+            return;
+        }
+
+        const keysArray = Array.isArray(keys) ? keys : Array.from(keys);
+        const validKeys = keysArray.filter(key => typeof key === 'string' && !isNaN(key));
+        //console.log('Valid Keys:', validKeys);
+        setSelectedKeys(prevKeys => {
+            const newKeys = new Set(validKeys);
+            // console.log('Setting new keys:', Array.from(newKeys));
+            return newKeys;
+        });
+    };
+
+    const items = React.useMemo(() => {
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        return filteredItems.slice(start, end);
+    }, [page, filteredItems, rowsPerPage]);
+
+    const sortedItems = React.useMemo(() => {
+        return [...items].sort((a, b) => {
+            const first = a[sortDescriptor.column];
+            const second = b[sortDescriptor.column];
+            const cmp = first < second ? -1 : first > second ? 1 : 0;
+            return sortDescriptor.direction === 'descending' ? -cmp : cmp;
+        });
+    }, [sortDescriptor, items]);
+    const handleNavigate = (path) => {
+        navigate(path);
+    };
+    function replaceCharacters(description) {
+        // Replace spaces with underscores
+        let result = description.replace(/ /g, "_");
+        // Replace hyphens with underscores
+        result = result.replace(/-/g, "_");
+        return result;
+    }
+
+    const renderCell = React.useCallback((rubric, columnKey) => {
+        const cellValue = rubric[columnKey];
+
+        switch (columnKey) {
+            case 'name':
+                return (
+                    <div className="flex flex-col">
+                        <p className="text-bold text-small capitalize">{cellValue}</p>
+                    </div>
+                );
+            case 'status':
+                return (
+                    <div className="flex flex-col">
+                        <p className={`text-bold text-small ${rubric.status.status ? 'text-success' : 'text-danger'}`}>
+                            {rubric.status.status ? 'Active' : 'Inactive'}
+
+
+                            {rubric.status.status ?
+
+
                                 <Button
                                     isIconOnly
                                     variant="light"
                                     radius="full"
-                                    onClick={() => {
-                                        handleUnSelect();
-                                    }}
+                                    size="sm"
+                                    onClick={() =>
+                                        handleNavigate(`/admin/management-rubric/${rubric.status.id}/rubric-items/list`)}
+
                                 >
-                                    <i className="fa-solid fa-xmark text-[18px]"></i>
+                                    <p>Chỉnh sửa</p>
                                 </Button>
-                            </Tooltip>
-                        </div>
+
+
+                                :
+
+                                <Button
+                                    isIconOnly
+                                    variant="light"
+                                    radius="full"
+                                    size="sm"
+                                    onClick={() =>
+                                        handleNavigate(`/admin/management-rubric/${rubric.status.id}/rubric-items/list`)}
+
+                                >
+                                    <p>Tạo mới</p>
+                                </Button>
+
+                            }
+                        </p>
                     </div>
-                )}
-                <div className="w-full overflow-auto">
-                    <Table className="table-po text-[#fefefe]"
-                        bordered
-                        loading={loading}
-                        rowSelection={{
-                            type: "checkbox",
-                            ...rowSelection,
-                        }}
-                        columns={columns}
-                        dataSource={rubicData}
+                );
+
+
+
+
+            case 'point':
+                return (
+                    <div className="flex flex-col">
+                        <p className="text-bold text-small">{cellValue}</p>
+                    </div>
+                );
+            //   case 'action':
+            //     const disc = replaceCharacters(cellValue.description); // Assuming `replaceCharacters` is a function you have
+            //     return (
+            //       <div className="flex items-center justify-center w-full gap-2">
+            //         <Tooltip title="Chấm điểm">
+            //           <Button
+            //             isIconOnly
+            //             variant="light"
+            //             radius="full"
+            //             size="sm"
+            // onClick={() => handleNavigate(`/admin/management-grading/${disc}/?description=${cellValue.description}`)}
+            //           >
+            //             <i className="fa-solid fa-feather-pointed"></i>
+            //           </Button>
+            //         </Tooltip>
+            //         <Tooltip title="In phiếu chấm">
+            //           <Button
+            //             isIconOnly
+            //             variant="light"
+            //             radius="full"
+            //             size="sm"
+            //           >
+            //             <i className="fa-regular fa-file-pdf"></i>
+            //           </Button>
+            //         </Tooltip>
+            //       </div>
+            //     );
+            default:
+                return cellValue;
+        }
+    }, []);
+
+
+    const onRowsPerPageChange = React.useCallback((e) => {
+        setRowsPerPage(Number(e.target.value));
+        setPage(1);
+    }, []);
+
+    const onSearchChange = React.useCallback((value) => {
+        if (value) {
+            setFilterValue(value);
+            setPage(1);
+        } else {
+            setFilterValue('');
+        }
+    }, []);
+
+    const topContent = React.useMemo(() => {
+        return (
+            <div className="flex flex-col gap-4">
+                <div className="flex justify-between gap-3 items-center">
+                    <Input
+                        isClearable
+                        classNames={{ base: 'w-full sm:max-w-[44%]', inputWrapper: 'border-1' }}
+                        placeholder="Search by name..."
+                        size="sm"
+                        startContent={<SearchIcon className="text-default-300" />}
+                        value={filterValue}
+                        variant="bordered"
+                        onClear={() => setFilterValue('')}
+                        onValueChange={onSearchChange}
                     />
-                    <CreateRubic loadData={getAllRubricIsDeleteFalse} onOpen={handleOpenModalCreate} isOpen={isOpenModalCreate} onClose={handleCloseModalCreate} />
+                    <div className="flex gap-3">
+                        <Button
+                            className='bg-[#AF84DD] '
+                            endContent={<PlusIcon />}
+                            onClick={() => handleNavigate(
+                                `/admin/management-grading/create`
+                            )}
+                        >
+                            Tạo mới
+                        </Button>
+                        {/* <Tooltip
+            title=""
+            getPopupContainer={() =>
+              document.querySelector(".Quick__Option")
+            }
+          >
+            <Button
+              className="flex justify-center items-center p-4"
+              isIconOnly
+              variant="light"
+              radius="full"
+              onClick={()=>{
+                //getSelectedItems
+                //console.log('Option selected',());
+                
+                navigateGradingGroup(ValidKeys)
+              }
+              
+              }
+            >
+              <span className="text-[#475569] text-lg font-bold">Chấm theo nhóm</span>
+            </Button>
+          </Tooltip> */}
+                    </div>
+                </div>
+                <div className="w-full flex  sm:items-center sm:justify-between">
+                    <p className="text-small text-default-400 min-w-[100px]">
+                        <span className="text-default-500">{assessments.length}</span> teacher(s)
+                    </p>
+                    <div className="w-fit sm:w-auto flex items-center gap-2 ">
+                        <p className="text-small text-default-400">Rows per page:</p>
+                        <select
+                            className="w-fit sm:w-auto rounded-lg border-default-200 bg-default-100 text-small transition-opacity focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            onChange={onRowsPerPageChange}
+                            value={rowsPerPage}
+                        >
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={15}>15</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        );
+    }, [filterValue, assessments, rowsPerPage, visibleColumns, onSearchChange, onRowsPerPageChange]);
+
+    const bottomContent = React.useMemo(() => {
+        return (
+            <div className="py-2 px-2 flex justify-between items-center">
+                <p className="text-small">
+                    {selectedKeys === 'all' ? 'All items selected' : `${selectedKeys.size} of ${assessments.length} selected`}
+                </p>
+                <Pagination
+                    showControls
+                    isCompact
+                    page={page}
+                    total={pages}
+                    onChange={(newPage) => setPage(newPage)}
+                />
+            </div>
+        );
+    }, [page, pages, selectedKeys, assessments]);
+
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
+    return (
+        <>
+            <div className='w-full flex justify-between'>
+                <div className='h-full my-auto p-5 hidden sm:block'>
+                    <BackButton />
+                </div>
+                <div className='w-fit h-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-start items-center flex gap-4 flex-col mb-2'>
+                    {/* <div className='flex justify-center w-full flex-wrap items-center gap-1'>
+            <Button
+              className='bg-[#FF9908] '
+              onClick={() => {
+                //const selectedItems = getSelectedItems();
+                //console.log('Selected Items:', selectedItems);
+                //console.log('Selected Keys:', Array.from(selectedKeys));
+                
+              }}
+              endContent={<PlusIcon />}
+            >
+              Chấm nhóm
+            </Button>
+       
+            <Button
+              className='bg-[#FF8077] '
+              endContent={<PlusIcon />}
+            >
+              Xóa
+            </Button> 
+           <Button
+              endContent={<PlusIcon />}
+            >
+              kho lưu trữ
+            </Button>
+
+          </div> */}
+                    <div className='flex gap-1 h-fit justify-start'>
+                        <Dropdown>
+                            <DropdownTrigger className="sm:flex">
+                                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                                    Columns
+                                </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu
+                                disallowEmptySelection
+                                aria-label="Table Columns"
+                                closeOnSelect={false}
+                                selectedKeys={visibleColumns}
+                                selectionMode="multiple"
+                                onSelectionChange={setVisibleColumns}
+                            >
+                                {columns.map((column) => (
+                                    <DropdownItem key={column.uid} className="capitalize">
+                                        {capitalize(column.name)}
+                                    </DropdownItem>
+                                ))}
+                            </DropdownMenu>
+                        </Dropdown>
+                        <Dropdown>
+                            <DropdownTrigger className="sm:flex">
+                                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                                    Lọc lớp
+                                </Button>
+                            </DropdownTrigger>
+
+                        </Dropdown>
+                    </div>
 
                 </div>
             </div>
-        </div>
+            <Table
+                aria-label="Example table with dynamic content"
+                bottomContent={bottomContent}
+                classNames={{
+                    base: 'overflow-visible',
+                    wrapper: 'min-h-[400px]',
+                    table: 'overflow-visible',
+                    th: 'text-small',
+                }}
+                selectedKeys={selectedKeys}
+                //selectionMode="multiple"
+                selectionMode="none"
+                sortDescriptor={sortDescriptor}
+                onSelectionChange={handleSelectionChange}
+                onSortChange={setSortDescriptor}
+                topContent={topContent}
+            >
+                <TableHeader columns={headerColumns}>
+                    {(column) => (
+                        <TableColumn
+                            key={column.uid}
+                            // align={column.uid === 'actions' ? 'center' : 'start'}
+                            align={'center'}
+                            allowsSorting={column.sortable}
+                        >
+                            {column.name}
+                        </TableColumn>
+                    )}
+                </TableHeader>
+                <TableBody items={sortedItems}>
+                    {(item) => (
+                        <TableRow key={item.id}>
+                            {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+                        </TableRow>
+                    )}
+                </TableBody>
+            </Table>
+
+
+
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Modal Title</ModalHeader>
+                            <ModalBody>
+                                <p>
+                                    Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in,
+                                    egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
+                                </p>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="primary" onPress={onClose}>
+                                    Close
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+        </>
     );
-}
+};
 
 export default ManagementRubric;
 
-function ConfirmAction(props) {
-    const { isOpen, onOpenChange, onConfirm } = props;
-    const handleOnOKClick = (onClose) => {
-        onClose();
-        if (typeof onConfirm === 'function') {
-            onConfirm();
-        }
-    }
-    return (
-        <Modal
-            isOpen={isOpen}
-            onOpenChange={onOpenChange}
-            motionProps={{
-                variants: {
-                    enter: {
-                        y: 0,
-                        opacity: 1,
-                        transition: {
-                            duration: 0.2,
-                            ease: "easeOut",
-                        },
-                    },
-                    exit: {
-                        y: -20,
-                        opacity: 0,
-                        transition: {
-                            duration: 0.1,
-                            ease: "easeIn",
-                        },
-                    },
-                }
-            }}
-        >
-            <ModalContent>
-                {(onClose) => (
-                    <>
-                        <ModalHeader>Cảnh báo</ModalHeader>
-                        <ModalBody>
-                            <p className="text-[16px]">
-                                Rubric sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
-                            </p>
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button variant="light" onClick={onClose}>
-                                Huỷ
-                            </Button>
-                            <Button color="danger" className="font-medium" onClick={() => handleOnOKClick(onClose)}>
-                                Xoá
-                            </Button>
-                        </ModalFooter>
-                    </>
-                )}
-            </ModalContent>
-        </Modal>
-    )
-}
+
