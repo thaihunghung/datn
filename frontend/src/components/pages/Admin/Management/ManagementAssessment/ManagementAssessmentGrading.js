@@ -34,7 +34,7 @@ const statusColorMap = {
   vacation: 'warning',
 };
 
-const INITIAL_VISIBLE_COLUMNS = ['totalScore','action', 'class','student'];
+const INITIAL_VISIBLE_COLUMNS = ['totalScore', 'action', 'class', 'student'];
 
 const ManagementAssessmentGrading = (nav) => {
   const { setCollapsedNav } = nav;
@@ -52,14 +52,17 @@ const ManagementAssessmentGrading = (nav) => {
     try {
       const decodedDescription = decodeURIComponent(descriptionString);
       descriptionURL = decodedDescription;
-      console.log(descriptionURL); // Logging the result
+      // console.log(descriptionURL); // Logging the result
     } catch (error) {
       console.error('Error processing description:', error);
     }
   }
 
   const [teachers, setTeachers] = useState([]);
+  const [ValidKeys, setValidKeys] = useState([]);
   const [filterValue, setFilterValue] = useState('');
+  const [classFilter, setClassFilter] = useState('all');
+  const [classes, setClasses] = useState([]);
   const [selectedKeys, setSelectedKeys] = useState(new Set());
   const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
   const [statusFilter, setStatusFilter] = useState('all');
@@ -90,14 +93,17 @@ const ManagementAssessmentGrading = (nav) => {
 
   useEffect(() => {
     const loadTeachers = async () => {
-      const { Assessment, Rubric_id, Course_id } = await fetchAssessmentData(teacher_id, descriptionURL, filterValue);
+      const { Assessment, Rubric_id, Course_id, Classes } = await fetchAssessmentData(teacher_id, descriptionURL, filterValue);
       setTeachers(Assessment);
-      setRubric_id(Rubric_id)
-      setCouse_id(Course_id)
- 
+      setRubric_id(Rubric_id);
+      setCouse_id(Course_id);
+      setClasses(Classes);
+      console.log('Fetched classes:', Classes);
     };
     loadTeachers();
+    console.log("teachers loaded", teachers);
   }, [page, rowsPerPage, filterValue]);
+
 
   const pages = Math.ceil(teachers.length / rowsPerPage);
   const hasSearchFilter = Boolean(filterValue);
@@ -109,13 +115,20 @@ const ManagementAssessmentGrading = (nav) => {
 
   const filteredItems = React.useMemo(() => {
     let filteredAssessment = [...teachers];
+
     if (hasSearchFilter) {
       filteredAssessment = filteredAssessment.filter((teacher) =>
-        teacher.description.toLowerCase().includes(filterValue.toLowerCase()),
+        teacher.description.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
+
+    console.log("statusFilter:", statusFilter);
+
     if (statusFilter !== 'all') {
-      const selectedStatus = statusOptions.find(option => statusFilter.has(option.uid));
+      // Tìm đối tượng trong statusOptions có totalScore khớp với statusFilter
+      const selectedStatus = statusOptions.find(option =>
+        option.totalScore === statusFilter // So sánh totalScore của tùy chọn với giá trị của statusFilter
+      );
       if (selectedStatus) {
         filteredAssessment = filteredAssessment.filter((teacher) =>
           teacher.totalScore === selectedStatus.totalScore
@@ -123,33 +136,48 @@ const ManagementAssessmentGrading = (nav) => {
       }
     }
 
+    if (classFilter !== 'all') {
+      filteredAssessment = filteredAssessment.filter((teacher) =>
+        teacher.class === classFilter
+      );
+    }
 
     return filteredAssessment;
-  }, [teachers, filterValue, statusFilter]);
+  }, [teachers, filterValue, statusFilter, classFilter]);
+
+
+
+
 
   const handleSelectionChange = (keys) => {
-    console.log('Keys received in handler:', keys);
-
+    // console.log('Keys:', keys);
     if (keys === 'all') {
-      // Xác định các mục trên trang hiện tại
       const startIndex = (page - 1) * rowsPerPage;
       const endIndex = startIndex + rowsPerPage;
       const currentPageUsers = filteredItems.slice(startIndex, endIndex).map(user => user.id.toString());
-
-      setSelectedKeys(new Set(currentPageUsers));
+      setSelectedKeys(prevKeys => {
+        const newKeys = new Set(currentPageUsers);
+        // console.log('Setting new keys:', Array.from(newKeys));
+        return newKeys;
+      });
       return;
     }
 
     const keysArray = Array.isArray(keys) ? keys : Array.from(keys);
-    console.log('Keys converted to array:', keysArray);
     const validKeys = keysArray.filter(key => typeof key === 'string' && !isNaN(key));
-    console.log('Valid Keys:', validKeys);
-
-    setSelectedKeys(new Set(validKeys));
+    //console.log('Valid Keys:', validKeys);
+    setSelectedKeys(prevKeys => {
+      const newKeys = new Set(validKeys);
+      // console.log('Setting new keys:', Array.from(newKeys));
+      return newKeys;
+    });
   };
 
+
   const getSelectedItems = () => {
-    return teachers.filter((item) => selectedKeys.has(item.id.toString()));
+    const selectedItems = teachers.filter((item) => selectedKeys.has(item.id.toString()));
+    //console.log('Get Selected Items', selectedItems);
+    return selectedItems;
   };
 
   const items = React.useMemo(() => {
@@ -166,7 +194,9 @@ const ManagementAssessmentGrading = (nav) => {
       return sortDescriptor.direction === 'descending' ? -cmp : cmp;
     });
   }, [sortDescriptor, items]);
-
+  const handleNavigate = (path) => {
+    navigate(path);
+  };
   const renderCell = React.useCallback((assessment, columnKey) => {
     const cellValue = assessment[columnKey];
 
@@ -185,7 +215,7 @@ const ManagementAssessmentGrading = (nav) => {
             {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
           </div>
         );
-        case 'class':
+      case 'class':
         return (
           <div className="flex flex-col">
             <p className="text-bold text-small capitalize">{cellValue}</p>
@@ -212,11 +242,11 @@ const ManagementAssessmentGrading = (nav) => {
             {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
           </div>
         );
-      
+
       case 'action':
         return (
           <div className="flex items-center justify-center w-full gap-2">
-            {assessment.action.totalScore === 0 ? (<Link to={`/admin/management-grading/${slugify(assessment.action.description, { lower: true, replacement: '_' })}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`}>
+            {assessment.action.totalScore === 0 ? (
               <Tooltip title="Chấm điểm">
                 <Button
                   isIconOnly
@@ -224,11 +254,14 @@ const ManagementAssessmentGrading = (nav) => {
                   radius="full"
                   size="sm"
                   className='bg-[#AF84DD]'
+                  onClick={() => handleNavigate(
+                    `/admin/management-grading/${slugify(assessment.action.description, { lower: true, replacement: '_' })}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
+                  )}
                 >
                   <i className="fa-solid fa-feather-pointed"></i>
                 </Button>
               </Tooltip>
-            </Link>) : (<Link to={`/admin/management-grading/update/${slugify(assessment.action.description, { lower: true, replacement: '_' })}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`}>
+            ) : (
               <Tooltip title="Chỉnh sửa">
                 <Button
                   isIconOnly
@@ -236,13 +269,14 @@ const ManagementAssessmentGrading = (nav) => {
                   radius="full"
                   size="sm"
                   className='bg-[#FF9908]'
+                  onClick={() => handleNavigate(
+                    `/admin/management-grading/update/${slugify(assessment.action.description, { lower: true, replacement: '_' })}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
+                  )}
                 >
                   <i className="fa-solid fa-pen"></i>
                 </Button>
               </Tooltip>
-            </Link>)}
-
-
+            )}
             <Tooltip title="Xoá">
               <Button
                 isIconOnly
@@ -250,7 +284,7 @@ const ManagementAssessmentGrading = (nav) => {
                 radius="full"
                 size="sm"
                 className='bg-[#FF8077]'
-                onClick={() => { onOpen();  }}
+                onClick={() => { onOpen(); }}
               >
                 {/* setDeleteId(assessment.action.assessment_id); */}
                 <i className="fa-solid fa-trash-can"></i>
@@ -267,10 +301,10 @@ const ManagementAssessmentGrading = (nav) => {
   const getStudentCode = (data, key) => {
     for (let item of data) {
       // && item.totalScore === 0
-      if (item.key === key ) {
+      if (item.id === key) {
         return {
           Assessment: key,
-          studentCode: item.student.studentCode   
+          studentCode: item.student.studentCode
         }
       }
     }
@@ -279,7 +313,7 @@ const ManagementAssessmentGrading = (nav) => {
 
   const checkstotalscore = (data, key) => {
     for (let item of data) {
-      if (item.key === key) {
+      if (item.id === key) {
         return {
           assessment_id: key,
           totalScore: item.totalScore,
@@ -290,46 +324,57 @@ const ManagementAssessmentGrading = (nav) => {
     return null;
   };
 
-  const [currentSelectedKeys, setCurrentSelectedKeys] = useState(new Set());
 
   useEffect(() => {
-    // Cập nhật currentSelectedKeys khi selectedKeys thay đổi
-    setCurrentSelectedKeys(selectedKeys);
+    console.log('Selected keys have changed:', Array.from(selectedKeys));
+    // Ensure `getSelectedItems` uses the latest `selectedKeys`
+    const selectedItems = getSelectedItems();
+    console.log('Selected Items after keys changed:', selectedItems);
   }, [selectedKeys]);
-
-
 
   const navigateGradingGroup = () => {
     setTimeout(() => {
-      const keysArray = Array.from(selectedKeys);
-      const numericKeys = keysArray.map(key => parseInt(key, 10));
-  
-      console.log(numericKeys);
-      console.log("keysArray");
-      console.log(keysArray);
-      console.log("teachers");
-  
-      if (keysArray.length === 0) {
+      const selectedItems = getSelectedItems();
+      //console.log('Selected Items after timeout:', selectedItems);
+      if (selectedItems.length === 0) {
         message.error('Please select at least one student');
         return;
       }
-      if (keysArray.length > 4) {
+      if (selectedItems.length > 4) {
         message.error('Please select no more than 4 students');
         return;
       }
-  
-      const checkStotalScore = keysArray.map((key) => checkstotalscore(teachers, key));
-      const listStudentCodes = keysArray.map((key) => getStudentCode(teachers, key));
-      console.log(checkStotalScore);
-  
+
+      const ids = selectedItems.map(item => item.id);
+
+
+      const checkStotalScore = ids.map((key) => checkstotalscore(teachers, key));
+      const hasUncheckedAssessment = checkStotalScore.some((item, index) => {
+        if (item.checktotalScore === false) {
+          message.error(`Sinh viên đã chọn thứ ${index + 1} đã chấm điểm.`);
+          return true;
+        }
+        return false;
+      });
+
+      if (hasUncheckedAssessment) {
+        return;
+      }
+      const listStudentCodes = ids.map((key) => getStudentCode(teachers, key));
+      // console.log("checkStotalScore");
+      // console.log(checkStotalScore);
+      // console.log("listStudentCodes");
+      // console.log(listStudentCodes);
       const studentCodesString = encodeURIComponent(JSON.stringify(listStudentCodes));
-  
       const disc = replaceCharacters(descriptionURL);
-      // navigate(`/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}`);
-    }, 0);
-  }
-  
-  
+      // console.log("studentCodesString");
+      // console.log(studentCodesString);
+      // console.log("disc");
+      // console.log(disc);
+      navigate(`/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}`);
+    }, 100);
+  };
+
 
   function replaceCharacters(description) {
     // Replace spaces with underscores
@@ -371,52 +416,8 @@ const ManagementAssessmentGrading = (nav) => {
             onValueChange={onSearchChange}
           />
           <div className="flex gap-3">
-            <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                  SV chưa chấm
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                // disallowEmptySelection
-                aria-label="Table Columns"
-                closeOnSelect={false}
-                selectedKeys={statusFilter}
-                selectionMode="multiple"
-                onSelectionChange={setStatusFilter}
-              >
-                {statusOptions.map((status) => (
-                  <DropdownItem key={status.uid} className="capitalize">
-                    {capitalize(status.name)}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-            <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                  Columns
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Table Columns"
-                closeOnSelect={false}
-                selectedKeys={visibleColumns}
-                selectionMode="multiple"
-                onSelectionChange={setVisibleColumns}
-              >
-                {columns.map((column) => (
-                  <DropdownItem key={column.uid} className="capitalize">
-                    {capitalize(column.name)}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-            <Button color="primary" size="sm" startContent={<PlusIcon />}>
-              New Teacher
-            </Button>
-            <Tooltip
+            
+            {/* <Tooltip
             title=""
             getPopupContainer={() =>
               document.querySelector(".Quick__Option")
@@ -427,23 +428,28 @@ const ManagementAssessmentGrading = (nav) => {
               isIconOnly
               variant="light"
               radius="full"
-              onClick={() => {
-                navigateGradingGroup();
-              }}
+              onClick={()=>{
+                //getSelectedItems
+                //console.log('Option selected',());
+                
+                navigateGradingGroup(ValidKeys)
+              }
+              
+              }
             >
               <span className="text-[#475569] text-lg font-bold">Chấm theo nhóm</span>
             </Button>
-          </Tooltip>
+          </Tooltip> */}
           </div>
         </div>
-        <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-small text-default-400">
+        <div className="w-full flex  sm:items-center sm:justify-between">
+          <p className="text-small text-default-400 min-w-[100px]">
             <span className="text-default-500">{teachers.length}</span> teacher(s)
           </p>
-          <div className="w-full sm:w-auto flex items-center gap-2">
+          <div className="w-fit sm:w-auto flex items-center gap-2 ">
             <p className="text-small text-default-400">Rows per page:</p>
             <select
-              className="w-full sm:w-auto rounded-lg border-default-200 bg-default-100 text-small transition-opacity focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-fit sm:w-auto rounded-lg border-default-200 bg-default-100 text-small transition-opacity focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               onChange={onRowsPerPageChange}
               value={rowsPerPage}
             >
@@ -478,6 +484,126 @@ const ManagementAssessmentGrading = (nav) => {
 
   return (
     <>
+    <div className='w-full flex justify-end'>
+    <div className='border-default-600 w-fit rounded-xl border-2 p-2 justify-start items-center flex gap-1 flex-col'>
+        <div className='flex justify-center w-full flex-wrap items-center gap-1'>
+
+          <Button
+            color="primary"
+            onClick={() => {
+              //const selectedItems = getSelectedItems();
+              //console.log('Selected Items:', selectedItems);
+              //console.log('Selected Keys:', Array.from(selectedKeys));
+              navigateGradingGroup();
+            }}
+            endContent={<PlusIcon />}
+          >
+            Chấm nhóm
+          </Button>
+          <Button
+              color="primary"
+              endContent={<PlusIcon />}
+            >
+              Add new
+            </Button>
+            <Button
+              color="primary"
+              endContent={<PlusIcon />}
+            >
+              Xóa
+            </Button>
+            <Button
+              color="primary"
+              endContent={<PlusIcon />}
+            >
+              kho lưu trữ
+            </Button>
+
+        </div>
+        <div className='flex gap-1 justify-start'>
+          <Dropdown>
+            <DropdownTrigger className="sm:flex">
+              <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                Lọc trạng thái
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              disallowEmptySelection
+              aria-label="Status Filter"
+              closeOnSelect={false}
+              selectedKeys={statusFilter === 'all' ? [] : [statusFilter]}
+              selectionMode="single"
+              onSelectionChange={(keys) => {
+                const selectedKey = Array.from(keys)[0] || 'all';
+                setStatusFilter(selectedKey === 'all' ? 'all' : parseInt(selectedKey, 10));
+              }}
+            >
+              <DropdownItem key="all" className="capitalize">All Statuses</DropdownItem>
+              {statusOptions.map((option) => (
+                <DropdownItem key={option.totalScore} className="capitalize">
+                  {option.name}
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+          <Dropdown>
+            <DropdownTrigger className="sm:flex">
+              <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                Columns
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              disallowEmptySelection
+              aria-label="Table Columns"
+              closeOnSelect={false}
+              selectedKeys={visibleColumns}
+              selectionMode="multiple"
+              onSelectionChange={setVisibleColumns}
+            >
+              {columns.map((column) => (
+                <DropdownItem key={column.uid} className="capitalize">
+                  {capitalize(column.name)}
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+          <Dropdown>
+            <DropdownTrigger className="sm:flex">
+              <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                Lọc lớp
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label="Class Filter"
+              closeOnSelect={true}
+              selectedKeys={new Set([classFilter])} // Chuyển đổi classFilter thành Set
+              selectionMode="single"
+              onSelectionChange={(keys) => {
+                // Đảm bảo keys là giá trị hợp lệ
+                const selectedKey = Array.from(keys)[0] || 'all';
+                setClassFilter(selectedKey);
+              }}
+            >
+              <DropdownItem key="all" className="capitalize">All Classes</DropdownItem>
+              {classes.map((classOption) => (
+                <DropdownItem key={classOption.value} className="capitalize">
+                  {classOption.label}
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+        </div>
+      </div>
+      
+    </div>
+     
+
+
+    
+
+
+
+
       <Table
         aria-label="Example table with dynamic content"
         bottomContent={bottomContent}
@@ -540,60 +666,4 @@ const ManagementAssessmentGrading = (nav) => {
 
 export default ManagementAssessmentGrading;
 
-function ConfirmAction(props) {
-  const { isOpen, onOpenChange, onConfirm } = props;
-  const handleOnOKClick = (onClose) => {
-    onClose();
-    if (typeof onConfirm === 'function') {
-      onConfirm();
-    }
-  }
-  return (
-    <Modal
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      motionProps={{
-        variants: {
-          enter: {
-            y: 0,
-            opacity: 1,
-            transition: {
-              duration: 0.2,
-              ease: "easeOut",
-            },
-          },
-          exit: {
-            y: -20,
-            opacity: 0,
-            transition: {
-              duration: 0.1,
-              ease: "easeIn",
-            },
-          },
-        }
-      }}
-    >
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader>Cảnh báo</ModalHeader>
-            <ModalBody>
-              <p className="text-[16px]">
-                Subject sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
 
-              </p>
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="light" onClick={onClose}>
-                Huỷ
-              </Button>
-              <Button color="danger" className="font-medium" onClick={() => handleOnOKClick(onClose)}>
-                Xoá
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
-    </Modal>
-  )
-}

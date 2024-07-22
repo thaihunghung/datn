@@ -5,9 +5,6 @@ import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 export const fetchAssessmentData = async (teacher_id, descriptionURL, searchTerm = "") => {
   try {
     const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}&description=${descriptionURL}`);
-    console.log(response?.data);
-    
-    // console.log("description", description);
     const updatedPoData = response?.data?.map((subject) => {
       const student = {
         studentCode: subject?.Student?.studentCode,
@@ -26,23 +23,28 @@ export const fetchAssessmentData = async (teacher_id, descriptionURL, searchTerm
         totalScore: subject?.totalScore,
         student: student,
         class: subject?.Student?.class?.classNameShort,
-        action: action
+        action: action,
       };
     });
 
-    // setRubric_id(response?.data[0]?.rubric_id)
-    // setCouse_id(response?.data[0]?.course_id)
-    // setAssessments(updatedPoData);
-    console.log(updatedPoData);
+    
+
+    const uniqueClasses = [...new Set(updatedPoData.map(item => item.class))];
+    const classOptions = uniqueClasses.map(className => ({
+      value: className,
+      label: className
+    }));
     return {
       Assessment: updatedPoData,
       Rubric_id: response?.data[0]?.rubric_id,
-      Course_id: response?.data[0]?.course_id
+      Course_id: response?.data[0]?.course_id,
+      Classes: classOptions
     };
   } catch (error) {
     console.error("Error: " + error.message);
   }
 };
+
 
 
 const columns = [
@@ -62,7 +64,7 @@ const columns = [
 ];
 
 const statusOptions = [
-  {name: "SV chưa chấm", uid: "1", totalScore:0},
+  {name: "SV chưa chấm", totalScore: 0},
 ];
 
 

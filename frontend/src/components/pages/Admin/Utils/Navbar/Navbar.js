@@ -8,6 +8,7 @@ import Cookies from 'js-cookie';
 import './Header.css'
 import { AxiosClient } from "../../../../../service/AxiosClient";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import BackButton from "../BackButton/BackButton";
 
 function Nav(props) {
   const { collapsedNav, setCollapsedNav, setSpinning } = props;
@@ -164,10 +165,13 @@ function Nav(props) {
   return (
     <div >
       <div className="block sm:hidden lg:hidden xl:hidden">
+      <BackButton />
         <div className="w-full flex justify-start p-2 border">
           <div className="Header-mobile-right" onClick={showDrawer}>
             <i className="fa-solid fa-bars"></i>
           </div>
+
+          
         </div>
         <Drawer
           title={<span className="text-[#6366F1] text-base font-bold">Menu</span>}
