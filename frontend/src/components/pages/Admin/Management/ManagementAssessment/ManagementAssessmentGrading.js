@@ -23,10 +23,11 @@ import { PlusIcon } from './PlusIcon';
 import { VerticalDotsIcon } from './VerticalDotsIcon';
 import { SearchIcon } from './SearchIcon';
 import { ChevronDownIcon } from './ChevronDownIcon';
-import { columns, fetchAssessmentData, statusOptions } from './Data';
+import { columns, fetchAssessmentDataGrading, statusOptions } from './DataAssessmentGrading';
 import { capitalize } from '../../Utils/capitalize';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
+import BackButton from '../../Utils/BackButton/BackButton';
 
 const statusColorMap = {
   active: 'success',
@@ -35,6 +36,7 @@ const statusColorMap = {
 };
 
 const INITIAL_VISIBLE_COLUMNS = ['totalScore', 'action', 'class', 'student'];
+const COMPACT_VISIBLE_COLUMNS = ['student', 'action'];
 
 const ManagementAssessmentGrading = (nav) => {
   const { setCollapsedNav } = nav;
@@ -58,7 +60,7 @@ const ManagementAssessmentGrading = (nav) => {
     }
   }
 
-  const [teachers, setTeachers] = useState([]);
+  const [assessments, setAssessment] = useState([]);
   const [ValidKeys, setValidKeys] = useState([]);
   const [filterValue, setFilterValue] = useState('');
   const [classFilter, setClassFilter] = useState('all');
@@ -85,6 +87,18 @@ const ManagementAssessmentGrading = (nav) => {
       }
     };
     handleResize();
+
+    const handleVisibilityChange = () => { 
+      if (window.innerWidth < 500) {
+        setVisibleColumns(new Set(COMPACT_VISIBLE_COLUMNS)); // Thay đổi visibleColumns khi cửa sổ nhỏ
+      } else {
+        setVisibleColumns(new Set(INITIAL_VISIBLE_COLUMNS)); // Trả lại visibleColumns khi cửa sổ lớn
+      }
+    }
+    handleVisibilityChange();
+    console.log(window.innerWidth)
+
+
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -93,19 +107,18 @@ const ManagementAssessmentGrading = (nav) => {
 
   useEffect(() => {
     const loadTeachers = async () => {
-      const { Assessment, Rubric_id, Course_id, Classes } = await fetchAssessmentData(teacher_id, descriptionURL, filterValue);
-      setTeachers(Assessment);
+      const { Assessment, Rubric_id, Course_id, Classes } = await fetchAssessmentDataGrading(teacher_id, descriptionURL, filterValue);
+      setAssessment(Assessment);
       setRubric_id(Rubric_id);
       setCouse_id(Course_id);
       setClasses(Classes);
-      console.log('Fetched classes:', Classes);
     };
     loadTeachers();
-    console.log("teachers loaded", teachers);
+    console.log("assessments loaded", assessments);
   }, [page, rowsPerPage, filterValue]);
 
 
-  const pages = Math.ceil(teachers.length / rowsPerPage);
+  const pages = Math.ceil(assessments.length / rowsPerPage);
   const hasSearchFilter = Boolean(filterValue);
 
   const headerColumns = React.useMemo(() => {
@@ -114,15 +127,13 @@ const ManagementAssessmentGrading = (nav) => {
   }, [visibleColumns]);
 
   const filteredItems = React.useMemo(() => {
-    let filteredAssessment = [...teachers];
+    let filteredAssessment = [...assessments];
 
     if (hasSearchFilter) {
       filteredAssessment = filteredAssessment.filter((teacher) =>
         teacher.description.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
-
-    console.log("statusFilter:", statusFilter);
 
     if (statusFilter !== 'all') {
       // Tìm đối tượng trong statusOptions có totalScore khớp với statusFilter
@@ -143,11 +154,7 @@ const ManagementAssessmentGrading = (nav) => {
     }
 
     return filteredAssessment;
-  }, [teachers, filterValue, statusFilter, classFilter]);
-
-
-
-
+  }, [assessments, filterValue, statusFilter, classFilter]);
 
   const handleSelectionChange = (keys) => {
     // console.log('Keys:', keys);
@@ -175,7 +182,7 @@ const ManagementAssessmentGrading = (nav) => {
 
 
   const getSelectedItems = () => {
-    const selectedItems = teachers.filter((item) => selectedKeys.has(item.id.toString()));
+    const selectedItems = assessments.filter((item) => selectedKeys.has(item.id.toString()));
     //console.log('Get Selected Items', selectedItems);
     return selectedItems;
   };
@@ -348,7 +355,7 @@ const ManagementAssessmentGrading = (nav) => {
       const ids = selectedItems.map(item => item.id);
 
 
-      const checkStotalScore = ids.map((key) => checkstotalscore(teachers, key));
+      const checkStotalScore = ids.map((key) => checkstotalscore(assessments, key));
       const hasUncheckedAssessment = checkStotalScore.some((item, index) => {
         if (item.checktotalScore === false) {
           message.error(`Sinh viên đã chọn thứ ${index + 1} đã chấm điểm.`);
@@ -360,7 +367,7 @@ const ManagementAssessmentGrading = (nav) => {
       if (hasUncheckedAssessment) {
         return;
       }
-      const listStudentCodes = ids.map((key) => getStudentCode(teachers, key));
+      const listStudentCodes = ids.map((key) => getStudentCode(assessments, key));
       // console.log("checkStotalScore");
       // console.log(checkStotalScore);
       // console.log("listStudentCodes");
@@ -444,7 +451,7 @@ const ManagementAssessmentGrading = (nav) => {
         </div>
         <div className="w-full flex  sm:items-center sm:justify-between">
           <p className="text-small text-default-400 min-w-[100px]">
-            <span className="text-default-500">{teachers.length}</span> teacher(s)
+            <span className="text-default-500">{assessments.length}</span> teacher(s)
           </p>
           <div className="w-fit sm:w-auto flex items-center gap-2 ">
             <p className="text-small text-default-400">Rows per page:</p>
@@ -461,13 +468,13 @@ const ManagementAssessmentGrading = (nav) => {
         </div>
       </div>
     );
-  }, [filterValue, teachers, rowsPerPage, statusFilter, visibleColumns, onSearchChange, onRowsPerPageChange]);
+  }, [filterValue, assessments, rowsPerPage, statusFilter, visibleColumns, onSearchChange, onRowsPerPageChange]);
 
   const bottomContent = React.useMemo(() => {
     return (
       <div className="py-2 px-2 flex justify-between items-center">
         <p className="text-small">
-          {selectedKeys === 'all' ? 'All items selected' : `${selectedKeys.size} of ${teachers.length} selected`}
+          {selectedKeys === 'all' ? 'All items selected' : `${selectedKeys.size} of ${assessments.length} selected`}
         </p>
         <Pagination
           showControls
@@ -478,132 +485,124 @@ const ManagementAssessmentGrading = (nav) => {
         />
       </div>
     );
-  }, [page, pages, selectedKeys, teachers]);
+  }, [page, pages, selectedKeys, assessments]);
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   return (
     <>
-    <div className='w-full flex justify-end'>
-    <div className='border-default-600 w-fit rounded-xl border-2 p-2 justify-start items-center flex gap-1 flex-col'>
-        <div className='flex justify-center w-full flex-wrap items-center gap-1'>
-
-          <Button
-            color="primary"
-            onClick={() => {
-              //const selectedItems = getSelectedItems();
-              //console.log('Selected Items:', selectedItems);
-              //console.log('Selected Keys:', Array.from(selectedKeys));
-              navigateGradingGroup();
-            }}
-            endContent={<PlusIcon />}
-          >
-            Chấm nhóm
-          </Button>
-          <Button
-              color="primary"
+      <div className='w-full flex justify-between'>
+        <div className='h-full my-auto p-5 hidden sm:block'>
+            <BackButton />
+        </div>
+        <div className='w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-start items-center flex gap-4 flex-col mb-4'>
+          <div className='flex justify-center w-full flex-wrap items-center gap-1'>
+            <Button
+              className='bg-[#FF9908] '
+              onClick={() => {
+                //const selectedItems = getSelectedItems();
+                //console.log('Selected Items:', selectedItems);
+                //console.log('Selected Keys:', Array.from(selectedKeys));
+                navigateGradingGroup();
+              }}
               endContent={<PlusIcon />}
             >
-              Add new
+              Chấm nhóm
             </Button>
             <Button
-              color="primary"
+              className='bg-[#AF84DD] '
+              endContent={<PlusIcon />}
+            >
+              Tạo mới
+            </Button>
+            <Button
+              className='bg-[#FF8077] '
               endContent={<PlusIcon />}
             >
               Xóa
             </Button>
             <Button
-              color="primary"
               endContent={<PlusIcon />}
             >
               kho lưu trữ
             </Button>
 
-        </div>
-        <div className='flex gap-1 justify-start'>
-          <Dropdown>
-            <DropdownTrigger className="sm:flex">
-              <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                Lọc trạng thái
-              </Button>
-            </DropdownTrigger>
-            <DropdownMenu
-              disallowEmptySelection
-              aria-label="Status Filter"
-              closeOnSelect={false}
-              selectedKeys={statusFilter === 'all' ? [] : [statusFilter]}
-              selectionMode="single"
-              onSelectionChange={(keys) => {
-                const selectedKey = Array.from(keys)[0] || 'all';
-                setStatusFilter(selectedKey === 'all' ? 'all' : parseInt(selectedKey, 10));
-              }}
-            >
-              <DropdownItem key="all" className="capitalize">All Statuses</DropdownItem>
-              {statusOptions.map((option) => (
-                <DropdownItem key={option.totalScore} className="capitalize">
-                  {option.name}
-                </DropdownItem>
-              ))}
-            </DropdownMenu>
-          </Dropdown>
-          <Dropdown>
-            <DropdownTrigger className="sm:flex">
-              <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                Columns
-              </Button>
-            </DropdownTrigger>
-            <DropdownMenu
-              disallowEmptySelection
-              aria-label="Table Columns"
-              closeOnSelect={false}
-              selectedKeys={visibleColumns}
-              selectionMode="multiple"
-              onSelectionChange={setVisibleColumns}
-            >
-              {columns.map((column) => (
-                <DropdownItem key={column.uid} className="capitalize">
-                  {capitalize(column.name)}
-                </DropdownItem>
-              ))}
-            </DropdownMenu>
-          </Dropdown>
-          <Dropdown>
-            <DropdownTrigger className="sm:flex">
-              <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                Lọc lớp
-              </Button>
-            </DropdownTrigger>
-            <DropdownMenu
-              aria-label="Class Filter"
-              closeOnSelect={true}
-              selectedKeys={new Set([classFilter])} // Chuyển đổi classFilter thành Set
-              selectionMode="single"
-              onSelectionChange={(keys) => {
-                // Đảm bảo keys là giá trị hợp lệ
-                const selectedKey = Array.from(keys)[0] || 'all';
-                setClassFilter(selectedKey);
-              }}
-            >
-              <DropdownItem key="all" className="capitalize">All Classes</DropdownItem>
-              {classes.map((classOption) => (
-                <DropdownItem key={classOption.value} className="capitalize">
-                  {classOption.label}
-                </DropdownItem>
-              ))}
-            </DropdownMenu>
-          </Dropdown>
+          </div>
+          <div className='flex gap-1 justify-start'>
+  <Dropdown>
+    <DropdownTrigger className="sm:flex">
+      <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+        Lọc trạng thái
+      </Button>
+    </DropdownTrigger>
+    <DropdownMenu
+      disallowEmptySelection
+      aria-label="Status Filter"
+      closeOnSelect={true}
+      selectedKeys={new Set([statusFilter === 'all' ? 'all' : statusFilter.toString()])} // Chuyển đổi thành Set
+      selectionMode="single"
+      onSelectionChange={(keys) => {
+        const selectedKey = Array.from(keys)[0] || 'all';
+        setStatusFilter(selectedKey === 'all' ? 'all' : parseInt(selectedKey, 10));
+      }}
+    >
+      <DropdownItem key="all" className="capitalize">All Statuses</DropdownItem>
+      {statusOptions.map((option) => (
+        <DropdownItem key={option.totalScore} className="capitalize">
+          {option.name}
+        </DropdownItem>
+      ))}
+    </DropdownMenu>
+  </Dropdown>
+  <Dropdown>
+    <DropdownTrigger className="sm:flex">
+      <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+        Columns
+      </Button>
+    </DropdownTrigger>
+    <DropdownMenu
+      disallowEmptySelection
+      aria-label="Table Columns"
+      closeOnSelect={false}
+      selectedKeys={visibleColumns}
+      selectionMode="multiple"
+      onSelectionChange={setVisibleColumns}
+    >
+      {columns.map((column) => (
+        <DropdownItem key={column.uid} className="capitalize">
+          {capitalize(column.name)}
+        </DropdownItem>
+      ))}
+    </DropdownMenu>
+  </Dropdown>
+  <Dropdown>
+    <DropdownTrigger className="sm:flex">
+      <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+        Lọc lớp
+      </Button>
+    </DropdownTrigger>
+    <DropdownMenu
+      aria-label="Class Filter"
+      closeOnSelect={true}
+      selectedKeys={new Set([classFilter])} // Chuyển đổi classFilter thành Set
+      selectionMode="single"
+      onSelectionChange={(keys) => {
+        const selectedKey = Array.from(keys)[0] || 'all';
+        setClassFilter(selectedKey);
+      }}
+    >
+      <DropdownItem key="all" className="capitalize">All Classes</DropdownItem>
+      {classes.map((classOption) => (
+        <DropdownItem key={classOption.value} className="capitalize">
+          {classOption.label}
+        </DropdownItem>
+      ))}
+    </DropdownMenu>
+  </Dropdown>
+</div>
+
         </div>
       </div>
-      
-    </div>
-     
-
-
-    
-
-
-
-
       <Table
         aria-label="Example table with dynamic content"
         bottomContent={bottomContent}

@@ -165,13 +165,16 @@ function Nav(props) {
   return (
     <div >
       <div className="block sm:hidden lg:hidden xl:hidden">
-      <BackButton />
-        <div className="w-full flex justify-start p-2 border">
-          <div className="Header-mobile-right" onClick={showDrawer}>
-            <i className="fa-solid fa-bars"></i>
-          </div>
+      
+        <div className="w-full flex justify-start items-center gap-1 p-2 border">
 
+        <BackButton />
+          <div className="Header-mobile-right" onClick={showDrawer}>
+            <i className="fa-solid fa-bars"></i> 
+          </div>
+          <div>
           
+          </div>
         </div>
         <Drawer
           title={<span className="text-[#6366F1] text-base font-bold">Menu</span>}
