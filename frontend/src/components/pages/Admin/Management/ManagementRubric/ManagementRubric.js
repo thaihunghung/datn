@@ -1,25 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {
-    Table,
-    TableHeader,
-    TableColumn,
-    TableBody,
-    TableRow,
-    TableCell,
-    Input,
-    Button,
-    DropdownTrigger,
-    Dropdown,
-    DropdownMenu,
-    DropdownItem,
-    Chip,
-    Pagination,
-} from '@nextui-org/react';
-import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
+    Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input,
+    Button, DropdownTrigger, Dropdown, DropdownMenu, DropdownItem, Chip, Pagination,
+    useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter
+}
+    from '@nextui-org/react';
 import { Tooltip, message } from 'antd';
-import slugify from 'slugify';
-import { Flex, Progress } from 'antd';
-
 import { PlusIcon } from '../ManagementAssessment/PlusIcon';
 import { VerticalDotsIcon } from '../ManagementAssessment/VerticalDotsIcon';
 import { SearchIcon } from '../ManagementAssessment/SearchIcon';
@@ -29,6 +15,10 @@ import { capitalize } from '../../Utils/capitalize';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
 import BackButton from '../../Utils/BackButton/BackButton';
+import { axiosAdmin } from '../../../../../service/AxiosAdmin';
+import ModalUpdateRubric from './ModalUpdateRubric';
+import CreateRubic from './CreateRubic';
+import DropdownAndNavRubric from '../../Utils/DropdownAndNav/DropdownAndNavRubric';
 
 const statusColorMap = {
     active: 'success',
@@ -36,17 +26,41 @@ const statusColorMap = {
     vacation: 'warning',
 };
 
-const INITIAL_VISIBLE_COLUMNS = ['id', 'name', 'point', 'status'];
+const INITIAL_VISIBLE_COLUMNS = ['id', 'name', 'point', 'status', 'action'];
 const COMPACT_VISIBLE_COLUMNS = ['name'];
 
 const ManagementRubric = (nav) => {
+    const [assessments, setAssessment] = useState([]);
+    const [filterValue, setFilterValue] = useState('');
+    const [selectedKeys, setSelectedKeys] = useState(new Set());
+    const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [deleteId, setDeleteId] = useState(null);
+    const [sortDescriptor, setSortDescriptor] = useState({
+        column: 'age',
+        direction: 'ascending',
+    });
+    const [currentTeacher, setCurrentTeacher] = useState(null);
+    const [DataSubject, setDataSubject] = useState([]);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editRubric, setEditRubric] = useState({
+        rubric_id: "",
+        subject_id: "",
+        teacher_id: "",
+        rubricName: "",
+        comment: "",
+    });
+    const [isOpenModalCreate, setIsOpenModalCreate] = useState(false);
+    const handleOpenModalCreate = () => setIsOpenModalCreate(true);
+    const handleCloseModalCreate = () => setIsOpenModalCreate(false);
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
     const { setCollapsedNav } = nav;
     const location = useLocation();
     const navigate = useNavigate();
     const searchParams = new URLSearchParams(location.search);
     const descriptionString = searchParams.get('description');
     let descriptionURL;
-
     if (descriptionString) {
         try {
             const decodedDescription = decodeURIComponent(descriptionString);
@@ -61,63 +75,59 @@ const ManagementRubric = (nav) => {
     if (!teacher_id) {
         navigate('/login');
     }
-    useEffect(() => {
-        //getAllAssessmentIsDeleteFalse()
-        const handleResize = () => {
-            if (window.innerWidth < 1024) {
-                setCollapsedNav(true);
-            } else {
-                setCollapsedNav(false);
+
+    const handleEditFormSubmit = async (values, teacher_id) => {
+        console.log("editRubric");
+        console.log(editRubric);
+        // if (!teacher_id) {
+        //   console.error("No teacher selected for editing");
+        //   return;
+        // }
+
+        // try {
+        //   const res = await axiosAdmin.put(`/teacher/${teacher_id}`, { data: values });
+        //   successNoti(res.data.message);
+        //   setIsEditModalOpen(false);
+        //   const { teachers, total } = await fetchTeachersData(page, rowsPerPage, filterValue);
+        //   setTeachers(teachers);
+        //   setTotalTeachers(total);
+        // } catch (error) {
+        //   console.error("Error updating teacher:", error);
+        //   if (error.response && error.response.data && error.response.data.message) {
+        //     errorNoti(error.response.data.message);
+        //   } else {
+        //     errorNoti("Error updating teacher");
+        //   }
+        // }
+    };
+
+    const getAllSubject = async () => {
+        try {
+            const response = await axiosAdmin.get(`/subjects/isDelete/false`);
+            if (response.data) {
+                setDataSubject(response.data);
             }
-        };
-        handleResize();
-        console.log(window.innerWidth)
-        const handleVisibilityChange = () => {
-            if (window.innerWidth < 500) {
-                setVisibleColumns(new Set(COMPACT_VISIBLE_COLUMNS)); // Thay đổi visibleColumns khi cửa sổ nhỏ
-            } else {
-                setVisibleColumns(new Set(INITIAL_VISIBLE_COLUMNS)); // Trả lại visibleColumns khi cửa sổ lớn
-            }
-        }
-        handleVisibilityChange();
-
-        window.addEventListener("resize", handleResize);
-        return () => {
-            window.removeEventListener("resize", handleResize);
-        };
-    }, []);
-
-    const [assessments, setAssessment] = useState([]);
-    const [filterValue, setFilterValue] = useState('');
-    const [selectedKeys, setSelectedKeys] = useState(new Set());
-    const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
-    const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [sortDescriptor, setSortDescriptor] = useState({
-        column: 'age',
-        direction: 'ascending',
-    });
-    const [page, setPage] = useState(1);
-
-    useEffect(() => {
-        const loadTeachers = async () => {
-            const response = await fetchRubricData(teacher_id);
             console.log(response);
-            setAssessment(response);
+        } catch (error) {
+            console.error("Error fetching subjects:", error);
+            message.error('Error fetching subjects');
+        }
+    }
 
+    const handleNavigate = (path) => {
+        navigate(path);
+    };
 
-        };
-        loadTeachers();
-        console.log("assessments loaded", assessments);
-    }, [page, rowsPerPage, filterValue]);
+    const getAllRubricIsDeleteFalse = async () => {
+    };
 
+    const [page, setPage] = useState(1);
     const pages = Math.ceil(assessments.length / rowsPerPage);
     const hasSearchFilter = Boolean(filterValue);
-
     const headerColumns = React.useMemo(() => {
         if (visibleColumns === 'all') return columns;
         return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
     }, [visibleColumns]);
-
     const filteredItems = React.useMemo(() => {
         let filteredAssessment = [...assessments];
 
@@ -130,7 +140,6 @@ const ManagementRubric = (nav) => {
 
         return filteredAssessment;
     }, [assessments, filterValue]);
-
     const handleSelectionChange = (keys) => {
         // console.log('Keys:', keys);
         if (keys === 'all') {
@@ -154,13 +163,11 @@ const ManagementRubric = (nav) => {
             return newKeys;
         });
     };
-
     const items = React.useMemo(() => {
         const start = (page - 1) * rowsPerPage;
         const end = start + rowsPerPage;
         return filteredItems.slice(start, end);
     }, [page, filteredItems, rowsPerPage]);
-
     const sortedItems = React.useMemo(() => {
         return [...items].sort((a, b) => {
             const first = a[sortDescriptor.column];
@@ -169,17 +176,68 @@ const ManagementRubric = (nav) => {
             return sortDescriptor.direction === 'descending' ? -cmp : cmp;
         });
     }, [sortDescriptor, items]);
-    const handleNavigate = (path) => {
-        navigate(path);
-    };
-    function replaceCharacters(description) {
-        // Replace spaces with underscores
-        let result = description.replace(/ /g, "_");
-        // Replace hyphens with underscores
-        result = result.replace(/-/g, "_");
-        return result;
-    }
 
+    const handleEditClick = (teacher) => {
+        setCurrentTeacher(teacher);
+        setEditRubric(teacher);
+        setIsEditModalOpen(true);
+    };
+    const handleSoftDelete = async () => {
+        console.log("handleSoftDelete called"); // Kiểm tra xem hàm có được gọi không
+    
+        // Kiểm tra giá trị của selectedKeys
+        console.log("selectedKeys:", selectedKeys);
+    
+        // Đảm bảo định dạng đúng
+        const data = {
+            rubric_id: Array.from(selectedKeys), // Convert Set to Array
+        };
+        console.log("data:", data); // Kiểm tra đối tượng data
+    
+        try {
+            const response = await axiosAdmin.put('/rubrics/softDelete', { data });
+            console.log("response:", response); // Kiểm tra phản hồi từ API
+            await getAllRubricIsDeleteFalse();
+            handleUnSelect();
+            message.success(response.data.message);
+        } catch (error) {
+            console.error("Error soft deleting rubrics:", error);
+            message.error('Error soft deleting rubrics');
+        }
+    };
+    
+
+    const handleSoftDeleteById = async (_id) => {
+        try {
+            const response = await axiosAdmin.put(`/rubric/${_id}/softDelete`);
+            await getAllRubricIsDeleteFalse();
+            handleUnSelect();
+            message.success(response.data.message);
+        } catch (error) {
+            console.error(`Error toggling soft delete for rubric with ID ${_id}:`, error);
+            message.error(`Error toggling soft delete for rubric with ID ${_id}`);
+        }
+    };
+
+    const handleUnSelect = () => {
+        setSelectedKeys(new Set());
+    };
+
+    const onRowsPerPageChange = React.useCallback((e) => {
+        setRowsPerPage(Number(e.target.value));
+        setPage(1);
+    }, []);
+
+    const onSearchChange = React.useCallback((value) => {
+        if (value) {
+            setFilterValue(value);
+            setPage(1);
+        } else {
+            setFilterValue('');
+        }
+    }, []);
+
+    ///////////table content
     const renderCell = React.useCallback((rubric, columnKey) => {
         const cellValue = rubric[columnKey];
 
@@ -193,36 +251,20 @@ const ManagementRubric = (nav) => {
             case 'status':
                 return (
                     <div className="flex flex-col">
-                        <p className={`text-bold text-small ${rubric.status.status ? 'text-success' : 'text-danger'}`}>
-                            {rubric.status.status ? 'Active' : 'Inactive'}
-
-
+                        {/* ${rubric.status.status ? 'text-success' : 'text-danger'} */}
+                        <p className={`text-bold text-small `}>
+                            {/* // {rubric.status.status ? 'Active' : 'Inactive'} */}
                             {rubric.status.status ?
-
-
-                                <Button
-                                    isIconOnly
-                                    variant="light"
-                                    radius="full"
-                                    size="sm"
+                                <Button color="primary" variant="ghost"
                                     onClick={() =>
                                         handleNavigate(`/admin/management-rubric/${rubric.status.id}/rubric-items/list`)}
-
                                 >
                                     <p>Chỉnh sửa</p>
                                 </Button>
-
-
                                 :
-
-                                <Button
-                                    isIconOnly
-                                    variant="light"
-                                    radius="full"
-                                    size="sm"
+                                <Button color="primary" variant="ghost"
                                     onClick={() =>
                                         handleNavigate(`/admin/management-rubric/${rubric.status.id}/rubric-items/list`)}
-
                                 >
                                     <p>Tạo mới</p>
                                 </Button>
@@ -231,60 +273,57 @@ const ManagementRubric = (nav) => {
                         </p>
                     </div>
                 );
-
-
-
-
             case 'point':
                 return (
                     <div className="flex flex-col">
                         <p className="text-bold text-small">{cellValue}</p>
                     </div>
                 );
-            //   case 'action':
-            //     const disc = replaceCharacters(cellValue.description); // Assuming `replaceCharacters` is a function you have
-            //     return (
-            //       <div className="flex items-center justify-center w-full gap-2">
-            //         <Tooltip title="Chấm điểm">
-            //           <Button
-            //             isIconOnly
-            //             variant="light"
-            //             radius="full"
-            //             size="sm"
-            // onClick={() => handleNavigate(`/admin/management-grading/${disc}/?description=${cellValue.description}`)}
-            //           >
-            //             <i className="fa-solid fa-feather-pointed"></i>
-            //           </Button>
-            //         </Tooltip>
-            //         <Tooltip title="In phiếu chấm">
-            //           <Button
-            //             isIconOnly
-            //             variant="light"
-            //             radius="full"
-            //             size="sm"
-            //           >
-            //             <i className="fa-regular fa-file-pdf"></i>
-            //           </Button>
-            //         </Tooltip>
-            //       </div>
-            //     );
+            case 'action':
+                //const disc = replaceCharacters(cellValue.description); // Assuming `replaceCharacters` is a function you have
+                return (
+                    <div className="flex items-center justify-center w-full gap-2">
+                        <Tooltip title="Chỉnh sửa">
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+                                className="bg-[#AF84DD]"
+                                onClick={() => { handleEditClick(rubric.action) }}
+                            >
+                                <i className="fa-solid fa-pen"></i>
+                            </Button>
+                        </Tooltip>
+                        <Tooltip title="Xoá">
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+                                onClick={() => { onOpen(); setDeleteId(rubric.action.rubric_id); }}
+                                className="bg-[#FF8077]"
+                            >
+                                <i className="fa-solid fa-trash-can"></i>
+                            </Button>
+                        </Tooltip>
+                        <Link to={`/admin/management-grading/list`}>
+                            <Tooltip title="Chấm điểm">
+                                <Button
+                                    isIconOnly
+                                    variant="light"
+                                    radius="full"
+                                    size="sm"
+                                    className="bg-[#FF9908] "
+                                >
+                                    <i className="fa-solid fa-feather-pointed"></i>
+                                </Button>
+                            </Tooltip>
+                        </Link>
+                    </div>
+                );
             default:
                 return cellValue;
-        }
-    }, []);
-
-
-    const onRowsPerPageChange = React.useCallback((e) => {
-        setRowsPerPage(Number(e.target.value));
-        setPage(1);
-    }, []);
-
-    const onSearchChange = React.useCallback((value) => {
-        if (value) {
-            setFilterValue(value);
-            setPage(1);
-        } else {
-            setFilterValue('');
         }
     }, []);
 
@@ -304,15 +343,7 @@ const ManagementRubric = (nav) => {
                         onValueChange={onSearchChange}
                     />
                     <div className="flex gap-3">
-                        <Button
-                            className='bg-[#AF84DD] '
-                            endContent={<PlusIcon />}
-                            onClick={() => handleNavigate(
-                                `/admin/management-grading/create`
-                            )}
-                        >
-                            Tạo mới
-                        </Button>
+
                         {/* <Tooltip
             title=""
             getPopupContainer={() =>
@@ -376,42 +407,86 @@ const ManagementRubric = (nav) => {
         );
     }, [page, pages, selectedKeys, assessments]);
 
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    ///////////useEffect
+    useEffect(() => {
+        //getAllAssessmentIsDeleteFalse()
+        getAllSubject()
+        const handleResize = () => {
+            if (window.innerWidth < 1024) {
+                setCollapsedNav(true);
+            } else {
+                setCollapsedNav(false);
+            }
+        };
+        handleResize();
+        console.log(window.innerWidth)
+        const handleVisibilityChange = () => {
+            if (window.innerWidth < 500) {
+                setVisibleColumns(new Set(COMPACT_VISIBLE_COLUMNS)); // Thay đổi visibleColumns khi cửa sổ nhỏ
+            } else {
+                setVisibleColumns(new Set(INITIAL_VISIBLE_COLUMNS)); // Trả lại visibleColumns khi cửa sổ lớn
+            }
+        }
+        handleVisibilityChange();
+
+        window.addEventListener("resize", handleResize);
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }, []);
+
+    useEffect(() => {
+        const loadTeachers = async () => {
+            const response = await fetchRubricData(teacher_id);
+            console.log(response);
+            setAssessment(response);
+
+
+        };
+        loadTeachers();
+        console.log("assessments loaded", assessments);
+    }, [page, rowsPerPage, filterValue]);
 
     return (
         <>
+            <DropdownAndNavRubric open={handleOpenModalCreate} />
+
             <div className='w-full flex justify-between'>
                 <div className='h-full my-auto p-5 hidden sm:block'>
                     <BackButton />
                 </div>
-                <div className='w-fit h-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-start items-center flex gap-4 flex-col mb-2'>
-                    {/* <div className='flex justify-center w-full flex-wrap items-center gap-1'>
-            <Button
-              className='bg-[#FF9908] '
-              onClick={() => {
-                //const selectedItems = getSelectedItems();
-                //console.log('Selected Items:', selectedItems);
-                //console.log('Selected Keys:', Array.from(selectedKeys));
-                
-              }}
-              endContent={<PlusIcon />}
-            >
-              Chấm nhóm
-            </Button>
-       
-            <Button
-              className='bg-[#FF8077] '
-              endContent={<PlusIcon />}
-            >
-              Xóa
-            </Button> 
-           <Button
-              endContent={<PlusIcon />}
-            >
-              kho lưu trữ
-            </Button>
+                <div className='w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-start items-center flex gap-4 flex-col mb-4'>
+                    <div className='flex justify-center w-full flex-wrap items-center gap-1'>
+                        <Button
+                            className='bg-[#AF84DD] '
+                            endContent={<PlusIcon />}
+                            // onClick={() => handleNavigate(
+                            //     `/admin/management-rubric/create`
+                            // )}
 
-          </div> */}
+                            onClick={handleOpenModalCreate}
+                        >
+                            Tạo mới
+                        </Button>
+                        <Button
+                            className='bg-[#FF8077]'
+                            endContent={<PlusIcon />}
+                            onClick={onOpen}
+                        >
+                            Ẩn nhiều
+                        </Button>
+                    
+
+                        <Button
+                            endContent={<PlusIcon />}
+                        >
+                            kho lưu trữ
+                        </Button>
+
+                    </div>
+
+
+
                     <div className='flex gap-1 h-fit justify-start'>
                         <Dropdown>
                             <DropdownTrigger className="sm:flex">
@@ -456,13 +531,14 @@ const ManagementRubric = (nav) => {
                     th: 'text-small',
                 }}
                 selectedKeys={selectedKeys}
-                //selectionMode="multiple"
-                selectionMode="none"
+                selectionMode="multiple"
+                // selectionMode="none"
                 sortDescriptor={sortDescriptor}
                 onSelectionChange={handleSelectionChange}
                 onSortChange={setSortDescriptor}
                 topContent={topContent}
             >
+
                 <TableHeader columns={headerColumns}>
                     {(column) => (
                         <TableColumn
@@ -484,32 +560,91 @@ const ManagementRubric = (nav) => {
                 </TableBody>
             </Table>
 
+            <ModalUpdateRubric
+                isOpen={isEditModalOpen}
+                onOpenChange={setIsEditModalOpen}
+                onSubmit={handleEditFormSubmit}
+                editRubric={editRubric}
+                setEditRubric={setEditRubric}
+                DataSubject={DataSubject}
 
 
-            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-                <ModalContent>
-                    {(onClose) => (
-                        <>
-                            <ModalHeader className="flex flex-col gap-1">Modal Title</ModalHeader>
-                            <ModalBody>
-                                <p>
-                                    Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in,
-                                    egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
-                                </p>
-                            </ModalBody>
-                            <ModalFooter>
-                                <Button color="primary" onPress={onClose}>
-                                    Close
-                                </Button>
-                            </ModalFooter>
-                        </>
-                    )}
-                </ModalContent>
-            </Modal>
+            />
+            <CreateRubic loadData={getAllRubricIsDeleteFalse} onOpen={handleOpenModalCreate} isOpen={isOpenModalCreate} onClose={handleCloseModalCreate} />
+
+            <ConfirmAction
+                onOpenChange={onOpenChange}
+                isOpen={isOpen}
+                onConfirm={() => {
+                    if (deleteId) {
+                        handleSoftDeleteById(deleteId);
+                        setDeleteId(null);
+                    } else if (selectedKeys.size  > 0) {
+                        handleSoftDelete();
+                        setSelectedKeys(new Set());
+                    }
+                }}
+            />
+
         </>
     );
 };
 
 export default ManagementRubric;
 
-
+function ConfirmAction(props) {
+    const { isOpen, onOpenChange, onConfirm } = props;
+    const handleOnOKClick = (onClose) => {
+        onClose();
+        if (typeof onConfirm === 'function') {
+            onConfirm();
+        }
+    }
+    return (
+        <Modal
+            isOpen={isOpen}
+            onOpenChange={onOpenChange}
+            motionProps={{
+                variants: {
+                    enter: {
+                        y: 0,
+                        opacity: 1,
+                        transition: {
+                            duration: 0.2,
+                            ease: "easeOut",
+                        },
+                    },
+                    exit: {
+                        y: -20,
+                        opacity: 0,
+                        transition: {
+                            duration: 0.1,
+                            ease: "easeIn",
+                        },
+                    },
+                }
+            }}
+        >
+            <ModalContent>
+                {(onClose) => (
+                    <>
+                        <ModalHeader>Cảnh báo</ModalHeader>
+                        <ModalBody>
+                            <p className="text-[16px]">
+                                Rubric sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
+                            </p>
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button variant="light" onClick={onClose}>
+                                Huỷ
+                            </Button>
+                            <Button color="danger" className="font-medium" onClick={() => handleOnOKClick(onClose)}>
+                                Xoá
+                            </Button>
+                        </ModalFooter>
+                    </>
+                )}
+            </ModalContent>
+        </Modal>
+    )
+}

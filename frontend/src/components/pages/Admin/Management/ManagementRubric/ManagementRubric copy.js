@@ -24,9 +24,9 @@ const ManagementRubric = (nav) => {
         setCurrentTeacher(teacher);
         setEditRubric(teacher);
         setIsEditModalOpen(true);
-      };
+    };
 
-      const getAllSubject = async () => {
+    const getAllSubject = async () => {
         try {
             const response = await axiosAdmin.get(`/subjects/isDelete/false`);
             if (response.data) {
@@ -58,7 +58,7 @@ const ManagementRubric = (nav) => {
         teacher_id: "",
         rubricName: "",
         comment: "",
-      });
+    });
 
 
     const rowSelection = {
@@ -80,7 +80,7 @@ const ManagementRubric = (nav) => {
         //   console.error("No teacher selected for editing");
         //   return;
         // }
-    
+
         // try {
         //   const res = await axiosAdmin.put(`/teacher/${teacher_id}`, { data: values });
         //   successNoti(res.data.message);
@@ -96,7 +96,7 @@ const ManagementRubric = (nav) => {
         //     errorNoti("Error updating teacher");
         //   }
         // }
-      };
+    };
     const columns = [
         {
             title: "Tên rubric",
@@ -161,24 +161,19 @@ const ManagementRubric = (nav) => {
             render: (Rubric) => (
                 <div className="flex items-center justify-center w-full gap-2">
                     {/* <Link to={`/admin/management-rubric/update/${_id}`}> */}
-                        <Tooltip title="Chỉnh sửa">
-                            <Button
-                                isIconOnly
-                                variant="light"
-                                radius="full"
-                                size="sm"
-                                className="bg-[#AF84DD]"
-                                onClick={() => {handleEditClick(Rubric) }}
-                            >
-                                <i className="fa-solid fa-pen"></i>
-                            </Button>
-                        </Tooltip>
+                    <Tooltip title="Chỉnh sửa">
+                        <Button
+                            isIconOnly
+                            variant="light"
+                            radius="full"
+                            size="sm"
+                            className="bg-[#AF84DD]"
+                            onClick={() => { handleEditClick(Rubric) }}
+                        >
+                            <i className="fa-solid fa-pen"></i>
+                        </Button>
+                    </Tooltip>
                     {/* </Link> */}
-
-
-
-
-                    
                     <Tooltip title="Xoá">
                         <Button
                             isIconOnly
@@ -270,7 +265,7 @@ const ManagementRubric = (nav) => {
     };
 
     useEffect(() => {
-        
+
         getAllRubricIsDeleteFalse()
         getAllSubject()
         const handleResize = () => {
@@ -289,16 +284,16 @@ const ManagementRubric = (nav) => {
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7">
-            <ModalUpdateRubric 
-                    isOpen={isEditModalOpen}
-                    onOpenChange={setIsEditModalOpen}
-                    onSubmit={handleEditFormSubmit}
-                    editRubric={editRubric}
-                    setEditRubric={setEditRubric}
-                    DataSubject={DataSubject}
-            
-            
-            /> 
+            <ModalUpdateRubric
+                isOpen={isEditModalOpen}
+                onOpenChange={setIsEditModalOpen}
+                onSubmit={handleEditFormSubmit}
+                editRubric={editRubric}
+                setEditRubric={setEditRubric}
+                DataSubject={DataSubject}
+
+
+            />
             <ConfirmAction
                 onOpenChange={onOpenChange}
                 isOpen={isOpen}
@@ -312,7 +307,7 @@ const ManagementRubric = (nav) => {
                     }
                 }}
             />
-            <DropdownAndNavRubric open={handleOpenModalCreate}/>
+            <DropdownAndNavRubric open={handleOpenModalCreate} />
             {/* <Button onClick={handleOpenModalCreate}>tạo mới</Button> */}
             <div className="w-full my-5">
                 {selectedRowKeys.length !== 0 && (
@@ -363,7 +358,7 @@ const ManagementRubric = (nav) => {
                         columns={columns}
                         dataSource={rubicData}
                     />
-                    <CreateRubic loadData={getAllRubricIsDeleteFalse} onOpen={handleOpenModalCreate} isOpen={isOpenModalCreate} onClose={handleCloseModalCreate} />
+        <CreateRubic  onOpen={handleOpenModalCreate} isOpen={isOpenModalCreate} onClose={handleCloseModalCreate} />
 
                 </div>
             </div>

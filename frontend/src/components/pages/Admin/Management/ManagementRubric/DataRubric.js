@@ -24,7 +24,7 @@ export const fetchRubricData = async (teacher_id) => {
         name: rubric.rubricName,
         status: status,
         point: rubric.RubricItem[0]?.total_score ? rubric.RubricItem[0].total_score : 0.0,
-       // action: Rubric
+        action: Rubric
       };
     });
 
@@ -41,7 +41,7 @@ const columns = [
   { name: "name", uid: "name", sortable: true },
   { name: "status", uid: "status", sortable: true },
   { name: "point", uid: "point", sortable: true },
-  // { name: "action", uid: "action", sortable: true },
+  { name: "action", uid: "action", sortable: true },
 ];
 
 const statusOptions = [

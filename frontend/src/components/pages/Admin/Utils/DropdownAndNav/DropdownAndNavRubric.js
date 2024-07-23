@@ -64,7 +64,7 @@ const DropdownAndNavRubric = ({ open }) => {
           </DropdownMenu>
         </Dropdown>;
       </div>
-  
+
       <div className="hidden sm:hidden lg:block xl:block">
         <div className="flex border justify-start text-base font-bold rounded-lg">
           <Link to={`/admin/management-rubric/list`}>
@@ -75,16 +75,16 @@ const DropdownAndNavRubric = ({ open }) => {
             </div>
           </Link>
           {
-  location.pathname === "/admin/management-rubric/store" ? null : (
-    <div onClick={open} className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
-      <div>
-        Tạo mới
-      </div>
-    </div>
-  )
-}
+            location.pathname === "/admin/management-rubric/store" ? null : (
+              <div onClick={open} className="p-5 text-[#020401] hover:bg-[#475569] rounded-lg hover:text-[#FEFEFE]">
+                <div>
+                  Tạo mới
+                </div>
+              </div>
+            )
+          }
 
-          
+
         </div>
       </div>
       <div className="hidden sm:hidden lg:block xl:block">

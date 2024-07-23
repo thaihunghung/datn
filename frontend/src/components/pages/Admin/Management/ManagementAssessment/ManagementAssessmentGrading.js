@@ -382,7 +382,6 @@ const ManagementAssessmentGrading = (nav) => {
     }, 100);
   };
 
-
   function replaceCharacters(description) {
     // Replace spaces with underscores
     let result = description.replace(/ /g, "_");
@@ -390,8 +389,6 @@ const ManagementAssessmentGrading = (nav) => {
     result = result.replace(/-/g, "_");
     return result;
   }
-
-
 
   const onRowsPerPageChange = React.useCallback((e) => {
     setRowsPerPage(Number(e.target.value));
@@ -493,7 +490,7 @@ const ManagementAssessmentGrading = (nav) => {
     <>
       <div className='w-full flex justify-between'>
         <div className='h-full my-auto p-5 hidden sm:block'>
-            <BackButton />
+          <BackButton />
         </div>
         <div className='w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-start items-center flex gap-4 flex-col mb-4'>
           <div className='flex justify-center w-full flex-wrap items-center gap-1'>
@@ -528,78 +525,80 @@ const ManagementAssessmentGrading = (nav) => {
             </Button>
 
           </div>
+
+          
           <div className='flex gap-1 justify-start'>
-  <Dropdown>
-    <DropdownTrigger className="sm:flex">
-      <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-        Lọc trạng thái
-      </Button>
-    </DropdownTrigger>
-    <DropdownMenu
-      disallowEmptySelection
-      aria-label="Status Filter"
-      closeOnSelect={true}
-      selectedKeys={new Set([statusFilter === 'all' ? 'all' : statusFilter.toString()])} // Chuyển đổi thành Set
-      selectionMode="single"
-      onSelectionChange={(keys) => {
-        const selectedKey = Array.from(keys)[0] || 'all';
-        setStatusFilter(selectedKey === 'all' ? 'all' : parseInt(selectedKey, 10));
-      }}
-    >
-      <DropdownItem key="all" className="capitalize">All Statuses</DropdownItem>
-      {statusOptions.map((option) => (
-        <DropdownItem key={option.totalScore} className="capitalize">
-          {option.name}
-        </DropdownItem>
-      ))}
-    </DropdownMenu>
-  </Dropdown>
-  <Dropdown>
-    <DropdownTrigger className="sm:flex">
-      <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-        Columns
-      </Button>
-    </DropdownTrigger>
-    <DropdownMenu
-      disallowEmptySelection
-      aria-label="Table Columns"
-      closeOnSelect={false}
-      selectedKeys={visibleColumns}
-      selectionMode="multiple"
-      onSelectionChange={setVisibleColumns}
-    >
-      {columns.map((column) => (
-        <DropdownItem key={column.uid} className="capitalize">
-          {capitalize(column.name)}
-        </DropdownItem>
-      ))}
-    </DropdownMenu>
-  </Dropdown>
-  <Dropdown>
-    <DropdownTrigger className="sm:flex">
-      <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-        Lọc lớp
-      </Button>
-    </DropdownTrigger>
-    <DropdownMenu
-      aria-label="Class Filter"
-      closeOnSelect={true}
-      selectedKeys={new Set([classFilter])} // Chuyển đổi classFilter thành Set
-      selectionMode="single"
-      onSelectionChange={(keys) => {
-        const selectedKey = Array.from(keys)[0] || 'all';
-        setClassFilter(selectedKey);
-      }}
-    >
-      <DropdownItem key="all" className="capitalize">All Classes</DropdownItem>
-      {classes.map((classOption) => (
-        <DropdownItem key={classOption.value} className="capitalize">
-          {classOption.label}
-        </DropdownItem>
-      ))}
-    </DropdownMenu>
-  </Dropdown>
-</div>
+            <Dropdown>
+              <DropdownTrigger className="sm:flex">
+                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                  Lọc trạng thái
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                disallowEmptySelection
+                aria-label="Status Filter"
+                closeOnSelect={true}
+                selectedKeys={new Set([statusFilter === 'all' ? 'all' : statusFilter.toString()])} // Chuyển đổi thành Set
+                selectionMode="single"
+                onSelectionChange={(keys) => {
+                  const selectedKey = Array.from(keys)[0] || 'all';
+                  setStatusFilter(selectedKey === 'all' ? 'all' : parseInt(selectedKey, 10));
+                }}
+              >
+                <DropdownItem key="all" className="capitalize">All Statuses</DropdownItem>
+                {statusOptions.map((option) => (
+                  <DropdownItem key={option.totalScore} className="capitalize">
+                    {option.name}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+            <Dropdown>
+              <DropdownTrigger className="sm:flex">
+                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                  Columns
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                disallowEmptySelection
+                aria-label="Table Columns"
+                closeOnSelect={false}
+                selectedKeys={visibleColumns}
+                selectionMode="multiple"
+                onSelectionChange={setVisibleColumns}
+              >
+                {columns.map((column) => (
+                  <DropdownItem key={column.uid} className="capitalize">
+                    {capitalize(column.name)}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+            <Dropdown>
+              <DropdownTrigger className="sm:flex">
+                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                  Lọc lớp
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label="Class Filter"
+                closeOnSelect={true}
+                selectedKeys={new Set([classFilter])} // Chuyển đổi classFilter thành Set
+                selectionMode="single"
+                onSelectionChange={(keys) => {
+                  const selectedKey = Array.from(keys)[0] || 'all';
+                  setClassFilter(selectedKey);
+                }}
+              >
+                <DropdownItem key="all" className="capitalize">All Classes</DropdownItem>
+                {classes.map((classOption) => (
+                  <DropdownItem key={classOption.value} className="capitalize">
+                    {classOption.label}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+          </div>
 
         </div>
       </div>

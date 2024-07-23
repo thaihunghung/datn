@@ -241,7 +241,7 @@ const StoreRubric = (nav) => {
                         </p>
                         <div className="flex items-center gap-2">
 
-                        <Tooltip
+                            <Tooltip
                                 title={`Khôi phục ${selectedRowKeys.length} rubric`}
                                 getPopupContainer={() =>
                                     document.querySelector(".Quick__Option")
