@@ -734,7 +734,7 @@ const router = express.Router();
  */
 
 
-router.get('/subjects', SubjectController.getSubjects);
+router.get('/subjects',ensureAuthenticated, SubjectController.getSubjects);
 router.get('/subject/:id', SubjectController.getByID);
 router.get('/subject/:id/rubrics', SubjectController.getRubricsBySubjectId);
 router.put('/subject/:id', SubjectController.update);

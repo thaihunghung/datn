@@ -198,6 +198,12 @@ const router = express.Router();
  *         description: Filter items by deletion status.
  *         schema:
  *           type: boolean
+ *       - name: include_clos
+ *         in: query
+ *         required: false
+ *         description: Include CLO data in the response.
+ *         schema:
+ *           type: boolean
  *     responses:
  *       '200':
  *         description: Successfully retrieved rubric items
@@ -325,6 +331,7 @@ const router = express.Router();
  *                   type: string
  *                   description: Error message
  */
+
 // get: /rubrics/checkScore
 /**
  * @openapi

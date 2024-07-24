@@ -6,6 +6,8 @@ const SubjectModel = require('../models/SubjectModel');
 const CloModel = require('../models/CloModel');
 const ChapterModel = require('../models/ChapterModel');
 const PloModel = require('../models/PloModel');
+const MapCloChapterModel = require('../models/CloChapterModel');
+const PloCloModel = require('../models/PloCloModel');
 
 const RubricController = {
   // Get all rubrics
@@ -404,7 +406,7 @@ const RubricController = {
   getItemsByRubricId: async (req, res) => {
     try {
       const { id } = req.params;
-      const { isDelete } = req.query;
+      const { isDelete, include_clos } = req.query;
 
       const rubric = await RubricModel.findOne({
         where: { rubric_id: id },
@@ -417,7 +419,6 @@ const RubricController = {
       if (!rubric) {
         return res.status(404).json({ message: 'Rubric not found' });
       }
-
       const rubricItems = await RubricItemModel.findAll({
         where: {
           rubric_id: rubric.rubric_id,
@@ -434,26 +435,41 @@ const RubricController = {
           attributes: ['plo_id', 'ploName', 'description']
         }]
       });
+      for (let item of rubricItems) {
+        // Tìm các chapter liên quan đến CLO của rubricItem
+        const cloChapters = await MapCloChapterModel.findAll({ where: { clo_id: item.clo_id } });
+        const chapterIds = cloChapters.map(chapter => chapter.chapter_id);
+        const chapters = await ChapterModel.findAll({ where: { chapter_id: chapterIds } });
+        item.dataValues.chapters = chapters;
+      
+        // Tìm các PLO liên quan đến CLO của rubricItem
+        const poPlo = await PloCloModel.findAll({ where: { clo_id: item.clo_id } });
+        const ploIds = poPlo.map(plo => plo.plo_id);
+        const plos = await PloModel.findAll({ where: { plo_id: ploIds } });
+        item.dataValues.plos = plos;
+      }
 
-      // const rubricIds = rubricItems.map(item => item.rubricsItem_id);
-      // const qualityLevels = await qualityLevelsModel.findAll({ where: { rubricsItem_id: rubricIds } });
+      
+      if (include_clos === 'true') {
+        const Clos = await CloModel.findAll({ where: { subject_id: rubric.subject_id, isDelete: isDelete === 'true'} });
+        rubric.dataValues.CloData = Clos;
+        
+        // const cloChapters = await CloChapterModel.findAll({ where: { clo_id: rubric.clo_id } });
 
-      // for (const rubricItem of rubricItems) {
-      //   const qualityLevelsForRubricItem = qualityLevels.filter(qualityLevel => qualityLevel.rubricsItem_id === rubricItem.rubricsItem_id);
-      //   rubricItem.dataValues.qualityLevel = qualityLevelsForRubricItem;
-      // }
+        // if (!cloChapters.length) {
+        //   return res.status(404).json({ message: 'No chapters found for the given CLO ID' });
+        // }
+
+        // const chapterIds = cloChapters.map(item => item.chapter_id);
+        // const chapters = await ChapterModel.findAll({ where: { chapter_id: chapterIds } });
+        // return res.status(200).json(chapters);
+      }
 
       const Clos = await CloModel.findAll({ where: { subject_id: rubric.subject_id } });
-      // const Chapters = await ChapterModel.findAll({ where: { subject_id: rubric.subject_id } });
-      // const PloClo = await PloCloModel.findAll({ where: { clo_id: rubric.clo_id } });
-
       rubric.dataValues.rubricItems = rubricItems;
       rubric.dataValues.CloData = Clos;
-      // rubric.dataValues.PloCloData = PloClo;
-      // rubric.dataValues.ChapterData = Chapters;
 
       return res.json({ rubric: rubric });
-
     } catch (error) {
       console.error('Error getting rubric items:', error);
       res.status(500).json({ message: 'Internal server error' });

@@ -44,7 +44,7 @@ function ModalUpdateRubric({ isOpen, onOpenChange, onSubmit, editRubric, setEdit
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader>Edit Rubric</ModalHeader>
+            <ModalHeader className='text-[#FF9908]'>Edit Rubric</ModalHeader>
             <ModalBody>
               <form
                 className="flex flex-col gap-3"

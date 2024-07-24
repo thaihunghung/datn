@@ -154,6 +154,9 @@ function Nav(props) {
     { text: "Rubric", link: "/admin/management-rubric/list", icon: <i className={`fa-regular fa-folder mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
     { text: "Sinh viên", link: "/admin/student", icon: <i className={`fa-solid fa-school mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
     { text: "Lớp môn học", link: "/admin/course", icon: <i className={`fa-brands fa-odnoklassniki mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
+    { text: "API", link: "http://localhost:1509/api/docs/#/", icon: <i className={`fa-solid fa-cloud mr-${collapsedNav ? "0" : "3"} w-4`}></i> },
+
+
   ];
 
   // Conditionally add the "Giáo viên" tab
@@ -165,15 +168,42 @@ function Nav(props) {
   return (
     <div >
       <div className="block sm:hidden lg:hidden xl:hidden">
-      
-        <div className="w-full flex justify-start items-center gap-1 p-2 border">
 
-        <BackButton />
-          <div className="Header-mobile-right" onClick={showDrawer}>
-            <i className="fa-solid fa-bars"></i> 
+        <div className="w-full items-center flex gap-1 p-2 border">
+          <div className="flex flex-1 justify-start items-center ">
+            <BackButton />
+            <div className="Header-mobile-right" onClick={showDrawer}>
+              <i className="fa-solid fa-bars "></i>
+            </div>
           </div>
           <div>
-          
+          <Tooltip title={'logout'} placement="left">
+            <div onClick={handleLogout} className="group">
+              <i className="fa-solid fa-right-from-bracket text-xl cursor-pointer group-hover:text-red-500 transition-colors duration-300"></i>
+            </div>
+          </Tooltip>
+          </div>
+
+         
+
+
+
+
+
+          {/* <DropdownItem
+  key="logout"
+  color="danger"
+  startContent={
+    <i className="fa-solid fa-right-from-bracket"></i>
+  }
+  onClick={() => {
+    handleLogout();
+  }}
+>
+  
+</DropdownItem>  */}
+          <div>
+
           </div>
         </div>
         <Drawer

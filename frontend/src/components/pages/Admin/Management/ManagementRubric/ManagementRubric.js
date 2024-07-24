@@ -27,7 +27,7 @@ const statusColorMap = {
 };
 
 const INITIAL_VISIBLE_COLUMNS = ['id', 'name', 'point', 'status', 'action'];
-const COMPACT_VISIBLE_COLUMNS = ['name'];
+const COMPACT_VISIBLE_COLUMNS = ['name', 'status', 'action'];
 
 const ManagementRubric = (nav) => {
     const [assessments, setAssessment] = useState([]);
@@ -56,6 +56,7 @@ const ManagementRubric = (nav) => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const { setCollapsedNav } = nav;
+    
     const location = useLocation();
     const navigate = useNavigate();
     const searchParams = new URLSearchParams(location.search);
@@ -119,6 +120,9 @@ const ManagementRubric = (nav) => {
     };
 
     const getAllRubricIsDeleteFalse = async () => {
+        const response = await fetchRubricData(teacher_id);
+        console.log(response);
+        setAssessment(response);
     };
 
     const [page, setPage] = useState(1);
@@ -177,6 +181,9 @@ const ManagementRubric = (nav) => {
         });
     }, [sortDescriptor, items]);
 
+
+
+
     const handleEditClick = (teacher) => {
         setCurrentTeacher(teacher);
         setEditRubric(teacher);
@@ -184,16 +191,16 @@ const ManagementRubric = (nav) => {
     };
     const handleSoftDelete = async () => {
         console.log("handleSoftDelete called"); // Kiểm tra xem hàm có được gọi không
-    
+
         // Kiểm tra giá trị của selectedKeys
         console.log("selectedKeys:", selectedKeys);
-    
+
         // Đảm bảo định dạng đúng
         const data = {
             rubric_id: Array.from(selectedKeys), // Convert Set to Array
         };
         console.log("data:", data); // Kiểm tra đối tượng data
-    
+
         try {
             const response = await axiosAdmin.put('/rubrics/softDelete', { data });
             console.log("response:", response); // Kiểm tra phản hồi từ API
@@ -205,7 +212,7 @@ const ManagementRubric = (nav) => {
             message.error('Error soft deleting rubrics');
         }
     };
-    
+
 
     const handleSoftDeleteById = async (_id) => {
         try {
@@ -436,15 +443,15 @@ const ManagementRubric = (nav) => {
     }, []);
 
     useEffect(() => {
-        const loadTeachers = async () => {
+        const loadRubric = async () => {
             const response = await fetchRubricData(teacher_id);
             console.log(response);
             setAssessment(response);
 
 
         };
-        loadTeachers();
-        console.log("assessments loaded", assessments);
+        loadRubric();
+        // console.log("assessments loaded", assessments);
     }, [page, rowsPerPage, filterValue]);
 
     return (
@@ -475,7 +482,7 @@ const ManagementRubric = (nav) => {
                         >
                             Ẩn nhiều
                         </Button>
-                    
+
 
                         <Button
                             endContent={<PlusIcon />}
@@ -567,8 +574,6 @@ const ManagementRubric = (nav) => {
                 editRubric={editRubric}
                 setEditRubric={setEditRubric}
                 DataSubject={DataSubject}
-
-
             />
             <CreateRubic loadData={getAllRubricIsDeleteFalse} onOpen={handleOpenModalCreate} isOpen={isOpenModalCreate} onClose={handleCloseModalCreate} />
 
@@ -579,7 +584,7 @@ const ManagementRubric = (nav) => {
                     if (deleteId) {
                         handleSoftDeleteById(deleteId);
                         setDeleteId(null);
-                    } else if (selectedKeys.size  > 0) {
+                    } else if (selectedKeys.size > 0) {
                         handleSoftDelete();
                         setSelectedKeys(new Set());
                     }
