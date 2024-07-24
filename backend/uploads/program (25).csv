@@ -1,4 +1,0 @@
-"program_name","ma_Bac","ma_CNganh","ma_He","ma_BM","so_Quyet_Dinh","ngay_Ban_Hanh","is_delete"
-"TEXT","VARCHAR(191)","INT(10) UNSIGNED","VARCHAR(191)","VARCHAR(191)","TEXT","DATE","TINYINT(1)"
-"Computer Science Program1","CS1","12345","Undergraduate1","CS_Department1","2024-04-30",0
-"Computer Science Program2","CS2","12345","Undergraduate2","CS_Department2","2024-04-30",0

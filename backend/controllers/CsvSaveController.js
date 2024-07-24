@@ -1,5 +1,5 @@
 const csvtojson = require('csvtojson');
-const Program = require('../models/ProgramModel');
+const ProgramModel = require('../models/ProgramModel');
 const PloModel = require('../models/PloModel');
 const PoModel = require('../models/PoModel');
 
@@ -162,13 +162,13 @@ const CsvSaveController = {
             if (!req.files || req.files.length === 0) {
                 return res.status(400).json({ error: 'No file uploaded.' });
             }
-            const Description = await Program.describe();
+            const Description = await ProgramModel.describe();
             const filteredProgram = filterDescription(Description, "Program");
 
             const filename = req.files[0].filename;
             const filePath = path.join(uploadDirectory, filename);
 
-            await saveDataFromCSV(Program, filteredProgram, filePath, res);
+            await saveDataFromCSV(ProgramModel, filteredProgram, filePath, res);
         } catch (err) {
             console.error("Lỗi khi lưu dữ liệu vào cơ sở dữ liệu:", err);
             res.status(500).json({ error: "Lỗi khi lưu dữ liệu vào cơ sở dữ liệu." });
@@ -213,7 +213,7 @@ const CsvUpdateController = {
             if (!req.files || req.files.length === 0) {
                 return res.status(400).json({ error: 'No file uploaded.' });
             }
-            const Description = await Program.describe();
+            const Description = await ProgramModel.describe();
             
 
             const filteredProgram = filterDescriptionHaveid(Description);

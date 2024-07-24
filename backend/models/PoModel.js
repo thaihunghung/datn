@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const Program = require('./ProgramModel');
+const ProgramModel = require('./ProgramModel');
 
 const PoModel = sequelize.define('PO', {
   po_id: {
@@ -20,7 +20,7 @@ const PoModel = sequelize.define('PO', {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
     references: {
-      model: Program,
+      model: ProgramModel,
       key: 'program_id'
     }
   },
@@ -33,7 +33,7 @@ const PoModel = sequelize.define('PO', {
   timestamps: true,
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  tableName: 'POs'
+  tableName: 'pos'
 });
-
+PoModel.belongsTo(ProgramModel, { foreignKey: 'program_id' });
 module.exports = PoModel;

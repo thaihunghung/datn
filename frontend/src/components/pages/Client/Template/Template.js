@@ -1,8 +1,19 @@
-import React from 'react';
+import React, { useEffect, useState } from "react";
 import { Button } from "@nextui-org/react";
 import { AxiosClient } from '../../../../service/AxiosClient';
 
+
+import { RadioGroup, Radio } from "@nextui-org/react";
+import { Tooltip } from "@nextui-org/react";
+import { Collapse } from 'antd';
+
+
+import { axiosAdmin } from "../../../../service/AxiosAdmin";
+
+
+
 const DownloadDiv = () => {
+
     const handleDownload = async () => {
         const divContent = document.getElementById('downloadDiv').innerHTML;
         const htmlString = `
@@ -31,7 +42,7 @@ const DownloadDiv = () => {
             </html>
         `;
         try {
-            const response = await AxiosClient.post('pdf', {
+            const response = await axiosAdmin.post('pdf', {
                 html: htmlString
             }, { responseType: 'blob', withCredentials: true });
 
@@ -56,88 +67,125 @@ const DownloadDiv = () => {
 };
 
 const Template = () => {
-    const CDR = [
-        { CDR: 'CDR1' },
-        { CDR: 'CDR2' },
-        { CDR: 'CDR3' },
-    ];
 
-    const tieuchi = [
-        { CDR: 'CDR1', tieuchi: 'TC1', point: 1.0 },
-        { CDR: 'CDR2', tieuchi: 'TC3', point: 1.5 },
-        { CDR: 'CDR2', tieuchi: 'TC4', point: 1.0 },
-        { CDR: 'CDR2', tieuchi: 'TC5', point: 1.0 },
-        { CDR: 'CDR3', tieuchi: 'TC6', point: 1.0 },
-        { CDR: 'CDR2', tieuchi: 'TC7', point: 1.0 },
-    ];
-    let counter = 0;
+    const [selectedValues, setSelectedValues] = useState([]);
+    const [RubicData, setRubicData] = useState([]);
+    const [RubicItemsData, setRubicItemsData] = useState([]);
 
-    const tableRows = CDR.map((cdrItem, index) => {
-        const criteria = tieuchi.filter(item => item.CDR === cdrItem.CDR);
-        return (
-            <React.Fragment key={index}>
-                {criteria.map((criteriaItem, idx) => {
-                    counter++;
-                    return (
-                        <tr key={`${index}-${idx}`}>
-                            <td className='p-5 align-top border-black border-[1px]'>{counter}</td>
-                            {idx === 0 && <td rowSpan={criteria.length} className='border-black border-[1px] p-2'>{cdrItem.CDR}</td>}
-                            <td className='text-justify w-[352px]  border-black border-[1px] test p-4'>
-                                <p> 1.1. Hình thức
-                                    <br />
-                                    1.Định dạng văn bản đúng quy định (font, size, khổ giấy, canh lề, văn bản, định dạng đoạn…)
-                                    <br />
-                                    2. Có danh mục hình, bảng (nếu có), mục lục, tài liệu tham khảo, danh mục từ viết tắt (nếu có)
-                                    <br />
-                                    3. Văn phong rõ ràng, mạch lạc, không lỗi chính tả
-                                    <br />
-                                    4. Mục lục, tài liệu tham khảo đúng quy định, kết luận
-                                </p>
-                            </td>
-                            <td className='flex flex-col items-start w-full '>
-                                <p className='text-left leading-6 ml-2'>Tổng điểm: {criteriaItem.point}</p>
-                                <div className='flex flex-col gap-[20px] ml-2  border-black border-[1px] pb-2'>
-                                    <div>
-                                        <h1 className='font-bold'>{criteriaItem.tieuchi}</h1>
-                                    </div>
-                                    <div className="w-[262px] flex gap-2 text-xs items-center justify-center font-bold">
-                                        {[...Array(5)].map((_, i) => (
-                                            <div key={i} className="border-black border-[1px] p-5 w-[20px] h-[20px] flex items-center justify-center rounded-full">
-                                                {counter + i}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    );
-                })}
-            </React.Fragment>
-        );
-    });
+
+    const GetRubricData = async () => {
+        try {
+            const response = await axiosAdmin.get(`/rubric/${1}/items/isDelete/false`);
+            setRubicData(response.data.rubric);
+            setRubicItemsData(response.data.rubric.rubricItems);
+        } catch (error) {
+            console.error('Error fetching rubric data:', error);
+            throw error;
+        }
+    };
+
+    useEffect(() => {
+        GetRubricData();
+    }, []);
 
     return (
-        <div>
+        <div className="w-[26cm]">
             <DownloadDiv />
-            <div className='flex justify-center text-base' id="downloadDiv">
-                <table className="table-bordered w-[720px]" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+            <div className='w-full text-sm' id="downloadDiv">
+                <div className="w-full pl-[2cm] pr-[1cm]">
+                    <div className="w-full flex justify-center items-center">
+                        <div className="w-[40%] flex flex-col justify-center items-center">
+                            <div>TRƯỜNG ĐẠI HỌC TRÀ VINH</div>
+                            <div className="font-bold">KHOA KỸ THUẬT CÔNG NGHỆ</div>
+                            <div className="w-[40%] border-1 border-black"></div>
+                        </div>
+                        <div className="flex-1 flex flex-col justify-center items-center">
+                            <div className="font-bold">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+                            <div className="font-bold">Độc lập - Tự do - Hạnh Phúc</div>
+                            <div className="w-[30%] border-1 border-black"></div>
+
+                        </div>
+                    </div>
+                    <div className="text-xl font-bold w-full text-center my-5">PHIẾU ĐÁNH GIÁ THỰC TẬP ĐỒ ÁN CHUYÊN NGÀNH</div>
+                    <div className="w-full text-left">1. Họ và tên (thành viên Chấm):</div>
+                    <div className="w-full text-left">2. Chức danh, học vị:</div>
+                    <div className="w-full text-left">3. Đơn vị công tác:</div>
+                    <div className="w-full text-left">4. Tên đề tài:</div>
+                    <div className="w-full py-5"></div>
+                    <div className="w-full flex justify-start items-center"><span className="flex-1 text-left">5. Họ và tên sinh viên:</span><span className="flex-1 text-left">MSSV:</span></div>
+                    <div className="w-full flex justify-start items-center"><span className="flex-1 text-left">6. Chuyên ngành:</span><span className="flex-1 text-left">Khóa:</span></div>
+                    <div className="w-full text-left">7. Địa điểm:</div>
+                    <div className="w-full text-left">8. Ý kiến đánh giá của thành viên Chấm Thực tập Đồ án Chuyên Ngành theo tín chỉ:</div>
+                    <div className="w-full text-left italic mb-5">(Thành viên Chấm khoanh tròn vào ô điểm số tương ứng với cột mức chất lượng mà SV đạt được theo từng tiêu chí)</div>
+                </div>
+                <table className='border-collapse border leading-6 border-[#ff8077] w-full h-full'>
                     <thead>
-                        <tr className='border-black border-[1px]'>
-                            <th className='p-2'>STT</th>
-                            <th className='p-2'>CDR</th>
-                            <th className='p-2'>Tieuchi</th>
-                            <th className='p-2'></th>
+                        <tr className="border border-b-0 border-[#ff8077] h-[20px]">
+                            <th className="border border-b-0 border-[#ff8077]">CLO</th>
+                            <th className="border border-b-0 border-[#ff8077]">PLO</th>
+                            <th className="border border-b-0 border-[#ff8077]">Tiêu chí</th>
+                            <th className="border border-b-0 border-r-0 border-[#ff8077]">Tổng điểm</th>
+
+
+                            <th ><table className="w-full h-full border-l border-[#ff8077]"><tr><th>Mức độ chất lượng</th></tr></table></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {tableRows}
+                        {RubicItemsData.map((item, i) => (
+
+                            <tr key={item.rubricsItem_id} className="border border-b-0 border-[#ff8077] p-5">
+                                <td className="border  border-[#ff8077] text-center px-2">{item.CLO.cloName}</td>
+                                <td className="border  border-[#ff8077] text-center px-2">{item.PLO.ploName}</td>
+                                <td className="border border-[#ff8077] test text-justify p-2">
+                                    <span dangerouslySetInnerHTML={{ __html: item.description }} />
+                                </td>
+                                <td className="border border-r-0 border-[#ff8077] text-center px-2">
+                                    {item.score}
+                                </td>
+                                <td>
+                                    
+                                </td>
+                            </tr>
+
+                        ))}
                     </tbody>
-                    <tfoot>
-                        <tr className=' border-black border-[1px]'>
-                            <th colSpan={4} className='border-black border-[1px] p-4'></th>
+                    <tfoot className="border border-[#ff8077] p-5">
+                        <tr className="h-[20px]">
+                            <td className="p-5"></td>
+                            <td className="p-5"></td>
+                            <td className="p-5"></td>
+                            <td className="p-5"></td>
+                            <td className=""><table className="w-full"><tr><td></td></tr></table></td>
                         </tr>
                     </tfoot>
                 </table>
+
+                <div className="w-full pl-[2cm] pr-[1cm]" style={{ pageBreakInside: 'avoid' }}>
+                    <div className="w-full text-left mt-2">
+                        <span className="font-bold">9. Kết luận của thành viên Chấm đồ án: </span>
+                        <span className="italic">(Lưu ý: Tổng điểm bài thi và điểm thưởng không quá 10 điểm)</span>
+                    </div>
+                    <div className="w-full text-left my-2">
+                        <span className="pl-[50px]">Tổng điểm:..................(Bằng chữ:........................................................................) </span>
+                    </div>
+                    <div className="w-full text-left font-bold">
+                        10. Ý kiến góp ý, bổ sung:
+                    </div>
+                    <div className="w-full flex mt-[50px] justify-end pl-[2cm] pr-[1cm] ">
+                        <div className="w-[50%] mr-[20px] test">
+                            <div className="w-full text-center test">
+                                Trà Vinh,<span className="italic"> ngày     tháng     năm 2024</span>
+                            </div>
+                            <div className="w-full text-center font-bold test">
+                                Thành viên Chấm báo cáo
+                            </div>
+                            <div className="w-full text-center test">
+                                <span className="italic">(Ký & ghi rõ họ tên)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     );

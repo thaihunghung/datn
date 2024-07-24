@@ -1,3 +1,0 @@
-"description","poName","program_id","isDelete"
-"VARCHAR(255)","VARCHAR(255)","INT(10) UNSIGNED","TINYINT(1)"
-"VARCHAR(255)","VARCHAR(255)","1","1"

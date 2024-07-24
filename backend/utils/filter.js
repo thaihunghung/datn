@@ -18,6 +18,11 @@ function filterDescription(Description, Model) {
         const { plo_id, createdAt, updatedAt, ...rest } = columnInfo;
         filtered = rest; 
     }
+
+    if(Model === "Student") {
+        const { student_id, createdAt, updatedAt, isDelete, ...rest } = columnInfo;
+        filtered = rest; 
+    }
     
     return filtered;
 }

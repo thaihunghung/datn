@@ -1,4 +1,4 @@
-const Program = require('../models/ProgramModel');
+const ProgramModel = require('../models/ProgramModel');
 const PoModel = require('../models/PoModel');
 const PloModel = require('../models/PloModel');
 
@@ -9,7 +9,7 @@ const fs = require('fs');
 const CsvController = {
     getFormProgram: async (req, res) => {
         try {
-            const Description = await Program.describe();
+            const Description = await ProgramModel.describe();
 
             console.log(Description);
             const filteredProgram = filterDescription(Description, "Program")
@@ -35,7 +35,7 @@ const CsvController = {
     getFormProgramWithListId: async (req, res) => {
         try {
             const {data} =req.body;
-            const programs = await Program.findAll({
+            const programs = await ProgramModel.findAll({
                 where: {
                     program_id: data.id 
                 }
@@ -45,7 +45,9 @@ const CsvController = {
                 const { createdAt, updatedAt, ...dataValues } = program.dataValues;
                 return dataValues;
             });
-            const Description = await Program.describe();
+            const Description = await ProgramModel.describe();
+            console.log(Description);
+
             const filteredProgram = filterDescriptionHaveid(Description)
             const JsonFile = [filteredProgram, ...dataValuesArray]
             const csvData = json2csv(JsonFile);
@@ -67,6 +69,7 @@ const CsvController = {
     getFormPo: async (req, res) => {
         try {
             const Description = await PoModel.describe();
+            console.log(Description);
             const filteredPo = filterDescription(Description, "Po")
 
             if (!Description) {
