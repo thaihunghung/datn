@@ -27,40 +27,46 @@ const RubricItemController = {
 
   checkScore: async (req, res) => {
     try {
-      const { data } = req.body;
-      const { rubric_id } = data.data;
+        const { data } = req.body;
+        const { rubric_id } = data.data;
 
-      const RubricsItem = await RubricItemModel.findAll({ where: { rubric_id: rubric_id, isDelete: false } });
-      const length = RubricsItem.length;
-      if (length > 0) {
-        const results = await RubricItemModel.findAll({
-          attributes: ['rubric_id', [Sequelize.fn('SUM', Sequelize.col('maxScore')), 'total_maxScore']],
-          where: { rubric_id: rubric_id, isDelete: false }
+        // Fetch rubric items with the given rubric_id
+        const RubricsItem = await RubricItemModel.findAll({
+            where: { rubric_id: rubric_id, isDelete: false }
         });
 
-        const rubricScores = results.map(result => ({
-          total_maxScore: result.dataValues.total_maxScore
-        }));
+        // Calculate the total maximum score
+        const length = RubricsItem.length;
+        if (length > 0) {
+            const results = await RubricItemModel.findAll({
+                attributes: [
+                    'rubric_id', 
+                    [Sequelize.fn('SUM', Sequelize.col('maxScore')), 'total_maxScore']
+                ],
+                where: { rubric_id: rubric_id, isDelete: false }
+            });
 
-        const totalScore = parseFloat(rubricScores[0].total_maxScore) + parseFloat(data.maxScore);
+            const total_maxScore = parseFloat(results[0].dataValues.total_maxScore || 0);
+            const maxScore = parseFloat(data.maxScore || 0);
+            const totalScore = total_maxScore + maxScore;
 
-        console.log('totalScore' + totalScore);
-        if (totalScore <= 10) {
-          const newRubric = await RubricItemModel.create(data.data);
-          res.status(201).json({ message: "Rubric item created successfully", data: newRubric });
+            if (totalScore <= 10) {
+                const newRubric = await RubricItemModel.create(data.data);
+                res.status(201).json({ message: "Rubric item created successfully", data: newRubric });
+            } else {
+                res.status(400).json({ message: "Failed to save: Total maxScore exceeds 10" });
+            }
         } else {
-          res.status(400).json({ message: "Failed to save: Total maxScore exceeds 10" });
+            // Create new rubric item if no existing rubric items
+            const newRubric = await RubricItemModel.create(data.data);
+            res.status(201).json({ message: "Rubric item created successfully", data: newRubric });
         }
-      } else {
-        const newRubric = await RubricItemModel.create(data.data);
-        res.status(201).json({ message: "Rubric item created successfully", data: newRubric });
-
-      }
     } catch (error) {
-      console.error('Error creating rubrics_item:', error);
-      res.status(500).json({ success: false, message: 'Server error' });
+        console.error('Error creating rubric item:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
     }
-  },
+},
+
 
   getByID: async (req, res) => {
     try {
@@ -81,6 +87,7 @@ const RubricItemController = {
     try {
       const { id } = req.params;
       const { data } = req.body;
+      console.log(data);
       const rubrics_item = await RubricItemModel.findOne({ where: { rubricsitem_id: id } });
       if (!rubrics_item) {
         return res.status(404).json({ message: 'rubrics_item not found' });

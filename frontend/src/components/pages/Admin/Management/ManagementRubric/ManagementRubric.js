@@ -30,7 +30,7 @@ const INITIAL_VISIBLE_COLUMNS = ['id', 'name', 'point', 'status', 'action'];
 const COMPACT_VISIBLE_COLUMNS = ['name', 'status', 'action'];
 
 const ManagementRubric = (nav) => {
-    const [assessments, setAssessment] = useState([]);
+    const [rubricData, setRubricData] = useState([]);
     const [filterValue, setFilterValue] = useState('');
     const [selectedKeys, setSelectedKeys] = useState(new Set());
     const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
@@ -56,7 +56,7 @@ const ManagementRubric = (nav) => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const { setCollapsedNav } = nav;
-    
+
     const location = useLocation();
     const navigate = useNavigate();
     const searchParams = new URLSearchParams(location.search);
@@ -122,28 +122,28 @@ const ManagementRubric = (nav) => {
     const getAllRubricIsDeleteFalse = async () => {
         const response = await fetchRubricData(teacher_id);
         console.log(response);
-        setAssessment(response);
+        setRubricData(response);
     };
 
     const [page, setPage] = useState(1);
-    const pages = Math.ceil(assessments.length / rowsPerPage);
+    const pages = Math.ceil(rubricData.length / rowsPerPage);
     const hasSearchFilter = Boolean(filterValue);
     const headerColumns = React.useMemo(() => {
         if (visibleColumns === 'all') return columns;
         return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
     }, [visibleColumns]);
     const filteredItems = React.useMemo(() => {
-        let filteredAssessment = [...assessments];
+        let filteredAssessment = [...rubricData];
 
         if (hasSearchFilter) {
             filteredAssessment = filteredAssessment.filter((teacher) =>
-                teacher.description.toLowerCase().includes(filterValue.toLowerCase())
+                teacher.name.toLowerCase().includes(filterValue.toLowerCase())
             );
         }
 
 
         return filteredAssessment;
-    }, [assessments, filterValue]);
+    }, [rubricData, filterValue]);
     const handleSelectionChange = (keys) => {
         // console.log('Keys:', keys);
         if (keys === 'all') {
@@ -314,19 +314,22 @@ const ManagementRubric = (nav) => {
                                 <i className="fa-solid fa-trash-can"></i>
                             </Button>
                         </Tooltip>
-                        <Link to={`/admin/management-grading/list`}>
-                            <Tooltip title="Chấm điểm">
-                                <Button
-                                    isIconOnly
-                                    variant="light"
-                                    radius="full"
-                                    size="sm"
-                                    className="bg-[#FF9908] "
-                                >
-                                    <i className="fa-solid fa-feather-pointed"></i>
-                                </Button>
-                            </Tooltip>
-                        </Link>
+
+                        <Tooltip title="Chấm điểm">
+                            <Button
+                                isIconOnly
+                                variant="light"
+                                radius="full"
+                                size="sm"
+                                className="bg-[#FF9908] "
+                                onClick={() => handleNavigate(
+                                    `/admin/management-grading/list`
+                                )}
+                            >
+                                <i className="fa-solid fa-feather-pointed"></i>
+                            </Button>
+                        </Tooltip>
+
                     </div>
                 );
             default:
@@ -378,7 +381,7 @@ const ManagementRubric = (nav) => {
                 </div>
                 <div className="w-full flex  sm:items-center sm:justify-between">
                     <p className="text-small text-default-400 min-w-[100px]">
-                        <span className="text-default-500">{assessments.length}</span> teacher(s)
+                        <span className="text-default-500">{rubricData.length}</span> teacher(s)
                     </p>
                     <div className="w-fit sm:w-auto flex items-center gap-2 ">
                         <p className="text-small text-default-400">Rows per page:</p>
@@ -395,13 +398,13 @@ const ManagementRubric = (nav) => {
                 </div>
             </div>
         );
-    }, [filterValue, assessments, rowsPerPage, visibleColumns, onSearchChange, onRowsPerPageChange]);
+    }, [filterValue, rubricData, rowsPerPage, visibleColumns, onSearchChange, onRowsPerPageChange]);
 
     const bottomContent = React.useMemo(() => {
         return (
             <div className="py-2 px-2 flex justify-between items-center">
                 <p className="text-small">
-                    {selectedKeys === 'all' ? 'All items selected' : `${selectedKeys.size} of ${assessments.length} selected`}
+                    {selectedKeys === 'all' ? 'All items selected' : `${selectedKeys.size} of ${rubricData.length} selected`}
                 </p>
                 <Pagination
                     showControls
@@ -412,7 +415,7 @@ const ManagementRubric = (nav) => {
                 />
             </div>
         );
-    }, [page, pages, selectedKeys, assessments]);
+    }, [page, pages, selectedKeys, rubricData]);
 
     ///////////useEffect
     useEffect(() => {
@@ -446,12 +449,12 @@ const ManagementRubric = (nav) => {
         const loadRubric = async () => {
             const response = await fetchRubricData(teacher_id);
             console.log(response);
-            setAssessment(response);
+            setRubricData(response);
 
 
         };
         loadRubric();
-        // console.log("assessments loaded", assessments);
+        // console.log("rubricData loaded", rubricData);
     }, [page, rowsPerPage, filterValue]);
 
     return (
@@ -467,32 +470,27 @@ const ManagementRubric = (nav) => {
                         <Button
                             className='bg-[#AF84DD] '
                             endContent={<PlusIcon />}
-                            // onClick={() => handleNavigate(
-                            //     `/admin/management-rubric/create`
-                            // )}
-
                             onClick={handleOpenModalCreate}
                         >
-                            Tạo mới
+                            New
                         </Button>
                         <Button
                             className='bg-[#FF8077]'
                             endContent={<PlusIcon />}
                             onClick={onOpen}
                         >
-                            Ẩn nhiều
+                            Deletes
                         </Button>
-
-
                         <Button
                             endContent={<PlusIcon />}
+                             onClick={() => handleNavigate(
+                                `/admin/management-rubric/store`
+                            )}
                         >
-                            kho lưu trữ
+                            Store
                         </Button>
 
                     </div>
-
-
 
                     <div className='flex gap-1 h-fit justify-start'>
                         <Dropdown>

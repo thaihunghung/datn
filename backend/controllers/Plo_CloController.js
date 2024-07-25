@@ -109,9 +109,9 @@ const Plo_CloController = {
       const { data } = req.body;
       const { id_clos } = data;
       const cloIds = id_clos.map(item => item.clo_id);
-      console.log("dd");
+      // console.log("dd");
 
-      console.log(cloIds);
+      // console.log(cloIds);
 
       const ploClos = await PloCloModel.findAll({
         where: {

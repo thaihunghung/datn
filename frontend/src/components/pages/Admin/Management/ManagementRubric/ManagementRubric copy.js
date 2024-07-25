@@ -13,16 +13,14 @@ import ModalUpdateRubric from "./ModalUpdateRubric";
 const ManagementRubric = (nav) => {
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [currentTeacher, setCurrentTeacher] = useState(null);
     const [DataSubject, setDataSubject] = useState([]);
     const navigate = useNavigate();
     const teacher_id = Cookies.get('teacher_id');
     if (!teacher_id) {
         navigate('/login');
     }
-    const handleEditClick = (teacher) => {
-        setCurrentTeacher(teacher);
-        setEditRubric(teacher);
+    const handleEditClick = (rubric) => {
+        setEditRubric(rubric);
         setIsEditModalOpen(true);
     };
 
@@ -358,8 +356,7 @@ const ManagementRubric = (nav) => {
                         columns={columns}
                         dataSource={rubicData}
                     />
-        <CreateRubic  onOpen={handleOpenModalCreate} isOpen={isOpenModalCreate} onClose={handleCloseModalCreate} />
-
+                    <CreateRubic onOpen={handleOpenModalCreate} isOpen={isOpenModalCreate} onClose={handleCloseModalCreate} />
                 </div>
             </div>
         </div>

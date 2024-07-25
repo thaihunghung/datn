@@ -5,45 +5,48 @@ import { Link, Navigate, useLocation, useNavigate, useParams } from "react-route
 import { Tooltip, message } from 'antd';
 import {
     Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input,
-    Button, DropdownTrigger, Dropdown, DropdownMenu, DropdownItem, Chip, Pagination,
-    useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter
+    Button, DropdownTrigger, Dropdown, DropdownMenu, DropdownItem, Pagination,
 }
     from '@nextui-org/react';
-// import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { PlusIcon } from '../ManagementAssessment/PlusIcon';
-import { VerticalDotsIcon } from '../ManagementAssessment/VerticalDotsIcon';
 import { SearchIcon } from '../ManagementAssessment/SearchIcon';
 import { ChevronDownIcon } from '../ManagementAssessment/ChevronDownIcon';
 import { capitalize } from '../../Utils/capitalize';
-
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import DropdownAndNavRubricItems from "../../Utils/DropdownAndNav/DropdownAndNavRubricItems";
 import Cookies from "js-cookie";
 import { columns, fetchRubricItemsData } from "./DataRubricItems";
 import CreateRubicItems from "./CreateRubicItems";
 import BackButton from "../../Utils/BackButton/BackButton";
-import ModalUpdateRubric from "./ModalUpdateRubric";
 import ModalUpdateRubicItems from "./ModalUpdateRubicItems";
-const statusColorMap = {
-    active: 'success',
-    paused: 'danger',
-    vacation: 'warning',
-};
 
 const INITIAL_VISIBLE_COLUMNS = ['ploName', 'cloName', 'chapterName', 'description', 'maxScore', 'action'];
 const COMPACT_VISIBLE_COLUMNS = ['description', 'action'];
 
-const MangementRubricItems = (nav) => {
-    const [assessments, setAssessment] = useState([]);
+const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
+    const { id } = useParams();
+    const navigate = useNavigate();
 
-
+    const teacher_id = Cookies.get('teacher_id');
+    if (!teacher_id) {
+        navigate('/login');
+    }
+    const [assessments, setRubricItems] = useState([]);
     const [CloData, setCloData] = useState([]);
     const [PloData, setPloData] = useState([]);
-
-    
+    const [DataAddClo, setDataAddClo] = useState([]);
     const [ChapterData, setChapterData] = useState([]);
-    
+    const [selectedRow, setSelectedRow] = useState([]);
+
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+    const [rubicItemsData, setRubicItemsData] = useState([]);
+
+    const [cloId, setCloId] = useState('');
+    const [chapterId, setChapterId] = useState('');
+    const [ploId, setPloId] = useState('');
+    const [Score, setScore] = useState('');
     const [filterValue, setFilterValue] = useState('');
+
     const [selectedKeys, setSelectedKeys] = useState(new Set());
     const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -51,27 +54,16 @@ const MangementRubricItems = (nav) => {
         column: 'age',
         direction: 'ascending',
     });
+    const [deleteId, setDeleteId] = useState(null);
 
-    const { id } = useParams();
-    const { setCollapsedNav } = nav;
+    const [rubicData, setRubicData] = useState({});
+    const [page, setPage] = useState(1);
+    const pages = Math.ceil(assessments.length / rowsPerPage);
+    const hasSearchFilter = Boolean(filterValue);
 
-    const location = useLocation();
-    const navigate = useNavigate();
-    const teacher_id = Cookies.get('teacher_id');
-    if (!teacher_id) {
-        navigate('/login');
-    }
-    const handleNavigate = (path) => {
-        navigate(path);
-    };
+    const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
 
-    // const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
-
-    const [isOpenModalCreate, setIsOpenModalCreate] = useState(false);
-    const handleOpenModalCreate = () => setIsOpenModalCreate(true);
-
-
-    const handleCloseModalCreate = () => setIsOpenModalCreate(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editRubric, setEditRubric] = useState({
         rubricsItem_id: "",
@@ -83,39 +75,126 @@ const MangementRubricItems = (nav) => {
         maxScore: "",
         stt: "",
     });
+    const [NewRubicItem, setNewRubicItem] = useState({
+        chapter_id: "",
+        clo_id: "",
+        rubric_id: parseInt(id),
+        plo_id: "",
+        description: "",
+        maxScore: "",
+    });
 
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: (selectedRowKeys, selectedRows) => {
+            setSelectedRow(selectedRows);
+            setSelectedRowKeys(selectedRowKeys);
+        },
+    };
 
-
-
-
-
-
-
-    const [selectedRow, setSelectedRow] = useState([]);
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    const [loading, setLoading] = useState(false);
-
-    const [rubicItemsData, setRubicItemsData] = useState([]);
-    const [rubicData, setRubicData] = useState({});
-    const [page, setPage] = useState(1);
-    const pages = Math.ceil(assessments.length / rowsPerPage);
-    const hasSearchFilter = Boolean(filterValue);
-    const headerColumns = React.useMemo(() => {
-        if (visibleColumns === 'all') return columns;
-        return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
-    }, [visibleColumns]);
-    const filteredItems = React.useMemo(() => {
-        let filteredAssessment = [...assessments];
-
-        if (hasSearchFilter) {
-            filteredAssessment = filteredAssessment.filter((teacher) =>
-                teacher.description.toLowerCase().includes(filterValue.toLowerCase())
-            );
+    const handleFormSubmit = async (event) => {
+        const data = {
+            maxScore: parseFloat(NewRubicItem.maxScore),
+            data: NewRubicItem
+        };
+        if (!NewRubicItem.clo_id || !NewRubicItem.plo_id || !NewRubicItem.chapter_id || !NewRubicItem.maxScore) {
+            message.error("Vui lòng chọn đầy đủ các trường.");
+            return;
+        }
+        try {
+            const response = await axiosAdmin.post('/rubric-item/checkScore', { data });
+            if (response.status === 201) {
+                message.success("Rubric item created successfully!");
+                loadRubric()
+            }
+        } catch (error) {
+            if (error.response) {
+                const { status, data } = error.response;
+                if (status === 400) {
+                    message.error(`Failed to create rubric item: ${data.message}`);
+                } else {
+                    // Xử lý các mã lỗi khác nếu cần
+                    message.error(`Error creating rubric item: ${data.message || error.message}`);
+                }
+            } else {
+                // Xử lý lỗi không phải từ phản hồi (ví dụ: lỗi mạng)
+                message.error(`Error creating rubric item: ${error.message}`);
+            }
+        }
+    };
+    const handleEditFormSubmit = async (values, rubric_item_id, convertedContent) => {
+        console.log("editRubric");
+        const data = {
+            rubricsItem_id: values.rubricsItem_id,
+            chapter_id: values.chapter_id,
+            clo_id: values.clo_id,
+            rubric_id: values.rubric_id,
+            plo_id: values.plo_id,
+            description: convertedContent,
+            maxScore: values.maxScore,
+            stt: values.stt,
         }
 
+        if (!rubric_item_id) {
+            console.error("No rubric_item selected for editing");
+            return;
+        }
+        try {
+            await axiosAdmin.put(`/rubric-item/${rubric_item_id}`, { data: data });
+            message.success('Rubric item update successfully');
+            loadRubric();
+        } catch (error) {
+            console.error("Error updating teacher:", error);
+            if (error.response && error.response.data && error.response.data.message) {
+                errorNoti(error.response.data.message);
+            } else {
+                errorNoti("Error updating teacher");
+            }
+        }
+    };
+    const handleEditClick = (rubricitems, chapters, plos) => {
+        console.log('handleEditClick');
+        // console.log(chapters);
+        // console.log(plos);
+        setPloData(plos)
+        setChapterData(chapters)
+        setEditRubric(rubricitems);
+        setCloId(rubricitems.clo_id);
+        setChapterId(rubricitems.chapter_id);
+        setPloId(rubricitems.plo_id);
+        setScore(rubricitems.maxScore);
+        setIsEditModalOpen(true);
+    };
+    const handleAddClick = () => {
+        setIsAddModalOpen(true);
+    };
+    const handleNavigate = (path) => {
+        navigate(path);
+    };
+    const loadRubric = async () => {
+        const { updatedRubricData, DataCLOArray, RubricData } = await fetchRubricItemsData(id);
+        setRubricItems(updatedRubricData);
+        setCloData(DataCLOArray);
+        setRubicData(RubricData);
+    };
+    const LoadRubricById = async () => {
+        try {
+            console.log("response.data");
+            const response = await axiosAdmin.get(`/rubric/${id}`);
 
-        return filteredAssessment;
-    }, [assessments, filterValue]);
+            console.log(response.data);
+            console.log("clo_ids");
+            if (response.status === 200) {
+                const clo_ids = await axiosAdmin.get(`/subject/${response.data.subject_id}?include_clos=true`);
+                console.log(clo_ids);
+                setDataAddClo(clo_ids?.data?.clos)
+            }
+
+        } catch (error) { }
+    }
+    const handleUnSelect = () => {
+        setSelectedKeys(new Set());
+    };
     const handleSelectionChange = (keys) => {
         // console.log('Keys:', keys);
         if (keys === 'all') {
@@ -139,25 +218,38 @@ const MangementRubricItems = (nav) => {
             return newKeys;
         });
     };
-    const items = React.useMemo(() => {
-        const start = (page - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
-        return filteredItems.slice(start, end);
-    }, [page, filteredItems, rowsPerPage]);
-    const sortedItems = React.useMemo(() => {
-        return [...items].sort((a, b) => {
-            const first = a[sortDescriptor.column];
-            const second = b[sortDescriptor.column];
-            const cmp = first < second ? -1 : first > second ? 1 : 0;
-            return sortDescriptor.direction === 'descending' ? -cmp : cmp;
-        });
-    }, [sortDescriptor, items]);
+    const handleSoftDelete = async () => {
+        const data = {
+            rubricsitem_id: Array.from(selectedKeys), 
+        };
+        console.log('Setting new keys:',data);
+        try {
+            const response = await axiosAdmin.put('/rubric-items/softDelete', { data });
+            await loadRubric();
+            handleUnSelect();
+            message.success(response.data.message);
+        } catch (error) {
+            console.error("Error soft deleting rubricsitems:", error);
+            message.error('Error soft deleting rubricsitems');
+        }
+    };
+
+    const handleSoftDeleteById = async (_id) => {
+        try {
+            const response = await axiosAdmin.put(`/rubric-item/${_id}/softDelete`);
+            await loadRubric();
+            handleUnSelect();
+            message.success(response.data.message);
+        } catch (error) {
+            console.error(`Error toggling soft delete for rubricsitem with ID ${_id}:`, error);
+            message.error(`Error toggling soft delete for rubricsitem with ID ${_id}`);
+        }
+    };
 
     const onRowsPerPageChange = React.useCallback((e) => {
         setRowsPerPage(Number(e.target.value));
         setPage(1);
     }, []);
-
     const onSearchChange = React.useCallback((value) => {
         if (value) {
             setFilterValue(value);
@@ -166,20 +258,37 @@ const MangementRubricItems = (nav) => {
             setFilterValue('');
         }
     }, []);
-    const [currentTeacher, setCurrentTeacher] = useState(null);
+    useEffect(() => {
+        LoadRubricById()
+        //getAllAssessmentIsDeleteFalse()
+        const handleResize = () => {
+            if (window.innerWidth < 1024) {
+                setCollapsedNav(true);
+            } else {
+                setCollapsedNav(false);
+            }
+        };
+        handleResize();
+        console.log(window.innerWidth)
+        const handleVisibilityChange = () => {
+            if (window.innerWidth < 500) {
+                setVisibleColumns(new Set(COMPACT_VISIBLE_COLUMNS)); // Thay đổi visibleColumns khi cửa sổ nhỏ
+            } else {
+                setVisibleColumns(new Set(INITIAL_VISIBLE_COLUMNS)); // Trả lại visibleColumns khi cửa sổ lớn
+            }
+        }
+        handleVisibilityChange();
 
+        window.addEventListener("resize", handleResize);
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }, []);
+    useEffect(() => {
+        loadRubric();
+        // console.log("assessments loaded", assessments);
+    }, [page, rowsPerPage, filterValue]);
 
-    
-
-    const handleEditClick = (rubricitems, chapters, plos) => {
-        console.log('handleEditClick');
-        // console.log(chapters);
-        // console.log(plos);
-        setPloData(plos)
-        setChapterData(chapters)
-        setEditRubric(rubricitems);
-      setIsEditModalOpen(true);
-    };
     ///////////table content
     const renderCell = React.useCallback((rubric, columnKey) => {
         const cellValue = rubric[columnKey];
@@ -230,11 +339,11 @@ const MangementRubricItems = (nav) => {
                                 size="sm"
                                 className="bg-[#AF84DD]"
                                 onClick={() => {
-                                     handleEditClick(rubric.rubricsItem, rubric.chapters, rubric.plos) 
+                                    handleEditClick(rubric.rubricsItem, rubric.chapters, rubric.plos)
                                 }}
-                                // onClick={() => handleNavigate(
-                                //     `/admin/management-rubric/${id}/rubric-items/${rubric.action.id}`
-                                // )}
+                            // onClick={() => handleNavigate(
+                            //     `/admin/management-rubric/${id}/rubric-items/${rubric.action.id}`
+                            // )}
                             >
                                 <i className="fa-solid fa-pen"></i>
                             </Button>
@@ -245,7 +354,7 @@ const MangementRubricItems = (nav) => {
                                 variant="light"
                                 radius="full"
                                 size="sm"
-                                //onClick={() => { onOpen(); setDeleteId(rubric.action.rubric_id); }}
+                                onClick={() => { onOpen(); setDeleteId(rubric.action.id); }}
                                 className="bg-[#FF8077]"
                             >
                                 <i className="fa-solid fa-trash-can"></i>
@@ -257,7 +366,6 @@ const MangementRubricItems = (nav) => {
                 return cellValue;
         }
     }, []);
-
     const topContent = React.useMemo(() => {
         return (
             <div className="flex flex-col gap-4">
@@ -320,7 +428,6 @@ const MangementRubricItems = (nav) => {
             </div>
         );
     }, [filterValue, assessments, rowsPerPage, visibleColumns, onSearchChange, onRowsPerPageChange]);
-
     const bottomContent = React.useMemo(() => {
         return (
             <div className="py-2 px-2 flex justify-between items-center">
@@ -337,231 +444,49 @@ const MangementRubricItems = (nav) => {
             </div>
         );
     }, [page, pages, selectedKeys, assessments]);
+    const headerColumns = React.useMemo(() => {
+        if (visibleColumns === 'all') return columns;
+        return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
+    }, [visibleColumns]);
+    const filteredItems = React.useMemo(() => {
+        let filteredAssessment = [...assessments];
 
-    useEffect(() => {
-        //getAllAssessmentIsDeleteFalse()
-        const handleResize = () => {
-            if (window.innerWidth < 1024) {
-                setCollapsedNav(true);
-            } else {
-                setCollapsedNav(false);
-            }
-        };
-        handleResize();
-        console.log(window.innerWidth)
-        const handleVisibilityChange = () => {
-            if (window.innerWidth < 500) {
-                setVisibleColumns(new Set(COMPACT_VISIBLE_COLUMNS)); // Thay đổi visibleColumns khi cửa sổ nhỏ
-            } else {
-                setVisibleColumns(new Set(INITIAL_VISIBLE_COLUMNS)); // Trả lại visibleColumns khi cửa sổ lớn
-            }
+        if (hasSearchFilter) {
+            filteredAssessment = filteredAssessment.filter((teacher) =>
+                teacher.description.toLowerCase().includes(filterValue.toLowerCase())
+            );
         }
-        handleVisibilityChange();
-
-        window.addEventListener("resize", handleResize);
-        return () => {
-            window.removeEventListener("resize", handleResize);
-        };
-    }, []);
-
-    useEffect(() => {
-        const loadRubric = async () => {
-            const { updatedRubricData, DataCLOArray,RubricData} = await fetchRubricItemsData(id);
-            setAssessment(updatedRubricData);
-            setCloData(DataCLOArray);
-            setRubicData(RubricData);
-        };
-        loadRubric();
-        // console.log("assessments loaded", assessments);
-    }, [page, rowsPerPage, filterValue]);
-
-    // const columns = [
-    //     {
-    //         title: "Tên CLO",
-    //         dataIndex: "cloName",
-    //         render: (record) => (
-    //             <Tooltip color={"#FF9908"}
-    //                 title={record.description}>
-    //                 <div className="text-sm">
-    //                     <p className="font-medium">{record.cloName}</p>
-    //                 </div>
-    //             </Tooltip>
-    //         ),
-    //     },
-    //     {
-    //         title: "Tên PLO",
-    //         dataIndex: "ploName",
-    //         render: (record) => (
-    //             <div className="text-sm">
-    //                 <Tooltip color={"#FF9908"}
-    //                     title={record.description}>
-    //                     <p className="font-medium">{record.ploName}</p>
-    //                 </Tooltip>
-    //             </div>
-    //         ),
-    //     },
-    //     {
-    //         title: "Tên Chapter",
-    //         dataIndex: "chapterName",
-    //         render: (record) => (
-    //             <div className="text-sm">
-    //                 <Tooltip color={"#FF9908"}
-    //                     title={record.description}>
-    //                     <p className="font-medium">{record.chapterName}</p>
-    //                 </Tooltip>
-    //             </div>
-    //         ),
-    //     },
-    //     {
-    //         title: "Tiêu chí",
-    //         dataIndex: "description",
-    //         render: (record) => (
-    //             <div className="text-sm text-justify text-wrap w-[500px]" dangerouslySetInnerHTML={{ __html: record }}></div>
-
-    //         ),
-    //     },
-    //     {
-    //         title: "Điểm",
-    //         dataIndex: "maxScore",
-    //         render: (record) => (
-    //             <div className="text-sm">
-    //                 <p className="font-medium">{record}</p>
-    //             </div>
-    //         ),
-    //     },
-    //     {
-    //         title: (
-    //             <div className="flex items-center justify-center w-full">
-    //                 <span>Form</span>
-    //             </div>
-    //         ),
-    //         dataIndex: "action",
-    //         render: (record) => (
-    //             <div className="flex items-center justify-center w-full gap-2">
-    //                 <Link to={`/admin/management-rubric/${id}/rubric-items/${record.id}`}>
-    //                     <Tooltip title="Chỉnh sửa">
-    //                         <Button
-    //                             isIconOnly
-    //                             variant="light"
-    //                             radius="full"
-    //                             size="sm"
-    //                         >
-    //                             <i className="fa-solid fa-pen"></i>
-    //                         </Button>
-    //                     </Tooltip>
-    //                 </Link>
-    //                 <Tooltip title="Xoá">
-    //                     <Button
-    //                         isIconOnly
-    //                         variant="light"
-    //                         radius="full"
-    //                         size="sm"
-    //                     // onClick={() => { onOpen(); setDeleteId(record.id); }}
-    //                     >
-    //                         <i className="fa-solid fa-trash-can"></i>
-    //                     </Button>
-    //                 </Tooltip>
-
-    //             </div>
-    //         ),
-    //     },
-
-    // ];
-    const [deleteId, setDeleteId] = useState(null);
-
-    const rowSelection = {
-        selectedRowKeys,
-        onChange: (selectedRowKeys, selectedRows) => {
-            setSelectedRow(selectedRows);
-            setSelectedRowKeys(selectedRowKeys);
-        },
-    };
-
-    const handleUnSelect = () => {
-        setSelectedRowKeys([]);
-        setSelectedRow([]);
-    };
 
 
-    //dem va create
-    const GetRubicAndItemsById = async () => {
-        try {
-            const response = await axiosAdmin.get(`/rubric/${id}/items?isDelete=false`);
-            const rubric = response.data?.rubric || {};
-
-            const RubricData = {
-                rubricName: rubric?.rubricName || 'Unknown',
-                subjectName: rubric?.subject?.subjectName || 'Unknown',
-            };
-
-
-            let count = 1;
-            const updatedRubricData = rubric?.rubricItems?.map((item) => {
-
-                const clo = {
-                    cloName: item?.CLO?.cloName || 'Unknown',
-                    description: item?.CLO?.description || 'No description',
-                };
-                const plo = {
-                    ploName: item?.PLO?.ploName || 'Unknown',
-                    description: item?.PLO?.description || 'No description',
-                };
-                const chapter = {
-                    chapterName: item?.Chapter?.chapterName || 'Unknown',
-                    description: item?.Chapter?.description || 'No description',
-                };
-
-
-                const action = {
-                    id: item?.rubricsItem_id || 'Unknown',
-                    number: count++
-                }
-
-                return {
-                    key: item?.rubricsItem_id || 'Unknown',
-                    cloName: clo,
-                    ploName: plo,
-                    chapterName: chapter,
-                    description: item?.description || 'Unknown',
-                    maxScore: item.maxScore,
-                    action: action
-                };
-            }) || [];
-            console.log(updatedRubricData);
-            setRubicItemsData(updatedRubricData);
-            setRubicData(RubricData);
-        } catch (error) {
-            console.error("Error: " + error.message);
-            message.error('Error fetching Rubric data');
-        }
-    };
+        return filteredAssessment;
+    }, [assessments, filterValue]);
+    const items = React.useMemo(() => {
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        return filteredItems.slice(start, end);
+    }, [page, filteredItems, rowsPerPage]);
+    const sortedItems = React.useMemo(() => {
+        return [...items].sort((a, b) => {
+            const first = a[sortDescriptor.column];
+            const second = b[sortDescriptor.column];
+            const cmp = first < second ? -1 : first > second ? 1 : 0;
+            return sortDescriptor.direction === 'descending' ? -cmp : cmp;
+        });
+    }, [sortDescriptor, items]);
 
 
 
-    const handleEditFormSubmit = async (values, teacher_id) => {
-        console.log("editRubric");
-        console.log(editRubric);
-        // if (!teacher_id) {
-        //   console.error("No teacher selected for editing");
-        //   return;
-        // }
 
-        // try {
-        //   const res = await axiosAdmin.put(`/teacher/${teacher_id}`, { data: values });
-        //   successNoti(res.data.message);
-        //   setIsEditModalOpen(false);
-        //   const { teachers, total } = await fetchTeachersData(page, rowsPerPage, filterValue);
-        //   setTeachers(teachers);
-        //   setTotalTeachers(total);
-        // } catch (error) {
-        //   console.error("Error updating teacher:", error);
-        //   if (error.response && error.response.data && error.response.data.message) {
-        //     errorNoti(error.response.data.message);
-        //   } else {
-        //     errorNoti("Error updating teacher");
-        //   }
-        // }
-    };
+
+
+
+
+
+
+
+
+
+
     return (
         <>
             <div className='w-full flex justify-between'>
@@ -577,23 +502,26 @@ const MangementRubricItems = (nav) => {
                             //     `/admin/management-rubric/create`
                             // )}
 
-                            onClick={handleOpenModalCreate}
+                            onClick={handleAddClick}
                         >
                             New
                         </Button>
                         <Button
                             className='bg-[#FF8077]'
                             endContent={<PlusIcon />}
-                        // onClick={onOpen}
+                            onClick={onOpen}
                         >
-                            Delete
+                            Deletes
                         </Button>
 
 
                         <Button
                             endContent={<PlusIcon />}
+                            onClick={() => handleNavigate(
+                                `/admin/management-rubric/${id}/rubric-items/store`
+                            )}
                         >
-                            store
+                            Store
                         </Button>
 
                     </div>
@@ -604,8 +532,8 @@ const MangementRubricItems = (nav) => {
                         <Dropdown>
                             <DropdownTrigger className="sm:flex">
                                 <Button endContent={<ChevronDownIcon className="font-semibold" />} size="sm" variant="flat">
-                                    
-                                    <span className="font-medium">Columns</span> 
+
+                                    <span className="font-medium">Columns</span>
                                 </Button>
                             </DropdownTrigger>
                             <DropdownMenu
@@ -626,7 +554,7 @@ const MangementRubricItems = (nav) => {
                         <Dropdown>
                             <DropdownTrigger className="sm:flex">
                                 <Button endContent={<ChevronDownIcon className="font-semibold" />} size="sm" variant="flat">
-                                   <span className="font-medium">Filter</span> 
+                                    <span className="font-medium">Filter</span>
                                 </Button>
                             </DropdownTrigger>
 
@@ -684,19 +612,98 @@ const MangementRubricItems = (nav) => {
                 editRubric={editRubric}
                 setEditRubric={setEditRubric}
                 CloData={CloData}
-                ChapterData={ChapterData}  
-                PloData={PloData} 
+                ChapterData={ChapterData}
+                PloData={PloData}
                 //DataSubject={DataSubject}
+                cloId={cloId}
+                chapterId={chapterId}
+                ploId={ploId}
+                setCloId={setCloId}
+                setChapterId={setChapterId}
+                setPloId={setPloId}
+                Score={Score}
             />
-            <CreateRubicItems onOpen={handleOpenModalCreate} isOpen={isOpenModalCreate} onClose={handleCloseModalCreate} />
-
-
+            <CreateRubicItems
+                isOpen={isAddModalOpen}
+                onOpenChange={setIsAddModalOpen}
+                onSubmit={handleFormSubmit}
+                NewRubicItem={NewRubicItem}
+                setNewRubicItem={setNewRubicItem}
+                CloData={DataAddClo}
+            />
+            <ConfirmAction
+                onOpenChange={onOpenChange}
+                isOpen={isOpen}
+                onConfirm={() => {
+                    if (deleteId) {
+                        handleSoftDeleteById(deleteId);
+                        setDeleteId(null);
+                    } else if (selectedKeys.size > 0) {
+                        handleSoftDelete();
+                        setSelectedKeys(new Set());
+                    } 
+                }}
+            />
         </>
-
     );
 }
 
 export default MangementRubricItems;
 
-
+function ConfirmAction(props) {
+    const { isOpen, onOpenChange, onConfirm } = props;
+    const handleOnOKClick = (onClose) => {
+        onClose();
+        if (typeof onConfirm === 'function') {
+            onConfirm();
+        }
+    }
+    return (
+        <Modal
+            isOpen={isOpen}
+            onOpenChange={onOpenChange}
+            motionProps={{
+                variants: {
+                    enter: {
+                        y: 0,
+                        opacity: 1,
+                        transition: {
+                            duration: 0.2,
+                            ease: "easeOut",
+                        },
+                    },
+                    exit: {
+                        y: -20,
+                        opacity: 0,
+                        transition: {
+                            duration: 0.1,
+                            ease: "easeIn",
+                        },
+                    },
+                }
+            }}
+        >
+            <ModalContent>
+                {(onClose) => (
+                    <>
+                        <ModalHeader>Cảnh báo</ModalHeader>
+                        <ModalBody>
+                            <p className="text-[16px]">
+                                Rubric items sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
+                            </p>
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button variant="light" onClick={onClose}>
+                                Huỷ
+                            </Button>
+                            <Button color="danger" className="font-medium" onClick={() => handleOnOKClick(onClose)}>
+                                Xoá
+                            </Button>
+                        </ModalFooter>
+                    </>
+                )}
+            </ModalContent>
+        </Modal>
+    )
+}
 

@@ -41,6 +41,7 @@ export const fetchRubricItemsData = async (id) => {
         rubric_id: item?.rubric_id,
         plo_id: item?.plo_id ,
         description: item?.description,
+        maxScore: item?.maxScore,
         stt: item?.stt,
       }
 

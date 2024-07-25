@@ -225,7 +225,7 @@ const PloController = {
   getFormUpdate: async (req, res) => {
     try {
       const { id } = req.body.data;
-      console.log(id);
+      // console.log(id);
       const pos = await PloModel.findAll({ where: { plo_id: id } });
 
       if (!pos || pos.length === 0) {
