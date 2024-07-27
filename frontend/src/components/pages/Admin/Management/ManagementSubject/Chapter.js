@@ -1,18 +1,37 @@
 
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
-import { Table, Tooltip, Button, message } from 'antd';
-import { useDisclosure, Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
+import { Table, Tooltip, message } from 'antd';
+import { useDisclosure, Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from "@nextui-org/react";
 
+import Cookies from "js-cookie";
 
 import DropdownAndNavChapter from "../../Utils/DropdownAndNav/DropdownAndNavChapter";
 import DownloadAndUpload from "../../Utils/DownloadAndUpload/DownloadAndUpload";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import Tabs from "../../Utils/Tabs/Tabs";
+import BackButton from "../../Utils/BackButton/BackButton";
+import { PlusIcon } from "../ManagementAssessment/PlusIcon";
 
 const Chapter = (nav) => {
     const { id } = useParams();
+    const navigate = useNavigate();
+    const teacher_id = Cookies.get('teacher_id');
+    if (!teacher_id) {
+        navigate('/login');
+    }
+    const [Subject, setSubject] = useState({});
+    const getSubjectById = async () => {
+        try {
+            const response = await axiosAdmin.get(`/subject/${id}`);
+            console.log("response.data");
+            console.log(response.data);
+            setSubject(response?.data?.subject)
+        } catch (error) {
+            console.error("Error: " + error.message);
+        }
+    };
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [activeTab, setActiveTab] = useState(0);
@@ -22,12 +41,14 @@ const Chapter = (nav) => {
     const [poListData, setPosListData] = useState([]);
     const [current, setCurrent] = useState(0);
     const [deleteId, setDeleteId] = useState(null);
-
+  
 
     const handleOnChangeTextName = (nameP) => {
         setCurrent(nameP);
     };
-
+    const handleNavigate = (path) => {
+        navigate(path);
+    };
     const [fileList, setFileList] = useState([]);
     const columns = [
         {
@@ -60,6 +81,7 @@ const Chapter = (nav) => {
                     <Link to={`/admin/management-subject/${id}/chapter/update/${_id}`}>
                         <Tooltip title="Chỉnh sửa">
                             <Button
+                            className="bg-[#AF84DD]"
                                 isIconOnly
                                 variant="light"
                                 radius="full"
@@ -73,6 +95,7 @@ const Chapter = (nav) => {
 
                     <Tooltip title="Xoá">
                         <Button
+                        className="bg-[#FF8077]"
                             isIconOnly
                             variant="light"
                             radius="full"
@@ -121,7 +144,7 @@ const Chapter = (nav) => {
             message.error('Error fetching PO data');
         }
     };
-
+  
     const handleSoftDelete = async () => {
         const data = {
             chapter_id: selectedRowKeys,
@@ -194,6 +217,7 @@ const Chapter = (nav) => {
 
     useEffect(() => {
         getAllChapter()
+        getSubjectById()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -223,7 +247,54 @@ const Chapter = (nav) => {
                     }
                 }}
             />
-            <DropdownAndNavChapter />
+            <div className='w-full flex justify-between'>
+                <div className='h-full my-auto p-5 hidden sm:block'>
+                    <BackButton />
+                </div>
+                <div className='w-full sm:w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-center items-center flex gap-4 flex-col'>
+                    <div className='flex justify-center w-full flex-wrap items-center gap-1'>
+                        <Button
+
+                            endContent={<PlusIcon />}
+                            onClick={() => handleNavigate(
+                                `/admin/management-subject/${id}/chapter-clo`
+                            )}
+                        >
+                            Clo chapter
+                        </Button>
+                        <Button
+                            className='bg-[#AF84DD] '
+                            endContent={<PlusIcon />}
+                        //onClick={handleOpenModalCreate}
+                        >
+                            New
+                        </Button>
+                        <Button
+                            className='bg-[#FF8077] '
+                            endContent={<PlusIcon />}
+                            onClick={onOpen}
+                            disabled={selectedRowKeys.length === 0}
+                        >
+                            Deletes
+                        </Button>
+                        <Button
+                            endContent={<PlusIcon />}
+                            onClick={() => handleNavigate(
+                                `/admin/management-subject/${id}/Chapter/store`
+                            )}
+                        >
+                            Store
+                        </Button>
+                    </div>
+                </div>
+            </div>
+            <div className="p-5 w-full flex justify-center items-start flex-col sm:flex-col lg:flex-row xl:fex-row">
+                <div className="text-2xl w-[300px] sm:w-full leading-8 italic font-bold text-[#FF9908] text-wrap flex-1 text-justify">{Subject.subjectCode + ': ' + Subject.subjectName}</div>
+            </div>
+            <div className="pl-5">
+                <h1 className="text-xl font-bold text-[#6366F1] text-left">Danh sách Chapter</h1>
+            </div>
+
             <div className="w-full my-5 px-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
@@ -232,17 +303,6 @@ const Chapter = (nav) => {
                             Đã chọn {selectedRow.length} chapter
                         </p>
                         <div className="flex items-center gap-2">
-
-                            <Tooltip
-                                title={`Xoá ${selectedRowKeys.length} chapter`}
-                                getPopupContainer={() =>
-                                    document.querySelector(".Quick__Option")
-                                }
-                            >
-                                <Button isIconOnly variant="light" radius="full" onClick={onOpen}>
-                                    <i className="fa-solid fa-trash-can"></i>
-                                </Button>
-                            </Tooltip>
                             <Tooltip
                                 title="Bỏ chọn"
                                 getPopupContainer={() =>
@@ -331,7 +391,7 @@ function ConfirmAction(props) {
                         <ModalHeader>Cảnh báo</ModalHeader>
                         <ModalBody>
                             <p className="text-[16px]">
-                                Chương sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
+                                Chapter sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
                             </p>
                         </ModalBody>
                         <ModalFooter>

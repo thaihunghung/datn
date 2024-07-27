@@ -5,8 +5,10 @@ import { Button, message } from 'antd';
 import { useParams } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-import { Table, Tooltip} from 'antd';
+import { Table, Tooltip } from 'antd';
 import DropdownAndNavClo from "../../Utils/DropdownAndNav/DropdownAndNavClo";
+import BackButton from "../../Utils/BackButton/BackButton";
+import { PlusIcon } from "../ManagementAssessment/PlusIcon";
 
 
 const StoreClo = (nav) => {
@@ -18,6 +20,7 @@ const StoreClo = (nav) => {
     const [loading, setLoading] = useState(false);
     const [poListData, setPosListData] = useState([]);
     const [deleteId, setDeleteId] = useState(null);
+    const [Subject, setSubject] = useState({});
 
     const columns = [
         {
@@ -128,7 +131,7 @@ const StoreClo = (nav) => {
                 };
             });
             setPosListData(updatedPloData);
-            
+
         } catch (error) {
             console.error("Error: " + error.message);
             //message.error('Error fetching PLO data');
@@ -136,37 +139,47 @@ const StoreClo = (nav) => {
     };
 
     const handleDelete = async () => {
-      const data = {
-          clo_id: selectedRowKeys,
-      };
-      console.log(data)
-      try {
-        const response = await axiosAdmin.delete('/clos/multiple', { params: data });
+        const data = {
+            clo_id: selectedRowKeys,
+        };
+        console.log(data)
+        try {
+            const response = await axiosAdmin.delete('/clos/multiple', { params: data });
 
-        await getAllClo();
-          handleUnSelect();
-          message.success(response.data.message);
-      } catch (error) {
-          console.error("Error soft deleting Clos:", error);
-          message.error('Error soft deleting Clos');
-      }
-  };
+            await getAllClo();
+            handleUnSelect();
+            message.success(response.data.message);
+        } catch (error) {
+            console.error("Error soft deleting Clos:", error);
+            message.error('Error soft deleting Clos');
+        }
+    };
 
-  const handleDeleteById = async (_id) => {
-      try {
-          const response = await axiosAdmin.delete(`/clo/${_id}`);
-          await getAllClo();
-          handleUnSelect();
-          message.success(response.data.message);
-      } catch (error) {
-          console.error(`Error toggling soft delete for Clo with ID ${_id}:`, error);
-          message.error(`Error toggling soft delete for Clo with ID ${_id}`);
-      }
-  };
+    const handleDeleteById = async (_id) => {
+        try {
+            const response = await axiosAdmin.delete(`/clo/${_id}`);
+            await getAllClo();
+            handleUnSelect();
+            message.success(response.data.message);
+        } catch (error) {
+            console.error(`Error toggling soft delete for Clo with ID ${_id}:`, error);
+            message.error(`Error toggling soft delete for Clo with ID ${_id}`);
+        }
+    };
+    const getSubjectById = async () => {
+        try {
+            const response = await axiosAdmin.get(`/subject/${id}`);
+            console.log("response.data");
+            console.log(response.data);
+            setSubject(response?.data?.subject)
+        } catch (error) {
+            console.error("Error: " + error.message);
+        }
+    };
 
     useEffect(() => {
         getAllClo()
-
+        getSubjectById()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setCollapsedNav(true);
@@ -180,6 +193,7 @@ const StoreClo = (nav) => {
             window.removeEventListener("resize", handleResize);
         };
     }, []);
+
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
@@ -196,7 +210,19 @@ const StoreClo = (nav) => {
                     }
                 }}
             />
-            <DropdownAndNavClo />
+            <div className='w-full flex justify-between'>
+                <div className='h-full my-auto p-5 hidden sm:block'>
+                    <BackButton />
+                </div>
+
+            </div>
+            <div className="p-5 w-full flex justify-center items-start flex-col sm:flex-col lg:flex-row xl:fex-row">
+                <div className="text-2xl w-[300px] sm:w-full leading-8 italic font-bold text-[#FF9908] text-wrap flex-1 text-justify">{Subject.subjectCode + ': ' + Subject.subjectName}</div>
+            </div>
+
+            <div className="pl-5">
+                <h1 className="text-xl font-bold text-[#6366F1] text-left">Danh sách Clo Đã ẩn</h1>
+            </div>
             <div className="w-full my-5 px-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">

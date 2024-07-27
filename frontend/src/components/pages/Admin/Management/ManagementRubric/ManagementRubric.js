@@ -77,29 +77,19 @@ const ManagementRubric = (nav) => {
         navigate('/login');
     }
 
-    const handleEditFormSubmit = async (values, teacher_id) => {
-        console.log("editRubric");
-        console.log(editRubric);
-        // if (!teacher_id) {
-        //   console.error("No teacher selected for editing");
-        //   return;
-        // }
-
-        // try {
-        //   const res = await axiosAdmin.put(`/teacher/${teacher_id}`, { data: values });
-        //   successNoti(res.data.message);
-        //   setIsEditModalOpen(false);
-        //   const { teachers, total } = await fetchTeachersData(page, rowsPerPage, filterValue);
-        //   setTeachers(teachers);
-        //   setTotalTeachers(total);
-        // } catch (error) {
-        //   console.error("Error updating teacher:", error);
-        //   if (error.response && error.response.data && error.response.data.message) {
-        //     errorNoti(error.response.data.message);
-        //   } else {
-        //     errorNoti("Error updating teacher");
-        //   }
-        // }
+    const handleEditFormSubmit = async (values, rubric_id) => {
+        if (!rubric_id) {
+          console.error("No rubric selected for editing");
+          return;
+        }
+        try {
+            const response = await axiosAdmin.put(`/rubric/${rubric_id}`, { data: values });
+            loadRubric();
+            message.success(response.data.message);
+          } catch (error) {
+            console.error("Error updating rubric:", error);
+            message.error("Error updating rubric: " + (error.response?.data?.message || 'Internal server error'));
+          }
     };
 
     const getAllSubject = async () => {
@@ -340,6 +330,9 @@ const ManagementRubric = (nav) => {
     const topContent = React.useMemo(() => {
         return (
             <div className="flex flex-col gap-4">
+                <div className='block sm:hidden'>
+                    <h1 className="text-2xl pb-2 font-bold text-[#6366F1]">Danh sách Rubric</h1>
+                </div>
                 <div className="flex justify-between gap-3 items-center">
                     <Input
                         isClearable
@@ -381,7 +374,7 @@ const ManagementRubric = (nav) => {
                 </div>
                 <div className="w-full flex  sm:items-center sm:justify-between">
                     <p className="text-small text-default-400 min-w-[100px]">
-                        <span className="text-default-500">{rubricData.length}</span> teacher(s)
+                        <span className="text-default-500">{rubricData.length}</span> rubric(s)
                     </p>
                     <div className="w-fit sm:w-auto flex items-center gap-2 ">
                         <p className="text-small text-default-400">Rows per page:</p>
@@ -445,27 +438,27 @@ const ManagementRubric = (nav) => {
         };
     }, []);
 
-    useEffect(() => {
-        const loadRubric = async () => {
-            const response = await fetchRubricData(teacher_id);
-            console.log(response);
-            setRubricData(response);
+    const loadRubric = async () => {
+        const response = await fetchRubricData(teacher_id);
+        console.log(response);
+        setRubricData(response);
+    };
 
-
-        };
+    useEffect(() => {   
         loadRubric();
         // console.log("rubricData loaded", rubricData);
     }, [page, rowsPerPage, filterValue]);
 
     return (
         <>
-            <DropdownAndNavRubric open={handleOpenModalCreate} />
-
             <div className='w-full flex justify-between'>
                 <div className='h-full my-auto p-5 hidden sm:block'>
+                <div>
+          <h1 className="text-2xl pb-2 font-bold text-[#6366F1]">Danh sách Rubric</h1>
+        </div>
                     <BackButton />
                 </div>
-                <div className='w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-start items-center flex gap-4 flex-col mb-4'>
+                <div className='w-full sm:w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-start items-center flex gap-4 flex-col mb-4'>
                     <div className='flex justify-center w-full flex-wrap items-center gap-1'>
                         <Button
                             className='bg-[#AF84DD] '
@@ -478,6 +471,7 @@ const ManagementRubric = (nav) => {
                             className='bg-[#FF8077]'
                             endContent={<PlusIcon />}
                             onClick={onOpen}
+                            disabled={selectedKeys.size === 0}
                         >
                             Deletes
                         </Button>
@@ -492,7 +486,7 @@ const ManagementRubric = (nav) => {
 
                     </div>
 
-                    <div className='flex gap-1 h-fit justify-start'>
+                    <div className='flex gap-2 h-fit justify-center sm:justify-start flex-wrap items-center'>
                         <Dropdown>
                             <DropdownTrigger className="sm:flex">
                                 <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">

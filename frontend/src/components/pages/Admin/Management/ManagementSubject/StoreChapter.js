@@ -1,17 +1,39 @@
 // StoreChapter.js
 
 import { useEffect, useState } from "react";
-import { Button, message } from 'antd';
-import { useParams } from "react-router-dom";
+import { message } from 'antd';
+import { useNavigate, useParams } from "react-router-dom";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Button } from "@nextui-org/react";
 import { Table, Tooltip} from 'antd';
 import DropdownAndNavChapter from "../../Utils/DropdownAndNav/DropdownAndNavChapter";
+import Cookies from "js-cookie";
+import BackButton from "../../Utils/BackButton/BackButton";
+import { PlusIcon } from "../ManagementAssessment/PlusIcon";
 
 
 const StoreChapter = (nav) => {
     const { id } = useParams();
     const { setCollapsedNav } = nav;
+    const navigate = useNavigate();
+    const teacher_id = Cookies.get('teacher_id');
+    if (!teacher_id) {
+        navigate('/login');
+    }
+    const [Subject, setSubject] = useState({});
+    const getSubjectById = async () => {
+        try {
+            const response = await axiosAdmin.get(`/subject/${id}`);
+            console.log("response.data");
+            console.log(response.data);
+            setSubject(response?.data?.subject)
+        } catch (error) {
+            console.error("Error: " + error.message);
+        }
+    };
+    const handleNavigate = (path) => {
+        navigate(path);
+    };
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [selectedRow, setSelectedRow] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -141,10 +163,9 @@ const StoreChapter = (nav) => {
       };
       try {
         const response = await axiosAdmin.delete('/chapters/multiple', { params: data });
-
-        await getAllChapter();
-          handleUnSelect();
-          message.success(response.data.message);
+        handleUnSelect();
+        message.success(response.data.message);
+        getAllChapter();
       } catch (error) {
           console.error("Error soft deleting Clos:", error);
           message.error('Error soft deleting Clos');
@@ -165,6 +186,7 @@ const StoreChapter = (nav) => {
   };
 
     useEffect(() => {
+        getSubjectById()
         getAllChapter()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
@@ -195,7 +217,18 @@ const StoreChapter = (nav) => {
                     }
                 }}
             />
-            <DropdownAndNavChapter/>
+              <div className='w-full flex justify-between'>
+                <div className='h-full my-auto p-5 hidden sm:block'>
+                    <BackButton />
+                </div>
+                
+            </div>
+            <div className="p-5 w-full flex justify-center items-start flex-col sm:flex-col lg:flex-row xl:fex-row">
+                <div className="text-2xl w-[300px] sm:w-full leading-8 italic font-bold text-[#FF9908] text-wrap flex-1 text-justify">{Subject.subjectCode + ': ' + Subject.subjectName}</div>
+            </div>
+            <div className="pl-5">
+                <h1 className="text-xl font-bold text-[#6366F1] text-left">Danh sách Chapter đã ẩn</h1>
+            </div>
             <div className="w-full my-5 px-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">

@@ -130,12 +130,11 @@ const MangementRubricItems = (nav) => {
                             variant="light"
                             radius="full"
                             size="sm"
-                        // onClick={() => { onOpen(); setDeleteId(record.id); }}
+                        // onClick={() => {onOpen(); setDeleteId(record.id); }}
                         >
                             <i className="fa-solid fa-trash-can"></i>
                         </Button>
                     </Tooltip>
-
                 </div>
             ),
         },

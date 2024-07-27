@@ -1,18 +1,25 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 
-import { Table, Tooltip, message, Button } from 'antd';
-import { useDisclosure, Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
+import { Table, Tooltip, message } from 'antd';
+import { useDisclosure, Modal, Chip, Button, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
 
 import DownloadAndUpload from "../../Utils/DownloadAndUpload/DownloadAndUpload";
 import DropdownAndNavClo from "../../Utils/DropdownAndNav/DropdownAndNavClo";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import Tabs from "../../Utils/Tabs/Tabs";
-
+import { PlusIcon } from "../ManagementAssessment/PlusIcon";
+import Cookies from "js-cookie";
+import BackButton from "../../Utils/BackButton/BackButton";
 
 const Clo = (nav) => {
     const { id } = useParams();
+    const navigate = useNavigate();
+    const teacher_id = Cookies.get('teacher_id');
+    if (!teacher_id) {
+        navigate('/login');
+    }
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -24,6 +31,8 @@ const Clo = (nav) => {
     const [current, setCurrent] = useState(0);
     const [deleteId, setDeleteId] = useState(null);
     const [fileList, setFileList] = useState([]);
+
+    const [Subject, setSubject] = useState({});
 
     const handleOnChangeTextName = (nameP) => {
         setCurrent(nameP);
@@ -59,7 +68,7 @@ const Clo = (nav) => {
                 <div className="flex items-center justify-center w-full gap-2">
                     <Link to={`/admin/management-subject/${id}/clo/update/${_id}`}>
                         <Tooltip title="Chỉnh sửa">
-                            <Button isIconOnly variant="light" radius="full" size="sm">
+                            <Button isIconOnly variant="light" radius="full" size="sm" className="bg-[#AF84DD]">
                                 <i className="fa-solid fa-pen"></i>
                             </Button>
                         </Tooltip>
@@ -67,6 +76,7 @@ const Clo = (nav) => {
                     <Tooltip title="Xoá">
                         <Button
                             isIconOnly
+                            className="bg-[#FF8077]"
                             variant="light"
                             radius="full"
                             size="sm"
@@ -88,6 +98,10 @@ const Clo = (nav) => {
         },
     };
 
+    const handleNavigate = (path) => {
+        navigate(path);
+    };
+
     const handleUnSelect = () => {
         setSelectedRowKeys([]);
         setSelectedRow([]);
@@ -105,6 +119,16 @@ const Clo = (nav) => {
             }));
             setPosListData(updatedPoData);
             console.log(response.data);
+        } catch (error) {
+            console.error("Error: " + error.message);
+        }
+    };
+    const getSubjectById = async () => {
+        try {
+            const response = await axiosAdmin.get(`/subject/${id}`);
+            console.log("response.data");
+            console.log(response.data);
+            setSubject(response?.data?.subject)
         } catch (error) {
             console.error("Error: " + error.message);
         }
@@ -174,6 +198,7 @@ const Clo = (nav) => {
     };
 
     useEffect(() => {
+        getSubjectById()
         getAllClo();
         const handleResize = () => {
             setCollapsedNav(window.innerWidth < 1024);
@@ -200,7 +225,55 @@ const Clo = (nav) => {
                     }
                 }}
             />
-            <DropdownAndNavClo />
+            {/* <DropdownAndNavClo /> */}
+            <div className='w-full flex justify-between'>
+                <div className='h-full my-auto p-5 hidden sm:block'>
+                    <BackButton />
+                </div>
+                <div className='w-full sm:w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-center items-center flex gap-4 flex-col'>
+                    <div className='flex justify-center w-full flex-wrap items-center gap-1'>
+                        <Button
+
+                            endContent={<PlusIcon />}
+                            onClick={() => handleNavigate(
+                                `/admin/management-subject/${id}/clo-plo`
+                            )}
+                        >
+                            Clo_Plo
+                        </Button>
+                        <Button
+                            className='bg-[#AF84DD] '
+                            endContent={<PlusIcon />}
+                        //onClick={handleOpenModalCreate}
+                        >
+                            New
+                        </Button>
+                        <Button
+                            className='bg-[#FF8077] '
+                            endContent={<PlusIcon />}
+                            onClick={onOpen}
+                            disabled={selectedRowKeys.length === 0}
+                        >
+                            Deletes
+                        </Button>
+                        <Button
+                            endContent={<PlusIcon />}
+                            onClick={() => handleNavigate(
+                                `/admin/management-subject/${id}/clo/store`
+                            )}
+                        >
+                            Store
+                        </Button>
+                    </div>
+                </div>
+            </div>
+            <div className="p-5 w-full flex justify-center items-start flex-col sm:flex-col lg:flex-row xl:fex-row">
+                <div className="text-2xl w-[300px] sm:w-full leading-8 italic font-bold text-[#FF9908] text-wrap flex-1 text-justify">{Subject.subjectCode + ': ' + Subject.subjectName}</div>
+            </div>
+            <div className="pl-5">
+                <h1 className="text-xl font-bold text-[#6366F1] text-left">Danh sách Clo</h1>
+            </div>
+            
             <div className="w-full my-5 px-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
@@ -209,8 +282,7 @@ const Clo = (nav) => {
                             Đã chọn {selectedRow.length} clo
                         </p>
                         <div className="flex items-center gap-2">
-
-                            <Tooltip
+                            {/* <Tooltip
                                 title={`Xoá ${selectedRowKeys.length} clo`}
                                 getPopupContainer={() =>
                                     document.querySelector(".Quick__Option")
@@ -219,7 +291,7 @@ const Clo = (nav) => {
                                 <Button isIconOnly variant="light" radius="full" onClick={onOpen}>
                                     <i className="fa-solid fa-trash-can"></i>
                                 </Button>
-                            </Tooltip>
+                            </Tooltip> */}
                             <Tooltip
                                 title="Bỏ chọn"
                                 getPopupContainer={() =>
@@ -253,16 +325,16 @@ const Clo = (nav) => {
                     />
                 </div>
             </div>
-            <Tabs tabs=
+            {/* <Tabs tabs=
                 {[
                     {
                         title: 'Cập nhật',
                         content:
-                        <DownloadAndUpload props={props} endpoint={'clo/update'} LoadData={getAllClo} Data={parseInt(id)} handleDownload={handleDownloadPo} handleOnChangeTextName={handleOnChangeTextName} current={current} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
+                            <DownloadAndUpload props={props} endpoint={'clo/update'} LoadData={getAllClo} Data={parseInt(id)} handleDownload={handleDownloadPo} handleOnChangeTextName={handleOnChangeTextName} current={current} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
                     }
                 ]}
                 activeTab={activeTab} setActiveTab={setActiveTab}
-            />
+            /> */}
         </div>
     );
 }

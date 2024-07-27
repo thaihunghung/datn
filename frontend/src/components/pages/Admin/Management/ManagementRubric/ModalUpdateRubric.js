@@ -16,10 +16,10 @@ function ModalUpdateRubric({ isOpen, onOpenChange, onSubmit, editRubric, setEdit
 
   // Xử lý thay đổi các giá trị của các trường nhập liệu
   const handleChange = (e) => {
-    const { rubricName, value } = e.target;
+    const { name, value } = e.target;
     setEditRubric((prev) => ({
       ...prev,
-      [rubricName]: value,
+      [name]: value,
     }));
   };
 
@@ -31,14 +31,6 @@ function ModalUpdateRubric({ isOpen, onOpenChange, onSubmit, editRubric, setEdit
     }));
   };
 
-  const handleChangeComment = (e) => {
-    const { comment, value } = e.target;
-    setEditRubric((prev) => ({
-      ...prev,
-      [comment]: value,
-    }));
-  };
-  
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
       <ModalContent>
@@ -67,20 +59,19 @@ function ModalUpdateRubric({ isOpen, onOpenChange, onSubmit, editRubric, setEdit
                   name="comment"
                   placeholder="Enter your Comment"
                   value={editRubric.comment || ''}
-                  onChange={handleChangeComment}
+                  onChange={handleChange}
                 />
                 <Select
                   label="Subject"
                   name="subject_id"
-                  defaultSelectedKeys={[editRubric.subject_id]}
-                  value={editRubric?.subject_id}
-                  onChange={handleSelectChange}
-
+                  defaultSelectedKeys={[editRubric.subject_id || '']}
+                  value={editRubric.subject_id || ''}
+                  onChange={(e) => handleSelectChange(e.target.value)}
                   fullWidth
                 > 
                   {DataSubject.map((subject) => (
-                    <SelectItem key={subject?.subject_id} value={subject?.subject_id}>
-                      {capitalize(subject?.subjectName)}
+                    <SelectItem key={subject.subject_id} value={subject.subject_id}>
+                      {capitalize(subject.subjectName)}
                     </SelectItem>
                   ))}
                </Select>
@@ -99,7 +90,7 @@ function ModalUpdateRubric({ isOpen, onOpenChange, onSubmit, editRubric, setEdit
                   onClose();
                 }}
               >
-                Save
+                Update
               </Button>
             </ModalFooter>
           </>

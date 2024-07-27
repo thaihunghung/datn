@@ -1,6 +1,6 @@
 // MangementRubricItems.js
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Tooltip, message } from 'antd';
 import {
@@ -20,7 +20,7 @@ import CreateRubicItems from "./CreateRubicItems";
 import BackButton from "../../Utils/BackButton/BackButton";
 import ModalUpdateRubicItems from "./ModalUpdateRubicItems";
 
-const INITIAL_VISIBLE_COLUMNS = ['ploName', 'cloName', 'chapterName', 'description', 'maxScore', 'action'];
+const INITIAL_VISIBLE_COLUMNS = ['Plo', 'Clo', 'Chapter', 'description', 'maxScore', 'action'];
 const COMPACT_VISIBLE_COLUMNS = ['description', 'action'];
 
 const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
@@ -40,6 +40,11 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
 
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [rubicItemsData, setRubicItemsData] = useState([]);
+
+    const [cloFilter, setCloFilter] = useState('');
+    const [ploFilter, setPloFilter] = useState('');
+    const [chapterFilter, setChapterFilter] = useState('');
+
 
     const [cloId, setCloId] = useState('');
     const [chapterId, setChapterId] = useState('');
@@ -83,7 +88,6 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
         description: "",
         maxScore: "",
     });
-
     const rowSelection = {
         selectedRowKeys,
         onChange: (selectedRowKeys, selectedRows) => {
@@ -91,7 +95,6 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
             setSelectedRowKeys(selectedRowKeys);
         },
     };
-
     const handleFormSubmit = async (event) => {
         const data = {
             maxScore: parseFloat(NewRubicItem.maxScore),
@@ -220,9 +223,9 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
     };
     const handleSoftDelete = async () => {
         const data = {
-            rubricsitem_id: Array.from(selectedKeys), 
+            rubricsitem_id: Array.from(selectedKeys),
         };
-        console.log('Setting new keys:',data);
+        console.log('Setting new keys:', data);
         try {
             const response = await axiosAdmin.put('/rubric-items/softDelete', { data });
             await loadRubric();
@@ -233,7 +236,6 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
             message.error('Error soft deleting rubricsitems');
         }
     };
-
     const handleSoftDeleteById = async (_id) => {
         try {
             const response = await axiosAdmin.put(`/rubric-item/${_id}/softDelete`);
@@ -245,7 +247,6 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
             message.error(`Error toggling soft delete for rubricsitem with ID ${_id}`);
         }
     };
-
     const onRowsPerPageChange = React.useCallback((e) => {
         setRowsPerPage(Number(e.target.value));
         setPage(1);
@@ -258,6 +259,11 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
             setFilterValue('');
         }
     }, []);
+    const handleCloFilterChange = (keys) => {
+        console.log('Selected CLO:', keys);
+        setCloFilter(keys[0]); // Assuming single selection
+    };
+
     useEffect(() => {
         LoadRubricById()
         //getAllAssessmentIsDeleteFalse()
@@ -300,25 +306,44 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
                         dangerouslySetInnerHTML={{ __html: cellValue }}>
                     </div>
                 );
-            case 'ploName':
+            case 'Plo':
                 return (
                     <div className="flex flex-col items-start justify-start text-justify max-w-[150px]">
                         <p className="text-bold font-bold text-small capitalize">{rubric.ploName.ploName}</p>
                         <p className="text-bold text-small capitalize">{rubric.ploName.description}</p>
                     </div>
                 );
-            case 'cloName':
+            case 'Clo':
                 return (
                     <div className="flex flex-col items-start justify-start text-justify max-w-[150px]">
                         <p className="text-bold font-bold text-small capitalize">{rubric.cloName.cloName}</p>
                         <p className="text-bold text-small capitalize">{rubric.cloName.description}</p>
                     </div>
                 );
-            case 'chapterName':
+            case 'Chapter':
+
                 return (
                     <div className="flex flex-col items-start justify-start text-justify max-w-[150px]">
                         <p className="text-bold font-bold text-small capitalize">{rubric.chapterName.chapterName}</p>
                         <p className="text-bold text-small capitalize">{rubric.chapterName.description}</p>
+                    </div>
+                );
+            case 'PloName':
+                return (
+                    <div className="flex flex-col items-start justify-start text-justify max-w-[150px]">
+                        <p className="text-bold font-bold text-small capitalize">{rubric.ploName.ploName}</p>
+                    </div>
+                );
+            case 'CloName':
+                return (
+                    <div className="flex flex-col items-start justify-start text-justify max-w-[150px]">
+                        <p className="text-bold font-bold text-small capitalize">{rubric.cloName.cloName}</p>
+                    </div>
+                );
+            case 'ChapterName':
+                return (
+                    <div className="flex flex-col items-start justify-start text-justify max-w-[150px]">
+                        <p className="text-bold font-bold text-small capitalize">{rubric.chapterName.chapterName}</p>
                     </div>
                 );
             case 'maxScore':
@@ -369,8 +394,11 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
     const topContent = React.useMemo(() => {
         return (
             <div className="flex flex-col gap-4">
+                <div className='block sm:hidden'>
+                    <h1 className="text-2xl pb-2 font-bold text-[#6366F1]">Danh sách Rubric items</h1>
+                </div>
                 <div className="flex justify-between gap-3 items-center">
-                    <Input
+                    {/* <Input
                         isClearable
                         classNames={{ base: 'w-full sm:max-w-[44%]', inputWrapper: 'border-1' }}
                         placeholder="Search by name..."
@@ -380,7 +408,7 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
                         variant="bordered"
                         onClear={() => setFilterValue('')}
                         onValueChange={onSearchChange}
-                    />
+                    /> */}
                     <div className="flex gap-3">
 
                         {/* <Tooltip
@@ -410,7 +438,7 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
                 </div>
                 <div className="w-full flex  sm:items-center sm:justify-between">
                     <p className="text-small text-default-400 min-w-[100px]">
-                        <span className="text-default-500">{assessments.length}</span> teacher(s)
+                        <span className="text-default-500">{assessments.length}</span> rubicItems(s)
                     </p>
                     <div className="w-fit sm:w-auto flex items-center gap-2 ">
                         <p className="text-small text-default-400">Rows per page:</p>
@@ -448,6 +476,7 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
         if (visibleColumns === 'all') return columns;
         return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
     }, [visibleColumns]);
+
     const filteredItems = React.useMemo(() => {
         let filteredAssessment = [...assessments];
 
@@ -456,10 +485,73 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
                 teacher.description.toLowerCase().includes(filterValue.toLowerCase())
             );
         }
-
-
+        if (cloFilter && cloFilter !== '') {
+            filteredAssessment = filteredAssessment.filter(item =>
+                item.cloName.cloName === cloFilter
+            );
+        }
+        if (ploFilter && ploFilter !== '') {
+            filteredAssessment = filteredAssessment.filter(item =>
+                item.ploName.ploName === ploFilter
+            );
+        }
+        if (chapterFilter && chapterFilter !== '') {
+            filteredAssessment = filteredAssessment.filter(item =>
+                item.chapterName.chapterName === chapterFilter
+            );
+        }
         return filteredAssessment;
-    }, [assessments, filterValue]);
+    }, [assessments, filterValue, cloFilter, ploFilter, chapterFilter]);
+
+
+
+    const uniqueSortedCloNames = useMemo(() => {
+        const cloNameSet = new Set();
+        assessments.forEach(item => cloNameSet.add(item.cloName.cloName));
+        const uniqueCloNamesArray = Array.from(cloNameSet);
+
+        // Hàm so sánh tùy chỉnh để sắp xếp theo phần số cuối
+        uniqueCloNamesArray.sort((a, b) => {
+            const numA = parseInt(a.match(/\d+$/));
+            const numB = parseInt(b.match(/\d+$/));
+            return numA - numB;
+        });
+
+        return uniqueCloNamesArray;
+    }, [assessments]);
+
+    const uniqueSortedPloNames = useMemo(() => {
+        const ploNameSet = new Set();
+        assessments.forEach(item => ploNameSet.add(item.ploName.ploName));
+        const uniquePloNamesArray = Array.from(ploNameSet);
+
+        // Hàm so sánh tùy chỉnh để sắp xếp theo phần số cuối
+        uniquePloNamesArray.sort((a, b) => {
+            const numA = parseInt(a.match(/\d+$/));
+            const numB = parseInt(b.match(/\d+$/));
+            return numA - numB;
+        });
+
+        return uniquePloNamesArray;
+    }, [assessments]);
+
+    const uniqueSortedChapterNames = useMemo(() => {
+        const chapterNameSet = new Set();
+        assessments.forEach(item => chapterNameSet.add(item.chapterName.chapterName));
+        const uniqueChapterNamesArray = Array.from(chapterNameSet);
+
+        // Hàm so sánh tùy chỉnh để sắp xếp theo phần số cuối
+        uniqueChapterNamesArray.sort((a, b) => {
+            const numA = parseInt(a.match(/\d+$/));
+            const numB = parseInt(b.match(/\d+$/));
+            return numA - numB;
+        });
+
+        return uniqueChapterNamesArray;
+    }, [assessments]);
+
+
+
     const items = React.useMemo(() => {
         const start = (page - 1) * rowsPerPage;
         const end = start + rowsPerPage;
@@ -474,23 +566,13 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
         });
     }, [sortDescriptor, items]);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     return (
         <>
             <div className='w-full flex justify-between'>
                 <div className='h-full my-auto p-5 hidden sm:block'>
+                <div>
+                    <h1 className="text-2xl pb-2 font-bold text-[#6366F1]">Danh sách Rubric items</h1>
+                </div>
                     <BackButton />
                 </div>
                 <div className='w-full sm:w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-start items-center flex gap-4 flex-col mb-4'>
@@ -510,6 +592,7 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
                             className='bg-[#FF8077]'
                             endContent={<PlusIcon />}
                             onClick={onOpen}
+                            disabled={selectedKeys.size === 0}
                         >
                             Deletes
                         </Button>
@@ -526,13 +609,10 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
 
                     </div>
 
-
-
-                    <div className='flex gap-1 h-fit justify-start'>
+                    <div className='flex gap-2 h-fit justify-center sm:justify-start flex-wrap items-center'>
                         <Dropdown>
                             <DropdownTrigger className="sm:flex">
                                 <Button endContent={<ChevronDownIcon className="font-semibold" />} size="sm" variant="flat">
-
                                     <span className="font-medium">Columns</span>
                                 </Button>
                             </DropdownTrigger>
@@ -551,14 +631,88 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
                                 ))}
                             </DropdownMenu>
                         </Dropdown>
+
                         <Dropdown>
                             <DropdownTrigger className="sm:flex">
-                                <Button endContent={<ChevronDownIcon className="font-semibold" />} size="sm" variant="flat">
-                                    <span className="font-medium">Filter</span>
+                                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                                    Filter by CLO
                                 </Button>
                             </DropdownTrigger>
-
+                            <DropdownMenu
+                                aria-label="Filter by CLO"
+                                closeOnSelect={true}
+                                selectedKeys={new Set([cloFilter])} // Chuyển đổi cloFilter thành Set
+                                selectionMode="single"
+                                onSelectionChange={(keys) => {
+                                    const selectedKey = Array.from(keys)[0] || ''; // Đảm bảo chọn giá trị rỗng nếu không có lựa chọn
+                                    setCloFilter(selectedKey);
+                                }}
+                            >
+                                <DropdownItem key="" className="capitalize">
+                                    All
+                                </DropdownItem>
+                                {uniqueSortedCloNames.map((cloName) => (
+                                    <DropdownItem key={cloName} className="capitalize">
+                                        {cloName}
+                                    </DropdownItem>
+                                ))}
+                            </DropdownMenu>
                         </Dropdown>
+
+                        <Dropdown>
+                            <DropdownTrigger className="sm:flex">
+                                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                                    Filter by PLO
+                                </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu
+                                aria-label="Filter by PLO"
+                                closeOnSelect={true}
+                                selectedKeys={new Set([ploFilter])} // Chuyển đổi ploFilter thành Set
+                                selectionMode="single"
+                                onSelectionChange={(keys) => {
+                                    const selectedKey = Array.from(keys)[0] || ''; // Đảm bảo chọn giá trị rỗng nếu không có lựa chọn
+                                    setPloFilter(selectedKey);
+                                }}
+                            >
+                                <DropdownItem key="" className="capitalize">
+                                    All PLOs
+                                </DropdownItem>
+                                {uniqueSortedPloNames.map((ploName) => (
+                                    <DropdownItem key={ploName} className="capitalize">
+                                        {ploName}
+                                    </DropdownItem>
+                                ))}
+                            </DropdownMenu>
+                        </Dropdown>
+                        <Dropdown>
+                            <DropdownTrigger className="sm:flex">
+                                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                                    Filter by Chapter
+                                </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu
+                                aria-label="Filter by Chapter"
+                                closeOnSelect={true}
+                                selectedKeys={new Set([chapterFilter])} // Chuyển đổi chapterFilter thành Set
+                                selectionMode="single"
+                                onSelectionChange={(keys) => {
+                                    const selectedKey = Array.from(keys)[0] || ''; // Đảm bảo chọn giá trị rỗng nếu không có lựa chọn
+                                    setChapterFilter(selectedKey);
+                                }}
+                            >
+                                <DropdownItem key="" className="capitalize">
+                                    All Chapters
+                                </DropdownItem>
+                                {uniqueSortedChapterNames.map((chapterName) => (
+                                    <DropdownItem key={chapterName} className="capitalize">
+                                        {chapterName}
+                                    </DropdownItem>
+                                ))}
+                            </DropdownMenu>
+                        </Dropdown>
+
+
                     </div>
 
                 </div>
@@ -641,7 +795,7 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
                     } else if (selectedKeys.size > 0) {
                         handleSoftDelete();
                         setSelectedKeys(new Set());
-                    } 
+                    }
                 }}
             />
         </>

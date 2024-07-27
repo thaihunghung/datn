@@ -6,6 +6,7 @@ import { Table, Tooltip, Button, message } from 'antd';
 import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavRubricItems from "../../Utils/DropdownAndNav/DropdownAndNavRubricItems";
+import BackButton from "../../Utils/BackButton/BackButton";
 
 const StoreRubicItems = (nav) => {
     const { id } = useParams();
@@ -243,7 +244,9 @@ const StoreRubicItems = (nav) => {
                     }
                 }}
             />
-            <DropdownAndNavRubricItems />
+            <div>
+            <BackButton />
+            </div>
             <div className="my-5 flex justify-center items-center flex-col sm:flex-col lg:flex-row xl:fex-row">
                 <div className="text-lg leading-8 italic font-bold text-[#FF9908] flex-1 text-justify">Tên học phần:{' '+rubicData.rubricName}</div>
                 <div className="text-lg  leading-8 italic font-bold text-[#FF9908]  flex-1 text-justify">Tên rubric:{' '+rubicData.subjectName}</div>

@@ -79,7 +79,7 @@ const UpdateSubject = (nav) => {
             window.removeEventListener("resize", handleResize);
         };
     }, [id, setCollapsedNav, onOpen]);
-    
+
     const DataTypeSubject = [
         { key: '1', TypeSubject: 'Đại cương' },
         { key: '2', TypeSubject: 'Cơ sở ngành' },
@@ -147,23 +147,22 @@ const UpdateSubject = (nav) => {
                             className="w-full"
                         />
                         <span>Loại môn học</span>
+                        
                         <Select
-            value={typeSubject}
-            onChange={(value) => setTypeSubject(value)}
-            size="large"
-            className="w-full"
-        >
-            {DataTypeSubject.map((TypeSubject) => (
-                <Select.Option
-                    key={TypeSubject.key}
-                    value={TypeSubject.TypeSubject}
-                >
-                    {TypeSubject.TypeSubject}
-                </Select.Option>
-            ))}
-        </Select>
-
-
+                            value={typeSubject}
+                            onChange={(value) => setTypeSubject(value)}
+                            size="large"
+                            className="w-full"
+                        >
+                            {DataTypeSubject.map((TypeSubject) => (
+                                <Select.Option
+                                    key={TypeSubject.key}
+                                    value={TypeSubject.TypeSubject}
+                                >
+                                    {TypeSubject.TypeSubject}
+                                </Select.Option>
+                            ))}
+                        </Select>
                     </ModalBody>
                     <ModalFooter>
                         <Button
@@ -175,7 +174,7 @@ const UpdateSubject = (nav) => {
                         >
                             Close
                         </Button>
-                        
+
                         <Button onClick={updateSubjects} color="primary" radius="sm">
                             <span className="font-medium">Cập nhật</span>
                         </Button>

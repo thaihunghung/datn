@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Tooltip, message, Button } from 'antd';
+import { Tooltip, message } from 'antd';
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavClo from "../../Utils/DropdownAndNav/DropdownAndNavClo";
+import BackButton from "../../Utils/BackButton/BackButton";
+import { PlusIcon } from "../ManagementAssessment/PlusIcon";
+import { Button } from "@nextui-org/react";
 const CloPlo = (nav) => {
     const { id } = useParams();
     const { setCollapsedNav } = nav;
@@ -143,8 +146,22 @@ const CloPlo = (nav) => {
 
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5 relative">
-            <DropdownAndNavClo/>
-            <div className="px-5 mt-5 flex justify-end items-start relative">
+            <div className='w-full flex justify-between'>
+                <div className='h-full my-auto p-5 hidden sm:block'>
+                    <BackButton />
+                </div>
+                <div className='w-full sm:w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-center items-center flex gap-4 flex-col'>
+                    <div className='flex justify-center w-full flex-wrap items-center gap-1'>
+                        <Button color="primary" onClick={handleSaveOrDelete}>
+                            Save
+                        </Button>
+                    </div>
+                </div>
+            </div>
+            <div className="pl-5 mt-2">
+                <h1 className="text-2xl font-bold text-[#6366F1] text-left">Map Clo Plo</h1>
+            </div>
+            <div className="p-5 pt-0 pb-10 mt-5 flex justify-end items-start relative">
                 <div className="sticky left-0 top-0 z-50 block sm:hidden lg:hidden xl:hidden">
                     <table>
                         <thead>
@@ -216,13 +233,6 @@ const CloPlo = (nav) => {
                 </div>
 
             </div>
-            <div className="w-full flex justify-center items-center">
-                <Button color="primary" onClick={handleSaveOrDelete} className="mt-5 px-20 w-[300px]">
-                    Lưu
-                </Button>
-
-            </div>
-
         </div>
     );
 }

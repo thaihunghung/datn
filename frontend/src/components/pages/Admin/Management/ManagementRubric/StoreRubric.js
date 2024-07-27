@@ -5,6 +5,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavRubric from "../../Utils/DropdownAndNav/DropdownAndNavRubric";
 import Cookies from "js-cookie";
+import BackButton from "../../Utils/BackButton/BackButton";
 const StoreRubric = (nav) => {
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -231,7 +232,10 @@ const StoreRubric = (nav) => {
                     }
                 }}
             />
-            <DropdownAndNavRubric />
+            <div>
+            <BackButton />
+            </div>
+            
             <div className="w-full my-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
