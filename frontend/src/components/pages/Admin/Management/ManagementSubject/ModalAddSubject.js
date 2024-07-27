@@ -13,7 +13,6 @@ import {
 } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
-import { permissions } from "./Data";
 import { capitalize } from "../../Utils/capitalize";
 import { Tabs, Tab } from "@nextui-org/react";
 
