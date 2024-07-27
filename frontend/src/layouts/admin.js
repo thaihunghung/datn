@@ -29,7 +29,7 @@ import CreateClo from '../components/pages/Admin/Management/ManagementSubject/Cr
 import CloPlo from '../components/pages/Admin/Management/ManagementSubject/CloPlo';
 import Chapter from '../components/pages/Admin/Management/ManagementSubject/Chapter';
 import ChapterClo from '../components/pages/Admin/Management/ManagementSubject/ChapterClo';
-import UpdateClo from '../components/pages/Admin/Management/ManagementSubject/UpdateClo';
+// import UpdateClo from '../components/pages/Admin/Management/ManagementSubject/UpdateClo';
 import CreateChapter from '../components/pages/Admin/Management/ManagementSubject/CreateChapter';
 import StoreClo from '../components/pages/Admin/Management/ManagementSubject/StoreClo';
 import UpdateChapter from '../components/pages/Admin/Management/ManagementSubject/UpdateChapter';
@@ -127,7 +127,7 @@ function Admin({ user }) {
 
 
           <Route path="/management-subject/:id/clo/update" element={<Clo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
-          <Route path="/management-subject/:id/clo/update/:clo_id" element={<UpdateClo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
+         
           <Route path="/management-subject/:id/clo/create" element={<CreateClo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
           <Route path="/management-subject/:id/clo/store" element={<StoreClo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
           <Route path="/management-subject/:id/clo-plo" element={<CloPlo collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
@@ -142,9 +142,6 @@ function Admin({ user }) {
           <Route path="/management-grading/:description" element={<ManagementAssessmentGrading collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
           <Route path="/management-grading-test" element={<ManagementAssessmentGradingTest collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
 
-          
-          
-          
           
           <Route path="/management-grading/:description/student-code/:studentCode/assessment/:assessment_id/rubric/:rubric_id" element={<FormGrading collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
 

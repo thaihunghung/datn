@@ -62,6 +62,7 @@ const Subject = (nav) => {
       console.error('Error processing description:', error);
     }
   }
+  const [dateFilter, setDateFilter] = useState('newest');
   const [Subjects, setSubjects] = useState([]);
   const [filterValue, setFilterValue] = useState('');
   const [classFilter, setClassFilter] = useState('all');
@@ -79,7 +80,6 @@ const Subject = (nav) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newRubric, setNewRubric] = useState({
-    subject_id: "",
     teacher_id: teacher_id,
     subjectName: "",
     subjectCode: "",
@@ -89,7 +89,6 @@ const Subject = (nav) => {
     numberCreditsPractice: "",
     typesubject: "",
   });
-
   const [editRubric, setEditRubric] = useState({
     subject_id: "",
     subjectName: "",
@@ -138,7 +137,6 @@ const Subject = (nav) => {
     loadSubjects();
   }, [page, rowsPerPage, filterValue]);
 
-
   const pages = Math.ceil(Subjects.length / rowsPerPage);
   const hasSearchFilter = Boolean(filterValue);
 
@@ -162,8 +160,14 @@ const Subject = (nav) => {
       );
     }
 
+    if (dateFilter === 'newest') {
+      filteredSubject.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } else if (dateFilter === 'oldest') {
+      filteredSubject.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    }
+
     return filteredSubject;
-  }, [Subjects, filterValue, statusFilter,]);
+  }, [Subjects, filterValue, statusFilter, dateFilter]);
 
   const handleSelectionChange = (keys) => {
     // console.log('Keys:', keys);
@@ -248,30 +252,55 @@ const Subject = (nav) => {
       message.error("Error updating subject: " + (error.response?.data?.message || 'Internal server error'));
     }
   };
+  const UnValueModalNew = {
+    teacher_id: teacher_id,
+    subjectName: "",
+    subjectCode: "",
+    description: "",
+    numberCredits: "",
+    numberCreditsTheory: "",
+    numberCreditsPractice: "",
+    typesubject: "",
+  }
   const handleFormSubmit = async (event) => {
-    console.log("newRubric", newRubric);
-    // event.preventDefault();
-    // try {
-    //   const response = await axiosAdmin.post("/teacher", newTeacher);
-    //   if (response.status === 200) {
-    //     const { teachers, total } = await fetchTeachersData(page, rowsPerPage, filterValue);
-    //     setTeachers(teachers);
-    //     setTotalTeachers(total);
-    //     handleClearSelection();
-    //   } else {
-    //     console.error("Failed to add teacher");
-    //   }
-    // } catch (error) {
-    //   console.error("Error adding teacher:", error);
-    // }
+    // setNewRubric(UnValueModalNew);
+
+    if (newRubric.typesubject === "") {
+      message.warning('Please select a type of subject');
+      return;
+    }
+    try {
+      const data = {
+        subjectName: newRubric.subjectName,
+        teacher_id: teacher_id,
+        subjectCode: newRubric.subjectCode,
+        description: newRubric.description,
+        numberCredits: parseInt(newRubric.numberCredits),
+        numberCreditsTheory: parseInt(newRubric.numberCreditsTheory),
+        numberCreditsPractice: parseInt(newRubric.numberCreditsPractice),
+        typesubject: newRubric.typesubject
+      }
+
+      const response = await axiosAdmin.post('/subject', { data: data });
+      if (response.status === 201) {
+        message.success('Data saved successfully');
+        setNewRubric(UnValueModalNew)
+        loadSubjects()
+      } else {
+        message.error(response.data.message || 'Error saving data');
+      }
+    } catch (error) {
+      console.error(error);
+      message.error('Error saving data');
+    }
   };
   const handleEditClick = (teacher) => {
     setEditRubric(teacher);
     setIsEditModalOpen(true);
-};
-const handleAddClick = () => {
-  setIsAddModalOpen(true);
-};
+  };
+  const handleAddClick = () => {
+    setIsAddModalOpen(true);
+  };
 
   const renderCell = React.useCallback((subject, columnKey) => {
     const cellValue = subject[columnKey];
@@ -419,6 +448,12 @@ const handleAddClick = () => {
         return (
           <div className="flex flex-col">
             <p className="text-bold text-small capitalize">{subject.typesubject}</p>
+          </div>
+        );
+      case 'createdAt':
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize">{subject.createdAt}</p>
           </div>
         );
       case 'action':
@@ -593,6 +628,27 @@ const handleAddClick = () => {
             <Dropdown>
               <DropdownTrigger className="sm:flex">
                 <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                  Columns
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                disallowEmptySelection
+                aria-label="Table Columns"
+                closeOnSelect={false}
+                selectedKeys={visibleColumns}
+                selectionMode="multiple"
+                onSelectionChange={setVisibleColumns}
+              >
+                {columns.map((column) => (
+                  <DropdownItem key={column.uid} className="capitalize">
+                    {capitalize(column.name)}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+            <Dropdown>
+              <DropdownTrigger className="sm:flex">
+                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
                   Filter type
                 </Button>
               </DropdownTrigger>
@@ -615,49 +671,27 @@ const handleAddClick = () => {
                 ))}
               </DropdownMenu>
             </Dropdown>
+
+
             <Dropdown>
               <DropdownTrigger className="sm:flex">
                 <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                  Columns
+                  Filter Date
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
                 disallowEmptySelection
-                aria-label="Table Columns"
-                closeOnSelect={false}
-                selectedKeys={visibleColumns}
-                selectionMode="multiple"
-                onSelectionChange={setVisibleColumns}
-              >
-                {columns.map((column) => (
-                  <DropdownItem key={column.uid} className="capitalize">
-                    {capitalize(column.name)}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-            <Dropdown>
-              <DropdownTrigger className="sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                  Lọc lớp
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                aria-label="Class Filter"
+                aria-label="Date Filter"
                 closeOnSelect={true}
-                selectedKeys={new Set([classFilter])} // Chuyển đổi classFilter thành Set
+                selectedKeys={new Set([dateFilter])}
                 selectionMode="single"
                 onSelectionChange={(keys) => {
-                  const selectedKey = Array.from(keys)[0] || 'all';
-                  setClassFilter(selectedKey);
+                  const selectedKey = Array.from(keys)[0] || 'newest';
+                  setDateFilter(selectedKey);
                 }}
               >
-                <DropdownItem key="all" className="capitalize">All Classes</DropdownItem>
-                {classes.map((classOption) => (
-                  <DropdownItem key={classOption.value} className="capitalize">
-                    {classOption.label}
-                  </DropdownItem>
-                ))}
+                <DropdownItem key="newest" className="capitalize">Newest</DropdownItem>
+                <DropdownItem key="oldest" className="capitalize">Oldest</DropdownItem>
               </DropdownMenu>
             </Dropdown>
           </div>
@@ -713,8 +747,8 @@ const handleAddClick = () => {
         newRubric={newRubric}
         setNewRubric={setNewRubric}
       />
-      
-      
+
+
       <ConfirmAction
         onOpenChange={onOpenChange}
         isOpen={isOpen}

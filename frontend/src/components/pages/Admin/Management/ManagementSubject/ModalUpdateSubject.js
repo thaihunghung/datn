@@ -39,7 +39,31 @@ function ModalUpdateSubject({ isOpen, onOpenChange, onSubmit, editRubric, setEdi
   ];
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Modal 
+      isOpen={isOpen} 
+      onOpenChange={onOpenChange}
+      scrollBehavior="outside"
+          motionProps={{
+            variants: {
+              enter: {
+                y: 0,
+                opacity: 1,
+                transition: {
+                  duration: 0.2,
+                  ease: "easeOut",
+                },
+              },
+              exit: {
+                y: -20,
+                opacity: 0,
+                transition: {
+                  duration: 0.1,
+                  ease: "easeIn",
+                },
+              },
+            },
+          }}
+      >
       <ModalContent>
         {(onClose) => (
           <>

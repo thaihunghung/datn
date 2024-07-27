@@ -25,7 +25,7 @@ const CustomUpload = ({ endpoint, setCurrent, fileList, setFileList, method, Loa
         } else {
           setFileList([]);
           message.success(data.message);
-          setCurrent(2);
+          //setCurrent(2);
           if (LoadData) {
             LoadData();
           }

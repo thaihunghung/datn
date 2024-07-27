@@ -6,7 +6,7 @@ const path = require('path');
 const programController = {
   index: async (req, res) => {
     try {
-      const programs = await ProgramModel.findOne({ where: { program_id: 1 } });
+      const programs = await ProgramModel.findOne({ where: { program_id: 'IT' } });
       if (!programs) {
         return res.status(404).json({ message: 'Program not found' });
       }

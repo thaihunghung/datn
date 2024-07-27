@@ -12,6 +12,8 @@ import Tabs from "../../Utils/Tabs/Tabs";
 import { PlusIcon } from "../ManagementAssessment/PlusIcon";
 import Cookies from "js-cookie";
 import BackButton from "../../Utils/BackButton/BackButton";
+import ModalUpdateClo from "./ModalUpdateClo";
+import ModalAddClo from "./ModalAddClo";
 
 const Clo = (nav) => {
     const { id } = useParams();
@@ -20,6 +22,7 @@ const Clo = (nav) => {
     if (!teacher_id) {
         navigate('/login');
     }
+    
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -64,15 +67,20 @@ const Clo = (nav) => {
                 </div>
             ),
             dataIndex: "action",
-            render: (_id) => (
+            render: (action) => (
                 <div className="flex items-center justify-center w-full gap-2">
-                    <Link to={`/admin/management-subject/${id}/clo/update/${_id}`}>
-                        <Tooltip title="Chỉnh sửa">
-                            <Button isIconOnly variant="light" radius="full" size="sm" className="bg-[#AF84DD]">
-                                <i className="fa-solid fa-pen"></i>
-                            </Button>
-                        </Tooltip>
-                    </Link>
+                    <Tooltip title="Chỉnh sửa">
+                        <Button
+                            isIconOnly
+                            variant="light"
+                            radius="full"
+                            size="sm"
+                            className="bg-[#AF84DD]"
+                            onClick={() => { handleEditClick(action.CLO) }}
+                        >
+                            <i className="fa-solid fa-pen"></i>
+                        </Button>
+                    </Tooltip>
                     <Tooltip title="Xoá">
                         <Button
                             isIconOnly
@@ -80,7 +88,7 @@ const Clo = (nav) => {
                             variant="light"
                             radius="full"
                             size="sm"
-                            onClick={() => { onOpen(); setDeleteId(_id); }}
+                            onClick={() => { onOpen(); setDeleteId(action._id); }}
                         >
                             <i className="fa-solid fa-trash-can"></i>
                         </Button>
@@ -110,12 +118,20 @@ const Clo = (nav) => {
     const getAllClo = async () => {
         try {
             const response = await axiosAdmin.get(`/clos?subject_id=${id}&isDelete=false`);
-            const updatedPoData = response.data.map((po) => ({
-                key: po.clo_id,
-                name: po.cloName,
-                description: po.description,
-                isDeleted: po.isDelete,
-                action: po.clo_id,
+            const updatedPoData = response.data.map((clo) => ({
+                key: clo?.clo_id,
+                name: clo?.cloName,
+                description: clo?.description,
+                isDeleted: clo?.isDelete,
+                action: {
+                    _id: clo?.clo_id,
+                    CLO: {
+                        clo_id: clo?.clo_id,
+                        cloName: clo?.cloName,
+                        description: clo?.description,
+                        subject_id: clo?.subject_id,
+                    }
+                }
             }));
             setPosListData(updatedPoData);
             console.log(response.data);
@@ -159,43 +175,77 @@ const Clo = (nav) => {
         }
     };
 
-    const handleDownloadPo = async () => {
-        try {
-            if (selectedRowKeys.length === 0) {
-                alert('Please select at least one clo ID');
-                return;
-            }
-            const data = { id: selectedRowKeys };
-            const response = await axiosAdmin.post('/clo/templates/update', { data }, { responseType: 'blob' });
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [newClo, setNewClo] = useState({
+        cloName: "",
+        description: "",
+        subject_id: "",
+    });
+    const [editClo, setEditClo] = useState({
+        clo_id: "",
+        cloName: "",
+        description: "",
+        subject_id: "",
+    });
 
-            if (response && response.data) {
-                const url = window.URL.createObjectURL(response.data);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'clo.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                setCurrent(1);
-            }
+    const handleEditFormSubmit = async (values, clo_id) => {
+        if (!clo_id) {
+            console.error("No clo selected for editing");
+            return;
+        }
+        try {
+            const response = await axiosAdmin.put(`/clo/${clo_id}`, { data: values });
+            getAllClo();
+            message.success(response.data.message);
         } catch (error) {
-            console.error('Error downloading file:', error);
+            console.error("Error updating clo:", error);
+            message.error("Error updating clo: " + (error.response?.data?.message || 'Internal server error'));
         }
     };
-
-    const props = {
-        onRemove: (file) => {
-            const index = fileList.indexOf(file);
-            const newFileList = fileList.slice();
-            newFileList.splice(index, 1);
-            setFileList(newFileList);
-        },
-        beforeUpload: (file) => {
-            setFileList([...fileList, file]);
-            return false;
-        },
-        fileList,
+    const UnValueModalNew = {
+        cloName: "",
+        description: "",
+        subject_id: id,
+    }
+    const handleFormSubmit = async (event) => {
+        // setNewClo(UnValueModalNew);
+        // const [newClo, setNewClo] = useState({
+        //     cloName: "",
+        //     description: "",
+        //     subject_id: "",
+        // });
+        
+        if (newClo.cloName === "") {
+            message.warning('Please input a new clo name');
+            return;
+        }
+        const data = {
+            cloName: newClo.cloName,
+            description: newClo.description,
+            subject_id: id,
+        }
+        try {
+            const response = await axiosAdmin.post('/clo', { data: data });
+            if (response.status === 201) {
+                message.success('Data saved successfully');
+                setNewClo(UnValueModalNew)
+            } else {
+                message.error(response.data.message || 'Error saving data');
+            }
+        } catch (error) {
+            console.error(error);
+            message.error('Error saving data');
+        }
     };
+    const handleEditClick = (clo) => {
+        setEditClo(clo);
+        setIsEditModalOpen(true);
+    };
+    const handleAddClick = () => {
+        setIsAddModalOpen(true);
+    };
+
 
     useEffect(() => {
         getSubjectById()
@@ -225,6 +275,23 @@ const Clo = (nav) => {
                     }
                 }}
             />
+            <ModalUpdateClo
+                isOpen={isEditModalOpen}
+                onOpenChange={setIsEditModalOpen}
+                onSubmit={handleEditFormSubmit}
+                editData={editClo}
+                setEditData={setEditClo}
+            />
+
+
+            <ModalAddClo
+                isOpen={isAddModalOpen}
+                onOpenChange={setIsAddModalOpen}
+                onSubmit={handleFormSubmit}
+                editData={newClo}
+                setEditData={setNewClo}
+            />
+
             {/* <DropdownAndNavClo /> */}
             <div className='w-full flex justify-between'>
                 <div className='h-full my-auto p-5 hidden sm:block'>
@@ -244,7 +311,7 @@ const Clo = (nav) => {
                         <Button
                             className='bg-[#AF84DD] '
                             endContent={<PlusIcon />}
-                        //onClick={handleOpenModalCreate}
+                            onClick={handleAddClick}
                         >
                             New
                         </Button>
@@ -273,7 +340,7 @@ const Clo = (nav) => {
             <div className="pl-5">
                 <h1 className="text-xl font-bold text-[#6366F1] text-left">Danh sách Clo</h1>
             </div>
-            
+
             <div className="w-full my-5 px-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
@@ -282,16 +349,6 @@ const Clo = (nav) => {
                             Đã chọn {selectedRow.length} clo
                         </p>
                         <div className="flex items-center gap-2">
-                            {/* <Tooltip
-                                title={`Xoá ${selectedRowKeys.length} clo`}
-                                getPopupContainer={() =>
-                                    document.querySelector(".Quick__Option")
-                                }
-                            >
-                                <Button isIconOnly variant="light" radius="full" onClick={onOpen}>
-                                    <i className="fa-solid fa-trash-can"></i>
-                                </Button>
-                            </Tooltip> */}
                             <Tooltip
                                 title="Bỏ chọn"
                                 getPopupContainer={() =>
@@ -325,22 +382,13 @@ const Clo = (nav) => {
                     />
                 </div>
             </div>
-            {/* <Tabs tabs=
-                {[
-                    {
-                        title: 'Cập nhật',
-                        content:
-                            <DownloadAndUpload props={props} endpoint={'clo/update'} LoadData={getAllClo} Data={parseInt(id)} handleDownload={handleDownloadPo} handleOnChangeTextName={handleOnChangeTextName} current={current} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
-                    }
-                ]}
-                activeTab={activeTab} setActiveTab={setActiveTab}
-            /> */}
         </div>
     );
 }
 
 
 export default Clo;
+
 function ConfirmAction(props) {
     const { isOpen, onOpenChange, onConfirm } = props;
     const handleOnOKClick = (onClose) => {

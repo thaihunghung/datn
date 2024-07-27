@@ -24,7 +24,8 @@ export const fetchRubricData = async (teacher_id) => {
         name: rubric.rubricName,
         status: status,
         point: rubric.RubricItem[0]?.total_score ? rubric.RubricItem[0].total_score : 0.0,
-        action: Rubric
+        action: Rubric,
+        createdAt: rubric.createdAt
       };
     });
 
@@ -39,9 +40,11 @@ export const fetchRubricData = async (teacher_id) => {
 const columns = [
   { name: "id", uid: "id", sortable: true }, // Có thể sử dụng `key` hoặc `rubric_id` tùy thuộc vào cách bạn muốn hiển thị
   { name: "name", uid: "name", sortable: true },
-  { name: "status", uid: "status", sortable: true },
+  { name: "Items", uid: "Items", sortable: true },
   { name: "point", uid: "point", sortable: true },
+  { name: "createdAt", uid: "createdAt", sortable: true },
   { name: "action", uid: "action", sortable: true },
+  
 ];
 
 const statusOptions = [

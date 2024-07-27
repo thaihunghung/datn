@@ -166,7 +166,6 @@ function ModalUpdateRubicItems({
       <Modal
         isOpen={isOpen}
         scrollBehavior="outside"
-        hideCloseButton
         motionProps={{
           variants: {
             enter: {

@@ -596,7 +596,14 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
                         >
                             Deletes
                         </Button>
-
+                        <Button
+                            endContent={<PlusIcon />}
+                            onClick={() => handleNavigate(
+                                `/admin/management-rubric/${id}/rubric-items/template`
+                            )}
+                        >
+                            View
+                        </Button>
 
                         <Button
                             endContent={<PlusIcon />}

@@ -8,6 +8,7 @@ const programController = require('../controllers/ProgramsController');
  *     description: Operations related to Programs management
  */
 // get: /programs
+
 /**
  * @openapi
  * tags:
@@ -63,7 +64,7 @@ const programController = require('../controllers/ProgramsController');
  *   - name: Programs
  *     description: Operations related to Programs management
  * 
- * /api/admin/program/{id}:
+  * /api/admin/program/{id}:
  *   get:
  *     summary: Get a program by ID
  *     tags:
@@ -73,7 +74,7 @@ const programController = require('../controllers/ProgramsController');
  *         in: path
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *     responses:
  *       '200':
  *         description: Program details
@@ -91,7 +92,7 @@ const programController = require('../controllers/ProgramsController');
  *   - name: Programs
  *     description: Operations related to Programs management
  * 
- * /api/admin/program/{id}:
+  * /api/admin/program/{id}:
  *   put:
  *     summary: Update a program by ID
  *     tags:
@@ -101,7 +102,7 @@ const programController = require('../controllers/ProgramsController');
  *         in: path
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *     requestBody:
  *       description: Program data to be updated
  *       content:
@@ -136,7 +137,7 @@ const programController = require('../controllers/ProgramsController');
  *         in: path
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *     responses:
  *       '204':
  *         description: Program deleted successfully
@@ -194,7 +195,7 @@ const programController = require('../controllers/ProgramsController');
  *   - name: Programs
  *     description: Operations related to Programs management
  * 
- * /api/admin/program/isDelete/{id}:
+  * /api/admin/program/isDelete/{id}:
  *   put:
  *     summary: Toggle the isDelete status of a program
  *     tags:
@@ -204,7 +205,7 @@ const programController = require('../controllers/ProgramsController');
  *         in: path
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *     requestBody:
  *       description: New isDelete status
  *       content:

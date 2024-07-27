@@ -17,12 +17,12 @@ const PoModel = sequelize.define('PO', {
     allowNull: false
   },
   program_id: {
-    type: DataTypes.INTEGER.UNSIGNED,
+    type: DataTypes.STRING(255),
     allowNull: false,
     references: {
       model: ProgramModel,
       key: 'program_id'
-    }
+    },
   },
   isDelete: {
     type: DataTypes.TINYINT(1),

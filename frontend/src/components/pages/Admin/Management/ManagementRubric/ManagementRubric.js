@@ -26,12 +26,13 @@ const statusColorMap = {
     vacation: 'warning',
 };
 
-const INITIAL_VISIBLE_COLUMNS = ['id', 'name', 'point', 'status', 'action'];
-const COMPACT_VISIBLE_COLUMNS = ['name', 'status', 'action'];
+const INITIAL_VISIBLE_COLUMNS = ['name', 'point', 'Items', 'action'];
+const COMPACT_VISIBLE_COLUMNS = ['name', 'Items', 'action'];
 
 const ManagementRubric = (nav) => {
     const [rubricData, setRubricData] = useState([]);
     const [filterValue, setFilterValue] = useState('');
+    const [dateFilter, setDateFilter] = useState('newest');
     const [selectedKeys, setSelectedKeys] = useState(new Set());
     const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -79,17 +80,17 @@ const ManagementRubric = (nav) => {
 
     const handleEditFormSubmit = async (values, rubric_id) => {
         if (!rubric_id) {
-          console.error("No rubric selected for editing");
-          return;
+            console.error("No rubric selected for editing");
+            return;
         }
         try {
             const response = await axiosAdmin.put(`/rubric/${rubric_id}`, { data: values });
             loadRubric();
             message.success(response.data.message);
-          } catch (error) {
+        } catch (error) {
             console.error("Error updating rubric:", error);
             message.error("Error updating rubric: " + (error.response?.data?.message || 'Internal server error'));
-          }
+        }
     };
 
     const getAllSubject = async () => {
@@ -131,9 +132,13 @@ const ManagementRubric = (nav) => {
             );
         }
 
-
+        if (dateFilter === 'newest') {
+            filteredAssessment.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          } else if (dateFilter === 'oldest') {
+            filteredAssessment.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+          }
         return filteredAssessment;
-    }, [rubricData, filterValue]);
+    }, [rubricData, filterValue, dateFilter]);
     const handleSelectionChange = (keys) => {
         // console.log('Keys:', keys);
         if (keys === 'all') {
@@ -170,9 +175,6 @@ const ManagementRubric = (nav) => {
             return sortDescriptor.direction === 'descending' ? -cmp : cmp;
         });
     }, [sortDescriptor, items]);
-
-
-
 
     const handleEditClick = (teacher) => {
         setCurrentTeacher(teacher);
@@ -245,7 +247,7 @@ const ManagementRubric = (nav) => {
                         <p className="text-bold text-small capitalize">{cellValue}</p>
                     </div>
                 );
-            case 'status':
+            case 'Items':
                 return (
                     <div className="flex flex-col">
                         {/* ${rubric.status.status ? 'text-success' : 'text-danger'} */}
@@ -256,14 +258,14 @@ const ManagementRubric = (nav) => {
                                     onClick={() =>
                                         handleNavigate(`/admin/management-rubric/${rubric.status.id}/rubric-items/list`)}
                                 >
-                                    <p>Chỉnh sửa</p>
+                                    <p>Update</p>
                                 </Button>
                                 :
                                 <Button color="primary" variant="ghost"
                                     onClick={() =>
                                         handleNavigate(`/admin/management-rubric/${rubric.status.id}/rubric-items/list`)}
                                 >
-                                    <p>Tạo mới</p>
+                                    <p>Create</p>
                                 </Button>
 
                             }
@@ -276,6 +278,15 @@ const ManagementRubric = (nav) => {
                         <p className="text-bold text-small">{cellValue}</p>
                     </div>
                 );
+                case 'createdAt':
+                    return (
+                        <div className="flex flex-col">
+                            <p className="text-bold text-small">{rubric.createdAt}</p>
+                        </div>
+                    );
+
+
+                
             case 'action':
                 //const disc = replaceCharacters(cellValue.description); // Assuming `replaceCharacters` is a function you have
                 return (
@@ -444,7 +455,7 @@ const ManagementRubric = (nav) => {
         setRubricData(response);
     };
 
-    useEffect(() => {   
+    useEffect(() => {
         loadRubric();
         // console.log("rubricData loaded", rubricData);
     }, [page, rowsPerPage, filterValue]);
@@ -453,9 +464,9 @@ const ManagementRubric = (nav) => {
         <>
             <div className='w-full flex justify-between'>
                 <div className='h-full my-auto p-5 hidden sm:block'>
-                <div>
-          <h1 className="text-2xl pb-2 font-bold text-[#6366F1]">Danh sách Rubric</h1>
-        </div>
+                    <div>
+                        <h1 className="text-2xl pb-2 font-bold text-[#6366F1]">Danh sách Rubric</h1>
+                    </div>
                     <BackButton />
                 </div>
                 <div className='w-full sm:w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-start items-center flex gap-4 flex-col mb-4'>
@@ -477,7 +488,7 @@ const ManagementRubric = (nav) => {
                         </Button>
                         <Button
                             endContent={<PlusIcon />}
-                             onClick={() => handleNavigate(
+                            onClick={() => handleNavigate(
                                 `/admin/management-rubric/store`
                             )}
                         >
@@ -509,13 +520,26 @@ const ManagementRubric = (nav) => {
                             </DropdownMenu>
                         </Dropdown>
                         <Dropdown>
-                            <DropdownTrigger className="sm:flex">
-                                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                                    Lọc lớp
-                                </Button>
-                            </DropdownTrigger>
-
-                        </Dropdown>
+              <DropdownTrigger className="sm:flex">
+                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                  Filter Date
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                disallowEmptySelection
+                aria-label="Date Filter"
+                closeOnSelect={true}
+                selectedKeys={new Set([dateFilter])}
+                selectionMode="single"
+                onSelectionChange={(keys) => {
+                  const selectedKey = Array.from(keys)[0] || 'newest';
+                  setDateFilter(selectedKey);
+                }}
+              >
+                <DropdownItem key="newest" className="capitalize">Newest</DropdownItem>
+                <DropdownItem key="oldest" className="capitalize">Oldest</DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
                     </div>
 
                 </div>

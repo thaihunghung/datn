@@ -6,46 +6,36 @@ import {
   ModalBody,
   ModalFooter,
   Input,
-  Select,
-  SelectItem,
   Button,
   Tabs,
   Tab,
+  Textarea,
 } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
-import { capitalize } from "../../Utils/capitalize";
 
-function ModalAddSubject({
+function ModalAddChapter({
   isOpen,
   onOpenChange,
   onSubmit,
-  newRubric,
-  setNewRubric,
+  editData,
+  setEditData,
 }) {
   const [fileList, setFileList] = useState([]);
   const [activeTab, setActiveTab] = useState('Form'); // Trạng thái để theo dõi tab hiện tại
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setNewRubric((prev) => ({
+    setEditData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const handleSelectChange = (event) => {
-    const { value } = event.target; // Lấy giá trị từ event.target
-    setNewRubric((prev) => ({
-      ...prev,
-      typesubject: value,
-    }));
-  };
-  
 
   const handleDownloadTemplateExcel = async () => {
     try {
-      const response = await axiosAdmin.get("/subject/templates/post", {
+      const response = await axiosAdmin.get("/chapter/templates/post", {
         responseType: "blob",
       });
 
@@ -55,7 +45,7 @@ function ModalAddSubject({
         );
         const a = document.createElement("a");
         a.href = url;
-        a.download = "subject.xlsx";
+        a.download = "chapter.xlsx";
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -74,13 +64,6 @@ function ModalAddSubject({
       currentFiles.filter((_, index) => index !== indexToRemove)
     );
   };
-
-  const DataTypeSubject = [
-    { key: 'Đại cương', TypeSubject: 'Đại cương' },
-    { key: 'Cơ sở ngành', TypeSubject: 'Cơ sở ngành' },
-    { key: 'Chuyên ngành', TypeSubject: 'Chuyên ngành' },
-    { key: 'Thực tập và Đồ án', TypeSubject: 'Thực tập và Đồ án' },
-  ];
 
   return (
     <Modal
@@ -112,7 +95,7 @@ function ModalAddSubject({
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className="text-[#FF9908]">Create Subject</ModalHeader>
+            <ModalHeader className="text-[#FF9908]">Create Chapter</ModalHeader>
             <ModalBody>
               <Tabs
                 aria-label="Tabs colors"
@@ -126,74 +109,29 @@ function ModalAddSubject({
                       className="flex flex-col gap-3 h-full"
                       onSubmit={(e) => {
                         e.preventDefault();
-                        onSubmit(newRubric, newRubric.subject_id);
+                        onSubmit(editData);
                         onClose();
                       }}
                     >
                       <Input
                         fullWidth
-                        label="Name"
-                        name="subjectName"
-                        value={newRubric.subjectName || ''}
+                        label="Clo Name"
+                        name="chapterName"
+                        value={editData.chapterName || ''}
                         onChange={handleChange}
                         required
                       />
-                      <Input
-                        fullWidth
-                        label="Code"
-                        name="subjectCode"
-                        value={newRubric.subjectCode || ''}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
+                      <Textarea
                         fullWidth
                         label="Description"
                         name="description"
-                        value={newRubric.description || ''}
+                        placeholder="Enter your description"
+                        value={editData.description || ''}
                         onChange={handleChange}
-                        required
+                        rows={4}
+                        minRows={4}
+                        maxRows={6}
                       />
-                      <Input
-                        fullWidth
-                        label="Number Credits"
-                        name="numberCredits"
-                        type="number"
-                        value={newRubric.numberCredits || ''}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        fullWidth
-                        label="Number Credits Theory"
-                        name="numberCreditsTheory"
-                        type="number"
-                        value={newRubric.numberCreditsTheory || ''}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        fullWidth
-                        label="Number Credits Practice"
-                        name="numberCreditsPractice"
-                        type="number"
-                        value={newRubric.numberCreditsPractice || ''}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Select
-                        label="Type of Subject"
-                        name="typesubject"
-                        value={newRubric.typesubject || ''}
-                        onChange={(value) => handleSelectChange(value)}
-                        fullWidth
-                      >
-                        {DataTypeSubject.map((type) => (
-                          <SelectItem key={type.key} value={type.TypeSubject}>
-                            {capitalize(type.TypeSubject)}
-                          </SelectItem>
-                        ))}
-                      </Select>
                     </form>
                   </div>
                 </Tab>
@@ -252,7 +190,7 @@ function ModalAddSubject({
                         <div className="flex flex-col card p-3 justify-center items-center">
                           <h3>Lưu file</h3>
                           <CustomUpload
-                            endpoint="subject"
+                            endpoint="chapter"
                             method="POST"
                             fileList={fileList}
                             setFileList={setFileList}
@@ -274,7 +212,7 @@ function ModalAddSubject({
                   color="primary"
                   onClick={(e) => {
                     e.preventDefault();
-                    onSubmit(newRubric);
+                    onSubmit(editData);
                     onClose();
                   }}
                 >
@@ -289,4 +227,4 @@ function ModalAddSubject({
   );
 }
 
-export default ModalAddSubject;
+export default ModalAddChapter;

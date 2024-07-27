@@ -20,7 +20,7 @@ const UpdateProgram = (nav) => {
 
     const getProgram = async () => {
         try {
-            const response = await axiosAdmin.get('/program/1');
+            const response = await axiosAdmin.get('/program/IT');
             setProgram(response.data);
             setNameP(response.data.programName)
         } catch (error) {

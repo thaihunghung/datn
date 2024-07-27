@@ -8,6 +8,7 @@ import { Table, Tooltip} from 'antd';
 import DropdownAndNavSubject from "../../Utils/DropdownAndNav/DropdownAndNavSubject";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
+import BackButton from "../../Utils/BackButton/BackButton";
 
 const StoreSubject = (nav) => {
     const { setCollapsedNav } = nav;
@@ -201,7 +202,16 @@ const StoreSubject = (nav) => {
                     }
                 }}
             />
-            <DropdownAndNavSubject />
+              <div className='w-full flex justify-between'>
+                <div className='h-full my-auto p-5 hidden sm:block'>
+                    <BackButton />
+                </div>
+
+            </div>
+
+            <div className="pl-5">
+                <h1 className="text-xl font-bold text-[#6366F1] text-left">Danh sách Subject Đã ẩn</h1>
+            </div>
             <div className="w-full my-5 px-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">

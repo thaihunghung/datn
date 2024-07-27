@@ -26,6 +26,7 @@ export const fetchSujectDataGrading = async () => {
         numberCreditsTheory: subject.numberCreditsTheory,
         numberCreditsPractice: subject.numberCreditsPractice,
         typesubject: subject.typesubject
+
       }
 
       return {
@@ -40,7 +41,8 @@ export const fetchSujectDataGrading = async () => {
         numberCreditsPractice: subject.numberCreditsPractice,
         typesubject: subject.typesubject,
         action: subject.subject_id,
-        Subject: Subject
+        Subject: Subject,
+        createdAt: subject.createdAt
       };
     });
 
@@ -61,6 +63,7 @@ const columns = [
   {name: "numberCreditsTheory", uid: "numberCreditsTheory", sortable: true},
   {name: "numberCreditsPractice", uid: "numberCreditsPractice", sortable: true},
   {name: "typesubject", uid: "typesubject", sortable: true},
+  {name: "createdAt", uid: "createdAt", sortable: true},
   {name: "action", uid: "action", sortable: true},
 ];
 

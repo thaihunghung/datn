@@ -13,6 +13,8 @@ import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import Tabs from "../../Utils/Tabs/Tabs";
 import BackButton from "../../Utils/BackButton/BackButton";
 import { PlusIcon } from "../ManagementAssessment/PlusIcon";
+import ModalUpdateChapter from "./ModalUpdateChapter";
+import ModalAddChapter from "./ModalAddChapter";
 
 const Chapter = (nav) => {
     const { id } = useParams();
@@ -34,22 +36,15 @@ const Chapter = (nav) => {
     };
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [activeTab, setActiveTab] = useState(0);
     const [selectedRow, setSelectedRow] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [poListData, setPosListData] = useState([]);
-    const [current, setCurrent] = useState(0);
+    const [chapterListData, setChapterListData] = useState([]);
     const [deleteId, setDeleteId] = useState(null);
-  
 
-    const handleOnChangeTextName = (nameP) => {
-        setCurrent(nameP);
-    };
     const handleNavigate = (path) => {
         navigate(path);
     };
-    const [fileList, setFileList] = useState([]);
     const columns = [
         {
             title: "Tên Chương",
@@ -76,31 +71,32 @@ const Chapter = (nav) => {
                 </div>
             ),
             dataIndex: "action",
-            render: (_id) => (
+            render: (action) => (
                 <div className="flex items-center justify-center w-full gap-2">
-                    <Link to={`/admin/management-subject/${id}/chapter/update/${_id}`}>
-                        <Tooltip title="Chỉnh sửa">
+                   
+                    <Tooltip title="Chỉnh sửa">
                             <Button
-                            className="bg-[#AF84DD]"
+                                className="bg-[#AF84DD]"
                                 isIconOnly
                                 variant="light"
                                 radius="full"
                                 size="sm"
+                                onClick={() => { handleEditClick(action.CHAPTER) }}
+
                             >
                                 <i className="fa-solid fa-pen"></i>
                             </Button>
-                        </Tooltip>
-                    </Link>
-
+                    </Tooltip>
+              
 
                     <Tooltip title="Xoá">
                         <Button
-                        className="bg-[#FF8077]"
+                            className="bg-[#FF8077]"
                             isIconOnly
                             variant="light"
                             radius="full"
                             size="sm"
-                            onClick={() => { onOpen(); setDeleteId(_id); }}
+                            onClick={() => { onOpen(); setDeleteId(action._id); }}
                         >
                             <i className="fa-solid fa-trash-can"></i>
                         </Button>
@@ -128,23 +124,31 @@ const Chapter = (nav) => {
     const getAllChapter = async () => {
         try {
             const response = await axiosAdmin.get(`/chapters?subject_id=${id}&isDelete=false`);
-            const updatedPoData = response.data.map((po) => {
+            const updatedPoData = response.data.map((chapter) => {
                 return {
-                    key: po.chapter_id,
-                    name: po.chapterName,
-                    description: po.description,
-                    isDeleted: po.isDelete,
-                    action: po.chapter_id,
+                    key: chapter?.chapter_id,
+                    name: chapter?.chapterName,
+                    description: chapter?.description,
+                    isDeleted: chapter?.isDelete,
+                    action: {
+                        _id: chapter?.chapter_id,
+                        CHAPTER: {
+                            chapter_id: chapter?.chapter_id,
+                            chapterName:  chapter?.chapterName,
+                            description:  chapter?.description,
+                            subject_id: chapter?.subject_id,
+                        }
+                    },
                 };
             });
-            setPosListData(updatedPoData);
+            setChapterListData(updatedPoData);
             console.log(response.data);
         } catch (error) {
             console.error("Error: " + error.message);
             message.error('Error fetching PO data');
         }
     };
-  
+
     const handleSoftDelete = async () => {
         const data = {
             chapter_id: selectedRowKeys,
@@ -173,48 +177,6 @@ const Chapter = (nav) => {
         }
     };
 
-    const handleDownloadChapter = async () => {
-        try {
-            if (selectedRowKeys.length === 0) {
-                alert('Please select at least one chapter ID');
-                return;
-            }
-            const data = {
-                id: selectedRowKeys
-            }
-            const response = await axiosAdmin.post('/chapter/templates/update', { data: data }, {
-                responseType: 'blob'
-            });
-
-            if (response && response.data) {
-                const url = window.URL.createObjectURL(response.data);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'chapter_update.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-
-                setCurrent(1);
-            }
-        } catch (error) {
-            console.error('Error downloading file:', error);
-        }
-    };
-    const props = {
-        onRemove: (file) => {
-            const index = fileList.indexOf(file);
-            const newFileList = fileList.slice();
-            newFileList.splice(index, 1);
-            setFileList(newFileList);
-        },
-        beforeUpload: (file) => {
-            setFileList([...fileList, file]);
-            return false;
-        },
-        fileList,
-    };
-
     useEffect(() => {
         getAllChapter()
         getSubjectById()
@@ -232,6 +194,77 @@ const Chapter = (nav) => {
         };
     }, []);
 
+
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [newChapter, setNewChapter] = useState({
+        chapterName: "",
+        description: "",
+        subject_id: "",
+    });
+    const [editChapter, setEditChapter] = useState({
+        chapter_id: "",
+        chapterName: "",
+        description: "",
+        subject_id: "",
+    });
+
+    const handleEditFormSubmit = async (values, chapter_id) => {
+        if (!chapter_id) {
+            console.error("No chapter selected for editing");
+            return;
+        }
+        try {
+            const response = await axiosAdmin.put(`/chapter/${chapter_id}`, { data: values });
+            getAllChapter();
+            message.success(response.data.message);
+        } catch (error) {
+            console.error("Error updating chapter:", error);
+            message.error("Error updating chapter: " + (error.response?.data?.message || 'Internal server error'));
+        }
+    };
+    const UnValueModalNew = {
+        chapterName: "",
+        description: "",
+        subject_id: id,
+    }
+    const handleFormSubmit = async (event) => {
+        // setNewChapter(UnValueModalNew);
+        // const [newChapter, setNewChapter] = useState({
+        //     cloName: "",
+        //     description: "",
+        //     subject_id: "",
+        // });
+
+        if (newChapter.chapterName === "") {
+            message.warning('Please input a new chapter Name');
+            return;
+        }
+        const data = {
+            chapterName: newChapter.chapterName,
+            description: newChapter.description,
+            subject_id: id,
+        }
+        try {
+            const response = await axiosAdmin.post('/chapter', { data: data });
+            if (response.status === 201) {
+                message.success('Data saved successfully');
+                setNewChapter(UnValueModalNew)
+            } else {
+                message.error(response.data.message || 'Error saving data');
+            }
+        } catch (error) {
+            console.error(error);
+            message.error('Error saving data');
+        }
+    };
+    const handleEditClick = (clo) => {
+        setEditChapter(clo);
+        setIsEditModalOpen(true);
+    };
+    const handleAddClick = () => {
+        setIsAddModalOpen(true);
+    };
     return (
         <div className="flex w-full flex-col justify-center leading-8 pt-5">
             <ConfirmAction
@@ -246,6 +279,22 @@ const Chapter = (nav) => {
                         setSelectedRowKeys([]);
                     }
                 }}
+            />
+            <ModalUpdateChapter
+                isOpen={isEditModalOpen}
+                onOpenChange={setIsEditModalOpen}
+                onSubmit={handleEditFormSubmit}
+                editData={editChapter}
+                setEditData={setEditChapter}
+            />
+
+
+            <ModalAddChapter
+                isOpen={isAddModalOpen}
+                onOpenChange={setIsAddModalOpen}
+                onSubmit={handleFormSubmit}
+                editData={newChapter}
+                setEditData={setNewChapter}
             />
             <div className='w-full flex justify-between'>
                 <div className='h-full my-auto p-5 hidden sm:block'>
@@ -265,7 +314,7 @@ const Chapter = (nav) => {
                         <Button
                             className='bg-[#AF84DD] '
                             endContent={<PlusIcon />}
-                        //onClick={handleOpenModalCreate}
+                            onClick={handleAddClick}
                         >
                             New
                         </Button>
@@ -332,20 +381,20 @@ const Chapter = (nav) => {
                             ...rowSelection,
                         }}
                         columns={columns}
-                        dataSource={poListData}
+                        dataSource={chapterListData}
                     />
                 </div>
             </div>
-            <Tabs tabs=
+            {/* <Tabs tabs=
                 {[
                     {
                         title: 'Cập nhật',
                         content:
-                        <DownloadAndUpload props={props} handleDownload={handleDownloadChapter} handleOnChangeTextName={handleOnChangeTextName} endpoint={'chapter/update'} current={current} LoadData={getAllChapter} Data={parseInt(id)} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
+                            <DownloadAndUpload props={props} handleDownload={handleDownloadChapter} handleOnChangeTextName={handleOnChangeTextName} endpoint={'chapter/update'} current={current} LoadData={getAllChapter} Data={parseInt(id)} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
                     }
                 ]}
                 activeTab={activeTab} setActiveTab={setActiveTab}
-            />
+            /> */}
         </div>
     );
 }

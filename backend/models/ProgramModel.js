@@ -3,9 +3,8 @@ const sequelize = require('../config/database');
 
 const ProgramModel = sequelize.define('Program', {
   program_id: {
-    type: DataTypes.INTEGER.UNSIGNED,
+    type: DataTypes.STRING(255),
     primaryKey: true,
-    autoIncrement: true,
     underscored: true
   },
   programName: {
