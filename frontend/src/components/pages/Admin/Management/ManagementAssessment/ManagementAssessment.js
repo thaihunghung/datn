@@ -30,6 +30,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
 import BackButton from '../../Utils/BackButton/BackButton';
 import { axiosAdmin } from '../../../../../service/AxiosAdmin';
+import ModalCreateAssessment from './ModalCreateAssessment';
 
 const statusColorMap = {
   active: 'success',
@@ -400,11 +401,18 @@ const ManagementAssessment = (nav) => {
       message.error(`Error toggling soft delete for assessments`);
     }
   };
-
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const handleAddClick = () => {
+    setIsAddModalOpen(true);
+  };
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   return (
     <>
+    <ModalCreateAssessment
+        isOpen={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+      />
       <ConfirmAction
         onOpenChange={onOpenChange}
         isOpen={isOpen}
@@ -427,7 +435,7 @@ const ManagementAssessment = (nav) => {
             <Button
               className='bg-[#AF84DD] '
               endContent={<PlusIcon />}
-            //onClick={handleOpenModalCreate}
+              onClick={handleAddClick}
             >
               New
             </Button>
