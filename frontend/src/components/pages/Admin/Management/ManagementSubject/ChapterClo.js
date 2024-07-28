@@ -145,7 +145,7 @@ const ChapterClo = (nav) => {
                     <BackButton />
                 </div>
                 <div className='w-full sm:w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-center items-center flex gap-4 flex-col'>
-                    <div className='flex justify-center w-full flex-wrap items-center gap-1'>
+                    <div className='flex justify-end w-full flex-wrap items-center gap-1'>
                         <Button color="primary" onClick={handleSaveOrDelete}>
                             Save
                         </Button>

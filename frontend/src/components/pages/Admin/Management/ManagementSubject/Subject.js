@@ -468,7 +468,7 @@ const Subject = (nav) => {
                 className="bg-[#AF84DD]"
                 onClick={() => { handleEditClick(subject.Subject) }}
               >
-                <i className="fa-solid fa-pen"></i>
+                <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
               </Button>
             </Tooltip>
             <Tooltip title="Xoá">
@@ -480,7 +480,7 @@ const Subject = (nav) => {
                 onClick={() => { onOpen(); setDeleteId(subject.action); }}
                 className="bg-[#FF8077]"
               >
-                <i className="fa-solid fa-trash-can"></i>
+                <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
               </Button>
             </Tooltip>
           </div>

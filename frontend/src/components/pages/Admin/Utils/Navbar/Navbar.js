@@ -107,7 +107,7 @@ function Nav(props) {
       icon: <i className={`fa-solid fa-gear mr-${collapsedNav ? "0" : "3"} w-4`}></i>,
       submenu: [
         {
-          text: (<><i className="fa-solid fa-minus mr-3"></i>Chương trình</>),
+          text: (<><i className="fa-solid fa-minus mr-3"></i>Program</>),
           link: "/admin/management-program/description",
           active: [
             "/admin/management-program/update",

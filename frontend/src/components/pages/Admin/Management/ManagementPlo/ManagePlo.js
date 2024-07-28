@@ -74,7 +74,7 @@ const ManagePlo = (nav) => {
                             size="sm" className="bg-[#AF84DD]"
                             onClick={() => { handleEditClick(action.PLO) }}
                         >
-                            <i className="fa-solid fa-pen"></i>
+                            <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
                         </Button>
                     </Tooltip>
                     <Tooltip title="Xoá">
@@ -85,7 +85,7 @@ const ManagePlo = (nav) => {
                             size="sm" className="bg-[#FF8077]"
                             onClick={() => { onOpen(); setDeleteId(action._id); }}
                         >
-                            <i className="fa-solid fa-trash-can"></i>
+                            <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
                         </Button>
                     </Tooltip>
                 </div>
@@ -206,7 +206,20 @@ const ManagePlo = (nav) => {
         },
         fileList,
     };
+    const [programData, setProgramData] = useState({});
+
+    const allProgramNotIsDelete = async () => {
+        try {
+            const program = await axiosAdmin.get('/program/IT');
+            setProgramData(program.data)
+            console.log(program.data);
+        } catch (error) {
+            console.error("Error fetching program data:", error);
+            message.error(error.message || 'Error fetching program data');
+        };
+    }
     useEffect(() => {
+        allProgramNotIsDelete()
         getAllPlo()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
@@ -262,12 +275,14 @@ const ManagePlo = (nav) => {
         const data = {
             ploName: newPlo.ploName,
             description: newPlo.description,
+            program_id: 'IT'
         }
         try {
             const response = await axiosAdmin.post('/plo', { data: data });
             if (response.status === 201) {
                 message.success('Data saved successfully');
                 setNewPlo(UnValueModalNew)
+                getAllPlo()
             } else {
                 message.error(response.data.message || 'Error saving data');
             }
@@ -307,29 +322,30 @@ const ManagePlo = (nav) => {
                 editData={editPlo}
                 setEditData={setEditPlo}
             />
-
-
             <ModalAddPlo
                 isOpen={isAddModalOpen}
                 onOpenChange={setIsAddModalOpen}
                 onSubmit={handleFormSubmit}
                 editData={newPlo}
                 setEditData={setNewPlo}
+                loadData={getAllPlo}
             />
-               <div className='w-full flex justify-between'>
+            <div className='w-full flex justify-between'>
                 <div className='h-full my-auto p-5 hidden sm:block'>
+                    {/* <div className="pb-5">
+                        <h1 className="text-2xl font-bold text-[#6366F1] text-left">Danh sách PO</h1>
+                    </div> */}
                     <BackButton />
                 </div>
                 <div className='w-full sm:w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-center items-center flex gap-4 flex-col'>
                     <div className='flex justify-center w-full flex-wrap items-center gap-1'>
                         <Button
-
                             endContent={<PlusIcon />}
                             onClick={() => handleNavigate(
-                                // `/admin/management-subject/${id}/clo-plo`
+                                `/admin/management-program/po-plo`
                             )}
                         >
-                            Clo_Plo
+                            Po_Plo
                         </Button>
                         <Button
                             className='bg-[#AF84DD] '
@@ -356,6 +372,9 @@ const ManagePlo = (nav) => {
                         </Button>
                     </div>
                 </div>
+            </div>
+            <div className="p-5 w-full flex justify-center items-start flex-col sm:flex-col lg:flex-row xl:fex-row">
+                <div className="text-2xl w-[300px] sm:w-full leading-8 italic font-bold text-[#FF9908] text-wrap flex-1 text-justify">{programData.program_id + ': ' + programData.programName}</div>
             </div>
             <div className="pl-5">
                 <h1 className="text-xl font-bold text-[#6366F1] text-left">Danh sách PO</h1>
@@ -412,16 +431,6 @@ const ManagePlo = (nav) => {
                     />
                 </div>
             </div>
-            <Tabs tabs=
-                {[
-                    {
-                        title: 'Cập nhật bằng CSV',
-                        content:
-                            <DownloadAndUpload props={props} handleDownload={handleDownloadPo} endpoint={'plo/update'} LoadData={getAllPlo} handleOnChangeTextName={handleOnChangeTextName} current={current} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
-                    }
-                ]}
-                activeTab={activeTab} setActiveTab={setActiveTab}
-            />
         </div>
     );
 }

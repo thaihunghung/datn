@@ -15,7 +15,7 @@ const assessmentsController = require('../controllers/AssessmentsController');
  * /api/admin/assessment:
  *   get:
  *     summary: Get a list of all assessments
- *     description: Returns a list of all assessments, or filtered by teacher_id and/or description if provided.
+ *     description: Returns a list of all assessments, or filtered by teacher_id, description, and/or isDelete if provided.
  *     tags: [assessments]
  *     security:
  *       - bearerAuth: []
@@ -34,6 +34,13 @@ const assessmentsController = require('../controllers/AssessmentsController');
  *         schema:
  *           type: string
  *           example: "Test description"
+ *       - name: isDelete
+ *         in: query
+ *         description: Filter assessments by delete status.
+ *         required: false
+ *         schema:
+ *           type: boolean
+ *           example: false
  *     responses:
  *       200:
  *         description: A list of assessments.
@@ -554,44 +561,55 @@ const assessmentsController = require('../controllers/AssessmentsController');
  *       500:
  *         description: Server error
  */
-// put: /assessment/:id/totalScore
 /**
  * @openapi
- * /api/admin/assessment/{id}/totalScore:
+ * /api/admin/assessment/softDelete/{description}:
  *   put:
- *     summary: Update the total score of a specific assessment by ID
- *     description: Updates the `totalScore` field of a specific assessment record based on the provided assessment ID.
+ *     summary: Toggle soft delete status of assessments by description
+ *     description: Toggles the `isDelete` status of assessments based on the provided description.
  *     tags: [assessments]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: description
  *         required: true
- *         description: ID of the assessment to update.
+ *         description: The description of the assessments to update.
  *         schema:
- *           type: integer
- *           example: 1
- *       - in: body
- *         name: data
- *         required: true
- *         description: The new total score value.
- *         schema:
- *           type: object
- *           properties:
- *             totalScore:
- *               type: number
- *               format: double
- *               description: The new total score for the assessment.
- *               example: 10
+ *           type: string
+ *           example: "Test description"
  *     responses:
  *       200:
- *         description: Successfully updated the total score of the assessment.
+ *         description: Successfully toggled the delete status of the assessments.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Toggled isDelete status"
+ *                 updated:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       assessment_id:
+ *                         type: integer
+ *                         example: 1
+ *                       isDelete:
+ *                         type: boolean
+ *                         example: true
  *       400:
- *         description: Invalid total score value provided.
+ *         description: Description is required.
  *       404:
- *         description: Assessment not found
+ *         description: Assessments not found.
  *       500:
  *         description: Server error
  */
+
+
+
+
+
 // get: /assessment/isDelete/true
 /**
  * @openapi
@@ -692,7 +710,11 @@ router.delete('/assessment/:id', assessmentsController.delete);
 router.put('/assessment/:id/totalScore', assessmentsController.updateStotalScore);
 router.get('/assessment/isDelete/true', assessmentsController.isDeleteTotrue);
 router.get('/assessment/isDelete/false', assessmentsController.isDeleteTofalse);
-router.put('/assessment/isDelete/:id', assessmentsController.isdelete);
+
+router.put('/assessment/softDelete/:description', assessmentsController.toggleSoftDeleteByDescription);
+
+
+
 
 //router.put('/assessment/:id/updateStotalScore', assessmentsController.updateStotalScore);
 // router.get('/assessments/teacher/:teacher_id', assessmentsController.GetByUser);

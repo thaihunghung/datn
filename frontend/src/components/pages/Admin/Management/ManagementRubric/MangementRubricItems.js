@@ -370,7 +370,7 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
                             //     `/admin/management-rubric/${id}/rubric-items/${rubric.action.id}`
                             // )}
                             >
-                                <i className="fa-solid fa-pen"></i>
+                                <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
                             </Button>
                         </Tooltip>
                         <Tooltip title="Xoá">
@@ -382,7 +382,7 @@ const MangementRubricItems = ({ setCollapsedNav, successNoti, errorNoti }) => {
                                 onClick={() => { onOpen(); setDeleteId(rubric.action.id); }}
                                 className="bg-[#FF8077]"
                             >
-                                <i className="fa-solid fa-trash-can"></i>
+                                <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
                             </Button>
                         </Tooltip>
                     </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Tooltip, message } from 'antd';
 import { Button } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import BackButton from "../../Utils/BackButton/BackButton";
 const PoPlo = (nav) => {
     const { setCollapsedNav } = nav;
   
@@ -99,9 +100,24 @@ const PoPlo = (nav) => {
     }, []);
 
     return (
-        <div className="flex w-full flex-col justify-center leading-8 p-5 sm:p-5 lg:p-10 xl:p-10 bg-[#f5f5f5]-500">
-            <div className="w-full border mt-5 rounded-lg">
-                <table className="table-auto w-full border-collapse border">
+        <div className="flex w-full flex-col justify-center leading-8 pt-5 bg-[#f5f5f5]-500">
+             <div className='w-full flex justify-between'>
+                <div className='h-full my-auto p-5 hidden sm:block'>
+                    <BackButton />
+                </div>
+                <div className='w-full sm:w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-center items-center flex gap-4 flex-col'>
+                    <div className='flex justify-end w-full flex-wrap items-center gap-1'>
+                        <Button color="primary" onClick={handleSaveOrDelete}>
+                            Save
+                        </Button>
+                    </div>
+                </div>
+            </div>
+            <div className="pl-5 mt-2">
+                <h1 className="text-2xl font-bold text-[#6366F1] text-left">Map Po Plo</h1>
+            </div>
+            <div className="w-full  mt-5 ">
+                <table className="table-auto w-full border-collapse border rounded-2xl">
                     <thead className="w-full">
                         <tr>
                             <th className="p-2 text-center sm:px-4 sm:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 bg-[#475569] text-[#fefefe]">PLO</th>
@@ -153,9 +169,6 @@ const PoPlo = (nav) => {
                         ))}
                     </tbody>
                 </table>
-                <Button color="primary" onClick={handleSaveOrDelete} className="mt-5 px-20">
-                    Lưu
-                </Button>
             </div>
         </div>
     );

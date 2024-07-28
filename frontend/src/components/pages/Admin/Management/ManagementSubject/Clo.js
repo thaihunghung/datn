@@ -78,7 +78,7 @@ const Clo = (nav) => {
                             className="bg-[#AF84DD]"
                             onClick={() => { handleEditClick(action.CLO) }}
                         >
-                            <i className="fa-solid fa-pen"></i>
+                            <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
                         </Button>
                     </Tooltip>
                     <Tooltip title="Xoá">
@@ -90,7 +90,7 @@ const Clo = (nav) => {
                             size="sm"
                             onClick={() => { onOpen(); setDeleteId(action._id); }}
                         >
-                            <i className="fa-solid fa-trash-can"></i>
+                            <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
                         </Button>
                     </Tooltip>
                 </div>

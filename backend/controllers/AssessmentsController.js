@@ -150,7 +150,7 @@ const AssessmentsController = {
 
   getAssessments: async (req, res) => {
     try {
-      const { teacher_id, description } = req.query;
+      const { isDelete, teacher_id, description } = req.query;
 
       if (teacher_id && description) {
         console.log("description");
@@ -161,7 +161,7 @@ const AssessmentsController = {
           where: {
             teacher_id: parseInt(teacher_id),
             description: description,
-            isDelete: false
+            isDelete: isDelete === 'true'
           },
           include: [{
             model: CourseModel,
@@ -184,7 +184,7 @@ const AssessmentsController = {
         const assessments = await AssessmentModel.findAll({
           where: {
             teacher_id: teacherId,
-            isDelete: false
+            isDelete: isDelete === 'true'
           },
           attributes: [
             'course_id',
@@ -204,7 +204,7 @@ const AssessmentsController = {
           return res.status(404).json({ message: 'No assessments found for this user' });
         }
 
-        const result = assessments.map(assessment => {
+        const result = await Promise.all(assessments.map(async assessment => {
           let status;
           if (parseInt(assessment.dataValues.zeroScoreCount) === 0) {
             status = 100;
@@ -213,7 +213,13 @@ const AssessmentsController = {
           } else {
             status = (parseInt(assessment.dataValues.zeroScoreCount) / parseInt(assessment.dataValues.assessmentCount)) * 100;
           }
-
+      
+          // Tìm createdAt cho từng assessment dựa trên description
+          const foundAssessment = await AssessmentModel.findOne({
+            where: { description: assessment.description, isDelete: isDelete === 'true'},
+            attributes: ['createdAt']
+          });
+      
           return {
             course_id: assessment.course_id,
             description: assessment.description,
@@ -221,9 +227,10 @@ const AssessmentsController = {
             assessmentCount: parseInt(assessment.dataValues.assessmentCount),
             studentCount: parseInt(assessment.dataValues.studentCount),
             zeroScoreCount: parseInt(assessment.dataValues.zeroScoreCount),
-            status: status
+            status: status,
+            createdAt: foundAssessment ? foundAssessment.createdAt : null
           };
-        });
+        }));
 
         return res.status(200).json(result);
 
@@ -406,27 +413,29 @@ const AssessmentsController = {
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
-  isdelete: async (req, res) => {
+  toggleSoftDeleteByDescription: async (req, res) => {
     try {
-      const { id } = req.params;
-      const assessment = await AssessmentModel.findOne({ where: { assessment_id: id } });
-
-      if (!assessment) {
-        return res.status(404).json({ message: 'Không tìm thấy assessments' });
+      const { description } = req.params;
+      if (!description) {
+        return res.status(400).json({ message: 'Description is required' });
       }
-      const updatedIsDeleted = !assessment.isDelete;
-      console.log(updatedIsDeleted);
-      AssessmentModel.update({ isDelete: updatedIsDeleted }, { where: { assessment_id: id } })
-        .then(assessments => {
-          console.log(assessments);
-        })
-        .catch(error => {
-          console.error(error);
-        });
-      res.json({ message: `Đã đảo ngược trạng thái isDelete thành ${updatedIsDeleted}` });
+  
+      const assessments = await AssessmentModel.findAll({ where: { description } });
+      if (assessments.length === 0) {
+        return res.status(404).json({ message: 'Assessment not found' });
+      }
+  
+      const updated = await Promise.all(assessments.map(async (assessment) => {
+        const updatedIsDeleted = !assessment.isDelete;
+        await assessment.update({ isDelete: updatedIsDeleted });
+        return { assessment_id: assessment.assessment_id, isDelete: updatedIsDeleted };
+      }));
+  
+      res.status(200).json({ message: 'Toggled isDelete status', updated });
+  
     } catch (error) {
-      console.error('Lỗi cập nhật trạng thái isDelete:', error);
-      res.status(500).json({ message: 'Lỗi server' });
+      console.error('Error toggling assessment delete statuses:', error);
+      res.status(500).json({ message: 'Server error' });
     }
   },
 
@@ -436,19 +445,6 @@ const AssessmentsController = {
     }
 
     const requestData = JSON.parse(req.body.data);
-
-    // Tạo một object mới với thuộc tính course_id
-    //console.log(requestData);
-
-    // try {
-    //   const subject = await SubjectModel.findByPk(subject_id);
-    //   if (!subject) {
-    //     return res.status(404).json({ message: 'Subject not found' });
-    //   }
-    // } catch (error) {
-    //   console.error('Error fetching subject:', error);
-    //   return res.status(500).json({ message: 'Error fetching subject from the database' });
-    // }
     const uploadDirectory = path.join(__dirname, '../uploads');
     const filename = req.files[0].filename;
     const filePath = path.join(uploadDirectory, filename);
@@ -479,6 +475,16 @@ const AssessmentsController = {
 
     fs.unlinkSync(filePath);
     try {
+      const existingDescriptions = await AssessmentModel.findAll({
+        where: {
+          description: jsonData.map(item => item.description)
+        },
+        attributes: ['description']
+      });
+  
+      if (existingDescriptions.length > 0) {
+        return res.status(400).json({ message: 'Some descriptions already exist in the database', existingDescriptions });
+      }
       const createdAssessment = await AssessmentModel.bulkCreate(jsonData);
       res.status(201).json({ message: 'Data saved successfully', data: createdAssessment });
     } catch (error) {

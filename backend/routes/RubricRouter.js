@@ -634,6 +634,90 @@ const router = express.Router();
  *                   type: string
  *                   description: Error message
  */
+// put: /assessments/softDelete
+/**
+ * @openapi
+ * /api/admin/assessments/softDelete:
+ *   put:
+ *     summary: Soft delete multiple assessments
+ *     description: Toggles the `isDelete` status for multiple assessments based on provided IDs.
+ *     tags: [assessments]
+ *     requestBody:
+ *       required: true
+ *       description: The IDs of the assessments to update.
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               assessment_id:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 description: The IDs of the assessments to update.
+ *                 example: [1, 2, 3]
+ *     responses:
+ *       200:
+ *         description: Successfully toggled the delete status of the assessments.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "AssessmentModel delete statuses toggled"
+ *                 updated:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       assessment_id:
+ *                         type: integer
+ *                         example: 1
+ *                       isDelete:
+ *                         type: boolean
+ *                         example: true
+ *       400:
+ *         description: No assessment IDs provided.
+ *       404:
+ *         description: One or more assessments not found.
+ *       500:
+ *         description: Server error
+ */
+
+// put: /assessment/:id/softDelete
+/**
+ * @openapi
+ * /api/admin/assessment/{id}/softDelete:
+ *   put:
+ *     summary: Toggle soft delete status of a specific assessment by ID
+ *     description: Toggles the `isDelete` status of a specific assessment based on the provided assessment ID.
+ *     tags: [assessments]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the assessment to update.
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: Successfully toggled the delete status of the assessment.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Toggled isDelete status to true"
+ *       404:
+ *         description: Assessment not found.
+ *       500:
+ *         description: Server error
+ */
 
 router.get('/rubrics', RubricController.index);
 router.post('/rubric', RubricController.create);
@@ -645,6 +729,9 @@ router.get('/rubric/:id/items', RubricController.getItemsByRubricId);
 router.get('/rubrics/checkScore', RubricController.getRubricsForCheckScore);
 router.put('/rubrics/softDelete', RubricController.softDeleteMultiple);
 router.put('/rubric/:id/softDelete', RubricController.toggleSoftDeleteById);
+
+
+
 router.delete('/rubric/:id', RubricController.delete);
 router.delete('/rubrics/multiple', RubricController.deleteMultiple);
 

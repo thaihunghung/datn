@@ -29,6 +29,7 @@ import { capitalize } from '../../Utils/capitalize';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
 import BackButton from '../../Utils/BackButton/BackButton';
+import { axiosAdmin } from '../../../../../service/AxiosAdmin';
 
 const statusColorMap = {
   active: 'success',
@@ -45,7 +46,7 @@ const ManagementAssessment = (nav) => {
   const searchParams = new URLSearchParams(location.search);
   const descriptionString = searchParams.get('description');
   let descriptionURL;
-  
+
   if (descriptionString) {
     try {
       const decodedDescription = decodeURIComponent(descriptionString);
@@ -55,7 +56,7 @@ const ManagementAssessment = (nav) => {
       console.error('Error processing description:', error);
     }
   }
-  
+
   const teacher_id = Cookies.get('teacher_id');
   if (!teacher_id) {
     navigate('/login');
@@ -71,7 +72,7 @@ const ManagementAssessment = (nav) => {
     };
     handleResize();
     console.log(window.innerWidth)
-    const handleVisibilityChange = () => { 
+    const handleVisibilityChange = () => {
       if (window.innerWidth < 500) {
         setVisibleColumns(new Set(COMPACT_VISIBLE_COLUMNS)); // Thay đổi visibleColumns khi cửa sổ nhỏ
       } else {
@@ -95,17 +96,15 @@ const ManagementAssessment = (nav) => {
     column: 'age',
     direction: 'ascending',
   });
+  const [dateFilter, setDateFilter] = useState('newest');
   const [page, setPage] = useState(1);
-
+  const loadAssessment = async () => {
+    const response = await fetchAssessmentData(teacher_id);
+    console.log(response);
+    setAssessment(response);
+  };
   useEffect(() => {
-    const loadTeachers = async () => {
-      const response= await fetchAssessmentData(teacher_id);
-      console.log(response);
-      setAssessment(response);
-
-     
-    };
-    loadTeachers();
+    loadAssessment();
     console.log("assessments loaded", assessments);
   }, [page, rowsPerPage, filterValue]);
 
@@ -126,9 +125,13 @@ const ManagementAssessment = (nav) => {
       );
     }
 
-
+    if (dateFilter === 'newest') {
+      filteredAssessment.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } else if (dateFilter === 'oldest') {
+      filteredAssessment.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    }
     return filteredAssessment;
-  }, [assessments, filterValue]);
+  }, [assessments, filterValue, dateFilter]);
 
   const handleSelectionChange = (keys) => {
     // console.log('Keys:', keys);
@@ -241,11 +244,12 @@ const ManagementAssessment = (nav) => {
                 variant="light"
                 radius="full"
                 size="sm"
+                className='bg-[#FF9908]'
                 onClick={() => handleNavigate(
                   `/admin/management-grading/${disc}/?description=${cellValue}`
                 )}
               >
-                <i className="fa-solid fa-feather-pointed"></i>
+                <i className="fa-solid fa-feather-pointed text-xl text-[#020401]"></i>
               </Button>
             </Tooltip>
             <Tooltip title="PDF">
@@ -255,12 +259,24 @@ const ManagementAssessment = (nav) => {
                   variant="light"
                   radius="full"
                   size="sm"
+                  className='bg-[#FEFEFE] '
                 >
-                  <i className="fa-regular fa-file-pdf"></i>
+                  <i className="fa-regular fa-file-pdf text-xl text-[#020401]"></i>
                 </Button>
               </Tooltip>
             </Tooltip>
-
+            <Tooltip title="Xoá">
+              <Button
+                className="bg-[#FF8077]"
+                isIconOnly
+                variant="light"
+                radius="full"
+                size="sm"
+                onClick={() => { onOpen(); setDeleteId(assessment.action); }}
+              >
+                <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
+              </Button>
+            </Tooltip>
           </div>
         );
       default:
@@ -285,6 +301,9 @@ const ManagementAssessment = (nav) => {
   const topContent = React.useMemo(() => {
     return (
       <div className="flex flex-col gap-4">
+        <div className='block sm:hidden'>
+          <h1 className="text-2xl pb-2 font-bold text-[#6366F1]">Danh sách Assessments</h1>
+        </div>
         <div className="flex justify-between gap-3 items-center">
           <Input
             isClearable
@@ -298,15 +317,15 @@ const ManagementAssessment = (nav) => {
             onValueChange={onSearchChange}
           />
           <div className="flex gap-3">
-          <Button
+            {/* <Button
               className='bg-[#AF84DD] '
               endContent={<PlusIcon />}
               onClick={() => handleNavigate(
                 `/admin/management-grading/create`
               )}
             >
-              Tạo mới 
-            </Button>
+              Tạo mới
+            </Button> */}
             {/* <Tooltip
             title=""
             getPopupContainer={() =>
@@ -369,73 +388,105 @@ const ManagementAssessment = (nav) => {
       </div>
     );
   }, [page, pages, selectedKeys, assessments]);
+  const [deleteId, setDeleteId] = useState(null);
+
+  const handleSoftDeleteByDescription = async (description) => {
+    try {
+      await axiosAdmin.put(`/assessment/softDelete/${description}`);
+      message.success(`Successfully toggled soft delete for assessments`);
+      loadAssessment();
+    } catch (error) {
+      console.error(`Error toggling soft delete for assessment`, error);
+      message.error(`Error toggling soft delete for assessments`);
+    }
+  };
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   return (
     <>
+      <ConfirmAction
+        onOpenChange={onOpenChange}
+        isOpen={isOpen}
+        onConfirm={() => {
+          if (deleteId) {
+            handleSoftDeleteByDescription(deleteId);
+            setDeleteId(null);
+          }
+        }}
+      />
       <div className='w-full flex justify-between'>
         <div className='h-full my-auto p-5 hidden sm:block'>
+          <div>
+            <h1 className="text-2xl pb-2 font-bold text-[#6366F1]">Danh sách Assessments</h1>
+          </div>
           <BackButton />
         </div>
-        <div className='w-fit h-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-start items-center flex gap-4 flex-col mb-2'>
-          {/* <div className='flex justify-center w-full flex-wrap items-center gap-1'>
+        <div className='w-full sm:w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-start items-center flex gap-4 flex-col mb-4'>
+          <div className='flex justify-center w-full flex-wrap items-center gap-1'>
             <Button
-              className='bg-[#FF9908] '
-              onClick={() => {
-                //const selectedItems = getSelectedItems();
-                //console.log('Selected Items:', selectedItems);
-                //console.log('Selected Keys:', Array.from(selectedKeys));
-                
-              }}
+              className='bg-[#AF84DD] '
               endContent={<PlusIcon />}
+            //onClick={handleOpenModalCreate}
             >
-              Chấm nhóm
-            </Button>
-       
-            <Button
-              className='bg-[#FF8077] '
-              endContent={<PlusIcon />}
-            >
-              Xóa
-            </Button> 
-           <Button
-              endContent={<PlusIcon />}
-            >
-              kho lưu trữ
+              New
             </Button>
 
-          </div> */}
-          <div className='flex gap-1 h-fit justify-start'>
-            <Dropdown>
-              <DropdownTrigger className="sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                  Columns
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Table Columns"
-                closeOnSelect={false}
-                selectedKeys={visibleColumns}
-                selectionMode="multiple"
-                onSelectionChange={setVisibleColumns}
-              >
-                {columns.map((column) => (
-                  <DropdownItem key={column.uid} className="capitalize">
-                    {capitalize(column.name)}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-            <Dropdown>
-              <DropdownTrigger className="sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                  Lọc lớp
-                </Button>
-              </DropdownTrigger>
-             
-            </Dropdown>
+            <Button
+              endContent={<PlusIcon />}
+              onClick={() => handleNavigate(
+                `/admin/management-rubric/store`
+              )}
+            >
+              Store
+            </Button>
+          </div>
+
+          <div className='flex gap-2 h-fit justify-center sm:justify-start flex-wrap items-center'>
+            <div className='flex gap-1 h-fit justify-start'>
+              <Dropdown>
+                <DropdownTrigger className="sm:flex">
+                  <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                    Columns
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  disallowEmptySelection
+                  aria-label="Table Columns"
+                  closeOnSelect={false}
+                  selectedKeys={visibleColumns}
+                  selectionMode="multiple"
+                  onSelectionChange={setVisibleColumns}
+                >
+                  {columns.map((column) => (
+                    <DropdownItem key={column.uid} className="capitalize">
+                      {capitalize(column.name)}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
+              <Dropdown>
+                <DropdownTrigger className="sm:flex">
+                  <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                    Filter Date
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  disallowEmptySelection
+                  aria-label="Date Filter"
+                  closeOnSelect={true}
+                  selectedKeys={new Set([dateFilter])}
+                  selectionMode="single"
+                  onSelectionChange={(keys) => {
+                    const selectedKey = Array.from(keys)[0] || 'newest';
+                    setDateFilter(selectedKey);
+                  }}
+                >
+                  <DropdownItem key="newest" className="capitalize">Newest</DropdownItem>
+                  <DropdownItem key="oldest" className="capitalize">Oldest</DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+            </div>
           </div>
 
         </div>
@@ -477,33 +528,66 @@ const ManagementAssessment = (nav) => {
           )}
         </TableBody>
       </Table>
-
-
-
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">Modal Title</ModalHeader>
-              <ModalBody>
-                <p>
-                  Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in,
-                  egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
-                </p>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="primary" onPress={onClose}>
-                  Close
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
     </>
   );
 };
 
 export default ManagementAssessment;
 
+function ConfirmAction(props) {
+  const { isOpen, onOpenChange, onConfirm } = props;
+  const handleOnOKClick = (onpose) => {
+    onpose();
+    if (typeof onConfirm === 'function') {
+      onConfirm();
+    }
+  }
+  return (
+    <Modal
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      motionProps={{
+        variants: {
+          enter: {
+            y: 0,
+            opacity: 1,
+            transition: {
+              duration: 0.2,
+              ease: "easeOut",
+            },
+          },
+          exit: {
+            y: -20,
+            opacity: 0,
+            transition: {
+              duration: 0.1,
+              ease: "easeIn",
+            },
+          },
+        }
+      }}
+    >
+      <ModalContent>
+        {(onpose) => (
+          <>
+            <ModalHeader>Cảnh báo</ModalHeader>
+            <ModalBody>
+              <p className="text-[16px]">
+                Assessment sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
+              </p>
+            </ModalBody>
+            <ModalFooter>
+              <Button variant="light" onClick={onpose}>
+                Huỷ
+              </Button>
+              <Button color="danger" className="font-medium" onClick={() => handleOnOKClick(onpose)}>
+                Xoá
+              </Button>
+            </ModalFooter>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
+  )
+}
 

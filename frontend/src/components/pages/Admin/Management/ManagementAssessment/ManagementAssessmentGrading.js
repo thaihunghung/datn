@@ -265,7 +265,7 @@ const ManagementAssessmentGrading = (nav) => {
                     `/admin/management-grading/${slugify(assessment.action.description, { lower: true, replacement: '_' })}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
                   )}
                 >
-                  <i className="fa-solid fa-feather-pointed"></i>
+                  <i className="fa-solid fa-feather-pointed text-xl text-[#020401]"></i>
                 </Button>
               </Tooltip>
             ) : (
@@ -280,7 +280,7 @@ const ManagementAssessmentGrading = (nav) => {
                     `/admin/management-grading/update/${slugify(assessment.action.description, { lower: true, replacement: '_' })}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
                   )}
                 >
-                  <i className="fa-solid fa-pen"></i>
+                  <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
                 </Button>
               </Tooltip>
             )}
@@ -294,7 +294,7 @@ const ManagementAssessmentGrading = (nav) => {
                 onClick={() => { onOpen(); }}
               >
                 {/* setDeleteId(assessment.action.assessment_id); */}
-                <i className="fa-solid fa-trash-can"></i>
+                <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
               </Button>
             </Tooltip>
 

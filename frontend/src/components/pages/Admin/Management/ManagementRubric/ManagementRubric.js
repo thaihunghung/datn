@@ -300,7 +300,7 @@ const ManagementRubric = (nav) => {
                                 className="bg-[#AF84DD]"
                                 onClick={() => { handleEditClick(rubric.action) }}
                             >
-                                <i className="fa-solid fa-pen"></i>
+                                <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
                             </Button>
                         </Tooltip>
                         <Tooltip title="Xoá">
@@ -312,7 +312,7 @@ const ManagementRubric = (nav) => {
                                 onClick={() => { onOpen(); setDeleteId(rubric.action.rubric_id); }}
                                 className="bg-[#FF8077]"
                             >
-                                <i className="fa-solid fa-trash-can"></i>
+                                <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
                             </Button>
                         </Tooltip>
 
@@ -327,7 +327,7 @@ const ManagementRubric = (nav) => {
                                     `/admin/management-grading/list`
                                 )}
                             >
-                                <i className="fa-solid fa-feather-pointed"></i>
+                                <i className="fa-solid fa-feather-pointed text-xl text-[#020401]"></i>
                             </Button>
                         </Tooltip>
 
@@ -520,26 +520,26 @@ const ManagementRubric = (nav) => {
                             </DropdownMenu>
                         </Dropdown>
                         <Dropdown>
-              <DropdownTrigger className="sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                  Filter Date
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Date Filter"
-                closeOnSelect={true}
-                selectedKeys={new Set([dateFilter])}
-                selectionMode="single"
-                onSelectionChange={(keys) => {
-                  const selectedKey = Array.from(keys)[0] || 'newest';
-                  setDateFilter(selectedKey);
-                }}
-              >
-                <DropdownItem key="newest" className="capitalize">Newest</DropdownItem>
-                <DropdownItem key="oldest" className="capitalize">Oldest</DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
+                            <DropdownTrigger className="sm:flex">
+                                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                                    Filter Date
+                                </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu
+                                disallowEmptySelection
+                                aria-label="Date Filter"
+                                closeOnSelect={true}
+                                selectedKeys={new Set([dateFilter])}
+                                selectionMode="single"
+                                onSelectionChange={(keys) => {
+                                    const selectedKey = Array.from(keys)[0] || 'newest';
+                                    setDateFilter(selectedKey);
+                                }}
+                            >
+                                <DropdownItem key="newest" className="capitalize">Newest</DropdownItem>
+                                <DropdownItem key="oldest" className="capitalize">Oldest</DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
                     </div>
 
                 </div>

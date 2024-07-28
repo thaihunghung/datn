@@ -4,7 +4,7 @@ import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 
 export const fetchAssessmentData = async (teacher_id) => {
   try {
-    const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}`);
+    const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}&isDelete=false`);
     const Data = response.data.map((items) => ({
         id: items?.course_id,
         description: items?.description,
@@ -12,7 +12,8 @@ export const fetchAssessmentData = async (teacher_id) => {
         studentCount: items?.studentCount,
         nameCourse: items?.course,
         status: items?.status,
-        action: items?.description
+        action: items?.description,
+        createdAt: items?.createdAt
     }));
     return Data;
   } catch (error) {
@@ -28,6 +29,7 @@ const columns = [
   {name: "assessmentCount", uid: "assessmentCount", sortable: true},
   {name: "studentCount", uid: "studentCount", sortable: true},
   {name: "nameCourse", uid: "nameCourse", sortable: true},
+  {name: "createdAt", uid: "createdAt", sortable: true},
   {name: "status", uid: "status", sortable: true},
   {name: "action", uid: "action", sortable: true},
 ];

@@ -6,6 +6,7 @@ import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { Table, Tooltip} from 'antd';
 import DropdownAndNavPlo from "../../Utils/DropdownAndNav/DropdownAndNavPlo";
+import BackButton from "../../Utils/BackButton/BackButton";
 const StorePlo = (nav) => {
    
     const { setCollapsedNav } = nav;
@@ -159,8 +160,20 @@ const StorePlo = (nav) => {
             message.error(`Error toggling soft delete for PLO with ID ${_id}`);
         }
     };
+    const [programData, setProgramData] = useState({});
 
+    const allProgramNotIsDelete = async () => {
+        try {
+            const program = await axiosAdmin.get('/program/IT');
+            setProgramData(program.data)
+            console.log(program.data);
+        } catch (error) {
+            console.error("Error fetching program data:", error);
+            message.error(error.message || 'Error fetching program data');
+        };
+    }
     useEffect(() => {
+        allProgramNotIsDelete()
         getAllPlo()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
@@ -191,7 +204,19 @@ const StorePlo = (nav) => {
                     }
                 }}
             />
-            <DropdownAndNavPlo />
+             <div className='w-full flex justify-between'>
+                <div className='h-full my-auto p-5 hidden sm:block'>
+                    <BackButton />
+                </div>
+
+            </div>
+            <div className="p-5 w-full flex justify-center items-start flex-col sm:flex-col lg:flex-row xl:fex-row">
+                <div className="text-2xl w-[300px] sm:w-full leading-8 italic font-bold text-[#FF9908] text-wrap flex-1 text-justify">{programData.program_id + ': ' + programData.programName}</div>
+            </div>
+
+            <div className="pl-5">
+                <h1 className="text-xl font-bold text-[#6366F1] text-left">Danh sách Plo Đã ẩn</h1>
+            </div>
             <div className="w-full my-5 px-5">
                 {selectedRowKeys.length !== 0 && (
                     <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">

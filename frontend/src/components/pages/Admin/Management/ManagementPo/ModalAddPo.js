@@ -23,6 +23,7 @@ function ModalAddPo({
   onSubmit,
   editData,
   setEditData,
+  loadData,
 }) {
   const [fileList, setFileList] = useState([]);
   const [activeTab, setActiveTab] = useState('Form'); // Trạng thái để theo dõi tab hiện tại
@@ -197,6 +198,7 @@ function ModalAddPo({
                             method="POST"
                             fileList={fileList}
                             setFileList={setFileList}
+                            LoadData={loadData}
                           />
                         </div>
                       </div>

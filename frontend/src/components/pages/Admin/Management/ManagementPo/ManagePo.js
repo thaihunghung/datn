@@ -26,19 +26,13 @@ const ManagePo = (nav) => {
     };
     const { setCollapsedNav } = nav;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [activeTab, setActiveTab] = useState(0);
     const [selectedRow, setSelectedRow] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [loading, setLoading] = useState(false);
     const [poListData, setPosListData] = useState([]);
-    const [current, setCurrent] = useState(0);
     const [deleteId, setDeleteId] = useState(null);
-    const [fileList, setFileList] = useState([]);
 
-    const handleOnChangeTextName = (nameP) => {
-        setCurrent(nameP);
-    };
-    
+
     const columns = [
         {
             title: "Tên PO",
@@ -73,9 +67,9 @@ const ManagePo = (nav) => {
                             variant="light"
                             radius="full"
                             size="sm" className="bg-[#AF84DD]"
-                            // onClick={() => { handleEditClick(action.PO) }}
+                            onClick={() => { handleEditClick(action.PO) }}
                         >
-                            <i className="fa-solid fa-pen"></i>
+                            <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
                         </Button>
                     </Tooltip>
                     <Tooltip title="Xoá">
@@ -86,7 +80,7 @@ const ManagePo = (nav) => {
                             size="sm" className="bg-[#FF8077]"
                             onClick={() => { onOpen(); setDeleteId(action._id); }}
                         >
-                            <i className="fa-solid fa-trash-can"></i>
+                            <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
                         </Button>
                     </Tooltip>
                 </div>
@@ -163,50 +157,20 @@ const ManagePo = (nav) => {
         }
     };
 
+    const [programData, setProgramData] = useState({});
 
-    const handleDownloadPo = async () => {
+    const allProgramNotIsDelete = async () => {
         try {
-            if (selectedRowKeys.length === 0) {
-                alert('Please select at least one po ID');
-                return;
-            }
-            const data = {
-                id: selectedRowKeys
-            }
-            const response = await axiosAdmin.post('/po/templates/update', { data: data }, {
-                responseType: 'blob'
-            });
-
-            if (response && response.data) {
-                const url = window.URL.createObjectURL(response.data);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'po_update.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-
-                setCurrent(1);
-            }
+            const program = await axiosAdmin.get('/program/IT');
+            setProgramData(program.data)
+            console.log(program.data);
         } catch (error) {
-            console.error('Error downloading file:', error);
-        }
-    };
-    const props = {
-        onRemove: (file) => {
-            const index = fileList.indexOf(file);
-            const newFileList = fileList.slice();
-            newFileList.splice(index, 1);
-            setFileList(newFileList);
-        },
-        beforeUpload: (file) => {
-            setFileList([...fileList, file]);
-            return false;
-        },
-        fileList,
-    };
-
+            console.error("Error fetching program data:", error);
+            message.error(error.message || 'Error fetching program data');
+        };
+    }
     useEffect(() => {
+        allProgramNotIsDelete()
         getAllPo()
         const handleResize = () => {
             if (window.innerWidth < 1024) {
@@ -227,11 +191,13 @@ const ManagePo = (nav) => {
     const [newpo, setNewpo] = useState({
         poName: "",
         description: "",
+        program_id: "IT",
     });
     const [editpo, setEditpo] = useState({
         po_id: "",
         poName: "",
         description: "",
+        program_id: "IT",
     });
 
     const handleEditFormSubmit = async (values, po_id) => {
@@ -261,12 +227,14 @@ const ManagePo = (nav) => {
         const data = {
             poName: newpo.poName,
             description: newpo.description,
+            program_id: "IT"
         }
         try {
             const response = await axiosAdmin.post('/po', { data: data });
             if (response.status === 201) {
                 message.success('Data saved successfully');
                 setNewpo(UnValueModalNew)
+                getAllPo()
             } else {
                 message.error(response.data.message || 'Error saving data');
             }
@@ -301,7 +269,7 @@ const ManagePo = (nav) => {
                     }
                 }}
             />
- <ModalUpdatePo
+            <ModalUpdatePo
                 isOpen={isEditModalOpen}
                 onOpenChange={setIsEditModalOpen}
                 onSubmit={handleEditFormSubmit}
@@ -316,9 +284,13 @@ const ManagePo = (nav) => {
                 onSubmit={handleFormSubmit}
                 editData={newpo}
                 setEditData={setNewpo}
+                loadData={getAllPo}
             />
             <div className='w-full flex justify-between'>
                 <div className='h-full my-auto p-5 hidden sm:block'>
+                    {/* <div className="pb-5">
+                        <h1 className="text-2xl font-bold text-[#6366F1] text-left">Danh sách PO</h1>
+                    </div> */}
                     <BackButton />
                 </div>
                 <div className='w-full sm:w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-center items-center flex gap-4 flex-col'>
@@ -327,10 +299,10 @@ const ManagePo = (nav) => {
 
                             endContent={<PlusIcon />}
                             onClick={() => handleNavigate(
-                                // `/admin/management-subject/${id}/clo-plo`
+                             `/admin/management-program/po-plo`
                             )}
                         >
-                            Clo_Plo
+                            Po_Plo
                         </Button>
                         <Button
                             className='bg-[#AF84DD] '
@@ -357,6 +329,9 @@ const ManagePo = (nav) => {
                         </Button>
                     </div>
                 </div>
+            </div>
+            <div className="p-5 w-full flex justify-center items-start flex-col sm:flex-col lg:flex-row xl:fex-row">
+                <div className="text-2xl w-[300px] sm:w-full leading-8 italic font-bold text-[#FF9908] text-wrap flex-1 text-justify">{programData.program_id + ': ' + programData.programName}</div>
             </div>
             <div className="pl-5">
                 <h1 className="text-xl font-bold text-[#6366F1] text-left">Danh sách PO</h1>
@@ -402,16 +377,6 @@ const ManagePo = (nav) => {
                     />
                 </div>
             </div>
-            <Tabs tabs=
-                {[
-                    {
-                        title: 'Cập nhật',
-                        content:
-                            <DownloadAndUpload props={props} handleDownload={handleDownloadPo} endpoint={'po/update'} LoadData={getAllPo} handleOnChangeTextName={handleOnChangeTextName} current={current} setCurrent={setCurrent} fileList={fileList} setFileList={setFileList} />
-                    }
-                ]} 
-                activeTab={activeTab} setActiveTab={setActiveTab}
-            />
         </div>
     );
 }

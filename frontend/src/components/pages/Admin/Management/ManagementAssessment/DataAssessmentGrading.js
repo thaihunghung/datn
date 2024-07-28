@@ -4,7 +4,7 @@ import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 
 export const fetchAssessmentDataGrading = async (teacher_id, descriptionURL, searchTerm = "") => {
   try {
-    const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}&description=${descriptionURL}`);
+    const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}&description=${descriptionURL}&isDelete=false`);
     const updatedPoData = response?.data?.map((subject) => {
       const student = {
         studentCode: subject?.Student?.studentCode,

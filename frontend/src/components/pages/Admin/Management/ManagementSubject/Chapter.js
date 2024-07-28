@@ -84,7 +84,7 @@ const Chapter = (nav) => {
                                 onClick={() => { handleEditClick(action.CHAPTER) }}
 
                             >
-                                <i className="fa-solid fa-pen"></i>
+                                <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
                             </Button>
                     </Tooltip>
               
@@ -98,7 +98,7 @@ const Chapter = (nav) => {
                             size="sm"
                             onClick={() => { onOpen(); setDeleteId(action._id); }}
                         >
-                            <i className="fa-solid fa-trash-can"></i>
+                            <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
                         </Button>
                     </Tooltip>
 
