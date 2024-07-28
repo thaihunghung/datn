@@ -213,21 +213,27 @@ const AssessmentsController = {
           } else {
             status = (parseInt(assessment.dataValues.zeroScoreCount) / parseInt(assessment.dataValues.assessmentCount)) * 100;
           }
-      
+          console.log("status");
+      console.log(status);
           // Tìm createdAt cho từng assessment dựa trên description
           const foundAssessment = await AssessmentModel.findOne({
             where: { description: assessment.description, isDelete: isDelete === 'true'},
-            attributes: ['createdAt']
+            attributes: [ "rubric_id","course_id","description","date", "place",'createdAt' ]
           });
-      
+          
+          console.log(foundAssessment);
+
           return {
             course_id: assessment.course_id,
             description: assessment.description,
             course: `${assessment.course.courseCode} - ${assessment.course.courseName}`,
+            courseCode: assessment.course.courseCode,
+            courseName: assessment.course.courseName,
             assessmentCount: parseInt(assessment.dataValues.assessmentCount),
             studentCount: parseInt(assessment.dataValues.studentCount),
             zeroScoreCount: parseInt(assessment.dataValues.zeroScoreCount),
             status: status,
+            Assessment: foundAssessment,
             createdAt: foundAssessment ? foundAssessment.createdAt : null
           };
         }));
@@ -415,16 +421,25 @@ const AssessmentsController = {
   },
   toggleSoftDeleteByDescription: async (req, res) => {
     try {
-      const { description } = req.params;
-      if (!description) {
-        return res.status(400).json({ message: 'Description is required' });
+      
+      const { descriptions } = req.body; // Nhận mảng descriptions từ req.body
+      if (!Array.isArray(descriptions) || descriptions.length === 0) {
+        return res.status(400).json({ message: 'Descriptions array is required and cannot be empty' });
       }
   
-      const assessments = await AssessmentModel.findAll({ where: { description } });
+      // Tìm tất cả assessments dựa vào các description
+      const assessments = await AssessmentModel.findAll({ 
+        where: { 
+          description: descriptions 
+        } 
+      });
+      console.log('Found assessments:', assessments);
+
       if (assessments.length === 0) {
-        return res.status(404).json({ message: 'Assessment not found' });
+        return res.status(404).json({ message: 'No assessments found for the provided descriptions' });
       }
   
+      // Toggling trạng thái isDelete cho tất cả assessments tìm thấy
       const updated = await Promise.all(assessments.map(async (assessment) => {
         const updatedIsDeleted = !assessment.isDelete;
         await assessment.update({ isDelete: updatedIsDeleted });
@@ -439,6 +454,49 @@ const AssessmentsController = {
     }
   },
 
+  updateByDescription: async (req, res) => {
+    try {
+      const { description, updateData } = req.body;
+      let assessments = await AssessmentModel.findAll({ where: { description: description } });
+      if (assessments.length === 0) {
+        return res.status(404).json({ message: "No assessments found" });
+      }
+      if (updateData.description) {
+        const existingAssessment = await AssessmentModel.findOne({ where: { description: updateData.description } });
+  
+        if (existingAssessment) {
+          return res.status(400).json({ message: "An assessment with the new description already exists" });
+        }
+      }
+
+      const updatedAssessments = await Promise.all(assessments.map(async (assessment) => {
+        if (updateData.rubric_id !== undefined) {
+          assessment.rubric_id = updateData.rubric_id;
+        }
+        if (updateData.course_id !== undefined) {
+          assessment.course_id = updateData.course_id;
+        }
+        if (updateData.description !== undefined) {
+          assessment.description = updateData.description;
+        }
+        if (updateData.date !== undefined) {
+          assessment.date = updateData.date;
+        }
+        if (updateData.place !== undefined) {
+          assessment.place = updateData.place;
+        }
+        await assessment.save();
+        return assessment;
+      }));
+  
+      res.status(200).json(updatedAssessments);
+    } catch (error) {
+      console.error("Error updating assessments:", error);
+      res.status(500).json({ message: "Error updating assessments", error });
+    }
+  },
+  
+  
   processSaveTemplateAssessment: async (req, res) => {
     if (!req.files) {
       return res.status(400).send('No file uploaded.');

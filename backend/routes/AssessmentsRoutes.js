@@ -563,19 +563,25 @@ const assessmentsController = require('../controllers/AssessmentsController');
  */
 /**
  * @openapi
- * /api/admin/assessment/softDelete/{description}:
+ * /api/admin/assessments/softDeleteByDescription:
  *   put:
- *     summary: Toggle soft delete status of assessments by description
- *     description: Toggles the `isDelete` status of assessments based on the provided description.
+ *     summary: Toggle soft delete status of assessments by descriptions
+ *     description: Toggles the `isDelete` status of assessments based on the provided list of descriptions.
  *     tags: [assessments]
- *     parameters:
- *       - in: path
- *         name: description
- *         required: true
- *         description: The description of the assessments to update.
- *         schema:
- *           type: string
- *           example: "Test description"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               descriptions:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   example: "100000 - IT02_Thống kê và phân tích dữ liệu DA20TTB_d_2018-1-1"
+ *             required:
+ *               - descriptions
  *     responses:
  *       200:
  *         description: Successfully toggled the delete status of the assessments.
@@ -594,14 +600,14 @@ const assessmentsController = require('../controllers/AssessmentsController');
  *                     properties:
  *                       assessment_id:
  *                         type: integer
- *                         example: 1
+ *                         example: 1025
  *                       isDelete:
  *                         type: boolean
  *                         example: true
  *       400:
- *         description: Description is required.
+ *         description: Descriptions array is required and cannot be empty.
  *       404:
- *         description: Assessments not found.
+ *         description: No assessments found for the provided descriptions.
  *       500:
  *         description: Server error
  */
@@ -700,6 +706,85 @@ const assessmentsController = require('../controllers/AssessmentsController');
  *       500:
  *         description: Server error
  */
+// patch: /assessment/updateByDescription
+/**
+ * @openapi
+ * /api/admin/assessment/updateByDescription:
+ *   patch:
+ *     summary: Update assessments by description
+ *     description: Updates assessments that match the given description with the provided update data.
+ *     tags: [assessments]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               description:
+ *                 type: string
+ *                 description: The description to match assessments.
+ *               updateData:
+ *                 type: object
+ *                 description: The data to update matching assessments with.
+ *                 properties:
+ *                   rubric_id:
+ *                     type: integer
+ *                   course_id:
+ *                     type: integer
+ *                   description:
+ *                     type: string
+ *                   date:
+ *                     type: string
+ *                     format: date
+ *                   place:
+ *                     type: string
+ *     responses:
+ *       200:
+ *         description: Successfully updated assessments.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   rubric_id:
+ *                     type: integer
+ *                   course_id:
+ *                     type: integer
+ *                   description:
+ *                     type: string
+ *                   date:
+ *                     type: string
+ *                     format: date
+ *                   place:
+ *                     type: string
+ *       404:
+ *         description: No assessments found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 error:
+ *                   type: object
+ *                   additionalProperties: true
+ */
+
 
 router.get('/assessment', assessmentsController.getAssessments);
 router.get('/assessment/:id/items', assessmentsController.GetitemsByID);
@@ -711,7 +796,8 @@ router.put('/assessment/:id/totalScore', assessmentsController.updateStotalScore
 router.get('/assessment/isDelete/true', assessmentsController.isDeleteTotrue);
 router.get('/assessment/isDelete/false', assessmentsController.isDeleteTofalse);
 
-router.put('/assessment/softDelete/:description', assessmentsController.toggleSoftDeleteByDescription);
+router.put('/assessments/softDeleteByDescription', assessmentsController.toggleSoftDeleteByDescription);
+router.patch('/assessment/updateByDescription', assessmentsController.updateByDescription);
 
 
 

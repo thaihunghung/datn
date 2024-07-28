@@ -78,19 +78,8 @@ const Subject = (nav) => {
   });
   const [page, setPage] = useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newRubric, setNewRubric] = useState({
     teacher_id: teacher_id,
-    subjectName: "",
-    subjectCode: "",
-    description: "",
-    numberCredits: "",
-    numberCreditsTheory: "",
-    numberCreditsPractice: "",
-    typesubject: "",
-  });
-  const [editRubric, setEditRubric] = useState({
-    subject_id: "",
     subjectName: "",
     subjectCode: "",
     description: "",
@@ -238,6 +227,19 @@ const Subject = (nav) => {
       message.error(`Error toggling soft delete for subject with ID ${_id}`);
     }
   };
+
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editRubric, setEditRubric] = useState({
+    subject_id: "",
+    subjectName: "",
+    subjectCode: "",
+    description: "",
+    numberCredits: "",
+    numberCreditsTheory: "",
+    numberCreditsPractice: "",
+    typesubject: "",
+  });
   const handleEditFormSubmit = async (values, subject_id) => {
     if (!subject_id) {
       console.error("No subject selected for editing");
@@ -252,6 +254,13 @@ const Subject = (nav) => {
       message.error("Error updating subject: " + (error.response?.data?.message || 'Internal server error'));
     }
   };
+  const handleEditClick = (teacher) => {
+    setEditRubric(teacher);
+    setIsEditModalOpen(true);
+  };
+
+
+
   const UnValueModalNew = {
     teacher_id: teacher_id,
     subjectName: "",
@@ -293,10 +302,6 @@ const Subject = (nav) => {
       console.error(error);
       message.error('Error saving data');
     }
-  };
-  const handleEditClick = (teacher) => {
-    setEditRubric(teacher);
-    setIsEditModalOpen(true);
   };
   const handleAddClick = () => {
     setIsAddModalOpen(true);

@@ -9,10 +9,10 @@ import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavGrading from "../../Utils/DropdownAndNav/DropdownAndNavGrading";
 import Cookies from "js-cookie";
 
-const ManagementAssessment = (nav) => {
+const ManagementAssessmentStore = (nav) => {
   const { setCollapsedNav } = nav;
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  
+
   const navigate = useNavigate();
   const teacher_id = Cookies.get('teacher_id');
   if (!teacher_id) {
@@ -28,16 +28,7 @@ const ManagementAssessment = (nav) => {
 
   const columns = [
     {
-      title: "Mã lớp",
-      dataIndex: "nameCourse",
-      render: (record) => (
-        <div className="text-sm min-w-[100px]">
-          <p className="font-medium">{record}</p>
-        </div>
-      ),
-    },
-    {
-      title: "Mô tả",
+      title: "description",
       dataIndex: "description",
       render: (record) => (
         <div className="text-sm min-w-[100px]">
@@ -46,91 +37,51 @@ const ManagementAssessment = (nav) => {
       ),
     },
     {
-      title: "Số lượng cần đánh giá",
-      dataIndex: "assessmentCount",
+      title: "courseName",
+      dataIndex: "courseName",
       render: (record) => (
         <div className="text-sm min-w-[100px]">
           <p className="font-medium">{record}</p>
         </div>
       ),
     },
-    {
-      title: "Số lượng sv",
-      dataIndex: "studentCount",
-      render: (record) => (
-        <div className="text-sm min-w-[100px]">
-          <p className="font-medium">{record}</p>
-        </div>
-      ),
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      render: (record) => (
-        <div className="text-sm min-w-[100px]">
 
-          <Flex vertical gap="middle">
-            <Progress   
-
-              percent={record}
-              status="active"
-              strokeColor={{
-                from: '#108ee9',
-                to: '#87d068',
-              }}
-            />
-          </Flex>
-        </div>
-      ),
-    },
     {
       title: (
-        <div className="flex items-center justify-center w-full">
-          <span>Form</span>
-        </div>
+          <div className="flex items-center justify-center w-full">
+              <span>Form</span>
+          </div>
       ),
       dataIndex: "action",
-      render: (record) => {
-        const disc = replaceCharacters(record.description);
-        return (
-          <div className="flex items-center justify-center w-full gap-2">
-            <Link to={`/admin/management-grading/${disc}/?description=${record.description}`}>
-              <Tooltip title="Chấm điểm">
-                <Button
-                  isIconOnly
-                  variant="light"
-                  radius="full"
-                  size="sm"
-                >
-                  <i className="fa-solid fa-feather-pointed"></i>
-                </Button>
+      render: (_id) => (
+          <div className="flex flex-col items-center justify-center w-full gap-2">
+              <Tooltip title="Khôi phục">
+                  <Button
+                      isIconOnly
+                      variant="light"
+                      radius="full"
+                      onClick={() => handleRestoreById(_id)}
+                  >
+                      <i className="fa-solid fa-clock-rotate-left"></i>
+                  </Button>
               </Tooltip>
-            </Link>
-            
-            <Tooltip title="In phiếu chấm">
-              <Button
-                isIconOnly
-                variant="light"
-                radius="full"
-                size="sm"
-              >
-                <i className="fa-regular fa-file-pdf"></i>
-              </Button>
-            </Tooltip>
+              <Tooltip title="Xoá vĩnh viễn">
+                  <Button
+                      isIconOnly
+                      variant="light"
+                      radius="full"
+                      color="danger"
+                      onClick={() => { onOpen(); setDeleteId(_id); }}
+                  >
+                      <i className="fa-solid fa-trash-can"></i>
+                  </Button>
+              </Tooltip>
           </div>
-        );
-      }
-    }
+      ),
+  },
 
   ];
 
-  function replaceCharacters(description) {
-    // Replace spaces with underscores
-    let result = description.replace(/ /g, "_");
-    // Replace hyphens with underscores
-    result = result.replace(/-/g, "_");
-    return result;
-  }
 
   const rowSelection = {
     selectedRowKeys,
@@ -147,56 +98,74 @@ const ManagementAssessment = (nav) => {
 
   const getAllAssessmentIsDeleteFalse = async () => {
     try {
-      const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}`);
-      const updatedPoData = response.data.map((subject) => {
-        const action = {
-          _id: subject.assessment_id,
-          description: subject?.description
-        }
-        return {
-          key: subject.assessment_id,
-          description: subject.description,
-          assessmentCount: subject.assessmentCount,
-          studentCount: subject.studentCount,
-          nameCourse: subject.course,
-          status: subject.status,
-          action: action
-        };
-      });
-      setAssessment(updatedPoData);
-      console.log(updatedPoData);
+      const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}&isDelete=true`);
+      const Data = response.data.map((items) => ({
+        key: items?.description,
+        description: items?.description,
+        assessmentCount: items?.assessmentCount,
+        studentCount: items?.studentCount,
+        courseName: items?.courseName,
+        status: items?.status,
+        action: items?.description,
+      }));
+      setAssessment(Data);
+      console.log(Data);
     } catch (error) {
       console.error("Error: " + error.message);
     }
   };
 
   const handleSoftDelete = async () => {
-    const data = {
-      subject_id: selectedRowKeys,
-    };
-    console.log(data)
+    const descriptions = selectedRowKeys
     try {
-      const response = await axiosAdmin.put('/assessments/softDelete', { data });
-      await getAllAssessmentIsDeleteFalse();
-      handleUnSelect();
-      message.success(response.data.message);
+      await axiosAdmin.put('/assessments/softDeleteByDescription', { descriptions });
+      message.success(`Successfully toggled soft delete for assessments`);
+      getAllAssessmentIsDeleteFalse();
     } catch (error) {
-      console.error("Error soft deleting assessments:", error);
-      message.error('Error soft deleting assessments');
+      console.error(`Error toggling soft delete for assessments`, error);
+      message.error(`Error toggling soft delete for assessments: ${error.response?.data?.message || 'Internal server error'}`);
     }
   };
 
-  const handleSoftDeleteById = async (_id) => {
+  const handleSoftDeleteById = async (description) => {
+    const descriptions = [description]
     try {
-      const response = await axiosAdmin.put(`/subject/${_id}/toggle-soft-delete`);
-      await getAllAssessmentIsDeleteFalse();
-      handleUnSelect();
-      message.success(response.data.message);
+      await axiosAdmin.put('/assessments/softDeleteByDescription', { descriptions });
+      message.success(`Successfully toggled soft delete for assessments`);
+      getAllAssessmentIsDeleteFalse();
     } catch (error) {
-      console.error(`Error toggling soft delete for subject with ID ${_id}:`, error);
-      message.error(`Error toggling soft delete for subject with ID ${_id}`);
+      console.error(`Error toggling soft delete for assessments`, error);
+      message.error(`Error toggling soft delete for assessments: ${error.response?.data?.message || 'Internal server error'}`);
     }
   };
+
+  const handleRestoreById = async (description) => {
+    const descriptions = [description]
+    try {
+      await axiosAdmin.put('/assessments/softDeleteByDescription', { descriptions });
+      getAllAssessmentIsDeleteFalse();
+      message.success(`Successfully toggled soft delete for assessments`);
+     
+    } catch (error) {
+      console.error(`Error toggling soft delete for assessments`, error);
+      message.error(`Error toggling soft delete for assessments: ${error.response?.data?.message || 'Internal server error'}`);
+    }
+  };
+
+  const handleRestore = async () => {
+    const descriptions = selectedRowKeys
+    try {
+      await axiosAdmin.put('/assessments/softDeleteByDescription', { descriptions });
+      getAllAssessmentIsDeleteFalse();
+      message.success(`Successfully toggled soft delete for assessments`);
+      
+    } catch (error) {
+      console.error(`Error toggling soft delete for assessments`, error);
+      message.error(`Error toggling soft delete for assessments: ${error.response?.data?.message || 'Internal server error'}`);
+    }
+  };
+
+
 
   useEffect(() => {
     getAllAssessmentIsDeleteFalse()
@@ -236,12 +205,22 @@ const ManagementAssessment = (nav) => {
           <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
             <p className="text-sm font-medium">
               <i className="fa-solid fa-circle-check mr-3 text-emerald-500"></i>{" "}
-              Đã chọn {selectedRow.length} học phần
+              Đã chọn {selectedRow.length} Assessment
             </p>
             <div className="flex items-center gap-2">
 
               <Tooltip
-                title={`Xoá ${selectedRowKeys.length} học phần`}
+                title={`Khôi phục ${selectedRowKeys.length} Assessment`}
+                getPopupContainer={() =>
+                  document.querySelector(".Quick__Option")
+                }
+              >
+                <Button isIconOnly variant="light" radius="full" onClick={() => handleRestore()}>
+                  <i className="fa-solid fa-clock-rotate-left"></i>
+                </Button>
+              </Tooltip>
+              <Tooltip
+                title={`Xoá vĩnh viễn ${selectedRowKeys.length} Assessment`}
                 getPopupContainer={() =>
                   document.querySelector(".Quick__Option")
                 }
@@ -250,6 +229,7 @@ const ManagementAssessment = (nav) => {
                   <i className="fa-solid fa-trash-can"></i>
                 </Button>
               </Tooltip>
+
               <Tooltip
                 title="Bỏ chọn"
                 getPopupContainer={() =>
@@ -287,7 +267,7 @@ const ManagementAssessment = (nav) => {
   );
 }
 
-export default ManagementAssessment;
+export default ManagementAssessmentStore;
 
 function ConfirmAction(props) {
   const { isOpen, onOpenChange, onConfirm } = props;

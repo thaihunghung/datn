@@ -134,9 +134,9 @@ const ManagementRubric = (nav) => {
 
         if (dateFilter === 'newest') {
             filteredAssessment.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          } else if (dateFilter === 'oldest') {
+        } else if (dateFilter === 'oldest') {
             filteredAssessment.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-          }
+        }
         return filteredAssessment;
     }, [rubricData, filterValue, dateFilter]);
     const handleSelectionChange = (keys) => {
@@ -278,15 +278,15 @@ const ManagementRubric = (nav) => {
                         <p className="text-bold text-small">{cellValue}</p>
                     </div>
                 );
-                case 'createdAt':
-                    return (
-                        <div className="flex flex-col">
-                            <p className="text-bold text-small">{rubric.createdAt}</p>
-                        </div>
-                    );
+            case 'createdAt':
+                return (
+                    <div className="flex flex-col">
+                        <p className="text-bold text-small">{rubric.createdAt}</p>
+                    </div>
+                );
 
 
-                
+
             case 'action':
                 //const disc = replaceCharacters(cellValue.description); // Assuming `replaceCharacters` is a function you have
                 return (

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Table,
   TableHeader,
@@ -24,13 +24,14 @@ import { PlusIcon } from './PlusIcon';
 import { VerticalDotsIcon } from './VerticalDotsIcon';
 import { SearchIcon } from './SearchIcon';
 import { ChevronDownIcon } from './ChevronDownIcon';
-import { columns, fetchAssessmentData } from './DataAssessment';
+import { columns, fetchAssessmentData } from './Data/DataAssessment';
 import { capitalize } from '../../Utils/capitalize';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
 import BackButton from '../../Utils/BackButton/BackButton';
 import { axiosAdmin } from '../../../../../service/AxiosAdmin';
 import ModalCreateAssessment from './ModalCreateAssessment';
+import ModalUpdateAssessment from './ModalUpdateAssessment';
 
 const statusColorMap = {
   active: 'success',
@@ -38,7 +39,7 @@ const statusColorMap = {
   vacation: 'warning',
 };
 
-const INITIAL_VISIBLE_COLUMNS = ['description', 'status', 'nameCourse', 'action'];
+const INITIAL_VISIBLE_COLUMNS = ['description', 'status', 'courseName', 'action'];
 const COMPACT_VISIBLE_COLUMNS = ['description', 'status', 'action'];
 const ManagementAssessment = (nav) => {
   const { setCollapsedNav } = nav;
@@ -63,6 +64,8 @@ const ManagementAssessment = (nav) => {
     navigate('/login');
   }
   useEffect(() => {
+    getAllRubricIsDeleteFalse()
+    getCourseByTeacher()
     //getAllAssessmentIsDeleteFalse()
     const handleResize = () => {
       if (window.innerWidth < 1024) {
@@ -87,6 +90,7 @@ const ManagementAssessment = (nav) => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+  const [courseFilter, setCourseFilter] = useState('');
 
   const [assessments, setAssessment] = useState([]);
   const [filterValue, setFilterValue] = useState('');
@@ -122,10 +126,10 @@ const ManagementAssessment = (nav) => {
 
     if (hasSearchFilter) {
       filteredAssessment = filteredAssessment.filter((teacher) =>
-        teacher.description.toLowerCase().includes(filterValue.toLowerCase())
+        teacher.courseName.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
-
+   
     if (dateFilter === 'newest') {
       filteredAssessment.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     } else if (dateFilter === 'oldest') {
@@ -194,10 +198,10 @@ const ManagementAssessment = (nav) => {
             {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
           </div>
         );
-      case 'nameCourse':
+      case 'courseName':
         return (
           <div className="flex flex-col">
-            <p className="text-bold text-small capitalize">{cellValue}</p>
+            <p className="text-bold text-small capitalize">{assessment.courseName}</p>
           </div>
         );
       case 'assessmentCount':
@@ -266,6 +270,18 @@ const ManagementAssessment = (nav) => {
                 </Button>
               </Tooltip>
             </Tooltip>
+            <Tooltip title="Chỉnh sửa">
+              <Button
+                isIconOnly
+                variant="light"
+                radius="full"
+                size="sm"
+                className="bg-[#AF84DD]"
+                onClick={() => { handleEditClick(assessment.Assessment, assessment.description) }}
+              >
+                <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
+              </Button>
+            </Tooltip>
             <Tooltip title="Xoá">
               <Button
                 className="bg-[#FF8077]"
@@ -298,6 +314,7 @@ const ManagementAssessment = (nav) => {
       setFilterValue('');
     }
   }, []);
+
 
   const topContent = React.useMemo(() => {
     return (
@@ -354,7 +371,7 @@ const ManagementAssessment = (nav) => {
         </div>
         <div className="w-full flex  sm:items-center sm:justify-between">
           <p className="text-small text-default-400 min-w-[100px]">
-            <span className="text-default-500">{assessments.length}</span> teacher(s)
+            <span className="text-default-500">{assessments.length}</span> assessment(s)
           </p>
           <div className="w-fit sm:w-auto flex items-center gap-2 ">
             <p className="text-small text-default-400">Rows per page:</p>
@@ -392,26 +409,115 @@ const ManagementAssessment = (nav) => {
   const [deleteId, setDeleteId] = useState(null);
 
   const handleSoftDeleteByDescription = async (description) => {
+    const descriptions = [description]
     try {
-      await axiosAdmin.put(`/assessment/softDelete/${description}`);
+      await axiosAdmin.put('/assessments/softDeleteByDescription', { descriptions });
       message.success(`Successfully toggled soft delete for assessments`);
       loadAssessment();
     } catch (error) {
-      console.error(`Error toggling soft delete for assessment`, error);
-      message.error(`Error toggling soft delete for assessments`);
+      console.error(`Error toggling soft delete for assessments`, error);
+      message.error(`Error toggling soft delete for assessments: ${error.response?.data?.message || 'Internal server error'}`);
     }
   };
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const handleAddClick = () => {
     setIsAddModalOpen(true);
   };
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const [editRubric, setEditRubric] = useState({
+    course_id: '',
+    rubric_id: '',
+    description: '',
+    place: '',
+    date: ''
+  });
+
+  const handleEditFormSubmit = async () => {
+    console.log("description:", oldDescription)
+
+    console.log("description", editRubric)
+
+      
+    try {
+        const response = await axiosAdmin.patch('/assessment/updateByDescription', {
+            description: oldDescription,
+            updateData: editRubric
+        });
+        loadAssessment(); 
+        message.success('Assessment updated successfully');
+    } catch (error) {
+        console.error("Error updating assessment:", error);
+        message.error("Error updating assessment: " + (error.response?.data?.message || 'Internal server error'));
+    }
+};
+
+  const [oldDescription, setOldDescription] = useState('')
+  const handleEditClick = (Assessment, description) => {
+    console.log("assessment", Assessment);
+    console.log("description", description);
+    setEditRubric(Assessment);
+    setOldDescription(description)
+    setIsEditModalOpen(true);
+  };
+
+  const [DataCourse, setCourseByTeacher] = useState([]);
+  const [filterRubicData, setfilterRubicData] = useState([]);
+  
+  const getAllRubricIsDeleteFalse = async () => {
+    try {
+      const response = await axiosAdmin.get(`/rubrics/checkScore?teacher_id=${teacher_id}&isDelete=false`);
+      const updatedRubricData = response.data.rubric.map((rubric) => {
+        const status = {
+          status: rubric.RubricItem.length === 0 ? false : true,
+          _id: rubric.rubric_id
+        };
+        return {
+          rubric_id: rubric.rubric_id,
+          rubricName: rubric.rubricName,
+          status: status,
+          point: rubric.RubricItem[0]?.total_score ? rubric.RubricItem[0].total_score : 0.0,
+          action: rubric.rubric_id
+        };
+      });
+      setfilterRubicData(updatedRubricData);
+      console.log(updatedRubricData);
+    } catch (error) {
+      console.error("Error: " + error.message);
+      message.error('Error fetching Rubric data');
+    }
+  };
+  
+  const getCourseByTeacher = async () => {
+    try {
+      const response = await axiosAdmin.get(`/course/getByTeacher/${teacher_id}`);
+      console.log(response.data.course);
+      if (response.data) {
+        setCourseByTeacher(response.data.course);
+      }
+    } catch (error) {
+      console.error("Error fetching course:", error);
+      message.error('Error fetching course');
+    }
+  };
+
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   return (
     <>
-    <ModalCreateAssessment
+      <ModalCreateAssessment
         isOpen={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
+      />
+      <ModalUpdateAssessment
+        isOpen={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        onSubmit={handleEditFormSubmit}
+        editRubric={editRubric}
+        setEditRubric={setEditRubric}
+        DataCourse={DataCourse}
+        filterRubicData={filterRubicData}
       />
       <ConfirmAction
         onOpenChange={onOpenChange}
@@ -443,7 +549,7 @@ const ManagementAssessment = (nav) => {
             <Button
               endContent={<PlusIcon />}
               onClick={() => handleNavigate(
-                `/admin/management-rubric/store`
+                `/admin/management-grading/store`
               )}
             >
               Store
@@ -494,6 +600,7 @@ const ManagementAssessment = (nav) => {
                   <DropdownItem key="oldest" className="capitalize">Oldest</DropdownItem>
                 </DropdownMenu>
               </Dropdown>
+              
             </div>
           </div>
 

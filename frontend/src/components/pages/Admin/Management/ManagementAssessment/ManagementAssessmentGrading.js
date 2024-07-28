@@ -23,7 +23,7 @@ import { PlusIcon } from './PlusIcon';
 import { VerticalDotsIcon } from './VerticalDotsIcon';
 import { SearchIcon } from './SearchIcon';
 import { ChevronDownIcon } from './ChevronDownIcon';
-import { columns, fetchAssessmentDataGrading, statusOptions } from './DataAssessmentGrading';
+import { columns, fetchAssessmentDataGrading, statusOptions } from './Data/DataAssessmentGrading';
 import { capitalize } from '../../Utils/capitalize';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";

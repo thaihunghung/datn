@@ -35,7 +35,7 @@ const AssessmentModel = sequelize.define('Assessment', {
       key: 'rubric_id'
     }
   },
-  course_id: {
+  course_id: { 
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {

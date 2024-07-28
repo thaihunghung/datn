@@ -1,6 +1,6 @@
 import React from "react";
 
-import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import { axiosAdmin } from "../../../../../../service/AxiosAdmin";
 
 export const fetchAssessmentDataGrading = async (teacher_id, descriptionURL, searchTerm = "") => {
   try {

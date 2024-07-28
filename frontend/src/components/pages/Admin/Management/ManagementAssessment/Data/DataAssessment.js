@@ -1,6 +1,6 @@
 import React from "react";
 
-import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import { axiosAdmin } from "../../../../../../service/AxiosAdmin";
 
 export const fetchAssessmentData = async (teacher_id) => {
   try {
@@ -10,9 +10,16 @@ export const fetchAssessmentData = async (teacher_id) => {
         description: items?.description,
         assessmentCount: items?.assessmentCount,
         studentCount: items?.studentCount,
-        nameCourse: items?.course,
+        courseName: items?.courseName,
         status: items?.status,
         action: items?.description,
+        Assessment: {
+          rubric_id: items?.Assessment?.rubric_id,
+          course_id: items?.Assessment?.course_id,
+          description: items?.Assessment?.description,
+          date: items?.Assessment?.date,
+          place: items?.Assessment?.place,
+        },
         createdAt: items?.createdAt
     }));
     return Data;
@@ -28,7 +35,7 @@ const columns = [
   {name: "description", uid: "description", sortable: true},
   {name: "assessmentCount", uid: "assessmentCount", sortable: true},
   {name: "studentCount", uid: "studentCount", sortable: true},
-  {name: "nameCourse", uid: "nameCourse", sortable: true},
+  {name: "courseName", uid: "courseName", sortable: true},
   {name: "createdAt", uid: "createdAt", sortable: true},
   {name: "status", uid: "status", sortable: true},
   {name: "action", uid: "action", sortable: true},
