@@ -42,10 +42,12 @@ const DownloadDiv = () => {
             </html>
         `;
         try {
-            const response = await axiosAdmin.post('pdf', {
-                html: htmlString
-            }, { responseType: 'blob', withCredentials: true });
-
+            const response = await axiosAdmin.get('pdf', {
+                params: { id: 1 },  // Pass parameters in the 'params' object
+                responseType: 'blob', 
+                withCredentials: true
+            });
+        
             const blob = new Blob([response.data], { type: 'application/pdf' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -75,9 +77,10 @@ const Template = () => {
 
     const GetRubricData = async () => {
         try {
-            const response = await axiosAdmin.get(`/rubric/${1}/items/isDelete/false`);
+            const response = await axiosAdmin.get(`/rubric/${1}/items?isDelete=false`);
             setRubicData(response.data.rubric);
             setRubicItemsData(response.data.rubric.rubricItems);
+            console.log(response.data)
         } catch (error) {
             console.error('Error fetching rubric data:', error);
             throw error;
@@ -89,10 +92,10 @@ const Template = () => {
     }, []);
 
     return (
-        <div className="w-[26cm]">
+        <div>
             <DownloadDiv />
             <div className='w-full text-sm' id="downloadDiv">
-                <div className="w-full pl-[2cm] pr-[1cm]">
+                <div className="w-full pl-[2cm] pr-[1cm] font-times">
                     <div className="w-full flex justify-center items-center">
                         <div className="w-[40%] flex flex-col justify-center items-center">
                             <div>TRƯỜNG ĐẠI HỌC TRÀ VINH</div>
@@ -103,89 +106,76 @@ const Template = () => {
                             <div className="font-bold">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
                             <div className="font-bold">Độc lập - Tự do - Hạnh Phúc</div>
                             <div className="w-[30%] border-1 border-black"></div>
-
                         </div>
                     </div>
-                    <div className="text-xl font-bold w-full text-center my-5">PHIẾU ĐÁNH GIÁ THỰC TẬP ĐỒ ÁN CHUYÊN NGÀNH</div>
-                    <div className="w-full text-left">1. Họ và tên (thành viên Chấm):</div>
-                    <div className="w-full text-left">2. Chức danh, học vị:</div>
-                    <div className="w-full text-left">3. Đơn vị công tác:</div>
-                    <div className="w-full text-left">4. Tên đề tài:</div>
-                    <div className="w-full py-5"></div>
-                    <div className="w-full flex justify-start items-center"><span className="flex-1 text-left">5. Họ và tên sinh viên:</span><span className="flex-1 text-left">MSSV:</span></div>
-                    <div className="w-full flex justify-start items-center"><span className="flex-1 text-left">6. Chuyên ngành:</span><span className="flex-1 text-left">Khóa:</span></div>
-                    <div className="w-full text-left">7. Địa điểm:</div>
-                    <div className="w-full text-left">8. Ý kiến đánh giá của thành viên Chấm Thực tập Đồ án Chuyên Ngành theo tín chỉ:</div>
-                    <div className="w-full text-left italic mb-5">(Thành viên Chấm khoanh tròn vào ô điểm số tương ứng với cột mức chất lượng mà SV đạt được theo từng tiêu chí)</div>
+                    <div className="text-xl font-bold w-full text-center mt-5 flex flex-col">
+                        <span>PHIẾU CHẤM ĐÁNH GIÁ BÁO CÁO</span>
+                        <span>HỌC PHẦN {RubicData.subject.subjectName.toUpperCase() }</span>
+                    </div>
+                    <div className="text-center text-base">(Mã HP: {RubicData.subject.subjectCode })</div>
+                    <div className="w-full text-left text-base">Nhóm<span className="text-lg">: .........</span> Chủ đề: ...........................................................................................................................................................................................</div>
+                    <div className="w-full text-left text-base">+ Họ và tên SV1<span className="text-lg">: ....................................................................................</span> MSSV: ....................................................................................</div>
+                    <div className="w-full text-left text-base">+ Họ và tên SV2<span className="text-lg">: ....................................................................................</span> MSSV: ....................................................................................</div>
+                    <div className="w-full text-left text-base">+ Họ và tên SV3<span className="text-lg">: ....................................................................................</span> MSSV: ....................................................................................</div>
                 </div>
-                <table className='border-collapse border leading-6 border-[#ff8077] w-full h-full'>
+                <table className='border-collapse border-[1px] border-[#020401] w-full h-full text-base mt-5 font-times'>
                     <thead>
-                        <tr className="border border-b-0 border-[#ff8077] h-[20px]">
-                            <th className="border border-b-0 border-[#ff8077]">CLO</th>
-                            <th className="border border-b-0 border-[#ff8077]">PLO</th>
-                            <th className="border border-b-0 border-[#ff8077]">Tiêu chí</th>
-                            <th className="border border-b-0 border-r-0 border-[#ff8077]">Tổng điểm</th>
-
-
-                            <th ><table className="w-full h-full border-l border-[#ff8077]"><tr><th>Mức độ chất lượng</th></tr></table></th>
+                        <tr className="border-[1px] border-b-0 w-full border-[#020401] h-[20px]">
+                            <th className="border-[1px] border-[#020401] w-[20%]">CLO</th>
+                            <th className="border-[1px] border-[#020401] w-[50%]">Nội dung báo cáo</th>
+                            <th className="border-[1px] border-[#020401] w-[50px] text-wrap p-0">
+                                <div className="flex flex-col items-center">
+                                    <span>Điểm</span>
+                                </div>
+                            </th>
+                            <th className="border-[1px] border-[#020401] w-[20px]">SV1</th>
+                            <th className="border-[1px] border-[#020401] w-[20px]">SV2</th>
+                            <th className="border-[1px] border-r-[2px] border-[#020401] w-[20px]">SV3</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {RubicItemsData.map((item, i) => (
-
-                            <tr key={item.rubricsItem_id} className="border border-b-0 border-[#ff8077] p-5">
-                                <td className="border  border-[#ff8077] text-center px-2">{item.CLO.cloName}</td>
-                                <td className="border  border-[#ff8077] text-center px-2">{item.PLO.ploName}</td>
-                                <td className="border border-[#ff8077] test text-justify p-2">
+                        {RubicItemsData.map((item) => (
+                            <tr key={item.rubricsItem_id} className="border-[1px] border-b-0 border-[#020401] p-5">
+                                <td className="border-[1px] border-[#020401] px-2 text-justify">{item.CLO.cloName + ': ' + item.CLO.description}</td>
+                                <td className="border-[1px] border-[#020401] text-justify p-2">
                                     <span dangerouslySetInnerHTML={{ __html: item.description }} />
                                 </td>
-                                <td className="border border-r-0 border-[#ff8077] text-center px-2">
-                                    {item.score}
+                                <td className="border-[1px] border-r-0 border-[#020401] text-center p-0 w-[10px]">
+                                    <div className="w-full text-center text-base overflow-hidden text-overflow-ellipsis whitespace-nowrap">
+                                        {item.maxScore}
+                                    </div>
                                 </td>
-                                <td>
-                                    
-                                </td>
+                                <td className="border-[1px] border-[#020401]"></td>
+                                <td className="border-[1px] border-[#020401]"></td>
+                                <td className="border-[1px] border-[#020401] border-r-[2px]"></td>
                             </tr>
-
                         ))}
                     </tbody>
-                    <tfoot className="border border-[#ff8077] p-5">
+                    <tfoot>
                         <tr className="h-[20px]">
-                            <td className="p-5"></td>
-                            <td className="p-5"></td>
-                            <td className="p-5"></td>
-                            <td className="p-5"></td>
-                            <td className=""><table className="w-full"><tr><td></td></tr></table></td>
+                            <td className="border-[1px] border-[#020401]"></td>
+                            <td className="border-[1px] border-[#020401]"></td>
+                            <td className="border-[1px] border-[#020401] w-[10px]"></td>
+                            <td className="border-[1px] border-[#020401]"></td>
+                            <td className="border-[1px] border-[#020401]"></td>
+                            <td className="border-[1px] border-[#020401] border-r-[2px]"></td>
                         </tr>
                     </tfoot>
                 </table>
-
-                <div className="w-full pl-[2cm] pr-[1cm]" style={{ pageBreakInside: 'avoid' }}>
-                    <div className="w-full text-left mt-2">
-                        <span className="font-bold">9. Kết luận của thành viên Chấm đồ án: </span>
-                        <span className="italic">(Lưu ý: Tổng điểm bài thi và điểm thưởng không quá 10 điểm)</span>
-                    </div>
-                    <div className="w-full text-left my-2">
-                        <span className="pl-[50px]">Tổng điểm:..................(Bằng chữ:........................................................................) </span>
-                    </div>
-                    <div className="w-full text-left font-bold">
-                        10. Ý kiến góp ý, bổ sung:
-                    </div>
-                    <div className="w-full flex mt-[50px] justify-end pl-[2cm] pr-[1cm] ">
-                        <div className="w-[50%] mr-[20px] test">
-                            <div className="w-full text-center test">
-                                Trà Vinh,<span className="italic"> ngày     tháng     năm 2024</span>
+                <div className="w-full pl-[2cm] pr-[1cm] text-base font-times" style={{ pageBreakInside: 'avoid' }}>
+                    <div className="w-full flex mt-[50px] justify-end pl-[2cm] pr-[1cm]">
+                        <div className="w-[50%] mr-[20px]">
+                            <div className="w-full text-center">
+                                Trà Vinh,<span className="italic"> ngày ... tháng ... năm ... </span>
                             </div>
-                            <div className="w-full text-center font-bold test">
-                                Thành viên Chấm báo cáo
+                            <div className="w-full text-center font-bold">
+                                GV CHẤM BÁO CÁO
                             </div>
-                            <div className="w-full text-center test">
-                                <span className="italic">(Ký & ghi rõ họ tên)</span>
+                            <div className="w-full text-center">
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     );

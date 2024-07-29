@@ -412,7 +412,7 @@ const RubricController = {
         where: { rubric_id: id },
         include: [{
           model: SubjectModel,
-          attributes: ['subject_id', 'subjectName']
+          attributes: ['subject_id','subjectCode',  'subjectName']
         }]
       });
 

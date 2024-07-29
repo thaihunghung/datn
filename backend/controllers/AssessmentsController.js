@@ -1,4 +1,5 @@
 const { Op, Sequelize } = require('sequelize');
+
 const AssessmentModel = require('../models/AssessmentModel');
 const CourseModel = require('../models/CourseModel');
 const StudentModel = require('../models/StudentModel');
@@ -224,6 +225,7 @@ const AssessmentsController = {
           } else {
             status = ((assessmentCount - zeroScoreCount) / assessmentCount) * 100;
           }
+          status = Math.round(status);
 
           // Tìm createdAt cho từng assessment dựa trên description
           const foundAssessment = await AssessmentModel.findOne({
@@ -406,14 +408,6 @@ const AssessmentsController = {
   },
 
   deleteMultiple: async (req, res) => {
-    try {
-      const { id } = req.params;
-      await AssessmentModel.destroy({ where: { assessment_id: id } });
-      res.json({ message: 'Xóa assessments thành công' });
-    } catch (error) {
-      console.error('Lỗi xóa assessments:', error);
-      res.status(500).json({ message: 'Lỗi server' });
-    }
     const { assessment_id } = req.query;
     try {
       const assessmentIds = assessment_id.map(id => parseInt(id));
