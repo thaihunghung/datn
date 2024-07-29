@@ -23,11 +23,13 @@ import { PlusIcon } from './PlusIcon';
 import { VerticalDotsIcon } from './VerticalDotsIcon';
 import { SearchIcon } from './SearchIcon';
 import { ChevronDownIcon } from './ChevronDownIcon';
-import { columns, fetchAssessmentDataGrading, statusOptions } from './Data/DataAssessmentGrading';
+import { columns, fetchAssessmentDataGrading, fetchStudentDataByCourseId, statusOptions } from './Data/DataAssessmentGrading';
 import { capitalize } from '../../Utils/capitalize';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
 import BackButton from '../../Utils/BackButton/BackButton';
+import { axiosAdmin } from '../../../../../service/AxiosAdmin';
+import ModalCreateOneAssessment from './ModalCreateOneAssessment';
 
 const statusColorMap = {
   active: 'success',
@@ -61,7 +63,18 @@ const ManagementAssessmentGrading = (nav) => {
   }
 
   const [assessments, setAssessment] = useState([]);
-  const [ValidKeys, setValidKeys] = useState([]);
+  const [StudentAll, setStudentAll] = useState([]);
+
+  const [filteredStudents, setFilteredStudents] = useState([]);
+  const [editRubric, setEditRubric] = useState({
+    teacher_id: "",
+    course_id: "",
+    rubric_id: "",
+    description: "",
+    student_id: "",
+    place: "",
+    date: "",
+  });
   const [filterValue, setFilterValue] = useState('');
   const [classFilter, setClassFilter] = useState('all');
   const [classes, setClasses] = useState([]);
@@ -88,7 +101,7 @@ const ManagementAssessmentGrading = (nav) => {
     };
     handleResize();
 
-    const handleVisibilityChange = () => { 
+    const handleVisibilityChange = () => {
       if (window.innerWidth < 500) {
         setVisibleColumns(new Set(COMPACT_VISIBLE_COLUMNS)); // Thay đổi visibleColumns khi cửa sổ nhỏ
       } else {
@@ -104,19 +117,116 @@ const ManagementAssessmentGrading = (nav) => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+  const [RubricArray, setRubricArray] = useState([]);
+  const [CourseArray, setCourseArray] = useState([]);
+  const loadTeachers = async () => {
+    const { Assessment, Rubric_id, Course_id, Classes, RubricArray, CourseArray } = await fetchAssessmentDataGrading(teacher_id, descriptionURL, filterValue);
+    setAssessment(Assessment);
+    setRubric_id(Rubric_id);
+    setCouse_id(Course_id);
+    setClasses(Classes);
+
+    setRubricArray(RubricArray);
+    setCourseArray(CourseArray);
+  };
 
   useEffect(() => {
-    const loadTeachers = async () => {
-      const { Assessment, Rubric_id, Course_id, Classes } = await fetchAssessmentDataGrading(teacher_id, descriptionURL, filterValue);
-      setAssessment(Assessment);
-      setRubric_id(Rubric_id);
-      setCouse_id(Course_id);
-      setClasses(Classes);
-    };
     loadTeachers();
-    console.log("assessments loaded", assessments);
   }, [page, rowsPerPage, filterValue]);
+  const loadStudentAllCourse = async (Couse_id) => {
+    try {
+      const response = await fetchStudentDataByCourseId(Couse_id);
+      setStudentAll(response);
 
+    } catch (error) {
+      console.error("Error loading student data:", error);
+    }
+  };
+  useEffect(() => {
+    loadStudentAllCourse(Couse_id);
+  }, [Couse_id]);
+  useEffect(() => {
+    if (Array.isArray(StudentAll) && Array.isArray(assessments)) {
+      const filtered = StudentAll.filter(student =>
+        !assessments.some(assessment => assessment.student.student_id === student.student_id)
+      );
+      setFilteredStudents(filtered);
+    }
+  }, [StudentAll, assessments]);
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleFormSubmit = async () => {
+    console.log("description", editRubric);
+    if (!editRubric.student_id || editRubric.student_id.length === 0) {
+      message.error('Please select at least one student.');
+      return;
+    }
+
+    try {
+      for (const studentId of editRubric.student_id) {
+        const data = {
+          teacher_id: editRubric.teacher_id || "",
+          course_id: editRubric.course_id || "",
+          rubric_id: editRubric.rubric_id || "",
+          description: editRubric.description || "",
+          student_id: studentId,
+          place: editRubric.place,
+          date: editRubric.date,
+        };
+
+        const response = await axiosAdmin.post('/assessment', { data: data });
+        console.log('Assessment response:', response.data);
+      }
+      loadTeachers();
+      setEditRubric((prev) => ({
+        ...prev,
+        student_id: "",
+      }));
+      message.success('Assessment updated successfully');
+    } catch (error) {
+      console.error("Error updating assessment:", error);
+      message.error("Error updating assessment: " + (error.response?.data?.message || 'Internal server error'));
+    }
+  };
+
+
+  const handleAddClick = () => {
+
+    console.log(editRubric);
+    setIsEditModalOpen(true);
+  };
+
+  useEffect(() => {
+    if (assessments) {
+      setEditRubric((prev) => ({
+        ...prev,
+        description: assessments[0]?.action?.description,
+      }));
+      setEditRubric((prev) => ({
+        ...prev,
+        date: assessments[0]?.action?.date,
+      }));
+      setEditRubric((prev) => ({
+        ...prev,
+        place: assessments[0]?.action?.place,
+      }));
+      setEditRubric((prev) => ({
+        ...prev,
+        rubric_id: assessments[0]?.action?.rubric_id,
+      }));
+      setEditRubric((prev) => ({
+        ...prev,
+        course_id: assessments[0]?.action?.course_id,
+      }));
+      setEditRubric((prev) => ({
+        ...prev,
+        teacher_id: assessments[0]?.action?.teacher_id,
+      }));
+    }
+  }, [assessments]);
+
+  const [deleteId, setDeleteId] = useState(null);
 
   const pages = Math.ceil(assessments.length / rowsPerPage);
   const hasSearchFilter = Boolean(filterValue);
@@ -179,7 +289,6 @@ const ManagementAssessmentGrading = (nav) => {
       return newKeys;
     });
   };
-
 
   const getSelectedItems = () => {
     const selectedItems = assessments.filter((item) => selectedKeys.has(item.id.toString()));
@@ -291,9 +400,9 @@ const ManagementAssessmentGrading = (nav) => {
                 radius="full"
                 size="sm"
                 className='bg-[#FF8077]'
-                onClick={() => { onOpen(); }}
+                onClick={() => { onOpen(); setDeleteId(assessment.action.assessment_id) }}
               >
-                {/* setDeleteId(assessment.action.assessment_id); */}
+                {/* ; */}
                 <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
               </Button>
             </Tooltip>
@@ -332,12 +441,6 @@ const ManagementAssessmentGrading = (nav) => {
   };
 
 
-  useEffect(() => {
-    console.log('Selected keys have changed:', Array.from(selectedKeys));
-    // Ensure `getSelectedItems` uses the latest `selectedKeys`
-    const selectedItems = getSelectedItems();
-    console.log('Selected Items after keys changed:', selectedItems);
-  }, [selectedKeys]);
 
   const navigateGradingGroup = () => {
     setTimeout(() => {
@@ -420,7 +523,7 @@ const ManagementAssessmentGrading = (nav) => {
             onValueChange={onSearchChange}
           />
           <div className="flex gap-3">
-            
+
             {/* <Tooltip
             title=""
             getPopupContainer={() =>
@@ -485,6 +588,33 @@ const ManagementAssessmentGrading = (nav) => {
   }, [page, pages, selectedKeys, assessments]);
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const handleSoftDelete = async () => {
+    const data = {
+      assessment_id: Array.from(selectedKeys),
+  };
+  console.log(data)
+  try {
+    const response = await axiosAdmin.delete('/assessments/multiple', { params: data });
+
+    await loadTeachers();
+      
+      message.success(response.data.message);
+  } catch (error) {
+      console.error("Error deleting:", error);
+      message.error('Error deleting');
+  }
+  };
+
+  const handleSoftDeleteById = async (_id) => {
+    try {
+      const response = await axiosAdmin.delete(`/assessment/${_id}`);
+      await loadTeachers();
+      message.success(response.data.message);
+  } catch (error) {
+      console.error(`Error toggling delete for with ID ${_id}:`, error);
+      message.error(`Error toggling delete for with ID ${_id}`);
+  }
+  };
 
   return (
     <>
@@ -504,34 +634,31 @@ const ManagementAssessmentGrading = (nav) => {
               }}
               endContent={<PlusIcon />}
             >
-              Chấm nhóm
+              Group
             </Button>
             <Button
               className='bg-[#AF84DD] '
               endContent={<PlusIcon />}
+              onClick={handleAddClick}
             >
-              Tạo mới
+              New
             </Button>
             <Button
               className='bg-[#FF8077] '
               endContent={<PlusIcon />}
+              onClick={onOpen}
+              disabled={selectedKeys.size === 0}
             >
-              Xóa
+              Deletes
             </Button>
-            <Button
-              endContent={<PlusIcon />}
-            >
-              kho lưu trữ
-            </Button>
-
           </div>
 
-          
+
           <div className='flex gap-1 justify-start'>
             <Dropdown>
               <DropdownTrigger className="sm:flex">
                 <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                  Lọc trạng thái
+                  Filter score
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
@@ -577,7 +704,7 @@ const ManagementAssessmentGrading = (nav) => {
             <Dropdown>
               <DropdownTrigger className="sm:flex">
                 <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                  Lọc lớp
+                  Filter class
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
@@ -602,6 +729,19 @@ const ManagementAssessmentGrading = (nav) => {
 
         </div>
       </div>
+      <ConfirmAction
+        onOpenChange={onOpenChange}
+        isOpen={isOpen}
+        onConfirm={() => {
+          if (deleteId) {
+            handleSoftDeleteById(deleteId);
+            setDeleteId(null);
+          } else if (selectedKeys.size > 0) {
+            handleSoftDelete();
+            setSelectedKeys(new Set());
+          }
+        }}
+      />
       <Table
         aria-label="Example table with dynamic content"
         bottomContent={bottomContent}
@@ -638,26 +778,16 @@ const ManagementAssessmentGrading = (nav) => {
           )}
         </TableBody>
       </Table>
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">Modal Title</ModalHeader>
-              <ModalBody>
-                <p>
-                  Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in,
-                  egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
-                </p>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="primary" onPress={onClose}>
-                  Close
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <ModalCreateOneAssessment
+        isOpen={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        onSubmit={handleFormSubmit}
+        editRubric={editRubric}
+        setEditRubric={setEditRubric}
+        DataCourse={CourseArray}
+        RubicData={RubricArray}
+        StudentData={filteredStudents}
+      />
     </>
   );
 };
@@ -665,3 +795,59 @@ const ManagementAssessmentGrading = (nav) => {
 export default ManagementAssessmentGrading;
 
 
+function ConfirmAction(props) {
+  const { isOpen, onOpenChange, onConfirm } = props;
+  const handleOnOKClick = (onpose) => {
+    onpose();
+    if (typeof onConfirm === 'function') {
+      onConfirm();
+    }
+  }
+  return (
+    <Modal
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      motionProps={{
+        variants: {
+          enter: {
+            y: 0,
+            opacity: 1,
+            transition: {
+              duration: 0.2,
+              ease: "easeOut",
+            },
+          },
+          exit: {
+            y: -20,
+            opacity: 0,
+            transition: {
+              duration: 0.1,
+              ease: "easeIn",
+            },
+          },
+        }
+      }}
+    >
+      <ModalContent>
+        {(onpose) => (
+          <>
+            <ModalHeader>Cảnh báo</ModalHeader>
+            <ModalBody>
+              <p className="text-[16px]">
+                Assessment sẽ được xóa và không thể khôi phục lại, tiếp tục thao tác?
+              </p>
+            </ModalBody>
+            <ModalFooter>
+              <Button variant="light" onClick={onpose}>
+                Huỷ
+              </Button>
+              <Button color="danger" className="font-medium" onClick={() => handleOnOKClick(onpose)}>
+                Xoá
+              </Button>
+            </ModalFooter>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
+  )
+}

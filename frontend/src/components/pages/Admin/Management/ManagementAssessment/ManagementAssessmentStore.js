@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import { Table, Tooltip, Button, message } from 'antd';
 import { Flex, Progress } from 'antd';
 
-import { Link, useNavigate } from "react-router-dom";
+import { Await, Link, useNavigate } from "react-router-dom";
 import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Chip } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavGrading from "../../Utils/DropdownAndNav/DropdownAndNavGrading";
 import Cookies from "js-cookie";
+import { fetchAssessmentDataTrue } from "./Data/DataAssessment";
+import BackButton from "../../Utils/BackButton/BackButton";
 
 const ManagementAssessmentStore = (nav) => {
   const { setCollapsedNav } = nav;
@@ -48,37 +50,37 @@ const ManagementAssessmentStore = (nav) => {
 
     {
       title: (
-          <div className="flex items-center justify-center w-full">
-              <span>Form</span>
-          </div>
+        <div className="flex items-center justify-center w-full">
+          <span>Form</span>
+        </div>
       ),
       dataIndex: "action",
       render: (_id) => (
-          <div className="flex flex-col items-center justify-center w-full gap-2">
-              <Tooltip title="Khôi phục">
-                  <Button
-                      isIconOnly
-                      variant="light"
-                      radius="full"
-                      onClick={() => handleRestoreById(_id)}
-                  >
-                      <i className="fa-solid fa-clock-rotate-left"></i>
-                  </Button>
-              </Tooltip>
-              <Tooltip title="Xoá vĩnh viễn">
-                  <Button
-                      isIconOnly
-                      variant="light"
-                      radius="full"
-                      color="danger"
-                      onClick={() => { onOpen(); setDeleteId(_id); }}
-                  >
-                      <i className="fa-solid fa-trash-can"></i>
-                  </Button>
-              </Tooltip>
-          </div>
+        <div className="flex flex-col items-center justify-center w-full gap-2">
+          <Tooltip title="Khôi phục">
+            <Button
+              isIconOnly
+              variant="light"
+              radius="full"
+              onClick={() => handleRestoreById(_id)}
+            >
+              <i className="fa-solid fa-clock-rotate-left"></i>
+            </Button>
+          </Tooltip>
+          <Tooltip title="Xoá vĩnh viễn">
+            <Button
+              isIconOnly
+              variant="light"
+              radius="full"
+              color="danger"
+              onClick={() => { onOpen(); setDeleteId(_id); }}
+            >
+              <i className="fa-solid fa-trash-can"></i>
+            </Button>
+          </Tooltip>
+        </div>
       ),
-  },
+    },
 
   ];
 
@@ -106,46 +108,59 @@ const ManagementAssessmentStore = (nav) => {
         studentCount: items?.studentCount,
         courseName: items?.courseName,
         status: items?.status,
+        isDelete: items?.isDelete,
         action: items?.description,
       }));
       setAssessment(Data);
-      console.log(Data);
+      console.log("Assessments fetched: ", response.data);
     } catch (error) {
       console.error("Error: " + error.message);
     }
   };
 
   const handleSoftDelete = async () => {
-    const descriptions = selectedRowKeys
+    const data = {
+      descriptions: selectedRowKeys
+    };
     try {
-      await axiosAdmin.put('/assessments/softDeleteByDescription', { descriptions });
-      message.success(`Successfully toggled soft delete for assessments`);
-      getAllAssessmentIsDeleteFalse();
+      await axiosAdmin.delete('/assessments/deleteByDescription', { data });
+      message.success("Successfully deleted assessment");
+      loadAssessment();
+      handleUnSelect();
     } catch (error) {
-      console.error(`Error toggling soft delete for assessments`, error);
-      message.error(`Error toggling soft delete for assessments: ${error.response?.data?.message || 'Internal server error'}`);
+      console.error("Error deleting assessment", error);
+      message.error(`Error deleting assessment: ${error.response?.data?.message || 'Internal server error'}`);
     }
   };
+
+
 
   const handleSoftDeleteById = async (description) => {
-    const descriptions = [description]
+    const data = {
+      descriptions: [description]
+    };
     try {
-      await axiosAdmin.put('/assessments/softDeleteByDescription', { descriptions });
-      message.success(`Successfully toggled soft delete for assessments`);
-      getAllAssessmentIsDeleteFalse();
+      await axiosAdmin.delete('/assessments/deleteByDescription', { data });
+      message.success("Successfully deleted assessment");
+      loadAssessment();
+      handleUnSelect();
     } catch (error) {
-      console.error(`Error toggling soft delete for assessments`, error);
-      message.error(`Error toggling soft delete for assessments: ${error.response?.data?.message || 'Internal server error'}`);
+      console.error("Error deleting assessment", error);
+      message.error(`Error deleting assessment: ${error.response?.data?.message || 'Internal server error'}`);
     }
   };
 
+
   const handleRestoreById = async (description) => {
-    const descriptions = [description]
+    const data = {
+      descriptions: [description],
+      isDelete: false
+    }
     try {
-      await axiosAdmin.put('/assessments/softDeleteByDescription', { descriptions });
-      getAllAssessmentIsDeleteFalse();
-      message.success(`Successfully toggled soft delete for assessments`);
-     
+      await axiosAdmin.put('/assessments/softDeleteByDescription', data);
+      message.success("Successfully toggled soft delete for assessments")
+      loadAssessment();
+      handleUnSelect();
     } catch (error) {
       console.error(`Error toggling soft delete for assessments`, error);
       message.error(`Error toggling soft delete for assessments: ${error.response?.data?.message || 'Internal server error'}`);
@@ -153,12 +168,16 @@ const ManagementAssessmentStore = (nav) => {
   };
 
   const handleRestore = async () => {
-    const descriptions = selectedRowKeys
+    const data = {
+      descriptions: selectedRowKeys,
+      isDelete: false
+    }
+    console.log(data);
     try {
-      await axiosAdmin.put('/assessments/softDeleteByDescription', { descriptions });
-      getAllAssessmentIsDeleteFalse();
-      message.success(`Successfully toggled soft delete for assessments`);
-      
+      const response = await axiosAdmin.put('/assessments/softDeleteByDescription', data);
+      loadAssessment();
+      message.success("Successfully toggled soft delete for assessments")
+      handleUnSelect()
     } catch (error) {
       console.error(`Error toggling soft delete for assessments`, error);
       message.error(`Error toggling soft delete for assessments: ${error.response?.data?.message || 'Internal server error'}`);
@@ -166,9 +185,14 @@ const ManagementAssessmentStore = (nav) => {
   };
 
 
+  const loadAssessment = async () => {
+    const response = await fetchAssessmentDataTrue(teacher_id);
+    console.log(response);
+    setAssessment(response);
+  };
 
   useEffect(() => {
-    getAllAssessmentIsDeleteFalse()
+    loadAssessment()
     const handleResize = () => {
       if (window.innerWidth < 1024) {
         setCollapsedNav(true);
@@ -199,7 +223,16 @@ const ManagementAssessmentStore = (nav) => {
         }}
       />
 
-      <DropdownAndNavGrading />
+      <div className='w-full flex justify-between'>
+        <div className='h-full my-auto p-5 pl-0 hidden sm:block'>
+          <BackButton />
+        </div>
+
+      </div>
+
+      <div>
+        <h1 className="text-xl font-bold text-[#6366F1] text-left">Danh sách Assessment Đã ẩn</h1>
+      </div>
       <div className="w-full my-5">
         {selectedRowKeys.length !== 0 && (
           <div className="Quick__Option flex justify-between items-center sticky top-2 bg-[white] z-50 w-full p-4 py-3 border-1 border-slate-300">
@@ -308,7 +341,7 @@ function ConfirmAction(props) {
             <ModalHeader>Cảnh báo</ModalHeader>
             <ModalBody>
               <p className="text-[16px]">
-                Subject sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
+                Assessment sẽ được xóa<Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và không thể khôi phục lại, tiếp tục thao tác?
 
               </p>
             </ModalBody>

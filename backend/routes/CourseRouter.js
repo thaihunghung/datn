@@ -327,6 +327,7 @@ const router = express.Router();
  *         description: Server error
  */
 
+
 router.get('/course', CourseController.index);
 router.post('/course-all', CourseController.getAll);
 router.get('/course/:id', CourseController.getByID);

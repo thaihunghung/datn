@@ -28,7 +28,23 @@ export const fetchAssessmentData = async (teacher_id) => {
   }
 };
 
-
+export const fetchAssessmentDataTrue = async (teacher_id) => {
+  try {
+    const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}&isDelete=true`);
+    const Data = response.data.map((items) => ({
+        key: items?.description,
+        description: items?.description,
+        assessmentCount: items?.assessmentCount,
+        studentCount: items?.studentCount,
+        courseName: items?.courseName,
+        status: items?.status,
+        action: items?.description,
+    }));
+    return Data;
+  } catch (error) {
+    console.error("Error: " + error.message);
+  }
+};
 
 const columns = [
   {name: "id", uid: "id", sortable: true},

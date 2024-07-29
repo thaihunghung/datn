@@ -561,6 +561,7 @@ const assessmentsController = require('../controllers/AssessmentsController');
  *       500:
  *         description: Server error
  */
+// put: /assessments/softDeleteByDescription
 /**
  * @openapi
  * /api/admin/assessments/softDeleteByDescription:
@@ -580,6 +581,9 @@ const assessmentsController = require('../controllers/AssessmentsController');
  *                 items:
  *                   type: string
  *                   example: "100000 - IT02_Thống kê và phân tích dữ liệu DA20TTB_d_2018-1-1"
+ *               isDelete:
+ *                 type: boolean
+ *                 example: true
  *             required:
  *               - descriptions
  *     responses:
@@ -611,11 +615,6 @@ const assessmentsController = require('../controllers/AssessmentsController');
  *       500:
  *         description: Server error
  */
-
-
-
-
-
 // get: /assessment/isDelete/true
 /**
  * @openapi
@@ -706,10 +705,10 @@ const assessmentsController = require('../controllers/AssessmentsController');
  *       500:
  *         description: Server error
  */
-// patch: /assessment/updateByDescription
+// patch: /assessments/updateByDescription
 /**
  * @openapi
- * /api/admin/assessment/updateByDescription:
+ * /api/admin/assessments/updateByDescription:
  *   patch:
  *     summary: Update assessments by description
  *     description: Updates assessments that match the given description with the provided update data.
@@ -784,6 +783,48 @@ const assessmentsController = require('../controllers/AssessmentsController');
  *                   type: object
  *                   additionalProperties: true
  */
+/**
+ * @openapi
+ * /api/admin/assessments/deleteByDescription:
+ *   delete:
+ *     summary: Delete assessments by descriptions
+ *     description: Deletes the assessments based on the provided list of descriptions.
+ *     tags: [assessments]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               descriptions:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   example: "100000 - IT02_Thống kê và phân tích dữ liệu DA20TTB_d_2018-1-1"
+ *             required:
+ *               - descriptions
+ *     responses:
+ *       200:
+ *         description: Successfully deleted the assessments.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Successfully deleted assessments"
+ *                 deletedCount:
+ *                   type: integer
+ *                   example: 5
+ *       400:
+ *         description: Descriptions array is required and cannot be empty.
+ *       404:
+ *         description: No assessments found for the provided descriptions.
+ *       500:
+ *         description: Server error
+ */
 
 
 router.get('/assessment', assessmentsController.getAssessments);
@@ -792,13 +833,18 @@ router.post('/assessment', assessmentsController.create);
 router.get('/assessment/:id', assessmentsController.getByID);
 router.put('/assessment/:id', assessmentsController.update);
 router.delete('/assessment/:id', assessmentsController.delete);
+router.delete('/assessments/multiple', assessmentsController.deleteMultiple);
+
+
 router.put('/assessment/:id/totalScore', assessmentsController.updateStotalScore);
 router.get('/assessment/isDelete/true', assessmentsController.isDeleteTotrue);
 router.get('/assessment/isDelete/false', assessmentsController.isDeleteTofalse);
 
-router.put('/assessments/softDeleteByDescription', assessmentsController.toggleSoftDeleteByDescription);
-router.patch('/assessment/updateByDescription', assessmentsController.updateByDescription);
 
+
+router.put('/assessments/softDeleteByDescription', assessmentsController.toggleSoftDeleteByDescription);
+router.patch('/assessments/updateByDescription', assessmentsController.updateByDescription);
+router.delete('/assessments/deleteByDescription', assessmentsController.deleteByDescription);
 
 
 

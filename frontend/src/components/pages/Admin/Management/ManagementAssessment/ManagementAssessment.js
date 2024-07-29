@@ -409,9 +409,12 @@ const ManagementAssessment = (nav) => {
   const [deleteId, setDeleteId] = useState(null);
 
   const handleSoftDeleteByDescription = async (description) => {
-    const descriptions = [description]
+    const data = {
+      descriptions: [description],
+      isDelete: true
+    }
     try {
-      await axiosAdmin.put('/assessments/softDeleteByDescription', { descriptions });
+      await axiosAdmin.put('/assessments/softDeleteByDescription', data );
       message.success(`Successfully toggled soft delete for assessments`);
       loadAssessment();
     } catch (error) {
@@ -441,7 +444,7 @@ const ManagementAssessment = (nav) => {
 
       
     try {
-        const response = await axiosAdmin.patch('/assessment/updateByDescription', {
+        const response = await axiosAdmin.patch('/assessments/updateByDescription', {
             description: oldDescription,
             updateData: editRubric
         });
@@ -509,6 +512,7 @@ const ManagementAssessment = (nav) => {
       <ModalCreateAssessment
         isOpen={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
+        load={loadAssessment}
       />
       <ModalUpdateAssessment
         isOpen={isEditModalOpen}

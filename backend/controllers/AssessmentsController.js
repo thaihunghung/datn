@@ -163,18 +163,28 @@ const AssessmentsController = {
             description: description,
             isDelete: isDelete === 'true'
           },
-          include: [{
-            model: CourseModel,
-            attributes: ['course_id', 'courseCode', 'courseName']
-          }, {
-            model: StudentModel,
-            attributes: ['student_id', 'studentCode', 'name', 'class_id'],
-            include: [{
-              model: ClassModel,
-              attributes: ['classNameShort']
-            }]
-          }]
+          include: [
+            {
+              model: CourseModel,
+              attributes: ['course_id', 'courseCode', 'courseName']
+            },
+            {
+              model: StudentModel,
+              attributes: ['student_id', 'studentCode', 'name', 'class_id'],
+              include: [
+                {
+                  model: ClassModel,
+                  attributes: ['classNameShort']
+                }
+              ]
+            },
+            {
+              model: RubricModel,
+              attributes: ['rubric_id', 'rubricName']
+            }
+          ]
         });
+        
 
         return res.status(200).json(assessments);
 
@@ -206,23 +216,22 @@ const AssessmentsController = {
 
         const result = await Promise.all(assessments.map(async assessment => {
           let status;
-          if (parseInt(assessment.dataValues.zeroScoreCount) === 0) {
+          const assessmentCount = parseInt(assessment.dataValues.assessmentCount);
+          const zeroScoreCount = parseInt(assessment.dataValues.zeroScoreCount);
+
+          if (assessmentCount === 0) {
             status = 100;
-          } else if (parseInt(assessment.dataValues.zeroScoreCount) === parseInt(assessment.dataValues.assessmentCount)) {
-            status = 0;
           } else {
-            status = (parseInt(assessment.dataValues.zeroScoreCount) / parseInt(assessment.dataValues.assessmentCount)) * 100;
+            status = ((assessmentCount - zeroScoreCount) / assessmentCount) * 100;
           }
-          console.log("status");
-      console.log(status);
+
           // Tìm createdAt cho từng assessment dựa trên description
           const foundAssessment = await AssessmentModel.findOne({
             where: { description: assessment.description, isDelete: isDelete === 'true'},
-            attributes: [ "rubric_id","course_id","description","date", "place",'createdAt' ]
+            attributes: [ "rubric_id","course_id","description","date", "place","isDelete","createdAt" ]
           });
           
-          console.log(foundAssessment);
-
+          console.log(status);
           return {
             course_id: assessment.course_id,
             description: assessment.description,
@@ -234,7 +243,8 @@ const AssessmentsController = {
             zeroScoreCount: parseInt(assessment.dataValues.zeroScoreCount),
             status: status,
             Assessment: foundAssessment,
-            createdAt: foundAssessment ? foundAssessment.createdAt : null
+            createdAt: foundAssessment ? foundAssessment.createdAt : null,
+            isDelete: foundAssessment ? foundAssessment.isDelete : null
           };
         }));
 
@@ -345,6 +355,7 @@ const AssessmentsController = {
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
+  
   getByID: async (req, res) => {
     try {
       const { id } = req.params;
@@ -393,6 +404,33 @@ const AssessmentsController = {
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
+
+  deleteMultiple: async (req, res) => {
+    try {
+      const { id } = req.params;
+      await AssessmentModel.destroy({ where: { assessment_id: id } });
+      res.json({ message: 'Xóa assessments thành công' });
+    } catch (error) {
+      console.error('Lỗi xóa assessments:', error);
+      res.status(500).json({ message: 'Lỗi server' });
+    }
+    const { assessment_id } = req.query;
+    try {
+      const assessmentIds = assessment_id.map(id => parseInt(id));
+      // for (const id of assessmentIds) {        
+      //   const RubricItems = await RubricItemModel.findAll({ where: { assessment_id: id } });
+      //   for (const RubricItem of RubricItems) {
+      //     await RubricItemModel.destroy({ where: { assessmentsItem_id: RubricItem.assessmentsItem_id } });
+      //   }
+      // }
+
+      await AssessmentModel.destroy({ where: { assessment_id: assessment_id } });
+      res.status(200).json({ message: 'Xóa nhiều assessment thành công' });
+    } catch (error) {
+      console.error('Lỗi khi xóa nhiều assessment:', error);
+      res.status(500).json({ message: 'Lỗi server nội bộ' });
+    }
+  },
   isDeleteTotrue: async (req, res) => {
     try {
       const assessment = await AssessmentModel.findAll({ where: { isDelete: true } });
@@ -419,10 +457,54 @@ const AssessmentsController = {
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
+
+  toggleSoftDeleteById: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const assessment = await AssessmentModel.findOne({ where: { assessment_id: id } });
+      if (!assessment) {
+        return res.status(404).json({ message: 'Assessment không tìm thấy' });
+      }
+      const updatedIsDeleted = !assessment.isDelete;
+      await AssessmentModel.update({ isDelete: updatedIsDeleted }, { where: { assessment_id: id } });
+  
+      res.status(200).json({ message: `Đã thay đổi trạng thái xóa mềm thành ${updatedIsDeleted}` });
+    } catch (error) {
+      console.error('Lỗi khi thay đổi trạng thái xóa mềm:', error);
+      res.status(500).json({ message: 'Lỗi server' });
+    }
+  },
+  
+
+  softDeleteMultiple: async (req, res) => {
+    try {
+      const { rubric_id } = req.body;
+      if (!Array.isArray(rubric_id) || rubric_id.length === 0) {
+        return res.status(400).json({ message: 'Không cung cấp id nào' });
+      }
+  
+      const assessments = await AssessmentModel.findAll({ where: { assessment_id: rubric_id } });
+      if (assessments.length !== rubric_id.length) {
+        return res.status(404).json({ message: 'Một hoặc nhiều Assessment không tìm thấy' });
+      }
+  
+      const updated = await Promise.all(assessments.map(async (assessment) => {
+        const updatedIsDeleted = !assessment.isDelete;
+        await assessment.update({ isDelete: updatedIsDeleted });
+        return { assessment_id: assessment.assessment_id, isDelete: updatedIsDeleted };
+      }));
+  
+      res.json({ message: 'Trạng thái xóa mềm đã được thay đổi', updated });
+    } catch (error) {
+      console.error('Lỗi khi thay đổi trạng thái xóa mềm:', error);
+      res.status(500).json({ message: 'Lỗi server' });
+    }
+  },
+  
+
   toggleSoftDeleteByDescription: async (req, res) => {
     try {
-      
-      const { descriptions } = req.body; // Nhận mảng descriptions từ req.body
+      const { descriptions, isDelete } = req.body; // Nhận mảng descriptions và giá trị isDelete từ req.body
       if (!Array.isArray(descriptions) || descriptions.length === 0) {
         return res.status(400).json({ message: 'Descriptions array is required and cannot be empty' });
       }
@@ -434,25 +516,30 @@ const AssessmentsController = {
         } 
       });
       console.log('Found assessments:', assessments);
-
+  
       if (assessments.length === 0) {
         return res.status(404).json({ message: 'No assessments found for the provided descriptions' });
       }
   
       // Toggling trạng thái isDelete cho tất cả assessments tìm thấy
       const updated = await Promise.all(assessments.map(async (assessment) => {
-        const updatedIsDeleted = !assessment.isDelete;
-        await assessment.update({ isDelete: updatedIsDeleted });
-        return { assessment_id: assessment.assessment_id, isDelete: updatedIsDeleted };
+        if (isDelete === null) {
+          return { assessment_id: assessment.assessment_id, isDelete: assessment.isDelete }; // Không thay đổi isDelete nếu isDelete là null
+        } else {
+          const updatedIsDeleted = isDelete !== undefined ? isDelete : !assessment.isDelete;
+          await assessment.update({ isDelete: updatedIsDeleted });
+          return { assessment_id: assessment.assessment_id, isDelete: updatedIsDeleted };
+        }
       }));
   
-      res.status(200).json({ message: 'Toggled isDelete status', updated });
+      res.status(200).json({ message: 'Processed isDelete status', updated });
   
     } catch (error) {
       console.error('Error toggling assessment delete statuses:', error);
       res.status(500).json({ message: 'Server error' });
     }
-  },
+  }
+  ,
 
   updateByDescription: async (req, res) => {
     try {
@@ -495,7 +582,32 @@ const AssessmentsController = {
       res.status(500).json({ message: "Error updating assessments", error });
     }
   },
-  
+  deleteByDescription: async (req, res) => {
+    try {
+      const { descriptions } = req.body; // Nhận mảng descriptions từ req.body
+      console.log(descriptions);
+      if (!Array.isArray(descriptions) || descriptions.length === 0) {
+        return res.status(400).json({ message: 'Descriptions array is required and cannot be empty' });
+      }
+
+      // Xóa tất cả assessments dựa vào các description
+      const deletedCount = await AssessmentModel.destroy({
+        where: {
+          description: descriptions
+        }
+      });
+
+      if (deletedCount === 0) {
+        return res.status(404).json({ message: 'No assessments found for the provided descriptions' });
+      }
+
+      res.status(200).json({ message: 'Successfully deleted assessments', deletedCount });
+
+    } catch (error) {
+      console.error('Error deleting assessments:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
   
   processSaveTemplateAssessment: async (req, res) => {
     if (!req.files) {

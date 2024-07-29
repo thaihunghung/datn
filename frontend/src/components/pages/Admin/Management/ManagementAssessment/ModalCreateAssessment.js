@@ -26,6 +26,7 @@ const ModalCreateAssessment = ({
     isOpen,
     onOpenChange,
     onSubmit,
+    load
 }) => {
     const [rubric_id, setRubric_id] = useState();
     const [course_id, setCourse_id] = useState();
@@ -366,6 +367,7 @@ const ModalCreateAssessment = ({
                                                     fileList={fileList}
                                                     setFileList={setFileList}
                                                     Data={newRubric}
+                                                    LoadData={load}
                                                 />
                                             ) : (
                                                 <Tooltip content="Fill all fields to enable upload" placement="top">

@@ -202,7 +202,7 @@ const StoreSubject = (nav) => {
                     }
                 }}
             />
-              <div className='w-full flex justify-between'>
+            <div className='w-full flex justify-between'>
                 <div className='h-full my-auto p-5 hidden sm:block'>
                     <BackButton />
                 </div>

@@ -730,8 +730,6 @@ router.get('/rubrics/checkScore', RubricController.getRubricsForCheckScore);
 router.put('/rubrics/softDelete', RubricController.softDeleteMultiple);
 router.put('/rubric/:id/softDelete', RubricController.toggleSoftDeleteById);
 
-
-
 router.delete('/rubric/:id', RubricController.delete);
 router.delete('/rubrics/multiple', RubricController.deleteMultiple);
 

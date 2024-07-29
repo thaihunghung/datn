@@ -135,20 +135,20 @@ const CourseEnrollmentController = {
         });
       });
 
-      await worksheet.protect('yourpassword', {
-        selectLockedCells: true,
-        selectUnlockedCells: true
-      });
+      // await worksheet.protect('yourpassword', {
+      //   selectLockedCells: true,
+      //   selectUnlockedCells: true
+      // });
 
-      worksheet.eachRow((row, rowNumber) => {
-        row.eachCell((cell, colNumber) => {
-          if (colNumber === 1) {
-            cell.protection = { locked: true };
-          } else {
-            cell.protection = { locked: false };
-          }
-        });
-      });
+      // worksheet.eachRow((row, rowNumber) => {
+      //   row.eachCell((cell, colNumber) => {
+      //     if (colNumber === 1) {
+      //       cell.protection = { locked: true };
+      //     } else {
+      //       cell.protection = { locked: false };
+      //     }
+      //   });
+      // });
 
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', 'attachment; filename="StudentsForm.xlsx"');
@@ -157,6 +157,41 @@ const CourseEnrollmentController = {
     } catch (error) {
       console.error('Error generating Excel file:', error);
       res.status(500).json({ error: 'Internal server error' });
+    }
+  },
+  getAllStudentByCourseId: async (req, res) => {
+    const { id } = req.params;
+    console.log(`getAllStudentByCourseId, ${id}`);
+    try {
+      const enrollments = await CourseEnrollmentModel.findAll({
+        attributes: ['student_id'],
+        where: {
+          course_id: id,
+          isDelete: false
+        }
+      });
+
+      // Trích xuất danh sách student_id
+      const studentIds = enrollments.map(enrollment => enrollment.student_id);
+
+      // Lấy thông tin sinh viên từ StudentModel dựa trên danh sách student_id
+      const students = await StudentModel.findAll({
+        include: [{
+          model: ClassModel,
+          attributes: ['classCode']
+        }],
+        attributes: ['student_id', 'class_id', 'studentCode', 'email', 'name', 'isDelete'],
+        where: {
+          isDelete: false,
+          student_id: studentIds
+        }
+      });
+
+      // Trả về dữ liệu sinh viên
+      res.status(200).json({ data: students });
+    } catch (error) {
+      console.error('Error fetching students by course ID:', error);
+      res.status(500).json({ message: 'Server error' });
     }
   },
   getFormStudentWithDataByCourse: async (req, res) => {
@@ -305,7 +340,7 @@ const CourseEnrollmentController = {
             } catch (error) {
               console.error(`Error querying database for row ${rowNumber}: ${error.message}`);
               failedRows.push(rowNumber);
-              failedRowDetails.push(`Database query error: ${error.message}` );
+              failedRowDetails.push(`Database query error: ${error.message}`);
             }
           }
         }
@@ -326,7 +361,7 @@ const CourseEnrollmentController = {
       failedRows.sort((a, b) => a - b);
       console.log("failedRowDetails", failedRowDetails)
       return res.status(200).json({
-        message: `Số dòng thêm thành công ${successfulRows} ${failedRows.length ==0 ? '':`, Dòng thêm không thành công ${failedRows} ${failedRowDetails}`} `
+        message: `Số dòng thêm thành công ${successfulRows} ${failedRows.length == 0 ? '' : `, Dòng thêm không thành công ${failedRows} ${failedRowDetails}`} `
       });
 
     } catch (error) {
