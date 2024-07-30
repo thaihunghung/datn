@@ -180,11 +180,15 @@ const ManagementAssessment = (nav) => {
   const handleNavigate = (path) => {
     navigate(path);
   };
+  
   function replaceCharacters(description) {
-    // Replace spaces with underscores
     let result = description.replace(/ /g, "_");
-    // Replace hyphens with underscores
     result = result.replace(/-/g, "_");
+    result = result.replace(/___/g, "_");
+    result = result.toLowerCase();
+    result = result.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    result = result.replace(/_+/g, "_");
+    result = result.replace(/^_+|_+$/g, "");
     return result;
   }
 

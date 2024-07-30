@@ -405,17 +405,43 @@ const AssessmentsController = {
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
-  
-  getByID: async (req, res) => {
+
+  getByID:async (req, res) => {
     try {
       const { id } = req.params;
-      const assessment = await AssessmentModel.findOne({ assessment_id: id });
+      const assessment = await AssessmentModel.findOne({
+        where: { assessment_id: id },
+        include: [
+          {
+            model: RubricModel,
+            where: { isDelete: false },
+            include: [
+              {
+                model: SubjectModel,
+                where: { isDelete: false },
+              },
+            ],
+          },
+          {
+            model: CourseModel,
+            where: { isDelete: false },
+          },
+          {
+            model: StudentModel,
+            where: { isDelete: false },
+          },
+        ],
+      });
+      if (!assessment) {
+        return res.status(404).json({ message: 'Assessment not found' });
+      }
       res.json(assessment);
     } catch (error) {
-      console.error('Lỗi tìm kiếm assessments:', error);
-      res.status(500).json({ message: 'Lỗi server' });
+      console.error('Error fetching assessment:', error);
+      res.status(500).json({ message: 'Server error' });
     }
   },
+  
   update: async (req, res) => {
     try {
       const { id } = req.params;

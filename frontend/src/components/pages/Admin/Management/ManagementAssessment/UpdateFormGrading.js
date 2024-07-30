@@ -192,6 +192,7 @@ const UpdateFormGrading = (nav) => {
           </Tooltip>
         </div>
       </div>
+      
       <div className="w-full flex flex-col p-2 py-0 mb-2  sm:p-5 sm:mb-2 sm:py-0 sm:flex-col lg:flex-row lg:mb-0 xl:flex-row xl:mb-0">
         <div className="w-full text-justify lg:w-[55%] xl:w-[60%]   flex flex-col sm:flex-col lg:flex-row xl:flex-row">
           <div className="w-full hidden p-2 bg-[#475569] sm:hidden lg:w-[100px] lg:block xl:w-[100px] xl:block">

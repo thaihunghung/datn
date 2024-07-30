@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
-
-import { message } from 'antd';
-
-import { Collapse } from 'antd';
-
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, Slider, Tooltip } from "@nextui-org/react";
+import { Collapse, message } from 'antd';
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Modal, Button, Text, Slider, Tooltip } from "@nextui-org/react";
+import { ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@nextui-org/react';
 
 import "./FormGrading.css"
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
@@ -12,9 +9,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import "./Motion.css";
 import { ChevronDownIcon } from "./ChevronDownIcon";
+import BackButton from "../../Utils/BackButton/BackButton";
 const FormGrading = (nav) => {
 
   const { setCollapsedNav } = nav;
+  const { description } = useParams();
 
   const [selectedValues, setSelectedValues] = useState([]); // Initialize as array
   const [RubicData, setRubicData] = useState([]);
@@ -67,6 +66,8 @@ const FormGrading = (nav) => {
     }
   };
 
+  // http://localhost:3000/admin/management-grading/update/100000_-_it31_khai_pha_du_lieu_da20ttb_bao_cao_ket_thuc_mon_test_2024-07-22/student-code/110120013/assessment/855/rubric/1
+
   const { assessment_id, rubric_id } = useParams();
   const navigate = useNavigate();
   const teacher_id = Cookies.get('teacher_id');
@@ -74,6 +75,12 @@ const FormGrading = (nav) => {
   if (!teacher_id) {
     navigate('/login');
   }
+  const handleNavigate = (path) => {
+    navigate(path);
+  };
+  const handleBack = () => {
+    navigate(-1);
+  };
 
   const handleSliderChange = (index, value, rubricsItem_id) => {
     setSelectedValues(prevValues => {
@@ -109,15 +116,30 @@ const FormGrading = (nav) => {
     });
   };
 
-  const handleSave = async () => {
 
+  function replaceCharacters(description) {
+    let result = description.replace(/ /g, "_");
+    result = result.replace(/-/g, "_");
+    result = result.replace(/___/g, "_");
+    result = result.toLowerCase();
+    result = result.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    result = result.replace(/_+/g, "_");
+    result = result.replace(/^_+|_+$/g, "");
+    return result;
+  }
+
+
+  const handleSave = async () => {
     console.log('Updated values', selectedValues);
     console.log('totalScore', totalScore);
+    if (Check === 0) {
+      message.error('Score not graded yet');
+      return;
+    }
     try {
       const data = { totalScore: totalScore }
 
       await axiosAdmin.put(`/assessment/${assessment_id}/totalScore`, { data: data })
-
       const dataAssessmentItem = selectedValues.map(item => {
         const { maxScore, CheckGrading, ...rest } = item;
         return {
@@ -126,17 +148,18 @@ const FormGrading = (nav) => {
         };
       });
 
-      console.log(dataAssessmentItem);
+      console.log(Check);
+
       const response = await axiosAdmin.post(`/assessment-item`, { data: dataAssessmentItem })
       if (response.status === 201) {
         message.success('Data saved successfully');
+        setIsModalWhenSaveOpen(true);
       }
     } catch (e) {
       console.error(e);
       message.error('Error saving data');
     }
   };
-
 
   const setValue = (data) => {
     const updatedPoData = data.map((subject) => {
@@ -152,12 +175,12 @@ const FormGrading = (nav) => {
     setSelectedValues(updatedPoData);
 
   }
+
   const GetRubricData = async () => {
     try {
 
       const response = await axiosAdmin.get(`/rubric/${rubric_id}/items?isDelete=false`);
-      console.log("response.data");
-      console.log(response.data);
+
       setRubicData(response.data.rubric)
       setRubicItemsData(response.data.rubric.rubricItems)
       const data = response.data.rubric.rubricItems
@@ -168,30 +191,35 @@ const FormGrading = (nav) => {
       throw error;
     }
   };
+  const [Assessment, setAssessment] = useState({});
 
-  function replaceUnderscoresWithSpaces(description) {
-    return description.replace(/_/g, " ");
-  }
+  const getAssessments = async () => {
+    try {
+
+      const response = await axiosAdmin.get(`/assessment/${assessment_id}`);
+      console.log("response.data");
+      console.log(response.data);
+      setAssessment(response.data)
+
+    } catch (error) {
+      console.error('Error fetching rubric data:', error);
+      throw error;
+    }
+  };
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
   const [showFirst, setShowFirst] = useState(true);
-
-
-
-
-
-
 
   const showAny = showCLO || showPLO || showChapter;
   const showAtLeastTwo = [showCLO, showPLO, showChapter].filter(Boolean).length >= 2;
   const showAllThree = showCLO && showPLO && showChapter;
-
-
   const isContainerHidden = !showAny;
-
   useEffect(() => {
     if (setCheck === 0) {
       setTotalScore(0);
       setdefaultValue(0);
     }
+    getAssessments()
     GetRubricData()
     setCollapsedNav(true);
     const handleResize = () => {
@@ -218,26 +246,64 @@ const FormGrading = (nav) => {
     };
   }, []);
 
+  const [isModalWhenSaveOpen, setIsModalWhenSaveOpen] = useState(false);
+
   return (
-    <div className="w-full p-2 pb-[100px] py-0 flex flex-col leading-6 mt-10">
-      <div className="Quick__Option flex justify-between items-center sticky top-2 bg-white z-50 w-fit p-4 py-3 shadow-lg rounded-md border border-slate-300">
+    <div className="w-full p-2 pb-[100px] py-0 flex flex-col leading-6">
+      <div className="w-full min-h-[200px] bg-[#FEFEFE] border border-slate-300 shadow-lg rounded-md mb-2 p-4">
+        <h1 className="text-xl font-bold mb-2 text-[#6366F1]">{Assessment?.description}</h1>
+        <div className="flex items-center text-lg flex-col font-bold justify-center">
+          <span className="text-[#020401]">{Assessment?.Student?.name}</span>   <span className="text-[#020401]">{Assessment?.Student?.studentCode}</span>
+        </div>
+        <div className="hidden sm:block"><BackButton /></div>
+      </div>
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">Confirm Save</ModalHeader>
+              <ModalBody>
+                <p>Are you sure you want to save the changes?</p>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button color="primary" onPress={() => { handleSave(); onClose(); }}>
+                  Save
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+      <ModalWhenSave
+        isOpen={isModalWhenSaveOpen}
+        onOpenChange={setIsModalWhenSaveOpen}
+        totalScore={totalScore}
+        assessment={Assessment}
+        handleBack={handleNavigate}
+        disc={description}
+      />
+      <div className="Quick__Option  flex justify-between items-center sticky top-0 bg-white z-50 w-fit p-4 py-3 shadow-lg rounded-md border border-slate-300">
         <div
           className={`flex items-center transition-opacity duration-500 ${showFirst ? 'opacity-100' : 'opacity-0'
             } ${showFirst ? 'block' : 'hidden'}`}
         >
+
           <div className="flex gap-1 justify-center items-center">
             <div className="flex items-center gap-2 mx-2 mr-2">
-            <Tooltip content="Save">
-      <Button
-        isIconOnly
-        variant="light"
-        radius="full"
-        onClick={handleSave}
-        className="text-[#020401] bg-[#AF84DD] "
-      >
-        <i className="fa-solid fa-floppy-disk text-[18px]"></i>
-      </Button>
-    </Tooltip>
+              <Tooltip content="Save">
+                <Button
+                  isIconOnly
+                  variant="light"
+                  radius="full"
+                  onClick={onOpen}
+                  className="text-[#020401] bg-[#AF84DD]"
+                >
+                  <i className="fa-solid fa-floppy-disk text-[18px]"></i>
+                </Button>
+              </Tooltip>
             </div>
             <div className="flex justify-center items-center gap-1 flex-col mx-2">
               <span>Tổng điểm: {' ' + totalScore} </span>
@@ -299,209 +365,299 @@ const FormGrading = (nav) => {
           )}
         </div>
       </div>
+      <div className="flex flex-col items-start justify-start relative">
 
-      <div className="w-full flex flex-col p-2 py-0 mb-2 text-base  sm:p-5 sm:mb-2 sm:py-0 sm:flex-col lg:flex-row lg:mb-0 xl:flex-row xl:mb-0">
-        <div className={`
+        <div className="w-full flex flex-col p-2 py-0 mb-2 text-base  sm:p-5 sm:mb-2 sm:py-0 sm:flex-col lg:flex-row lg:mb-0 xl:flex-row xl:mb-0">
+          <div className={`
         ${isContainerHidden ? 'lg:w-[50%]' : ''}   ${showAny ? 'lg:w-[70%]' : ''} ${showAtLeastTwo ? 'lg:w-[70%]' : ''} ${showAllThree ? 'lg:w-[70%]' : ''} 
         w-full text-justify   flex flex-col sm:flex-col lg:flex-row xl:flex-row`}>
-          <div className={`${showAny ? 'lg:w-[40%]' : ''} ${showAtLeastTwo ? 'lg:w-[40%]' : ''} ${showAllThree ? 'lg:w-[80%]' : ''} flex justify-center items-center`}>
-            <div className={`hidden p-2 bg-[#475569] ${showChapter ? 'lg:block xl:block' : 'hidden'} sm:hidden flex-1`}>
-              <p className=" text-[#fefefe] text-center font-bold">CHAPTER</p>
+            <div className={`${showAny ? 'lg:w-[40%]' : ''} ${showAtLeastTwo ? 'lg:w-[40%]' : ''} ${showAllThree ? 'lg:w-[80%]' : ''} flex justify-center items-center`}>
+              <div className={`hidden p-2 bg-[#475569] ${showChapter ? 'lg:block xl:block' : 'hidden'} sm:hidden flex-1`}>
+                <p className=" text-[#fefefe] text-center font-bold">CHAPTER</p>
+              </div>
+              <div className={`hidden p-2 bg-[#475569] ${showPLO ? 'lg:block xl:block' : 'hidden'} sm:hidden flex-1`}>
+                <p className=" text-[#fefefe] text-center font-bold">PLO</p>
+              </div>
+              <div className={`hidden p-2 bg-[#475569] ${showCLO ? 'lg:block xl:block' : 'hidden'} sm:hidden flex-1`}>
+                <p className=" text-[#fefefe] text-center font-bold">CLO</p>
+              </div>
             </div>
-            <div className={`hidden p-2 bg-[#475569] ${showPLO ? 'lg:block xl:block' : 'hidden'} sm:hidden flex-1`}>
-              <p className=" text-[#fefefe] text-center font-bold">PLO</p>
-            </div>
-            <div className={`hidden p-2 bg-[#475569] ${showCLO ? 'lg:block xl:block' : 'hidden'} sm:hidden flex-1`}>
-              <p className=" text-[#fefefe] text-center font-bold">CLO</p>
+
+            <div className={`w-full ${isContainerHidden ? 'lg:w-full' : ''} ${showAtLeastTwo ? 'lg:w-[60%]' : ''} ${showAllThree ? 'lg:w-[20%]' : ''} p-0 sm:p-0 lg:p-2 xl:p-2 bg-[#475569]`}>
+              <p className="text-center font-bold hidden sm:hidden lg:block xl:block text-[#fefefe] p-5 sm:p-5 lg:p-0 xl:p-0">Nội dung</p>
+              <p className="text-center font-bold block sm:block lg:hidden xl:hidden text-[#fefefe] p-5 sm:p-5 lg:p-0 xl:p-0">Chấm điểm</p>
             </div>
           </div>
-         
-          <div className={`w-full ${isContainerHidden ? 'lg:w-full' : ''} ${showAtLeastTwo ? 'lg:w-[60%]' : ''} ${showAllThree ? 'lg:w-[20%]' : ''} p-0 sm:p-0 lg:p-2 xl:p-2 bg-[#475569]`}>
-            <p className="text-center font-bold hidden sm:hidden lg:block xl:block text-[#fefefe] p-5 sm:p-5 lg:p-0 xl:p-0">Nội dung</p>
-            <p className="text-center font-bold block sm:block lg:hidden xl:hidden text-[#fefefe] p-5 sm:p-5 lg:p-0 xl:p-0">Chấm điểm</p>
+          <div className={`hidden w-full bg-[#475569] sm:hidden ${isContainerHidden ? 'lg:w-[50%]' : ''}   ${showAny ? 'lg:w-[30%]' : ''} ${showAtLeastTwo ? 'lg:w-[30%]' : ''} ${showAllThree ? 'lg:w-[30%]' : ''}     lg:block xl:block text-justify p-5 pb-0 pt-2`}>
+            <p className="text-center font-bold  text-[#fefefe]">Chấm điểm</p>
           </div>
         </div>
-        <div className={`hidden w-full bg-[#475569] sm:hidden ${isContainerHidden ? 'lg:w-[50%]' : ''}   ${showAny ? 'lg:w-[30%]' : ''} ${showAtLeastTwo ? 'lg:w-[30%]' : ''} ${showAllThree ? 'lg:w-[30%]' : ''}     lg:block xl:block text-justify p-5 pb-0 pt-2`}>
-          <p className="text-center font-bold  text-[#fefefe]">Chấm điểm</p>
-        </div>
-      </div>
-      {
-        RubicItemsData.map((item, i) => (
-          <div className="w-full flex flex-col p-2 py-0 sm:p-5 sm:py-0 sm:flex-col lg:flex-row xl:flex-row" key={item.rubricsItem_id}>
-            {/* Left Side */}
-            <div className={`
+        {
+          RubicItemsData.map((item, i) => (
+            <div className="w-full flex flex-col p-2 py-0 sm:p-5 sm:py-0 sm:flex-col lg:flex-row xl:flex-row" key={item.rubricsItem_id}>
+              {/* Left Side */}
+              <div className={`
               ${isContainerHidden ? 'lg:w-[50%]' : ''}   ${showAny ? 'lg:w-[70%]' : ''} ${showAtLeastTwo ? 'lg:w-[70%]' : ''} ${showAllThree ? 'lg:w-[70%]' : ''}  
               w-full rounded-b-lg sm:rounded-b-lg lg:rounded-none xl:rounded-none 
               text-justify border-[1px] sm:border-t-[1px] lg:border-t-0 xl:border-t-0 border-[#020401]  
               flex flex-col sm:flex-col lg:flex-row xl:flex-row`}
-            >
+              >
 
-              <div className={`w-full ${showAny ? 'lg:w-[40%]' : ''} ${showAtLeastTwo ? 'lg:w-[40%]' : ''} ${showAllThree ? 'lg:w-[80%]' : ''} border-b-1 
+                <div className={`w-full ${showAny ? 'lg:w-[40%]' : ''} ${showAtLeastTwo ? 'lg:w-[40%]' : ''} ${showAllThree ? 'lg:w-[80%]' : ''} border-b-1 
                       sm:border-b-1 border-r-0 sm:border-r-0 sm:px-0 lg:border-r-[1px] 
                       lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-[#020401] 
                       flex justify-center items-start leading-8 ${isContainerHidden ? 'hidden' : ''}`}>
 
-                <div className={`w-full h-full flex-1 hidden sm:hidden ${showChapter ? 'lg:block xl:block' : ''}  
+                  <div className={`w-full h-full flex-1 hidden sm:hidden ${showChapter ? 'lg:block xl:block' : ''}  
                 border-b-1 sm:border-b-1 border-r-1 sm:border-r-1 sm:px-0 lg:border-r-[1px] lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-[#020401] `}>
-                  <div className="p-4 overflow-y-auto">
-                    <div className="text-center font-bold  max-h-[300px] sm:font-bold lg:font-normal xl:font-normal text-[#AF84DD] sm:text-[#AF84DD] lg:text-[#020401] xl:text-[#020401]">
-                      <div className="font-bold">{item.Chapter.chapterName}:</div>
-                      <div className="w-full text-wrap">{item.Chapter.description}</div>
+                    <div className="p-4 overflow-y-auto">
+                      <div className="text-center font-bold  max-h-[300px] sm:font-bold lg:font-normal xl:font-normal text-[#AF84DD] sm:text-[#AF84DD] lg:text-[#020401] xl:text-[#020401]">
+                        <div className="font-bold">{item.Chapter.chapterName}:</div>
+                        <div className="w-full text-wrap">{item.Chapter.description}</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className={`w-full h-full flex-1 hidden sm:hidden ${showPLO ? 'lg:block xl:block' : 'hidden'}  border-b-1 sm:border-b-1 border-r-1 sm:border-r-1 sm:px-0 lg:border-r-[1px] lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-[#020401] `}>
-                  <div className="p-4 overflow-y-auto">
-                    <div className="text-center font-bold  max-h-[300px] sm:font-bold lg:font-normal xl:font-normal text-[#AF84DD] sm:text-[#AF84DD] lg:text-[#020401] xl:text-[#020401]">
-                      <div className="font-bold">{item.PLO.ploName}:</div>
-                      <div className="w-full text-wrap">{item.PLO.description}</div>
-                      
+                  <div className={`w-full h-full flex-1 hidden sm:hidden ${showPLO ? 'lg:block xl:block' : 'hidden'}  border-b-1 sm:border-b-1 border-r-1 sm:border-r-1 sm:px-0 lg:border-r-[1px] lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-[#020401] `}>
+                    <div className="p-4 overflow-y-auto">
+                      <div className="text-center font-bold  max-h-[300px] sm:font-bold lg:font-normal xl:font-normal text-[#AF84DD] sm:text-[#AF84DD] lg:text-[#020401] xl:text-[#020401]">
+                        <div className="font-bold">{item.PLO.ploName}:</div>
+                        <div className="w-full text-wrap">{item.PLO.description}</div>
+
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className={`block sm:block ${showCLO ? 'lg:block xl:block' : ''} flex-1 p-4  overflow-y-auto`}>
-                  <div className="text-center max-h-[300px] font-bold sm:font-bold lg:font-normal xl:font-normal 
+                  <div className={`block sm:block ${showCLO ? 'lg:block xl:block' : ''} flex-1 p-4  overflow-y-auto`}>
+                    <div className="text-center max-h-[300px] font-bold sm:font-bold lg:font-normal xl:font-normal 
                   text-[#475569]  sm:text-[#475569] lg:text-[#020401] xl:text-[#020401]">
-                   <div className="block lg:hidden">
-                   <div className={`font-bold ${showChapter ? 'lg:block xl:block' : 'hidden'}`}>{item.Chapter.chapterName}:</div>
-                    <div className={`w-full text-wrap ${showChapter ? 'lg:block xl:block' : 'hidden'}`}>{item.Chapter.description}</div>
+                      <div className="block lg:hidden">
+                        <div className={`font-bold ${showChapter ? 'lg:block xl:block' : 'hidden'}`}>{item.Chapter.chapterName}:</div>
+                        <div className={`w-full text-wrap ${showChapter ? 'lg:block xl:block' : 'hidden'}`}>{item.Chapter.description}</div>
 
-                    <div className={`font-bold ${showPLO ? 'lg:block xl:block' : 'hidden'}`}>{item.PLO.ploName}:</div>
-                    <div className={`w-full text-wrap ${showPLO ? 'lg:block xl:block' : 'hidden'}`}>{item.PLO.description}</div>
-                   </div>
-                   
+                        <div className={`font-bold ${showPLO ? 'lg:block xl:block' : 'hidden'}`}>{item.PLO.ploName}:</div>
+                        <div className={`w-full text-wrap ${showPLO ? 'lg:block xl:block' : 'hidden'}`}>{item.PLO.description}</div>
+                      </div>
 
-                    <div className={`font-bold ${showCLO ? 'lg:block xl:block' : 'hidden'}`}>{item.CLO.cloName}:</div>
-                    <div className={`w-full text-wrap ${showCLO ? 'lg:block xl:block' : 'hidden'}`}>{item.CLO.description}</div>
+
+                      <div className={`font-bold ${showCLO ? 'lg:block xl:block' : 'hidden'}`}>{item.CLO.cloName}:</div>
+                      <div className={`w-full text-wrap ${showCLO ? 'lg:block xl:block' : 'hidden'}`}>{item.CLO.description}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`w-full ${isContainerHidden ? 'lg:w-full' : ''} ${showAtLeastTwo ? 'lg:w-[60%]' : ''} ${showAllThree ? 'lg:w-[20%]' : ''}`}>
+                  <div className="flex flex-col hidden sm:hidden lg:block xl:block text-justify leading-8 p-4" dangerouslySetInnerHTML={{ __html: item.description }} />
+                  <div className="block sm:block lg:hidden xl:hidden">
+                    <Collapse
+                      items={[
+                        {
+                          key: '1',
+                          label: <p className="text-justify text-base font-semibold">Nội dung</p>,
+                          children: (
+                            <div className="text-justify leading-8 flex flex-col text-base   p-2 px-5 sm:p-2 sm:px-5 lg:p-5 xl:p-5" dangerouslySetInnerHTML={{ __html: item.description }} />
+                          )
+                        }
+                      ]}
+                      colorBorder="#FFD700"
+                      className="Collapse"
+                      defaultActiveKey={['1']}
+                    />
                   </div>
                 </div>
               </div>
-              
-              <div className={`w-full ${isContainerHidden ? 'lg:w-full' : ''} ${showAtLeastTwo ? 'lg:w-[60%]' : ''} ${showAllThree ? 'lg:w-[20%]' : ''}`}>
-                <div className="flex flex-col hidden sm:hidden lg:block xl:block text-justify leading-8 p-4" dangerouslySetInnerHTML={{ __html: item.description }} />
-                <div className="block sm:block lg:hidden xl:hidden">
-                  <Collapse
-                    items={[
-                      {
-                        key: '1',
-                        label: <p className="text-justify text-base font-semibold">Nội dung</p>,
-                        children: (
-                          <div className="text-justify leading-8 flex flex-col text-base   p-2 px-5 sm:p-2 sm:px-5 lg:p-5 xl:p-5" dangerouslySetInnerHTML={{ __html: item.description }} />
-                        )
-                      }
-                    ]}
-                    colorBorder="#FFD700"
-                    className="Collapse"
-                    defaultActiveKey={['1']}
-                  />
-                </div>
-              </div>
-            </div>
 
-            {/* Right Side */}
-            <div className={`w-full sm:w-full   
+              {/* Right Side */}
+              <div className={`w-full sm:w-full   
               ${isContainerHidden ? 'lg:w-[50%]' : ''}   ${showAny ? 'lg:w-[30%]' : ''} ${showAtLeastTwo ? 'lg:w-[30%]' : ''} ${showAllThree ? 'lg:w-[30%]' : ''}  
               text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-[#020401] `} key={i}>
-              <div className="flex flex-col gap-6 w-full">
-                {item.maxScore === 1 && (
-                  <Slider
-                    size="lg"
-                    label={<span>Điểm tối đa: {item.maxScore} </span>}
-                    showTooltip={true}
-                    step={0.25}
-                    // formatOptions={{style: "percent"}}
-                    maxValue={item.maxScore}
-                    minValue={0}
-                    defaultValue={defaultValue}
-                    className="max-w-full"
-                    marks={[
-                      {
-                        value: 0,
-                        label: "0",
-                      },
-                      {
-                        value: 0.25,
-                        label: "0.25",
-                      },
-                      {
-                        value: 0.5,
-                        label: "0.5",
-                      },
-                      {
-                        value: 0.75,
-                        label: "0.75",
-                      },
-                      {
-                        value: 1,
-                        label: "1",
-                      },
-                    ]}
-                    onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
+                <div className="flex flex-col gap-6 w-full">
+                  {item.maxScore === 1 && (
+                    <Slider
+                      size="lg"
+                      label={<span>Điểm tối đa: {item.maxScore} </span>}
+                      showTooltip={true}
+                      step={0.25}
+                      // formatOptions={{style: "percent"}}
+                      maxValue={item.maxScore}
+                      minValue={0}
+                      defaultValue={defaultValue}
+                      className="max-w-full"
+                      marks={[
+                        {
+                          value: 0,
+                          label: "0",
+                        },
+                        {
+                          value: 0.25,
+                          label: "0.25",
+                        },
+                        {
+                          value: 0.5,
+                          label: "0.5",
+                        },
+                        {
+                          value: 0.75,
+                          label: "0.75",
+                        },
+                        {
+                          value: 1,
+                          label: "1",
+                        },
+                      ]}
+                      onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
 
-                  />
-                )}
+                    />
+                  )}
 
-                {item.maxScore === 0.5 && (
-                  <Slider
-                    size="lg"
-                    label={<span>Điểm tối đa: {item.maxScore} </span>}
-                    showTooltip={true}
-                    step={0.25}
-                    // formatOptions={{style: "percent"}}
-                    maxValue={item.maxScore}
-                    minValue={0}
-                    defaultValue={defaultValue}
-                    className="max-w-full"
-                    marks={[
-                      {
-                        value: 0,
-                        label: "0",
-                      },
-                      {
-                        value: 0.25,
-                        label: "0.25",
-                      },
-                      {
-                        value: 0.5,
-                        label: "0.5",
-                      },
-                    ]}
-                    onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
+                  {item.maxScore === 0.5 && (
+                    <Slider
+                      size="lg"
+                      label={<span>Điểm tối đa: {item.maxScore} </span>}
+                      showTooltip={true}
+                      step={0.25}
+                      // formatOptions={{style: "percent"}}
+                      maxValue={item.maxScore}
+                      minValue={0}
+                      defaultValue={defaultValue}
+                      className="max-w-full"
+                      marks={[
+                        {
+                          value: 0,
+                          label: "0",
+                        },
+                        {
+                          value: 0.25,
+                          label: "0.25",
+                        },
+                        {
+                          value: 0.5,
+                          label: "0.5",
+                        },
+                      ]}
+                      onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
 
-                  />
-                )}
+                    />
+                  )}
 
-                {item.maxScore === 0.25 && (
-                  <Slider
-                    size="lg"
-                    label={<span>Điểm tối đa: {item.maxScore} </span>}
-                    showTooltip={true}
-                    step={0.25}
-                    // formatOptions={{style: "percent"}}
-                    maxValue={item.maxScore}
-                    minValue={0}
-                    defaultValue={defaultValue}
-                    className="max-w-full"
-                    marks={[
-                      {
-                        value: 0,
-                        label: "Chưa đạt",
-                      },
-                      {
-                        value: 0.25,
-                        label: "Đạt",
-                      },
-                    ]}
-                    onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
-                  />
-                )}
+                  {item.maxScore === 0.25 && (
+                    <Slider
+                      size="lg"
+                      label={<span>Điểm tối đa: {item.maxScore} </span>}
+                      showTooltip={true}
+                      step={0.25}
+                      // formatOptions={{style: "percent"}}
+                      maxValue={item.maxScore}
+                      minValue={0}
+                      defaultValue={defaultValue}
+                      className="max-w-full"
+                      marks={[
+                        {
+                          value: 0,
+                          label: "Chưa đạt",
+                        },
+                        {
+                          value: 0.25,
+                          label: "Đạt",
+                        },
+                      ]}
+                      onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
+                    />
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))
-      }
-
+          ))
+        }
+      </div>
     </div>
   )
 }
 export default FormGrading
+
+
+const ModalWhenSave = ({
+  isOpen,
+  onOpenChange,
+  totalScore,
+  assessment,
+  handleBack,
+  disc
+}) => {
+
+  return (
+    <Modal
+      size="xl"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      scrollBehavior="outside"
+      motionProps={{
+        variants: {
+          enter: {
+            y: 0,
+            opacity: 1,
+            transition: {
+              duration: 0.2,
+              ease: "easeOut",
+            },
+          },
+          exit: {
+            y: -20,
+            opacity: 0,
+            transition: {
+              duration: 0.1,
+              ease: "easeIn",
+            },
+          },
+        },
+      }}
+    >
+      <ModalContent>
+        {(onClose) => (
+          <>
+            <ModalHeader className="text-[#FF9908]">Score for Student</ModalHeader>
+            <ModalBody>
+              <div className="flex flex-col items-center h-full">
+                {/* Assessment Description */}
+                <h1 className="text-2xl text-center font-bold mb-4 text-[#6366F1]">
+                  {assessment?.description}
+                </h1>
+
+                {/* Student Information */}
+                <div className="flex flex-col items-center text-lg font-semibold mb-4">
+                  <span className="text-[#020401]">{assessment?.Student?.name}</span>
+                  <span className="text-[#020401]">{assessment?.Student?.studentCode}</span>
+                </div>
+
+                {/* Total Score */}
+                <div className="flex flex-col items-center text-lg font-semibold">
+                  <span className="text-[#020401]">Total Score: {totalScore}</span>
+                </div>
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                variant="light"
+                onClick={() => {
+                  onClose();
+                  handleBack(`/admin/management-grading/${disc}/?description=${assessment?.description}`);
+                }}
+              >
+                Back
+              </Button>
+              <Button
+                type="submit"
+                color="primary"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onClose();
+                  handleBack(`/admin/management-grading/update/${disc}/student-code/${assessment?.Student?.studentCode}/assessment/${assessment?.assessment_id}/rubric/${assessment?.rubric_id}`);
+                }}
+              >
+                Update
+              </Button>
+            </ModalFooter>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
+  );
+};

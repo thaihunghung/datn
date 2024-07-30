@@ -313,6 +313,17 @@ const ManagementAssessmentGrading = (nav) => {
   const handleNavigate = (path) => {
     navigate(path);
   };
+  function replaceCharacters(description) {
+    let result = description.replace(/ /g, "_");
+    result = result.replace(/-/g, "_");
+    result = result.replace(/___/g, "_");
+    result = result.toLowerCase();
+    result = result.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    result = result.replace(/_+/g, "_");
+    result = result.replace(/^_+|_+$/g, "");
+    return result;
+  }
+  
   const renderCell = React.useCallback((assessment, columnKey) => {
     const cellValue = assessment[columnKey];
 
@@ -360,6 +371,7 @@ const ManagementAssessmentGrading = (nav) => {
         );
 
       case 'action':
+        const disc = replaceCharacters(assessment.action.description);
         return (
           <div className="flex items-center justify-center w-full gap-2">
             {assessment.action.totalScore === 0 ? (
@@ -371,7 +383,7 @@ const ManagementAssessmentGrading = (nav) => {
                   size="sm"
                   className='bg-[#AF84DD]'
                   onClick={() => handleNavigate(
-                    `/admin/management-grading/${slugify(assessment.action.description, { lower: true, replacement: '_' })}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
+                    `/admin/management-grading/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
                   )}
                 >
                   <i className="fa-solid fa-feather-pointed text-xl text-[#020401]"></i>
@@ -386,7 +398,7 @@ const ManagementAssessmentGrading = (nav) => {
                   size="sm"
                   className='bg-[#FF9908]'
                   onClick={() => handleNavigate(
-                    `/admin/management-grading/update/${slugify(assessment.action.description, { lower: true, replacement: '_' })}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
+                    `/admin/management-grading/update/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
                   )}
                 >
                   <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
@@ -413,7 +425,8 @@ const ManagementAssessmentGrading = (nav) => {
         return cellValue;
     }
   }, []);
-
+ 
+  
   const getStudentCode = (data, key) => {
     for (let item of data) {
       // && item.totalScore === 0
@@ -439,7 +452,6 @@ const ManagementAssessmentGrading = (nav) => {
     }
     return null;
   };
-
 
 
   const navigateGradingGroup = () => {
@@ -485,13 +497,7 @@ const ManagementAssessmentGrading = (nav) => {
     }, 100);
   };
 
-  function replaceCharacters(description) {
-    // Replace spaces with underscores
-    let result = description.replace(/ /g, "_");
-    // Replace hyphens with underscores
-    result = result.replace(/-/g, "_");
-    return result;
-  }
+ 
 
   const onRowsPerPageChange = React.useCallback((e) => {
     setRowsPerPage(Number(e.target.value));
