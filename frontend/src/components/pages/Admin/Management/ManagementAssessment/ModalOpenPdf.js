@@ -79,8 +79,8 @@ const ModalOpenPdf = ({
             </html>
         `;
         try {
-            const response = await axiosAdmin.post('/pdf', 
-                { html: htmlString, landscape }, 
+            const response = await axiosAdmin.post('/pdf',
+                { html: htmlString, landscape },
                 { responseType: 'blob', withCredentials: true }
             );
 
@@ -98,7 +98,7 @@ const ModalOpenPdf = ({
             setLoading(false);
         }
     };
-    
+
     return (
         <Modal
             size="5xl"
@@ -131,30 +131,30 @@ const ModalOpenPdf = ({
                     <>
                         <ModalHeader className="text-[#FF9908]">Download Template According to Selection</ModalHeader>
                         <ModalBody>
-                        <div className="flex space-x-4">
-            <Button 
-                variant="light" 
-                onClick={() => handleDownload(false)} 
-                className="flex items-center space-x-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded shadow-sm transition ease-in-out duration-150"
-            >
-                <FaArrowsAltV className="text-lg" />
-                <span>Portrait</span>
-            </Button>
-            <Button 
-                variant="light" 
-                onClick={() => handleDownload(true)} 
-                className="flex items-center space-x-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded shadow-sm transition ease-in-out duration-150"
-            >
-                <FaArrowsAltH className="text-lg" />
-                <span>Landscape</span>
-            </Button>
-            {loading && (
-                <div className="flex items-center space-x-2">
-                    <Spinner size="sm" color="primary" />
-                    <span>Loading...</span>
-                </div>
-            )}
-        </div>
+                            <div className="flex space-x-4">
+                                <Button
+                                    variant="light"
+                                    onClick={() => handleDownload(false)}
+                                    className="flex items-center space-x-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded shadow-sm transition ease-in-out duration-150"
+                                >
+                                    <FaArrowsAltV className="text-lg" />
+                                    <span>Portrait</span>
+                                </Button>
+                                <Button
+                                    variant="light"
+                                    onClick={() => handleDownload(true)}
+                                    className="flex items-center space-x-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded shadow-sm transition ease-in-out duration-150"
+                                >
+                                    <FaArrowsAltH className="text-lg" />
+                                    <span>Landscape</span>
+                                </Button>
+                                {loading && (
+                                    <div className="flex items-center space-x-2">
+                                        <Spinner size="sm" color="primary" />
+                                        <span>Loading...</span>
+                                    </div>
+                                )}
+                            </div>
                             <div className="relative w-full h-full flex flex-col justify-center items-center">
                                 <div className="flex justify-end mb-2 w-full ">
                                     <button className="px-2 py-1 bg-blue-500 text-white rounded mr-2" onClick={handleZoomIn}>Zoom In</button>
@@ -197,7 +197,7 @@ const ModalOpenPdf = ({
                                                     </th>
                                                     <th className="border border-black w-[20px]">SV1</th>
                                                     <th className="border border-black w-[20px]">SV2</th>
-                                                    <th className="border border-r-[2px] border-black w-[20px]">SV3</th>
+                                                    <th className="border border-r-[1px] border-black w-[20px]">SV3</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -214,18 +214,18 @@ const ModalOpenPdf = ({
                                                         </td>
                                                         <td className="border border-black"></td>
                                                         <td className="border border-black"></td>
-                                                        <td className="border border-black border-r-[2px]"></td>
+                                                        <td className="border border-black border-r-[1px]"></td>
                                                     </tr>
                                                 ))}
                                             </tbody>
                                             <tfoot>
                                                 <tr className="h-[20px]">
-                                                    <td className="border border-black"></td>
-                                                    <td className="border border-black"></td>
-                                                    <td className="border border-black w-[10px]"></td>
-                                                    <td className="border border-black"></td>
-                                                    <td className="border border-black"></td>
-                                                    <td className="border border-black border-r-[2px]"></td>
+                                                    <td className="border border-black border-r-0"></td>
+                                                    <td className="border border-black border-x-0"></td>
+                                                    <td className="border border-black border-x-0 w-[10px]"></td>
+                                                    <td className="border border-black border-x-0"></td>
+                                                    <td className="border border-black border-x-0"></td>
+                                                    <td className="border border-black  border-l-0 border-r-[1px]"></td>
                                                 </tr>
                                             </tfoot>
                                         </table>

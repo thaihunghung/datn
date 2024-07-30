@@ -98,7 +98,6 @@ const UpdateFormGrading = (nav) => {
     }
   };
 
-
   const setValue = (data) => {
     const updatedPoData = data.map((subject) => {
       return {
@@ -134,8 +133,6 @@ const UpdateFormGrading = (nav) => {
       throw error;
     }
   };
-
-
 
   useEffect(() => {
     if (setCheck === 0) {

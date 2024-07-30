@@ -591,18 +591,18 @@ const ManagementAssessmentGrading = (nav) => {
   const handleSoftDelete = async () => {
     const data = {
       assessment_id: Array.from(selectedKeys),
-  };
-  console.log(data)
-  try {
-    const response = await axiosAdmin.delete('/assessments/multiple', { params: data });
+    };
+    console.log(data)
+    try {
+      const response = await axiosAdmin.delete('/assessments/multiple', { params: data });
 
-    await loadTeachers();
-      
+      await loadTeachers();
+
       message.success(response.data.message);
-  } catch (error) {
+    } catch (error) {
       console.error("Error deleting:", error);
       message.error('Error deleting');
-  }
+    }
   };
 
   const handleSoftDeleteById = async (_id) => {
@@ -610,10 +610,10 @@ const ManagementAssessmentGrading = (nav) => {
       const response = await axiosAdmin.delete(`/assessment/${_id}`);
       await loadTeachers();
       message.success(response.data.message);
-  } catch (error) {
+    } catch (error) {
       console.error(`Error toggling delete for with ID ${_id}:`, error);
       message.error(`Error toggling delete for with ID ${_id}`);
-  }
+    }
   };
 
   return (
