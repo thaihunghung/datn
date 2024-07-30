@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Table, Tooltip, Button, message } from 'antd';
+import { Table, message } from 'antd';
 import { Select } from "antd";
 import { Collapse } from 'antd';
-import { Slider } from "@nextui-org/react";
 import "./FormGrading.css"
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import RubricSlider from "../../Utils/RubricSlider/RubricSlider";
+
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Modal, Button, Slider, Tooltip } from "@nextui-org/react";
+import { ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@nextui-org/react';
+import { ChevronDownIcon } from "./ChevronDownIcon";
+
+
 
 const FormMultipleGrading = (nav) => {
   const { setCollapsedNav } = nav;
@@ -64,7 +69,58 @@ const FormMultipleGrading = (nav) => {
       console.error('Error processing description:', error);
     }
   }
+  const [showCLO, setShowCLO] = useState(false);
+  const [showPLO, setShowPLO] = useState(false);
+  const [showChapter, setShowChapter] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState(new Set());
+  const [showAll, setShowAll] = useState(false);
 
+  const columns = [
+    { uid: 'clo', name: 'CLO' },
+    { uid: 'plo', name: 'PLO' },
+    { uid: 'chapter', name: 'Chapter' },
+  ];
+
+  const handleSelectionChange = (keys) => {
+    // Update state variables based on visible columns
+    setShowCLO(keys.has('clo'));
+    setShowPLO(keys.has('plo'));
+    setShowChapter(keys.has('chapter'));
+
+    // Update visibleColumns set
+    if (keys.has('showAll')) {
+      keys.delete('showAll');
+    }
+    setVisibleColumns(keys);
+    setShowAll(keys.size === columns.length);
+  };
+
+  const handleShowAll = () => {
+    if (showAll) {
+      // If 'Show All' is already active, unselect everything
+      setVisibleColumns(new Set());
+      setShowCLO(false);
+      setShowPLO(false);
+      setShowChapter(false);
+      setShowAll(false);
+    } else {
+      // Select all columns
+      const allKeys = new Set(columns.map(column => column.uid));
+      setVisibleColumns(allKeys);
+      setShowCLO(true);
+      setShowPLO(true);
+      setShowChapter(true);
+      setShowAll(true);
+    }
+  };
+
+
+  const [showFirst, setShowFirst] = useState(true);
+
+  const showAny = showCLO || showPLO || showChapter;
+  const showAtLeastTwo = [showCLO, showPLO, showChapter].filter(Boolean).length >= 2;
+  const showAllThree = showCLO && showPLO && showChapter;
+  const isContainerHidden = !showAny;
   // Assessment: key,
   // studentCode: item.student.studentCode  
   // console.log(studentCodes);
@@ -89,6 +145,8 @@ const FormMultipleGrading = (nav) => {
     //console.log('value');
     setStudent(value);
   };
+
+
   const handleSliderChange1 = (index, value, rubricsItem_id, student_id) => {
     setSelectedValues1(prevValues => {
       if (!Array.isArray(prevValues)) {
@@ -313,7 +371,7 @@ const FormMultipleGrading = (nav) => {
           const check = CheckSave(items)
           console.log(items)
           if (check) {
-            Save(findAssessment1, totalScore1) 
+            Save(findAssessment1, totalScore1)
           }
         }
         break;
@@ -492,7 +550,7 @@ const FormMultipleGrading = (nav) => {
       //const response = await axiosAdmin.get(`/assessments/${descriptionURL}/teacher/${teacher_id}`);
       const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}&description=${descriptionURL}`);
 
-      if (response.data) { 
+      if (response.data) {
         setAssessment(response?.data);
       }
       console.log("assessments");
@@ -555,22 +613,28 @@ const FormMultipleGrading = (nav) => {
     GetAssesmentByDicriptions()
     GetRubricData();
 
+    setCollapsedNav(true);
     const handleResize = () => {
-      if (window.innerWidth < 1200) {
-        setCollapsedNav(true);
+      if (window.innerWidth < 768) {
+
+        setShowCLO(true);
+        setShowPLO(false);
+        setShowChapter(false);
+        setVisibleColumns(new Set(['clo']));
       } else {
-        setCollapsedNav(false);
+
+        setShowCLO(true);
+        setShowPLO(true);
+        setShowChapter(true);
+        setVisibleColumns(new Set(['clo', 'plo', 'chapter']));
       }
     };
 
     handleResize();
     window.addEventListener("resize", handleResize);
-    setTimeout(() => {
-    }, 100);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
-      clearTimeout(setTimeout); // Clean up the timeout on component unmount
+      window.removeEventListener("resize", handleResize); // Cleanup
     };
   }, []);
 
@@ -671,215 +735,289 @@ const FormMultipleGrading = (nav) => {
           </Tooltip>
         </div>
       </div>
-      <div className="w-full flex flex-col p-2 py-0 mb-2  sm:p-5 sm:mb-2 sm:py-0 sm:flex-col lg:flex-row lg:mb-0 xl:flex-row xl:mb-0">
-        <div className="w-full text-justify lg:w-[55%] xl:w-[60%]   flex flex-col sm:flex-col lg:flex-row xl:flex-row">
-          <div className="w-full hidden p-2 bg-[#475569] sm:hidden lg:w-[100px] lg:block xl:w-[100px] xl:block">
-            <p className=" text-[#fefefe] text-center font-bold">PLO</p>
-          </div>
-          <div className="w-full hidden p-2 bg-[#475569] sm:hidden lg:w-[100px] lg:block xl:w-[100px] xl:block">
-            <p className=" text-[#fefefe] text-center font-bold">CĐR</p>
-          </div>
-          <div className="w-full p-0 sm:p-0 lg:p-2 xl:p-2 bg-[#475569]">
-            <p className="text-center font-bold hidden sm:hidden lg:block xl:block text-[#fefefe] p-5 sm:p-5 lg:p-0 xl:p-0">Tiêu chí</p>
-            <p className="text-center font-bold block sm:block lg:hidden xl:hidden text-[#fefefe] p-5 sm:p-5 lg:p-0 xl:p-0">Chấm điểm</p>
-          </div>
-        </div>
-        <div className="hidden w-full bg-[#475569] sm:hidden lg:w-[45%]   lg:block xl:block xl:w-[40%] text-justify p-5 pb-0 pt-2">
-          <p className="text-center font-bold  text-[#fefefe]">Điểm đạt</p>
-        </div>
+      <div className="flex gap-4 p-4">
+        <Dropdown>
+          <DropdownTrigger className="sm:flex">
+            <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+              Columns
+            </Button>
+          </DropdownTrigger>
+          <DropdownMenu
+            aria-label="Table Columns"
+            closeOnSelect={false}
+            selectedKeys={visibleColumns}
+            selectionMode="multiple"
+            onSelectionChange={handleSelectionChange}
+          >
+            <DropdownItem
+              key="showAll"
+              onClick={handleShowAll}
+              className="capitalize"
+            >
+              {showAll ? 'Unselect All' : 'Show All'}
+            </DropdownItem>
+            {columns.map((column) => (
+              <DropdownItem key={column.uid} className="capitalize">
+                {column.name}
+              </DropdownItem>
+            ))}
+          </DropdownMenu>
+        </Dropdown>
       </div>
-      {
-        RubicItemsData.map((item, i) => (
-          <div className="w-full flex flex-col p-2 py-0 sm:p-5 sm:py-0 sm:flex-col lg:flex-row xl:flex-row" key={item.rubricsItem_id}>
-            {/* Left Side */}
-            <div className="w-full rounded-b-lg sm:rounded-b-lg lg:rounded-none xl:rounded-none text-justify lg:w-[55%] xl:w-[60%] border-[1px] sm:border-t-[1px] lg:border-t-0 xl:border-t-0 border-[#ff8077] flex flex-col sm:flex-col lg:flex-row xl:flex-row">
-              <div className="w-full hidden sm:hidden lg:block xl:block p-2 lg:w-[100px] xl:w-[100px] border-b-1 sm:border-b-1 border-r-0 sm:border-r-0 sm:px-0 lg:border-r-[1px] lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-[#ff8077]">
 
-                <div className="flex justify-center items-center h-full w-full p-2">
-                  <div className="text-center font-bold sm:font-bold lg:font-normal xl:font-normal text-[#008000] sm:text-[#008000] lg:text-black xl:text-black">
-                  <Tooltip content={item.PLO.description}>{replaceUnderscoresWithSpaces(item.PLO.ploName)}</Tooltip>
-                  </div>
-                </div>
 
+      <div className="flex flex-col items-start justify-start relative">
+        <div className="w-full flex flex-col p-2 py-0 mb-2 text-base  sm:p-5 sm:mb-2 sm:py-0 sm:flex-col lg:flex-row lg:mb-0 xl:flex-row xl:mb-0">
+          <div className={`
+        ${isContainerHidden ? 'lg:w-[50%]' : ''}   ${showAny ? 'lg:w-[70%]' : ''} ${showAtLeastTwo ? 'lg:w-[70%]' : ''} ${showAllThree ? 'lg:w-[70%]' : ''} 
+        w-full text-justify   flex flex-col sm:flex-col lg:flex-row xl:flex-row`}>
+            <div className={`${showAny ? 'lg:w-[40%]' : ''} ${showAtLeastTwo ? 'lg:w-[40%]' : ''} ${showAllThree ? 'lg:w-[80%]' : ''} flex justify-center items-center`}>
+              <div className={`hidden p-2 bg-[#475569] ${showChapter ? 'lg:block xl:block' : 'hidden'} sm:hidden flex-1`}>
+                <p className=" text-[#fefefe] text-center font-bold">CHAPTER</p>
               </div>
-              <div className="w-full p-2 lg:w-[100px] xl:w-[100px] border-b-1 
-              sm:border-b-1 border-r-0 sm:border-r-0 sm:px-0 lg:border-r-[1px] 
-              lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-[#ff8077]
-              flex justify-center items-center
-              ">
-                <div className="hidden sm:block lg:block xl:block flex-1 p-2">
-                  <div className="text-center font-bold sm:font-bold lg:font-normal xl:font-normal text-[#008000] sm:text-[#008000] lg:text-black xl:text-black">
-                  <Tooltip content={item.CLO.description}>{replaceUnderscoresWithSpaces(item.CLO.cloName)}</Tooltip>
-                  </div>
-                </div>
-                <div className="hidden sm:block lg:hidden xl:hidden flex-1">
-                  <div className="text-center font-bold sm:font-bold lg:font-normal xl:font-normal text-[#008000] sm:text-[#008000] lg:text-black xl:text-black">
-                    <Tooltip content={item.PLO.description}>{item.PLO.ploName}</Tooltip>
-                  </div>
-                </div>
-
+              <div className={`hidden p-2 bg-[#475569] ${showPLO ? 'lg:block xl:block' : 'hidden'} sm:hidden flex-1`}>
+                <p className=" text-[#fefefe] text-center font-bold">PLO</p>
               </div>
-              <div className="w-full">
-                <div className="flex flex-col hidden sm:hidden lg:block xl:block text-justify leading-8 p-4" dangerouslySetInnerHTML={{ __html: item.description }} />
-                <div className="block sm:block lg:hidden xl:hidden">
-                  <Collapse
-                    items={[
-                      {
-                        key: '1',
-                        label: <p className="text-justify text-base">Tiêu chí</p>,
-                        children: (
-                          <div className="text-justify leading-8 flex flex-col  p-2 px-5 sm:p-2 sm:px-5 lg:p-5 xl:p-5" dangerouslySetInnerHTML={{ __html: item.description }} />
-                        )
-                      }
-                    ]}
-                    colorBorder="#FFD700"
-                    className="Collapse"
-                    defaultActiveKey={['1']}
-                  />
-                </div>
+              <div className={`hidden p-2 bg-[#475569] ${showCLO ? 'lg:block xl:block' : 'hidden'} sm:hidden flex-1`}>
+                <p className=" text-[#fefefe] text-center font-bold">CLO</p>
               </div>
             </div>
-            <div className="w-full sm:w-full lg:w-[45%] xl:w-[40%] text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-[#ff8077]" key={i}>
-              {
-                ListStudentOJ.length === 0 && (
-                  // Hiển thị 0 RubricSlider khi không có sinh viên được chọn
-                  <>
-                  </>
-                )
-              }
-              {
-                ListStudentOJ.length === 1 && (
-                  // Hiển thị 1 RubricSlider khi có 1 sinh viên được chọn
-                  <>
-                    <RubricSlider
-                      studentID={ListStudentOJ[0]?.student_id}
-                      studentCode={ListStudentOJ[0]?.studentCode}
-                      StudentName={ListStudentOJ[0]?.name}
-                      maxScore={item.maxScore}
-                      index={i}
-                      defaultValue={defaultValue}
-                      handleSliderChange={handleSliderChange1}
-                      rubricsItem_id={item.rubricsItem_id}
-                    />
-                  </>
-                )
-              }
-              {
-                ListStudentOJ.length === 2 && (
-                  // Hiển thị 2 RubricSlider khi có 2 sinh viên được chọn
-                  <>
-                    <RubricSlider
-                      studentID={ListStudentOJ[0]?.student_id}
-                      studentCode={ListStudentOJ[0]?.studentCode}
-                      StudentName={ListStudentOJ[0]?.name}
-                      maxScore={item.maxScore}
-                      index={i}
-                      defaultValue={defaultValue}
-                      handleSliderChange={handleSliderChange1}
-                      rubricsItem_id={item.rubricsItem_id}
-                    />
-                    <RubricSlider
-                      studentID={ListStudentOJ[1]?.student_id}
-                      studentCode={ListStudentOJ[1]?.studentCode}
-                      StudentName={ListStudentOJ[1]?.name}
-                      maxScore={item.maxScore}
-                      index={i}
-                      defaultValue={defaultValue}
-                      handleSliderChange={handleSliderChange2}
-                      rubricsItem_id={item.rubricsItem_id}
-                    />
-                  </>
-                )
-              }
-              {
-                ListStudentOJ.length === 3 && (
-                  // Hiển thị 3 RubricSlider khi có 3 hoặc nhiều hơn sinh viên được chọn
-                  <>
-                    <RubricSlider
-                      studentID={ListStudentOJ[0]?.student_id}
-                      studentCode={ListStudentOJ[0]?.studentCode}
-                      StudentName={ListStudentOJ[0]?.name}
-                      maxScore={item.maxScore}
-                      index={i}
-                      defaultValue={defaultValue}
-                      handleSliderChange={handleSliderChange1}
-                      rubricsItem_id={item.rubricsItem_id}
-                    />
-                    <RubricSlider
-                      studentID={ListStudentOJ[1]?.student_id}
-                      studentCode={ListStudentOJ[1]?.studentCode}
-                      StudentName={ListStudentOJ[1]?.name}
-                      maxScore={item.maxScore}
-                      index={i}
-                      defaultValue={defaultValue}
-                      handleSliderChange={handleSliderChange2}
-                      rubricsItem_id={item.rubricsItem_id}
-                    />
-                    <RubricSlider
-                      studentID={ListStudentOJ[2]?.student_id}
-                      studentCode={ListStudentOJ[2]?.studentCode}
-                      StudentName={ListStudentOJ[2]?.name}
-                      maxScore={item.maxScore}
-                      index={i}
-                      defaultValue={defaultValue}
-                      handleSliderChange={handleSliderChange3}
-                      rubricsItem_id={item.rubricsItem_id}
-                    />
-                  </>
-                )
-              }
-              {
-                ListStudentOJ.length === 4 && (
-                  // Hiển thị 3 RubricSlider khi có 3 hoặc nhiều hơn sinh viên được chọn
-                  <>
-                    <RubricSlider
-                      studentID={ListStudentOJ[0]?.student_id}
-                      studentCode={ListStudentOJ[0]?.studentCode}
-                      StudentName={ListStudentOJ[0]?.name}
-                      maxScore={item.maxScore}
-                      index={i}
-                      defaultValue={defaultValue}
-                      handleSliderChange={handleSliderChange1}
-                      rubricsItem_id={item.rubricsItem_id}
-                    />
-                    <RubricSlider
-                      studentID={ListStudentOJ[1]?.student_id}
-                      studentCode={ListStudentOJ[1]?.studentCode}
-                      StudentName={ListStudentOJ[1]?.name}
-                      maxScore={item.maxScore}
-                      index={i}
-                      defaultValue={defaultValue}
-                      handleSliderChange={handleSliderChange2}
-                      rubricsItem_id={item.rubricsItem_id}
-                    />
-                    <RubricSlider
-                      studentID={ListStudentOJ[2]?.student_id}
-                      studentCode={ListStudentOJ[2]?.studentCode}
-                      StudentName={ListStudentOJ[2]?.name}
-                      maxScore={item.maxScore}
-                      index={i}
-                      defaultValue={defaultValue}
-                      handleSliderChange={handleSliderChange3}
-                      rubricsItem_id={item.rubricsItem_id}
-                    />
-                    <RubricSlider
-                      studentID={ListStudentOJ[3]?.student_id}
-                      studentCode={ListStudentOJ[3]?.studentCode}
-                      StudentName={ListStudentOJ[3]?.name}
-                      maxScore={item.maxScore}
-                      index={i}
-                      defaultValue={defaultValue}
-                      handleSliderChange={handleSliderChange4}
-                      rubricsItem_id={item.rubricsItem_id}
-                    />
-                  </>
-                )
-              }
+
+            <div className={`w-full ${isContainerHidden ? 'lg:w-full' : ''} ${showAtLeastTwo ? 'lg:w-[60%]' : ''} ${showAllThree ? 'lg:w-[20%]' : ''} p-0 sm:p-0 lg:p-2 xl:p-2 bg-[#475569]`}>
+              <p className="text-center font-bold hidden sm:hidden lg:block xl:block text-[#fefefe] p-5 sm:p-5 lg:p-0 xl:p-0">Nội dung</p>
+              <p className="text-center font-bold block sm:block lg:hidden xl:hidden text-[#fefefe] p-5 sm:p-5 lg:p-0 xl:p-0">Chấm điểm</p>
             </div>
           </div>
-        ))
-      }
+          <div className={`hidden w-full bg-[#475569] sm:hidden ${isContainerHidden ? 'lg:w-[50%]' : ''}   ${showAny ? 'lg:w-[30%]' : ''} ${showAtLeastTwo ? 'lg:w-[30%]' : ''} ${showAllThree ? 'lg:w-[30%]' : ''}     lg:block xl:block text-justify p-5 pb-0 pt-2`}>
+            <p className="text-center font-bold  text-[#fefefe]">Chấm điểm</p>
+          </div>
+        </div>
 
+        {
+          RubicItemsData.map((item, i) => (
+            <div className="w-full flex flex-col p-2 py-0 sm:p-5 sm:py-0 sm:flex-col lg:flex-row xl:flex-row" key={item.rubricsItem_id}>
+              {/* Left Side */}
+              <div className={`
+              ${isContainerHidden ? 'lg:w-[50%]' : ''}   ${showAny ? 'lg:w-[70%]' : ''} ${showAtLeastTwo ? 'lg:w-[70%]' : ''} ${showAllThree ? 'lg:w-[70%]' : ''}  
+              w-full rounded-b-lg sm:rounded-b-lg lg:rounded-none xl:rounded-none 
+              text-justify border-[1px] sm:border-t-[1px] lg:border-t-0 xl:border-t-0 border-[#020401]  
+              flex flex-col sm:flex-col lg:flex-row xl:flex-row`}
+              >
+
+                <div className={`w-full ${showAny ? 'lg:w-[40%]' : ''} ${showAtLeastTwo ? 'lg:w-[40%]' : ''} ${showAllThree ? 'lg:w-[80%]' : ''} border-b-1 
+                      sm:border-b-1 border-r-0 sm:border-r-0 sm:px-0 lg:border-r-[1px] 
+                      lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-[#020401] 
+                      flex justify-center items-start leading-8 ${isContainerHidden ? 'hidden' : ''}`}>
+
+                  <div className={`w-full h-full flex-1 hidden sm:hidden ${showChapter ? 'lg:block xl:block' : ''}  
+                border-b-1 sm:border-b-1 border-r-1 sm:border-r-1 sm:px-0 lg:border-r-[1px] lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-[#020401] `}>
+                    <div className="p-4 overflow-y-auto">
+                      <div className="text-center font-bold  max-h-[300px] sm:font-bold lg:font-normal xl:font-normal text-[#AF84DD] sm:text-[#AF84DD] lg:text-[#020401] xl:text-[#020401]">
+                        <div className="font-bold">{item.Chapter.chapterName}:</div>
+                        <div className="w-full text-wrap">{item.Chapter.description}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`w-full h-full flex-1 hidden sm:hidden ${showPLO ? 'lg:block xl:block' : 'hidden'}  border-b-1 sm:border-b-1 border-r-1 sm:border-r-1 sm:px-0 lg:border-r-[1px] lg:border-b-0 xl:border-r-[1px] xl:border-b-0  border-[#020401] `}>
+                    <div className="p-4 overflow-y-auto">
+                      <div className="text-center font-bold  max-h-[300px] sm:font-bold lg:font-normal xl:font-normal text-[#AF84DD] sm:text-[#AF84DD] lg:text-[#020401] xl:text-[#020401]">
+                        <div className="font-bold">{item.PLO.ploName}:</div>
+                        <div className="w-full text-wrap">{item.PLO.description}</div>
+
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`block sm:block ${showCLO ? 'lg:block xl:block' : ''} flex-1 p-4  overflow-y-auto`}>
+                    <div className="text-center max-h-[300px] font-bold sm:font-bold lg:font-normal xl:font-normal 
+                  text-[#475569]  sm:text-[#475569] lg:text-[#020401] xl:text-[#020401]">
+                      <div className="block lg:hidden">
+                        <div className={`font-bold ${showChapter ? 'lg:block xl:block' : 'hidden'}`}>{item.Chapter.chapterName}:</div>
+                        <div className={`w-full text-wrap ${showChapter ? 'lg:block xl:block' : 'hidden'}`}>{item.Chapter.description}</div>
+
+                        <div className={`font-bold ${showPLO ? 'lg:block xl:block' : 'hidden'}`}>{item.PLO.ploName}:</div>
+                        <div className={`w-full text-wrap ${showPLO ? 'lg:block xl:block' : 'hidden'}`}>{item.PLO.description}</div>
+                      </div>
+
+
+                      <div className={`font-bold ${showCLO ? 'lg:block xl:block' : 'hidden'}`}>{item.CLO.cloName}:</div>
+                      <div className={`w-full text-wrap ${showCLO ? 'lg:block xl:block' : 'hidden'}`}>{item.CLO.description}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`w-full ${isContainerHidden ? 'lg:w-full' : ''} ${showAtLeastTwo ? 'lg:w-[60%]' : ''} ${showAllThree ? 'lg:w-[20%]' : ''}`}>
+                  <div className="flex flex-col hidden sm:hidden lg:block xl:block text-justify leading-8 p-4" dangerouslySetInnerHTML={{ __html: item.description }} />
+                  <div className="block sm:block lg:hidden xl:hidden">
+                    <Collapse
+                      items={[
+                        {
+                          key: '1',
+                          label: <p className="text-justify text-base font-semibold">Nội dung</p>,
+                          children: (
+                            <div className="text-justify leading-8 flex flex-col text-base   p-2 px-5 sm:p-2 sm:px-5 lg:p-5 xl:p-5" dangerouslySetInnerHTML={{ __html: item.description }} />
+                          )
+                        }
+                      ]}
+                      colorBorder="#FFD700"
+                      className="Collapse"
+                      defaultActiveKey={['1']}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className={`w-full sm:w-full   
+              ${isContainerHidden ? 'lg:w-[50%]' : ''}   ${showAny ? 'lg:w-[30%]' : ''} ${showAtLeastTwo ? 'lg:w-[30%]' : ''} ${showAllThree ? 'lg:w-[30%]' : ''}  
+              text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-[#020401] `} key={i}>
+                {
+                  ListStudentOJ.length === 0 && (
+                    // Hiển thị 0 RubricSlider khi không có sinh viên được chọn
+                    <>
+                    </>
+                  )
+                }
+                {
+                  ListStudentOJ.length === 1 && (
+                    // Hiển thị 1 RubricSlider khi có 1 sinh viên được chọn
+                    <>
+                      <RubricSlider
+                        studentID={ListStudentOJ[0]?.student_id}
+                        studentCode={ListStudentOJ[0]?.studentCode}
+                        StudentName={ListStudentOJ[0]?.name}
+                        maxScore={item.maxScore}
+                        index={i}
+                        defaultValue={defaultValue}
+                        handleSliderChange={handleSliderChange1}
+                        rubricsItem_id={item.rubricsItem_id}
+
+                      />
+                    </>
+                  )
+                }
+                {
+                  ListStudentOJ.length === 2 && (
+                    // Hiển thị 2 RubricSlider khi có 2 sinh viên được chọn
+                    <>
+                      <RubricSlider
+                        studentID={ListStudentOJ[0]?.student_id}
+                        studentCode={ListStudentOJ[0]?.studentCode}
+                        StudentName={ListStudentOJ[0]?.name}
+                        maxScore={item.maxScore}
+                        index={i}
+                        defaultValue={defaultValue}
+                        handleSliderChange={handleSliderChange1}
+                        rubricsItem_id={item.rubricsItem_id}
+
+                      />
+                      <RubricSlider
+                        studentID={ListStudentOJ[1]?.student_id}
+                        studentCode={ListStudentOJ[1]?.studentCode}
+                        StudentName={ListStudentOJ[1]?.name}
+                        maxScore={item.maxScore}
+                        index={i}
+                        defaultValue={defaultValue}
+                        handleSliderChange={handleSliderChange2}
+                        rubricsItem_id={item.rubricsItem_id}
+
+                      />
+                    </>
+                  )
+                }
+                {
+                  ListStudentOJ.length === 3 && (
+                    // Hiển thị 3 RubricSlider khi có 3 hoặc nhiều hơn sinh viên được chọn
+                    <>
+                      <RubricSlider
+                        studentID={ListStudentOJ[0]?.student_id}
+                        studentCode={ListStudentOJ[0]?.studentCode}
+                        StudentName={ListStudentOJ[0]?.name}
+                        maxScore={item.maxScore}
+                        index={i}
+                        defaultValue={defaultValue}
+                        handleSliderChange={handleSliderChange1}
+                        rubricsItem_id={item.rubricsItem_id}
+
+                      />
+                      <RubricSlider
+                        studentID={ListStudentOJ[1]?.student_id}
+                        studentCode={ListStudentOJ[1]?.studentCode}
+                        StudentName={ListStudentOJ[1]?.name}
+                        maxScore={item.maxScore}
+                        index={i}
+                        defaultValue={defaultValue}
+                        handleSliderChange={handleSliderChange2}
+                        rubricsItem_id={item.rubricsItem_id}
+
+                      />
+                      <RubricSlider
+                        studentID={ListStudentOJ[2]?.student_id}
+                        studentCode={ListStudentOJ[2]?.studentCode}
+                        StudentName={ListStudentOJ[2]?.name}
+                        maxScore={item.maxScore}
+                        index={i}
+                        defaultValue={defaultValue}
+                        handleSliderChange={handleSliderChange3}
+                        rubricsItem_id={item.rubricsItem_id}
+
+                      />
+                    </>
+                  )
+                }
+                {
+                  ListStudentOJ.length === 4 && (
+                    // Hiển thị 3 RubricSlider khi có 3 hoặc nhiều hơn sinh viên được chọn
+                    <>
+                      <RubricSlider
+                        studentID={ListStudentOJ[0]?.student_id}
+                        studentCode={ListStudentOJ[0]?.studentCode}
+                        StudentName={ListStudentOJ[0]?.name}
+                        maxScore={item.maxScore}
+                        index={i}
+                        defaultValue={defaultValue}
+                        handleSliderChange={handleSliderChange1}
+                        rubricsItem_id={item.rubricsItem_id}
+
+                      />
+                      <RubricSlider
+                        studentID={ListStudentOJ[1]?.student_id}
+                        studentCode={ListStudentOJ[1]?.studentCode}
+                        StudentName={ListStudentOJ[1]?.name}
+                        maxScore={item.maxScore}
+                        index={i}
+                        defaultValue={defaultValue}
+                        handleSliderChange={handleSliderChange2}
+                        rubricsItem_id={item.rubricsItem_id}
+
+                      />
+                      <RubricSlider
+                        studentID={ListStudentOJ[2]?.student_id}
+                        studentCode={ListStudentOJ[2]?.studentCode}
+                        StudentName={ListStudentOJ[2]?.name}
+                        maxScore={item.maxScore}
+                        index={i}
+                        defaultValue={defaultValue}
+                        handleSliderChange={handleSliderChange3}
+                        rubricsItem_id={item.rubricsItem_id}
+
+                      />
+                      <RubricSlider
+                        studentID={ListStudentOJ[3]?.student_id}
+                        studentCode={ListStudentOJ[3]?.studentCode}
+                        StudentName={ListStudentOJ[3]?.name}
+                        maxScore={item.maxScore}
+                        index={i}
+                        defaultValue={defaultValue}
+                        handleSliderChange={handleSliderChange4}
+                        rubricsItem_id={item.rubricsItem_id}
+
+                      />
+                    </>
+                  )
+                }
+              </div>
+            </div>
+          ))
+        }
+      </div>
     </div>
   )
 }

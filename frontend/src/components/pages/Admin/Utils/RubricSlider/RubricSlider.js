@@ -3,8 +3,7 @@ import { Slider, Tooltip } from "@nextui-org/react";
 
 const RubricSlider = ({ maxScore, index, defaultValue, handleSliderChange, rubricsItem_id, StudentName, studentID}) => {
   
-  
-  
+
   const getMarks = (maxScore) => {
     let marks = [];
     if (maxScore === 1) {
@@ -31,7 +30,7 @@ const RubricSlider = ({ maxScore, index, defaultValue, handleSliderChange, rubri
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-md">
+    <div className="flex flex-col gap-6 w-full max-w-full">
       <Slider
         size="lg"
         label={<span>{StudentName}</span>}
@@ -40,7 +39,7 @@ const RubricSlider = ({ maxScore, index, defaultValue, handleSliderChange, rubri
         maxValue={maxScore}
         minValue={0}
         defaultValue={defaultValue}
-        className="max-w-md"
+        className="max-w-full"
         marks={getMarks(maxScore)}
         onChange={(value) => handleSliderChange(index, value, rubricsItem_id, studentID)}
       />

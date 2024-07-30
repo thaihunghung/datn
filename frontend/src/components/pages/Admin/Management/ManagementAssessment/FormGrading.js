@@ -21,6 +21,7 @@ const FormGrading = (nav) => {
   const [totalScore, setTotalScore] = useState(0);
   const [Check, setCheck] = useState(0);
   const [defaultValue, setdefaultValue] = useState(0);
+
   const [showCLO, setShowCLO] = useState(false);
   const [showPLO, setShowPLO] = useState(false);
   const [showChapter, setShowChapter] = useState(false);
@@ -66,6 +67,15 @@ const FormGrading = (nav) => {
     }
   };
 
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
+  const [showFirst, setShowFirst] = useState(true);
+
+  const showAny = showCLO || showPLO || showChapter;
+  const showAtLeastTwo = [showCLO, showPLO, showChapter].filter(Boolean).length >= 2;
+  const showAllThree = showCLO && showPLO && showChapter;
+  const isContainerHidden = !showAny;
+
   // http://localhost:3000/admin/management-grading/update/100000_-_it31_khai_pha_du_lieu_da20ttb_bao_cao_ket_thuc_mon_test_2024-07-22/student-code/110120013/assessment/855/rubric/1
 
   const { assessment_id, rubric_id } = useParams();
@@ -78,9 +88,10 @@ const FormGrading = (nav) => {
   const handleNavigate = (path) => {
     navigate(path);
   };
-  const handleBack = () => {
-    navigate(-1);
-  };
+
+
+
+
 
   const handleSliderChange = (index, value, rubricsItem_id) => {
     setSelectedValues(prevValues => {
@@ -117,16 +128,13 @@ const FormGrading = (nav) => {
   };
 
 
-  function replaceCharacters(description) {
-    let result = description.replace(/ /g, "_");
-    result = result.replace(/-/g, "_");
-    result = result.replace(/___/g, "_");
-    result = result.toLowerCase();
-    result = result.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    result = result.replace(/_+/g, "_");
-    result = result.replace(/^_+|_+$/g, "");
-    return result;
-  }
+
+
+
+
+
+
+
 
 
   const handleSave = async () => {
@@ -206,14 +214,7 @@ const FormGrading = (nav) => {
       throw error;
     }
   };
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  const [showFirst, setShowFirst] = useState(true);
-
-  const showAny = showCLO || showPLO || showChapter;
-  const showAtLeastTwo = [showCLO, showPLO, showChapter].filter(Boolean).length >= 2;
-  const showAllThree = showCLO && showPLO && showChapter;
-  const isContainerHidden = !showAny;
   useEffect(() => {
     if (setCheck === 0) {
       setTotalScore(0);
@@ -257,6 +258,7 @@ const FormGrading = (nav) => {
         </div>
         <div className="hidden sm:block"><BackButton /></div>
       </div>
+
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (
@@ -365,8 +367,10 @@ const FormGrading = (nav) => {
           )}
         </div>
       </div>
-      <div className="flex flex-col items-start justify-start relative">
 
+
+
+      <div className="flex flex-col items-start justify-start relative">
         <div className="w-full flex flex-col p-2 py-0 mb-2 text-base  sm:p-5 sm:mb-2 sm:py-0 sm:flex-col lg:flex-row lg:mb-0 xl:flex-row xl:mb-0">
           <div className={`
         ${isContainerHidden ? 'lg:w-[50%]' : ''}   ${showAny ? 'lg:w-[70%]' : ''} ${showAtLeastTwo ? 'lg:w-[70%]' : ''} ${showAllThree ? 'lg:w-[70%]' : ''} 
@@ -465,10 +469,20 @@ const FormGrading = (nav) => {
                 </div>
               </div>
 
+
+
+
+
               {/* Right Side */}
               <div className={`w-full sm:w-full   
               ${isContainerHidden ? 'lg:w-[50%]' : ''}   ${showAny ? 'lg:w-[30%]' : ''} ${showAtLeastTwo ? 'lg:w-[30%]' : ''} ${showAllThree ? 'lg:w-[30%]' : ''}  
               text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-[#020401] `} key={i}>
+              
+              
+              
+              
+              
+              
                 <div className="flex flex-col gap-6 w-full">
                   {item.maxScore === 1 && (
                     <Slider
@@ -574,14 +588,14 @@ const FormGrading = (nav) => {
 export default FormGrading
 
 
-const ModalWhenSave = ({
+function ModalWhenSave({
   isOpen,
   onOpenChange,
   totalScore,
   assessment,
   handleBack,
   disc
-}) => {
+}) {
 
   return (
     <Modal
