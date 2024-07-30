@@ -14,6 +14,8 @@ const path = require('path');
 const CloModel = require('../models/CloModel');
 const ChapterModel = require('../models/ChapterModel');
 const PloModel = require('../models/PloModel');
+const RubricsItemModel = require('../models/RubricItemModel');
+const SubjectModel = require('../models/SubjectModel');
 
 const AssessmentsController = {
   // index: async (req, res) => {
@@ -190,7 +192,6 @@ const AssessmentsController = {
         return res.status(200).json(assessments);
 
       } else if (teacher_id) {
-        // Logic for GetByUser
         const teacherId = parseInt(teacher_id);
         const assessments = await AssessmentModel.findAll({
           where: {
@@ -227,13 +228,60 @@ const AssessmentsController = {
           }
           status = Math.round(status);
 
-          // Tìm createdAt cho từng assessment dựa trên description
           const foundAssessment = await AssessmentModel.findOne({
-            where: { description: assessment.description, isDelete: isDelete === 'true'},
-            attributes: [ "rubric_id","course_id","description","date", "place","isDelete","createdAt" ]
+            where: {
+              description: assessment.description,
+              isDelete: isDelete === 'true'
+            },
+            attributes: ["rubric_id", "course_id", "description", "date", "place", "isDelete", "createdAt"],
+            include: [{
+              model: RubricModel,
+              where: {
+                isDelete: isDelete === 'true'
+              },
+              include: [{
+                model: SubjectModel,
+                where: {
+                    isDelete: isDelete === 'true'
+                }
+              }]
+            }, {
+              model: CourseModel,
+              where: {
+                isDelete: isDelete === 'true'
+              }
+            }]
           });
-          
-          console.log(status);
+
+          if (foundAssessment && foundAssessment.Rubric) {
+            const rubricItems = await RubricsItemModel.findAll({
+              where: {
+                rubric_id: foundAssessment.Rubric.rubric_id,
+                isDelete: isDelete === 'true'
+              },
+              include: [{
+                model: CloModel,
+                attributes: ['clo_id', 'cloName', 'description'],
+                where: {
+                  isDelete: isDelete === 'true'
+                }
+              }, {
+                model: ChapterModel,
+                attributes: ['chapter_id', 'chapterName', 'description'],
+                where: {
+                  isDelete: isDelete === 'true'
+                }
+              }, {
+                model: PloModel,
+                attributes: ['plo_id', 'ploName', 'description'],
+                where: {
+                  isDelete: isDelete === 'true'
+                }
+              }]
+            });
+            foundAssessment.Rubric.dataValues.rubricItems = rubricItems;
+          }
+
           return {
             course_id: assessment.course_id,
             description: assessment.description,
@@ -251,8 +299,8 @@ const AssessmentsController = {
         }));
 
         return res.status(200).json(result);
-
-      } else {
+      }
+     else {
         // Logic for index
         const assessments = await AssessmentModel.findAll();
         return res.status(200).json(assessments);

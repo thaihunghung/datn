@@ -32,6 +32,7 @@ import BackButton from '../../Utils/BackButton/BackButton';
 import { axiosAdmin } from '../../../../../service/AxiosAdmin';
 import ModalCreateAssessment from './ModalCreateAssessment';
 import ModalUpdateAssessment from './ModalUpdateAssessment';
+import ModalOpenPdf from './ModalOpenPdf';
 
 const statusColorMap = {
   active: 'success',
@@ -264,7 +265,8 @@ const ManagementAssessment = (nav) => {
                   variant="light"
                   radius="full"
                   size="sm"
-                  className='bg-[#FEFEFE] '
+                  className='bg-[#FEFEFE]'
+                  onClick={() => { handleAddClickPDF(assessment.RubicData, assessment.RubicItemsData) }}
                 >
                   <i className="fa-regular fa-file-pdf text-xl text-[#020401]"></i>
                 </Button>
@@ -427,6 +429,17 @@ const ManagementAssessment = (nav) => {
   const handleAddClick = () => {
     setIsAddModalOpen(true);
   };
+  const [editPDF, setEditPDF] = useState({});
+  const [isAddModalOpenPDF, setIsAddModalOpenPDF] = useState(false);
+  const handleAddClickPDF = (DataRubricPDF, DataRubricItems) => {
+    setRubicDataPDF(DataRubricPDF)
+    setDataRubricItems(DataRubricItems)
+    setIsAddModalOpenPDF(true);
+  };
+  const [DataRubricPDF, setRubicDataPDF] = useState({});
+  const [DataRubricItems, setDataRubricItems] = useState([]);
+  
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const [editRubric, setEditRubric] = useState({
@@ -514,6 +527,16 @@ const ManagementAssessment = (nav) => {
         onOpenChange={setIsAddModalOpen}
         load={loadAssessment}
       />
+
+
+      <ModalOpenPdf
+        isOpen={isAddModalOpenPDF}
+        onOpenChange={setIsAddModalOpenPDF}
+        editRubric={editPDF}
+        DataRubric={DataRubricPDF}
+        DataRubricItems={DataRubricItems}
+      />
+
       <ModalUpdateAssessment
         isOpen={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}

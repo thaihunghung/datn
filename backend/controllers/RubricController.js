@@ -412,7 +412,7 @@ const RubricController = {
         where: { rubric_id: id },
         include: [{
           model: SubjectModel,
-          attributes: ['subject_id','subjectCode',  'subjectName']
+          attributes: ['subject_id','subjectCode', 'subjectName']
         }]
       });
 
@@ -448,8 +448,6 @@ const RubricController = {
         const plos = await PloModel.findAll({ where: { plo_id: ploIds } });
         item.dataValues.plos = plos;
       }
-
-      
       if (include_clos === 'true') {
         const Clos = await CloModel.findAll({ where: { subject_id: rubric.subject_id, isDelete: isDelete === 'true'} });
         rubric.dataValues.CloData = Clos;

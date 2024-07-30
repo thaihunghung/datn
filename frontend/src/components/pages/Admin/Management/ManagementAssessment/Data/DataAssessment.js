@@ -20,6 +20,8 @@ export const fetchAssessmentData = async (teacher_id) => {
           date: items?.Assessment?.date,
           place: items?.Assessment?.place,
         },
+        RubicItemsData: items?.Assessment?.Rubric?.rubricItems,
+        RubicData: items?.Assessment?.Rubric,
         createdAt: items?.createdAt
     }));
     return Data;

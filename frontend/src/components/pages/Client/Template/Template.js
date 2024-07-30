@@ -15,39 +15,37 @@ import { axiosAdmin } from "../../../../service/AxiosAdmin";
 const DownloadDiv = () => {
 
     const handleDownload = async () => {
-        const divContent = document.getElementById('downloadDiv').innerHTML;
-        const htmlString = `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Downloaded Div Content</title>
-                <script src="https://cdn.tailwindcss.com"></script>
-                <style>
-                @media print {
-                    table { page-break-inside:auto }
-                    .test { page-break-inside:avoid; page-break-after:auto }
-                    thead { display:table-header-group }
-                    tfoot { display:table-footer-group }
-                    .hung { background-color: black !important; }
-                    thead { display: table-header-group; }
-                    tfoot { display: table-footer-group; }
-                }
-                </style>
-            </head>
-            <body>
-                ${divContent}
-            </body>
-            </html>
-        `;
+        // const divContent = document.getElementById('downloadDiv').innerHTML;
+        // const htmlString = `
+        //     <!DOCTYPE html>
+        //     <html lang="en">
+        //     <head>
+        //         <meta charset="UTF-8">
+        //         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        //         <title>Downloaded Div Content</title>
+        //         <script src="https://cdn.tailwindcss.com"></script>
+        //         <style>
+        //         @media print {
+        //             table { page-break-inside:auto }
+        //             .test { page-break-inside:avoid; page-break-after:auto }
+        //             thead { display:table-header-group }
+        //             tfoot { display:table-footer-group }
+        //             .hung { background-color: black !important; }
+        //             thead { display: table-header-group; }
+        //             tfoot { display: table-footer-group; }
+        //         }
+        //         </style>
+        //     </head>
+        //     <body>
+        //         ${divContent}
+        //     </body>
+        //     </html>
+        // `;
         try {
             const response = await axiosAdmin.get('pdf', {
-                params: { id: 1 },  // Pass parameters in the 'params' object
-                responseType: 'blob', 
-                withCredentials: true
-            });
-        
+                id: 1
+            }, { responseType: 'blob', withCredentials: true });
+
             const blob = new Blob([response.data], { type: 'application/pdf' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
