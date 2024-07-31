@@ -187,7 +187,8 @@ const FormGrading = (nav) => {
       setRubicItemsData(response.data.rubric.rubricItems)
       const data = response.data.rubric.rubricItems
       setValue(data)
-
+      console.log("response.data");
+      console.log(response.data);
     } catch (error) {
       console.error('Error fetching rubric data:', error);
       throw error;
@@ -199,8 +200,7 @@ const FormGrading = (nav) => {
     try {
 
       const response = await axiosAdmin.get(`/assessment/${assessment_id}`);
-      console.log("response.data");
-      console.log(response.data);
+
       setAssessment(response.data)
 
     } catch (error) {
@@ -473,13 +473,203 @@ const FormGrading = (nav) => {
               ${isContainerHidden ? 'lg:w-[50%]' : ''}   ${showAny ? 'lg:w-[30%]' : ''} ${showAtLeastTwo ? 'lg:w-[30%]' : ''} ${showAllThree ? 'lg:w-[30%]' : ''}  
               text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-[#020401] `} key={i}>
 
-
-
-
-
-
                 <div className="flex flex-col gap-6 w-full">
                   {item.maxScore === 1 && (
+                    <Slider
+                      size="lg"
+                      label={<span>Điểm tối đa: {item.maxScore} </span>}
+                      showTooltip={true}
+                      step={0.25}
+                      // formatOptions={{style: "percent"}}
+                      maxValue={item.maxScore}
+                      minValue={0}
+                      defaultValue={defaultValue}
+                      className="max-w-full"
+
+                      marks={[
+                        {
+                          value: 0,
+                          label: "0",
+                        },
+                        {
+                          value: 0.25,
+                          label: "0.25",
+                        },
+                        {
+                          value: 0.5,
+                          label: "0.5",
+                        },
+                        {
+                          value: 0.75,
+                          label: "0.75",
+                        },
+                        {
+                          value: 1,
+                          label: "1",
+                        },
+                      ]}
+
+                      onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
+
+                    />
+                  )}
+                  {item.maxScore === 1.25 && (
+                    <Slider
+                      size="lg"
+                      label={<span>Điểm tối đa: {item.maxScore} </span>}
+                      showTooltip={true}
+                      step={0.25}
+                      // formatOptions={{style: "percent"}}
+                      maxValue={item.maxScore}
+                      minValue={0}
+                      defaultValue={defaultValue}
+                      className="max-w-full"
+
+                      marks={[
+                        {
+                          value: 0,
+                          label: "0",
+                        },
+                        {
+                          value: 0.25,
+                          label: "0.25",
+                        },
+                        {
+                          value: 0.5,
+                          label: "0.5",
+                        },
+                        {
+                          value: 0.75,
+                          label: "0.75",
+                        },
+                        {
+                          value: 1,
+                          label: "1",
+                        },
+                        {
+                          value: 1.25,
+                          label: "1.25",
+                        },
+                      ]}
+
+                      onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
+
+                    />
+                  )}
+                  {item.maxScore === 1.5 && (
+                    <Slider
+                      size="lg"
+                      label={<span>Điểm tối đa: {item.maxScore} </span>}
+                      showTooltip={true}
+                      step={0.25}
+                      // formatOptions={{style: "percent"}}
+                      maxValue={item.maxScore}
+                      minValue={0}
+                      defaultValue={defaultValue}
+                      className="max-w-full"
+
+                      marks={[
+                        {
+                          value: 0,
+                          label: "0",
+                        },
+                        {
+                          value: 0.5,
+                          label: "0.5",
+                        },
+                        {
+                          value: 1,
+                          label: "1",
+                        },
+                        {
+                          value: 1.5,
+                          label: "1.5",
+                        },
+                      ]}
+
+                      onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
+
+                    />
+                  )}
+                  {item.maxScore === 1.75 && (
+                    <Slider
+                      size="lg"
+                      label={<span>Điểm tối đa: {item.maxScore} </span>}
+                      showTooltip={true}
+                      step={0.25}
+                      // formatOptions={{style: "percent"}}
+                      maxValue={item.maxScore}
+                      minValue={0}
+                      defaultValue={defaultValue}
+                      className="max-w-full"
+
+                      marks={[
+                        {
+                          value: 0,
+                          label: "0",
+                        },
+                        {
+                          value: 0.5,
+                          label: "0.5",
+                        },
+                        {
+                          value: 1,
+                          label: "1",
+                        },
+                        {
+                          value: 1.5,
+                          label: "1.5",
+                        },
+                        {
+                          value: 1.75,
+                          label: "1.75",
+                        },
+                      ]}
+
+                      onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
+
+                    />
+                  )}
+                  {item.maxScore === 2 && (
+                    <Slider
+                      size="lg"
+                      label={<span>Điểm tối đa: {item.maxScore} </span>}
+                      showTooltip={true}
+                      step={0.25}
+                      // formatOptions={{style: "percent"}}
+                      maxValue={item.maxScore}
+                      minValue={0}
+                      defaultValue={defaultValue}
+                      className="max-w-full"
+
+                      marks={[
+                        {
+                          value: 0,
+                          label: "0",
+                        },
+                        {
+                          value: 0.5,
+                          label: "0.5",
+                        },
+                        {
+                          value: 1,
+                          label: "1",
+                        },
+                        {
+                          value: 1.5,
+                          label: "1.5",
+                        },
+                        {
+                          value: 2,
+                          label: "2",
+                        },
+                      ]}
+
+                      onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
+
+                    />
+                  )}
+                  {item.maxScore === 0.75 && (
                     <Slider
                       size="lg"
                       label={<span>Điểm tối đa: {item.maxScore} </span>}
@@ -507,16 +697,11 @@ const FormGrading = (nav) => {
                           value: 0.75,
                           label: "0.75",
                         },
-                        {
-                          value: 1,
-                          label: "1",
-                        },
                       ]}
                       onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
 
                     />
                   )}
-
                   {item.maxScore === 0.5 && (
                     <Slider
                       size="lg"
@@ -546,7 +731,6 @@ const FormGrading = (nav) => {
 
                     />
                   )}
-
                   {item.maxScore === 0.25 && (
                     <Slider
                       size="lg"
@@ -561,11 +745,11 @@ const FormGrading = (nav) => {
                       marks={[
                         {
                           value: 0,
-                          label: "Chưa đạt",
+                          label: "0",
                         },
                         {
                           value: 0.25,
-                          label: "Đạt",
+                          label: "0.25",
                         },
                       ]}
                       onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
@@ -650,9 +834,9 @@ function ModalWhenSave({
                   onClose();
                   handleBack(
                     filterScore === 0 ?
-                    `/admin/management-grading/${disc}/?description=${assessment?.description}?FilterScore=0`
-                    :
-                    `/admin/management-grading/${disc}/?description=${assessment?.description}`
+                      `/admin/management-grading/${disc}/?description=${assessment?.description}?FilterScore=0`
+                      :
+                      `/admin/management-grading/${disc}/?description=${assessment?.description}`
                   );
                 }}
               >
@@ -666,9 +850,9 @@ function ModalWhenSave({
                   onClose();
                   handleBack(
                     filterScore === 0 ?
-                    `/admin/management-grading/update/${disc}/student-code/${assessment?.Student?.studentCode}/assessment/${assessment?.assessment_id}/rubric/${assessment?.rubric_id}?FilterScore=0`
-                    :
-                    `/admin/management-grading/update/${disc}/student-code/${assessment?.Student?.studentCode}/assessment/${assessment?.assessment_id}/rubric/${assessment?.rubric_id}`
+                      `/admin/management-grading/update/${disc}/student-code/${assessment?.Student?.studentCode}/assessment/${assessment?.assessment_id}/rubric/${assessment?.rubric_id}?FilterScore=0`
+                      :
+                      `/admin/management-grading/update/${disc}/student-code/${assessment?.Student?.studentCode}/assessment/${assessment?.assessment_id}/rubric/${assessment?.rubric_id}`
                   );
                 }}
               >

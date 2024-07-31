@@ -514,7 +514,195 @@ const UpdateFormGrading = (nav) => {
                       onChange={(value) => handleSliderChange(i, value, item?.rubricsItem_id, item?.AssessmentItems[0]?.assessmentItem_id)}
                     />
                   )}
+                  {item.maxScore === 1.25 && (
+                    <Slider
+                      size="lg"
+                      label={<span>Điểm tối đa: {item.maxScore} </span>}
+                      showTooltip={true}
+                      step={0.25}
+                      // formatOptions={{style: "percent"}}
+                      maxValue={item.maxScore}
+                      minValue={0}
+                      defaultValue={item?.AssessmentItems[0]?.assessmentScore}
+                      className="max-w-full"
 
+                      marks={[
+                        {
+                          value: 0,
+                          label: "0",
+                        },
+                        {
+                          value: 0.25,
+                          label: "0.25",
+                        },
+                        {
+                          value: 0.5,
+                          label: "0.5",
+                        },
+                        {
+                          value: 0.75,
+                          label: "0.75",
+                        },
+                        {
+                          value: 1,
+                          label: "1",
+                        },
+                        {
+                          value: 1.25,
+                          label: "1.25",
+                        },
+                      ]}
+
+                      onChange={(value) => handleSliderChange(i, value, item?.rubricsItem_id, item?.AssessmentItems[0]?.assessmentItem_id)}
+
+                    />
+                  )}
+                  {item.maxScore === 1.5 && (
+                    <Slider
+                      size="lg"
+                      label={<span>Điểm tối đa: {item.maxScore} </span>}
+                      showTooltip={true}
+                      step={0.25}
+                      // formatOptions={{style: "percent"}}
+                      maxValue={item.maxScore}
+                      minValue={0}
+                      defaultValue={item?.AssessmentItems[0]?.assessmentScore}
+                      className="max-w-full"
+
+                      marks={[
+                        {
+                          value: 0,
+                          label: "0",
+                        },
+                        {
+                          value: 0.5,
+                          label: "0.5",
+                        },
+                        {
+                          value: 1,
+                          label: "1",
+                        },
+                        {
+                          value: 1.5,
+                          label: "1.5",
+                        },
+                      ]}
+
+                      onChange={(value) => handleSliderChange(i, value, item?.rubricsItem_id, item?.AssessmentItems[0]?.assessmentItem_id)}
+
+                    />
+                  )}
+                  {item.maxScore === 1.75 && (
+                    <Slider
+                      size="lg"
+                      label={<span>Điểm tối đa: {item.maxScore} </span>}
+                      showTooltip={true}
+                      step={0.25}
+                      // formatOptions={{style: "percent"}}
+                      maxValue={item.maxScore}
+                      minValue={0}
+                      defaultValue={item?.AssessmentItems[0]?.assessmentScore}
+                      className="max-w-full"
+
+                      marks={[
+                        {
+                          value: 0,
+                          label: "0",
+                        },
+                        {
+                          value: 0.5,
+                          label: "0.5",
+                        },
+                        {
+                          value: 1,
+                          label: "1",
+                        },
+                        {
+                          value: 1.5,
+                          label: "1.5",
+                        },
+                        {
+                          value: 1.75,
+                          label: "1.75",
+                        },
+                      ]}
+
+                      onChange={(value) => handleSliderChange(i, value, item?.rubricsItem_id, item?.AssessmentItems[0]?.assessmentItem_id)}
+
+                    />
+                  )}
+                  {item.maxScore === 2 && (
+                    <Slider
+                      size="lg"
+                      label={<span>Điểm tối đa: {item.maxScore} </span>}
+                      showTooltip={true}
+                      step={0.25}
+                      // formatOptions={{style: "percent"}}
+                      maxValue={item.maxScore}
+                      minValue={0}
+                      defaultValue={item?.AssessmentItems[0]?.assessmentScore}
+                      className="max-w-full"
+
+                      marks={[
+                        {
+                          value: 0,
+                          label: "0",
+                        },
+                        {
+                          value: 0.5,
+                          label: "0.5",
+                        },
+                        {
+                          value: 1,
+                          label: "1",
+                        },
+                        {
+                          value: 1.5,
+                          label: "1.5",
+                        },
+                        {
+                          value: 2,
+                          label: "2",
+                        },
+                      ]}
+
+                      onChange={(value) => handleSliderChange(i, value, item?.rubricsItem_id, item?.AssessmentItems[0]?.assessmentItem_id)}
+
+                    />
+                  )}
+                  {item.maxScore === 0.75 && (
+                    <Slider
+                      size="lg"
+                      label={<span>Điểm tối đa: {item.maxScore} </span>}
+                      showTooltip={true}
+                      step={0.25}
+                      // formatOptions={{style: "percent"}}
+                      maxValue={item.maxScore}
+                      minValue={0}
+                      defaultValue={item?.AssessmentItems[0]?.assessmentScore}
+                      className="max-w-full"
+                      marks={[
+                        {
+                          value: 0,
+                          label: "0",
+                        },
+                        {
+                          value: 0.25,
+                          label: "0.25",
+                        },
+                        {
+                          value: 0.5,
+                          label: "0.5",
+                        },
+                        {
+                          value: 0.75,
+                          label: "0.75",
+                        },
+                      ]}
+                      onChange={(value) => handleSliderChange(i, value, item?.rubricsItem_id, item?.AssessmentItems[0]?.assessmentItem_id)}
+
+                    />
+                  )}
                   {item.maxScore === 0.5 && (
                     <Slider
                       size="lg"
@@ -540,7 +728,7 @@ const UpdateFormGrading = (nav) => {
                           label: "0.5",
                         },
                       ]}
-                      onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
+                      onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id, item?.AssessmentItems[0]?.assessmentItem_id)}
 
                     />
                   )}
@@ -559,14 +747,14 @@ const UpdateFormGrading = (nav) => {
                       marks={[
                         {
                           value: 0,
-                          label: "Chưa đạt",
+                          label: "0",
                         },
                         {
                           value: 0.25,
-                          label: "Đạt",
+                          label: "0.25",
                         },
                       ]}
-                      onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id)}
+                      onChange={(value) => handleSliderChange(i, value, item.rubricsItem_id, item?.AssessmentItems[0]?.assessmentItem_id)}
                     />
                   )}
                 </div>

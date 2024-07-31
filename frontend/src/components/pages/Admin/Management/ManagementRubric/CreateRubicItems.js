@@ -222,8 +222,8 @@ function CreateRubicItems({
                       <Select
                         label="Chọn điểm"
                         name="score"
-                        value={newRubicItem?.maxScore || '0.25'}
-                        defaultSelectedKeys={['0.25']}
+                        value={newRubicItem?.maxScore}
+                    
                         onChange={handleScoreChange}
                         className="w-full"
                       >
