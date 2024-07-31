@@ -11,7 +11,7 @@ const BackButton = () => {
   return (
     <button
       onClick={handleBack}
-      className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded-xl flex items-center justify-center shadow-lg"
+      className=" sm:bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded-xl flex items-center justify-center sm:shadow-lg"
     >
       <i className="fa-solid fa-arrow-left text-xl"></i>
     </button>

@@ -88,10 +88,8 @@ const FormGrading = (nav) => {
   const handleNavigate = (path) => {
     navigate(path);
   };
-
-
-
-
+  const params = new URLSearchParams(window.location.search);
+  const filterScore = params.get('FilterScore');
 
   const handleSliderChange = (index, value, rubricsItem_id) => {
     setSelectedValues(prevValues => {
@@ -126,10 +124,6 @@ const FormGrading = (nav) => {
       return updatedValues;
     });
   };
-
-
-
-
 
 
 
@@ -286,6 +280,7 @@ const FormGrading = (nav) => {
         assessment={Assessment}
         handleBack={handleNavigate}
         disc={description}
+        filterScore={filterScore}
       />
       <div className="Quick__Option  flex justify-between items-center sticky top-0 bg-white z-50 w-fit p-4 py-3 shadow-lg rounded-md border border-slate-300">
         <div
@@ -477,12 +472,12 @@ const FormGrading = (nav) => {
               <div className={`w-full sm:w-full   
               ${isContainerHidden ? 'lg:w-[50%]' : ''}   ${showAny ? 'lg:w-[30%]' : ''} ${showAtLeastTwo ? 'lg:w-[30%]' : ''} ${showAllThree ? 'lg:w-[30%]' : ''}  
               text-justify pt-2 sm:pt-2 lg:p-5 xl:p-5 border-0 lg:border-1 lg:border-t-0 lg:border-l-0 xl:border-1 xl:border-t-0 xl:border-l-0 border-[#020401] `} key={i}>
-              
-              
-              
-              
-              
-              
+
+
+
+
+
+
                 <div className="flex flex-col gap-6 w-full">
                   {item.maxScore === 1 && (
                     <Slider
@@ -594,7 +589,8 @@ function ModalWhenSave({
   totalScore,
   assessment,
   handleBack,
-  disc
+  disc,
+  filterScore
 }) {
 
   return (
@@ -652,7 +648,12 @@ function ModalWhenSave({
                 variant="light"
                 onClick={() => {
                   onClose();
-                  handleBack(`/admin/management-grading/${disc}/?description=${assessment?.description}`);
+                  handleBack(
+                    filterScore === 0 ?
+                    `/admin/management-grading/${disc}/?description=${assessment?.description}?FilterScore=0`
+                    :
+                    `/admin/management-grading/${disc}/?description=${assessment?.description}`
+                  );
                 }}
               >
                 Back
@@ -663,7 +664,12 @@ function ModalWhenSave({
                 onClick={(e) => {
                   e.preventDefault();
                   onClose();
-                  handleBack(`/admin/management-grading/update/${disc}/student-code/${assessment?.Student?.studentCode}/assessment/${assessment?.assessment_id}/rubric/${assessment?.rubric_id}`);
+                  handleBack(
+                    filterScore === 0 ?
+                    `/admin/management-grading/update/${disc}/student-code/${assessment?.Student?.studentCode}/assessment/${assessment?.assessment_id}/rubric/${assessment?.rubric_id}?FilterScore=0`
+                    :
+                    `/admin/management-grading/update/${disc}/student-code/${assessment?.Student?.studentCode}/assessment/${assessment?.assessment_id}/rubric/${assessment?.rubric_id}`
+                  );
                 }}
               >
                 Update

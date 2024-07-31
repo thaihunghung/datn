@@ -456,6 +456,8 @@ const AssessmentsController = {
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
+
+  
   updateStotalScore: async (req, res) => {
     try {
       const { id } = req.params;
@@ -697,8 +699,14 @@ const AssessmentsController = {
     const worksheet = workbook.getWorksheet('Students Form');
     const jsonData = [];
 
+    let invalidDescriptionFound = false;
+
     worksheet.eachRow((row, rowNumber) => {
       if (rowNumber > 1) {
+        const description = `${requestData.courseName}_${requestData.description}_${requestData.date}`;
+        if (description.includes('/')) {
+          invalidDescriptionFound = true;
+        }
         jsonData.push({
           teacher_id: requestData.teacher_id,
           course_id: requestData.course_id,
@@ -712,6 +720,9 @@ const AssessmentsController = {
     });
 
     fs.unlinkSync(filePath);
+    if (invalidDescriptionFound) {
+      return res.status(400).json({ message: 'Description contains invalid characters (e.g., "/") and cannot be saved' });
+    }
     try {
       const existingDescriptions = await AssessmentModel.findAll({
         where: {

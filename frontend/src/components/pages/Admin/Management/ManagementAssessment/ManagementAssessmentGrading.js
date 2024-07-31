@@ -80,7 +80,14 @@ const ManagementAssessmentGrading = (nav) => {
   const [classes, setClasses] = useState([]);
   const [selectedKeys, setSelectedKeys] = useState(new Set());
   const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
-  const [statusFilter, setStatusFilter] = useState('all');
+
+ 
+  const params = new URLSearchParams(window.location.search);
+  const filterScore = params.get('FilterScore');
+
+
+  const [statusFilter, setStatusFilter] = useState(filterScore? filterScore : 'all');
+
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [Couse_id, setCouse_id] = useState();
   const [rubric_id, setRubric_id] = useState();
@@ -90,8 +97,18 @@ const ManagementAssessmentGrading = (nav) => {
   });
   const [page, setPage] = useState(1);
 
+  // const params = new URLSearchParams(window.location.search);
+  // const filterScore = params.get('FilterScore');
+
+  // // Cập nhật state nếu có giá trị 'FilterScore'
+  // if (filterScore) {
+  //   setStatusFilter(filterScore);
+  // //  setSelectedKeys(new Set([filterScore]));
+  // }
+
   useEffect(() => {
     //getAllAssessmentIsDeleteFalse()
+   
     const handleResize = () => {
       if (window.innerWidth < 1024) {
         setCollapsedNav(true);
@@ -246,15 +263,13 @@ const ManagementAssessmentGrading = (nav) => {
     }
 
     if (statusFilter !== 'all') {
-      // Tìm đối tượng trong statusOptions có totalScore khớp với statusFilter
-      const selectedStatus = statusOptions.find(option =>
-        option.totalScore === statusFilter // So sánh totalScore của tùy chọn với giá trị của statusFilter
+      // Chuyển đổi statusFilter thành số
+      const statusFilterNumber = parseInt(statusFilter, 10);
+      
+      // Lọc các đối tượng dựa trên totalScore
+      filteredAssessment = filteredAssessment.filter((teacher) =>
+        teacher.totalScore === statusFilterNumber
       );
-      if (selectedStatus) {
-        filteredAssessment = filteredAssessment.filter((teacher) =>
-          teacher.totalScore === selectedStatus.totalScore
-        );
-      }
     }
 
     if (classFilter !== 'all') {
@@ -372,6 +387,10 @@ const ManagementAssessmentGrading = (nav) => {
 
       case 'action':
         const disc = replaceCharacters(assessment.action.description);
+        const urlcreate = statusFilter === 0 ?`/admin/management-grading/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}?FilterScore=0`
+        :
+        `/admin/management-grading/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
+
         return (
           <div className="flex items-center justify-center w-full gap-2">
             {assessment.action.totalScore === 0 ? (
@@ -383,7 +402,7 @@ const ManagementAssessmentGrading = (nav) => {
                   size="sm"
                   className='bg-[#AF84DD]'
                   onClick={() => handleNavigate(
-                    `/admin/management-grading/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
+                    urlcreate
                   )}
                 >
                   <i className="fa-solid fa-feather-pointed text-xl text-[#020401]"></i>
@@ -398,7 +417,11 @@ const ManagementAssessmentGrading = (nav) => {
                   size="sm"
                   className='bg-[#FF9908]'
                   onClick={() => handleNavigate(
+                    statusFilter === 0? 
+                    `/admin/management-grading/update/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}?FilterScore=0`
+                    : 
                     `/admin/management-grading/update/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
+
                   )}
                 >
                   <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
@@ -493,7 +516,8 @@ const ManagementAssessmentGrading = (nav) => {
       // console.log(studentCodesString);
       // console.log("disc");
       // console.log(disc);
-      navigate(`/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}`);
+      const url = statusFilter === 0? `/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}&&FilterScore=0` : `/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}`
+      navigate(url);
     }, 100);
   };
 

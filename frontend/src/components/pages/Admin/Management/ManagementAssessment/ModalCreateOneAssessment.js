@@ -166,6 +166,7 @@ const ModalCreateOneAssessment = ({
                                         rows={4}
                                         minRows={4}
                                         maxRows={6}
+                                        isDisabled
                                     />
                                      <Select
                                         label="Student"

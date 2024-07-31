@@ -458,6 +458,10 @@ const ManagementAssessment = (nav) => {
     console.log("description:", oldDescription)
 
     console.log("description", editRubric)
+    if (editRubric.description.includes('/')) {
+      message.error("Description cannot contain '/' character.");
+      return; 
+  }
 
       
     try {

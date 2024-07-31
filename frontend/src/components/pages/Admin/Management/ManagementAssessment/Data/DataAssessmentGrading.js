@@ -106,8 +106,4 @@ const statusOptions = [
   { name: "SV chưa chấm", totalScore: 0 },
 ];
 
-
-
-
-
 export { columns, statusOptions };
