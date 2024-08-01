@@ -305,7 +305,6 @@ const AssessmentsController = {
         const assessments = await AssessmentModel.findAll();
         return res.status(200).json(assessments);
       }
-
     } catch (error) {
       console.error('Error fetching assessments:', error);
       res.status(500).json({ message: 'Server error' });

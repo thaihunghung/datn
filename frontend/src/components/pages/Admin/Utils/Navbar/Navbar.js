@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { User, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection, ScrollShadow, Button } from "@nextui-org/react";
+import { User, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection, ScrollShadow, Button, Tooltip } from "@nextui-org/react";
 import { useEffect, useState } from "react";
-import { Tooltip } from "antd";
+
 import { motion } from "framer-motion";
 import { Drawer, Menu } from "antd";
 import Cookies from 'js-cookie';

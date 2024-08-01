@@ -4,10 +4,10 @@ const router = express.Router();
 
 
 router.get('/meta-assessments', MetaAssessmentController.index);
-router.post('/meta-assessments', MetaAssessmentController.create);
-router.get('/meta-assessments/:id', MetaAssessmentController.show);
-router.put('/meta-assessments/:id', MetaAssessmentController.update);
-router.delete('/meta-assessments/:id', MetaAssessmentController.delete);
+router.post('/meta-assessment', MetaAssessmentController.create);
+router.get('/meta-assessment/:id', MetaAssessmentController.show);
+router.put('/meta-assessment/:id', MetaAssessmentController.update);
+router.delete('/meta-assessment/:id', MetaAssessmentController.delete);
 
 // Các route khác có thể thêm vào ở đây nếu cần
 // Ví dụ, các route để thay đổi trạng thái isDelete, nếu cần

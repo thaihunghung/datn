@@ -5,17 +5,182 @@ const { Sequelize } = require("sequelize");
 const sequelize = require("../config/database");
 
 const MetaAssessmentModel = require('../models/MetaAssessmentModel');
-
+const CourseModel = require('../models/CourseModel');
+const StudentModel = require('../models/StudentModel');
+const ClassModel = require('../models/ClassModel');
+const RubricModel = require('../models/RubricModel');
+const SubjectModel = require('../models/SubjectModel');
+const CloModel = require('../models/CloModel');
+const ChapterModel = require('../models/ChapterModel');
+const PloModel = require('../models/PloModel');
+const RubricsItemModel = require('../models/RubricItemModel');
+const AssessmentModel = require('../models/AssessmentModel');
 
 const MetaAssessmentController = {
   // Lấy tất cả các meta assessments
   index: async (req, res) => {
     try {
-      const metaAssessments = await MetaAssessmentModel.findAll();
-      res.json(metaAssessments);
+      const { isDelete, teacher_id, generalDescription } = req.query;
+
+      if (teacher_id && generalDescription) {
+        // Logic for GetByDescriptionByUser
+        const assessments = await MetaAssessmentModel.findAll({
+          where: {
+            teacher_id: parseInt(teacher_id),
+            generalDescription: generalDescription,
+            isDelete: isDelete === 'true'
+          },
+          include: [
+            {
+              model: CourseModel,
+              attributes: ['course_id', 'courseCode', 'courseName']
+            },
+            {
+              model: StudentModel,
+              attributes: ['student_id', 'studentCode', 'name', 'class_id'],
+              include: [
+                {
+                  model: ClassModel,
+                  attributes: ['classNameShort']
+                }
+              ]
+            },
+            {
+              model: RubricModel,
+              attributes: ['rubric_id', 'rubricName']
+            }
+          ]
+        });
+
+
+        return res.status(200).json(assessments);
+
+      } else if (teacher_id) {
+        const teacherId = parseInt(teacher_id);
+        const assessments = await MetaAssessmentModel.findAll({
+          where: {
+            teacher_id: teacherId,
+            isDelete: isDelete === 'true'
+          },
+          attributes: [
+            'course_id',
+            'generalDescription',
+            [Sequelize.fn('COUNT', Sequelize.col('meta_assessment_id')), 'assessmentCount'],
+            [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('student_id'))), 'studentCount'],
+            [Sequelize.fn('SUM', Sequelize.literal('CASE WHEN FinalScore = 0 THEN 1 ELSE 0 END')), 'zeroScoreCount']
+          ],
+          group: ['course_id', 'generalDescription'],
+          include: [{
+            model: CourseModel,
+            attributes: ['courseCode', 'courseName']
+          }
+        ]
+        });
+
+        if (assessments.length === 0) {
+          return res.status(404).json({ message: 'No meta-assessments found for this user' });
+        }
+
+        const result = await Promise.all(assessments.map(async assessment => {
+          let status;
+          const assessmentCount = parseInt(assessment.dataValues.assessmentCount);
+          const zeroScoreCount = parseInt(assessment.dataValues.zeroScoreCount);
+
+          if (assessmentCount === 0) {
+            status = 100;
+          } else {
+            status = ((assessmentCount - zeroScoreCount) / assessmentCount) * 100;
+          }
+          status = Math.round(status);
+
+          const foundAssessment = await MetaAssessmentModel.findOne({
+            where: {
+              generalDescription: assessment.generalDescription,
+              isDelete: isDelete === 'true'
+            },
+            attributes: ["rubric_id", "course_id", "generalDescription", "date", "place", "isDelete", "createdAt"],
+            include: [{
+              model: RubricModel,
+              where: {
+                isDelete: isDelete === 'true'
+              },
+              include: [{
+                model: SubjectModel,
+                where: {
+                  isDelete: isDelete === 'true'
+                }
+              }]
+            }, {
+              model: CourseModel,
+              where: {
+                isDelete: isDelete === 'true'
+              }
+            }]
+          });
+
+          if (foundAssessment && foundAssessment.Rubric) {
+            const rubricItems = await RubricsItemModel.findAll({
+              where: {
+                rubric_id: foundAssessment.Rubric.rubric_id,
+                isDelete: isDelete === 'true'
+              },
+              include: [{
+                model: CloModel,
+                attributes: ['clo_id', 'cloName', 'description'],
+                where: {
+                  isDelete: isDelete === 'true'
+                }
+              }, {
+                model: ChapterModel,
+                attributes: ['chapter_id', 'chapterName', 'description'],
+                where: {
+                  isDelete: isDelete === 'true'
+                }
+              }, {
+                model: PloModel,
+                attributes: ['plo_id', 'ploName', 'description'],
+                where: {
+                  isDelete: isDelete === 'true'
+                }
+              }]
+            });
+            foundAssessment.Rubric.dataValues.rubricItems = rubricItems;
+          }
+
+          return {
+            course_id: assessment.course_id,
+            generalDescription: assessment.generalDescription,
+            course: `${assessment.course.courseCode} - ${assessment.course.courseName}`,
+            courseCode: assessment.course.courseCode,
+            courseName: assessment.course.courseName,
+            assessmentCount: parseInt(assessment.dataValues.assessmentCount),
+            studentCount: parseInt(assessment.dataValues.studentCount),
+            zeroScoreCount: parseInt(assessment.dataValues.zeroScoreCount),
+            status: status,
+            Assessment: foundAssessment,
+            createdAt: foundAssessment ? foundAssessment.createdAt : null,
+            isDelete: foundAssessment ? foundAssessment.isDelete : null
+          };
+        }));
+
+        return res.status(200).json(result);
+      } else if (generalDescription) { 
+        const assessments = await MetaAssessmentModel.findAll({
+          where: {
+            generalDescription: generalDescription,
+            isDelete: isDelete === 'true'
+          }
+        });
+        return res.status(200).json(assessments);
+      }
+      else {
+        // Logic for index
+        const assessments = await MetaAssessmentModel.findAll();
+        return res.status(200).json(assessments);
+      }
     } catch (error) {
-      console.error('Lỗi khi lấy tất cả các meta assessments:', error);
-      res.status(500).json({ message: 'Lỗi server' });
+      console.error('Error fetching meta-assessments:', error);
+      res.status(500).json({ message: 'Server error' });
     }
   },
 
@@ -51,7 +216,7 @@ const MetaAssessmentController = {
     try {
       const { id } = req.params;
       const [updated] = await MetaAssessmentModel.update(req.body, {
-        where: { meta_assessment_id: id }
+        where: { meta_meta_assessment_id: id }
       });
       if (updated) {
         const updatedMetaAssessment = await MetaAssessmentModel.findByPk(id);
@@ -70,7 +235,7 @@ const MetaAssessmentController = {
     try {
       const { id } = req.params;
       const deleted = await MetaAssessmentModel.destroy({
-        where: { meta_assessment_id: id }
+        where: { meta_meta_assessment_id: id }
       });
       if (deleted) {
         res.json({ message: 'Meta assessment đã được xóa' });
@@ -134,7 +299,7 @@ const MetaAssessmentController = {
         },
         attributes: ['generalDescription']
       });
-  
+
       if (existingDescriptions.length > 0) {
         return res.status(400).json({ message: 'Some generalDescription already exist in the database', existingDescriptions });
       }

@@ -24,7 +24,7 @@ import { PlusIcon } from './PlusIcon';
 import { VerticalDotsIcon } from './VerticalDotsIcon';
 import { SearchIcon } from './SearchIcon';
 import { ChevronDownIcon } from './ChevronDownIcon';
-import { columns, fetchAssessmentData } from './Data/DataAssessment';
+import { columns, fetchAssessmentData, fetchDataGetMetaIdByGeneralDescription } from './Data/DataAssessment';
 import { capitalize } from '../../Utils/capitalize';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
@@ -33,6 +33,8 @@ import { axiosAdmin } from '../../../../../service/AxiosAdmin';
 import ModalCreateAssessment from './ModalCreateAssessment';
 import ModalUpdateAssessment from './ModalUpdateAssessment';
 import ModalOpenPdf from './ModalOpenPdf';
+import { Select, Container } from '@nextui-org/react';
+import ModalAllot from './ModalAllot';
 
 const statusColorMap = {
   active: 'success',
@@ -40,8 +42,9 @@ const statusColorMap = {
   vacation: 'warning',
 };
 
-const INITIAL_VISIBLE_COLUMNS = ['description', 'status', 'courseName', 'action'];
-const COMPACT_VISIBLE_COLUMNS = ['description', 'status', 'action'];
+const INITIAL_VISIBLE_COLUMNS = ['generalDescription', 'status', 'courseName', 'Phân công', 'action'];
+const COMPACT_VISIBLE_COLUMNS = ['generalDescription', 'status', 'Phân công', 'action'];
+
 const ManagementAssessment = (nav) => {
   const { setCollapsedNav } = nav;
   const location = useLocation();
@@ -95,6 +98,9 @@ const ManagementAssessment = (nav) => {
 
   const [assessments, setAssessment] = useState([]);
   const [filterValue, setFilterValue] = useState('');
+  const [GeneralDescription, setGeneralDescription] = useState('');
+
+  
   const [selectedKeys, setSelectedKeys] = useState(new Set());
   const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -109,6 +115,7 @@ const ManagementAssessment = (nav) => {
     console.log(response);
     setAssessment(response);
   };
+
   useEffect(() => {
     loadAssessment();
     console.log("assessments loaded", assessments);
@@ -130,7 +137,7 @@ const ManagementAssessment = (nav) => {
         teacher.courseName.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
-   
+
     if (dateFilter === 'newest') {
       filteredAssessment.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     } else if (dateFilter === 'oldest') {
@@ -180,7 +187,9 @@ const ManagementAssessment = (nav) => {
   const handleNavigate = (path) => {
     navigate(path);
   };
-  
+
+  const [isModalallot, setIsModalallot] = useState(false);
+
   function replaceCharacters(description) {
     let result = description.replace(/ /g, "_");
     result = result.replace(/-/g, "_");
@@ -196,7 +205,7 @@ const ManagementAssessment = (nav) => {
     const cellValue = assessment[columnKey];
 
     switch (columnKey) {
-      case 'description':
+      case 'generalDescription':
         return (
           <div className="flex flex-col">
             <p className="text-bold text-small capitalize">{cellValue}</p>
@@ -209,6 +218,20 @@ const ManagementAssessment = (nav) => {
             <p className="text-bold text-small capitalize">{assessment.courseName}</p>
           </div>
         );
+      case 'Phân công':
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize"> <Button color="primary" variant="ghost"
+              onClick={() =>
+                handleAllotClick(assessment.generalDescription)
+              }
+            >
+              <p>Phân công</p>
+            </Button></p>
+          </div>
+        );
+
+
       case 'assessmentCount':
         return (
           <div className="flex flex-col">
@@ -283,7 +306,7 @@ const ManagementAssessment = (nav) => {
                 radius="full"
                 size="sm"
                 className="bg-[#AF84DD]"
-                onClick={() => { handleEditClick(assessment?.Assessment, assessment?.description) }}
+                onClick={() => { handleEditClick(assessment?.Assessment, assessment?.generalDescription) }}
               >
                 <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
               </Button>
@@ -420,7 +443,7 @@ const ManagementAssessment = (nav) => {
       isDelete: true
     }
     try {
-      await axiosAdmin.put('/assessments/softDeleteByDescription', data );
+      await axiosAdmin.put('/assessments/softDeleteByDescription', data);
       message.success(`Successfully toggled soft delete for assessments`);
       loadAssessment();
     } catch (error) {
@@ -442,7 +465,7 @@ const ManagementAssessment = (nav) => {
   };
   const [DataRubricPDF, setRubicDataPDF] = useState({});
   const [DataRubricItems, setDataRubricItems] = useState([]);
-  
+
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -460,35 +483,41 @@ const ManagementAssessment = (nav) => {
     console.log("description", editRubric)
     if (editRubric.description.includes('/')) {
       message.error("Description cannot contain '/' character.");
-      return; 
-  }
-
-      
-    try {
-        const response = await axiosAdmin.patch('/assessments/updateByDescription', {
-            description: oldDescription,
-            updateData: editRubric
-        });
-        loadAssessment(); 
-        message.success('Assessment updated successfully');
-    } catch (error) {
-        console.error("Error updating assessment:", error);
-        message.error("Error updating assessment: " + (error.response?.data?.message || 'Internal server error'));
+      return;
     }
-};
+
+
+    try {
+      const response = await axiosAdmin.patch('/assessments/updateByDescription', {
+        description: oldDescription,
+        updateData: editRubric
+      });
+      loadAssessment();
+      message.success('Assessment updated successfully');
+    } catch (error) {
+      console.error("Error updating assessment:", error);
+      message.error("Error updating assessment: " + (error.response?.data?.message || 'Internal server error'));
+    }
+  };
 
   const [oldDescription, setOldDescription] = useState('')
-  const handleEditClick = (Assessment, description) => {
+  const handleEditClick = (Assessment, generalDescription) => {
     console.log("assessment", Assessment);
-    console.log("description", description);
+    console.log("generalDescription", generalDescription);
     setEditRubric(Assessment);
-    setOldDescription(description)
+    setOldDescription(generalDescription)
     setIsEditModalOpen(true);
   };
 
+  const handleAllotClick = (generalDescription) => {
+    setGeneralDescription(generalDescription)
+    setIsModalallot(true);
+  };
+
+
   const [DataCourse, setCourseByTeacher] = useState([]);
   const [filterRubicData, setfilterRubicData] = useState([]);
-  
+
   const getAllRubricIsDeleteFalse = async () => {
     try {
       const response = await axiosAdmin.get(`/rubrics/checkScore?teacher_id=${teacher_id}&isDelete=false`);
@@ -509,11 +538,9 @@ const ManagementAssessment = (nav) => {
       console.log(updatedRubricData);
     } catch (error) {
       console.error("Error: " + error.message);
-     // message.error('Error fetching Rubric data');
+      // message.error('Error fetching Rubric data');
     }
   };
-  
-
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -534,7 +561,7 @@ const ManagementAssessment = (nav) => {
         DataRubricItems={DataRubricItems}
       />
 
-      {/* <ModalUpdateAssessment
+      <ModalUpdateAssessment
         isOpen={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
         onSubmit={handleEditFormSubmit}
@@ -542,7 +569,7 @@ const ManagementAssessment = (nav) => {
         setEditRubric={setEditRubric}
         DataCourse={DataCourse}
         filterRubicData={filterRubicData}
-      /> */}
+      />
       <ConfirmAction
         onOpenChange={onOpenChange}
         isOpen={isOpen}
@@ -552,6 +579,11 @@ const ManagementAssessment = (nav) => {
             setDeleteId(null);
           }
         }}
+      />
+      <ModalAllot
+        isOpen={isModalallot}
+        onOpenChange={setIsModalallot}
+        generalDescription={GeneralDescription}
       />
       <div className='w-full flex justify-between'>
         <div className='h-full my-auto p-5 hidden sm:block'>
@@ -624,7 +656,7 @@ const ManagementAssessment = (nav) => {
                   <DropdownItem key="oldest" className="capitalize">Oldest</DropdownItem>
                 </DropdownMenu>
               </Dropdown>
-              
+
             </div>
           </div>
 
@@ -670,7 +702,6 @@ const ManagementAssessment = (nav) => {
     </>
   );
 };
-
 export default ManagementAssessment;
 
 function ConfirmAction(props) {
@@ -729,4 +760,6 @@ function ConfirmAction(props) {
     </Modal>
   )
 }
+
+
 
