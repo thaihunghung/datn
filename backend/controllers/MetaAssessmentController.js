@@ -88,8 +88,6 @@ const MetaAssessmentController = {
     }
 
     const requestData = JSON.parse(req.body.data);
-    console.log("requestData");
-    console.log(requestData);
     const uploadDirectory = path.join(__dirname, '../uploads');
     const filename = req.files[0].filename;
     const filePath = path.join(uploadDirectory, filename);
