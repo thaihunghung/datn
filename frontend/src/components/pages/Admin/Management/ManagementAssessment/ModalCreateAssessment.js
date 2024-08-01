@@ -362,7 +362,7 @@ const ModalCreateAssessment = ({
                                             <h3 className="text-lg font-semibold text-gray-700 mb-2">Lưu file</h3>
                                             {newRubric.course_id && newRubric.rubric_id && newRubric.description && newRubric.courseName && newRubric.place && newRubric.date ? (
                                                 <CustomUpload
-                                                    endpoint={'/assessment'}
+                                                    endpoint={'/meta-assessment'}
                                                     method="POST"
                                                     fileList={fileList}
                                                     setFileList={setFileList}

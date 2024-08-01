@@ -1,9 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-
 const StudentModel = require('./StudentModel');
 const RubricModel = require('./RubricModel');
-const SubjectModel = require('./SubjectModel');
 const CourseModel = require('./CourseModel');
 const TeacherModel = require('./TeacherModel');
 const MetaAssessmentModel = sequelize.define('MetaAssessment', {
@@ -34,14 +32,6 @@ const MetaAssessmentModel = sequelize.define('MetaAssessment', {
     references: {
       model: RubricModel,
       key: 'rubric_id'
-    }
-  },
-  subject_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: SubjectModel,
-      key: 'subject_id'
     }
   },
   course_id: {

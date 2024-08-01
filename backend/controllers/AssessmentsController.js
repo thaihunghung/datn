@@ -678,69 +678,6 @@ const AssessmentsController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
-  
-  processSaveTemplateAssessment: async (req, res) => {
-    if (!req.files) {
-      return res.status(400).send('No file uploaded.');
-    }
-
-    const requestData = JSON.parse(req.body.data);
-    const uploadDirectory = path.join(__dirname, '../uploads');
-    const filename = req.files[0].filename;
-    const filePath = path.join(uploadDirectory, filename);
-
-    const workbook = new ExcelJS.Workbook();
-    try {
-      await workbook.xlsx.readFile(filePath);
-    } catch (error) {
-      return res.status(500).json({ message: 'Error reading the uploaded file' });
-    }
-
-    const worksheet = workbook.getWorksheet('Students Form');
-    const jsonData = [];
-
-    let invalidDescriptionFound = false;
-
-    worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber > 1) {
-        const description = `${requestData.courseName}_${requestData.description}_${requestData.date}`;
-        if (description.includes('/')) {
-          invalidDescriptionFound = true;
-        }
-        jsonData.push({
-          teacher_id: requestData.teacher_id,
-          course_id: requestData.course_id,
-          rubric_id: requestData.rubric_id,
-          description: `${requestData.courseName}_${requestData.description}_${requestData.date}`,
-          place: requestData.place,
-          date: requestData.date,
-          student_id: row.getCell(1).value,
-        });
-      }
-    });
-
-    fs.unlinkSync(filePath);
-    if (invalidDescriptionFound) {
-      return res.status(400).json({ message: 'Description contains invalid characters (e.g., "/") and cannot be saved' });
-    }
-    try {
-      const existingDescriptions = await AssessmentModel.findAll({
-        where: {
-          description: jsonData.map(item => item.description)
-        },
-        attributes: ['description']
-      });
-  
-      if (existingDescriptions.length > 0) {
-        return res.status(400).json({ message: 'Some descriptions already exist in the database', existingDescriptions });
-      }
-      const createdAssessment = await AssessmentModel.bulkCreate(jsonData);
-      res.status(201).json({ message: 'Data saved successfully', data: createdAssessment });
-    } catch (error) {
-      console.error('Error saving data to the database:', error);
-      res.status(500).json({ message: 'Error saving data to the database' });
-    }
-  },
 };
 
 module.exports = AssessmentsController;

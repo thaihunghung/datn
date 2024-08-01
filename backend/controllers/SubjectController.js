@@ -8,12 +8,14 @@ const PloCloModel = require("../models/PloCloModel");
 const ExcelJS = require('exceljs');
 const fs = require('fs');
 const path = require('path');
+const { Sequelize } = require("sequelize");
+const sequelize = require("../config/database");
+
 const TeacherModel = require("../models/TeacherModel");
 const RubricModel = require("../models/RubricModel");
-const { Sequelize } = require("sequelize");
 const CourseModel = require("../models/CourseModel");
 const AssessmentModel = require("../models/AssessmentModel");
-const sequelize = require("../config/database");
+
 
 
 const validTypes = [

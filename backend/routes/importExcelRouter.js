@@ -16,6 +16,7 @@ const SubjectController = require('../controllers/SubjectController');
 const AssessmentsController = require('../controllers/AssessmentsController');
 const CourseEnrollmentController = require('../controllers/CourseEnrollmentController');
 const TeacherController = require('../controllers/TeacherController');
+const MetaAssessmentController = require('../controllers/MetaAssessmentController');
  
 const uploadDirectory = path.join(__dirname, '../uploads');
 
@@ -38,7 +39,12 @@ router.post('/teacher', upload.any(), TeacherController.saveTeacherExcel);
 router.post('/clo', upload.any(), CloController.processSaveTemplateClo);
 router.post('/chapter', upload.any(), ChapterController.processSaveTemplateChapter);
 router.post('/subject', ensureAuthenticated, upload.any(), SubjectController.processSaveTemplateSubject);
-router.post('/assessment', upload.any(), AssessmentsController.processSaveTemplateAssessment);
+router.post('/meta-assessment', upload.any(), MetaAssessmentController.processSaveTemplateMetaAssessment);
+
+
+
+
+
 router.post('/course-enrollment', upload.any(), CourseEnrollmentController.saveExcel);
 
 router.put('/student/update', upload.any(), StudentController.updateStudentsFromExcel);
