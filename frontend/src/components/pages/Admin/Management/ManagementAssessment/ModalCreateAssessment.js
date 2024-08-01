@@ -162,7 +162,7 @@ const ModalCreateAssessment = ({
                 }
             } catch (error) {
                 console.error("Error fetching course:", error);
-                message.error('Error fetching course');
+                //message.error('Error fetching course');
             }
         };
 

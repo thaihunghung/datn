@@ -66,7 +66,7 @@ const ManagementAssessment = (nav) => {
   }
   useEffect(() => {
     getAllRubricIsDeleteFalse()
-    getCourseByTeacher()
+    //getCourseByTeacher()
     //getAllAssessmentIsDeleteFalse()
     const handleResize = () => {
       if (window.innerWidth < 1024) {
@@ -270,7 +270,7 @@ const ManagementAssessment = (nav) => {
                   radius="full"
                   size="sm"
                   className='bg-[#FEFEFE]'
-                  onClick={() => { handleAddClickPDF(assessment.RubicData, assessment.RubicItemsData) }}
+                  onClick={() => { handleAddClickPDF(assessment?.RubicData, assessment?.RubicItemsData) }}
                 >
                   <i className="fa-regular fa-file-pdf text-xl text-[#020401]"></i>
                 </Button>
@@ -283,7 +283,7 @@ const ManagementAssessment = (nav) => {
                 radius="full"
                 size="sm"
                 className="bg-[#AF84DD]"
-                onClick={() => { handleEditClick(assessment.Assessment, assessment.description) }}
+                onClick={() => { handleEditClick(assessment?.Assessment, assessment?.description) }}
               >
                 <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
               </Button>
@@ -295,7 +295,7 @@ const ManagementAssessment = (nav) => {
                 variant="light"
                 radius="full"
                 size="sm"
-                onClick={() => { onOpen(); setDeleteId(assessment.action); }}
+                onClick={() => { onOpen(); setDeleteId(assessment?.action); }}
               >
                 <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
               </Button>
@@ -492,39 +492,28 @@ const ManagementAssessment = (nav) => {
   const getAllRubricIsDeleteFalse = async () => {
     try {
       const response = await axiosAdmin.get(`/rubrics/checkScore?teacher_id=${teacher_id}&isDelete=false`);
-      const updatedRubricData = response.data.rubric.map((rubric) => {
+      const updatedRubricData = response?.data?.rubric?.map((rubric) => {
         const status = {
-          status: rubric.RubricItem.length === 0 ? false : true,
-          _id: rubric.rubric_id
+          status: rubric?.RubricItem?.length === 0 ? false : true,
+          _id: rubric?.rubric_id
         };
         return {
-          rubric_id: rubric.rubric_id,
-          rubricName: rubric.rubricName,
+          rubric_id: rubric?.rubric_id,
+          rubricName: rubric?.rubricName,
           status: status,
-          point: rubric.RubricItem[0]?.total_score ? rubric.RubricItem[0].total_score : 0.0,
-          action: rubric.rubric_id
+          point: rubric?.RubricItem[0]?.total_score ? rubric?.RubricItem[0]?.total_score : 0.0,
+          action: rubric?.rubric_id
         };
       });
       setfilterRubicData(updatedRubricData);
       console.log(updatedRubricData);
     } catch (error) {
       console.error("Error: " + error.message);
-      message.error('Error fetching Rubric data');
+     // message.error('Error fetching Rubric data');
     }
   };
   
-  const getCourseByTeacher = async () => {
-    try {
-      const response = await axiosAdmin.get(`/course/getByTeacher/${teacher_id}`);
-      console.log(response.data.course);
-      if (response.data) {
-        setCourseByTeacher(response.data.course);
-      }
-    } catch (error) {
-      console.error("Error fetching course:", error);
-      message.error('Error fetching course');
-    }
-  };
+
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -545,7 +534,7 @@ const ManagementAssessment = (nav) => {
         DataRubricItems={DataRubricItems}
       />
 
-      <ModalUpdateAssessment
+      {/* <ModalUpdateAssessment
         isOpen={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
         onSubmit={handleEditFormSubmit}
@@ -553,7 +542,7 @@ const ManagementAssessment = (nav) => {
         setEditRubric={setEditRubric}
         DataCourse={DataCourse}
         filterRubicData={filterRubicData}
-      />
+      /> */}
       <ConfirmAction
         onOpenChange={onOpenChange}
         isOpen={isOpen}
@@ -607,7 +596,7 @@ const ManagementAssessment = (nav) => {
                   selectionMode="multiple"
                   onSelectionChange={setVisibleColumns}
                 >
-                  {columns.map((column) => (
+                  {columns?.map((column) => (
                     <DropdownItem key={column.uid} className="capitalize">
                       {capitalize(column.name)}
                     </DropdownItem>
