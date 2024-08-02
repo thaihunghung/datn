@@ -17,6 +17,7 @@ const PloModel = require('../models/PloModel');
 const RubricsItemModel = require('../models/RubricItemModel');
 const SubjectModel = require('../models/SubjectModel');
 const MetaAssessmentModel = require('../models/MetaAssessmentModel');
+const TeacherModel = require('../models/TeacherModel');
 
 const AssessmentsController = {
   // index: async (req, res) => {
@@ -297,7 +298,14 @@ const AssessmentsController = {
                 isDelete: false
               }
             }
-          ]
+          ],
+          
+        },
+        {
+          model: TeacherModel,
+          where: {
+            isDelete: false
+          },
         }]
         
       });

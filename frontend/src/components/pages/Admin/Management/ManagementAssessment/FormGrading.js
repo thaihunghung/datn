@@ -8,8 +8,9 @@ import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import "./Motion.css";
-import { ChevronDownIcon } from "./ChevronDownIcon";
+
 import BackButton from "../../Utils/BackButton/BackButton";
+import { ChevronDownIcon } from "../../../../../public/ChevronDownIcon";
 const FormGrading = (nav) => {
 
   const { setCollapsedNav } = nav;
@@ -273,7 +274,7 @@ const FormGrading = (nav) => {
             <Button 
               color="primary" 
               className="w-fit p-5 mt-3"
-              isDisabled={CurrentTeacher? false :true }
+              isDisabled={CurrentTeacher}
               onPress={handleUpdateTopic}
             >
               Update Topic

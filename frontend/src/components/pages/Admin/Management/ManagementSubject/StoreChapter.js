@@ -9,7 +9,6 @@ import { Table, Tooltip} from 'antd';
 import DropdownAndNavChapter from "../../Utils/DropdownAndNav/DropdownAndNavChapter";
 import Cookies from "js-cookie";
 import BackButton from "../../Utils/BackButton/BackButton";
-import { PlusIcon } from "../ManagementAssessment/PlusIcon";
 
 
 const StoreChapter = (nav) => {
@@ -320,6 +319,7 @@ function ConfirmAction(props) {
                             ease: "easeOut",
                         },
                     },
+                    
                     exit: {
                         y: -20,
                         opacity: 0,

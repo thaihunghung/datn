@@ -11,7 +11,7 @@ import "./FormGrading.css"
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import { useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
-import { ChevronDownIcon } from "./ChevronDownIcon";
+import { ChevronDownIcon } from "../../../../../public/ChevronDownIcon";
 import BackButton from "../../Utils/BackButton/BackButton";
 
 const UpdateFormGrading = (nav) => {

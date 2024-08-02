@@ -12,9 +12,10 @@ import DownloadAndUpload from "../../Utils/DownloadAndUpload/DownloadAndUpload";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import Tabs from "../../Utils/Tabs/Tabs";
 import BackButton from "../../Utils/BackButton/BackButton";
-import { PlusIcon } from "../ManagementAssessment/PlusIcon";
+
 import ModalUpdateChapter from "./ModalUpdateChapter";
 import ModalAddChapter from "./ModalAddChapter";
+import { PlusIcon } from "../../../../../public/PlusIcon";
 
 const Chapter = (nav) => {
     const { id } = useParams();

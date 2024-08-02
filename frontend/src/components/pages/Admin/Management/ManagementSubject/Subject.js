@@ -19,10 +19,9 @@ import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter
 import { Tooltip, message } from 'antd';
 import slugify from 'slugify';
 
-import { PlusIcon } from '../ManagementAssessment/PlusIcon';
-import { VerticalDotsIcon } from '../ManagementAssessment/VerticalDotsIcon';
-import { SearchIcon } from '../ManagementAssessment/SearchIcon';
-import { ChevronDownIcon } from '../ManagementAssessment/ChevronDownIcon';
+
+import { SearchIcon } from '../../../../../public/SearchIcon';
+import { ChevronDownIcon } from '../../../../../public/ChevronDownIcon';
 import { columns, fetchSujectDataGrading, statusOptions } from './data/DataSubject';
 import { capitalize } from '../../Utils/capitalize';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -31,6 +30,7 @@ import BackButton from '../../Utils/BackButton/BackButton';
 import { axiosAdmin } from '../../../../../service/AxiosAdmin';
 import ModalUpdateSubject from './ModalUpdateSubject';
 import ModalAddSubject from './ModalAddSubject';
+import { PlusIcon } from '../../../../../public/PlusIcon';
 
 const statusColorMap = {
   active: 'success',

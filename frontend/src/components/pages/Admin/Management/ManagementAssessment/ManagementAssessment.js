@@ -20,12 +20,12 @@ import { Tooltip, message } from 'antd';
 import slugify from 'slugify';
 import { Flex, Progress } from 'antd';
 
-import { PlusIcon } from './PlusIcon';
-import { VerticalDotsIcon } from './VerticalDotsIcon';
-import { SearchIcon } from './SearchIcon';
-import { ChevronDownIcon } from './ChevronDownIcon';
+import { PlusIcon } from '../../../../../public/PlusIcon';
+import { SearchIcon } from '../../../../../public/SearchIcon';
+
 import { columns, fetchAssessmentData, fetchDataGetMetaIdByGeneralDescription } from './Data/DataAssessment';
 import { capitalize } from '../../Utils/capitalize';
+
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
 import BackButton from '../../Utils/BackButton/BackButton';
@@ -35,6 +35,7 @@ import ModalUpdateAssessment from './ModalUpdateAssessment';
 import ModalOpenPdf from './ModalOpenPdf';
 import { Select, Container } from '@nextui-org/react';
 import ModalAllot from './ModalAllot';
+import { ChevronDownIcon } from '../../../../../public/ChevronDownIcon';
 
 const statusColorMap = {
   active: 'success',

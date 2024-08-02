@@ -6,57 +6,71 @@ export const fetchAssessmentDataGrading = async (teacher_id, descriptionURL, sea
   try {
     const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}&generalDescription=${descriptionURL}&isDelete=false`);
     const updatedPoData = response?.data?.map((Assessment) => {
-      const student = {
-        student_id: Assessment?.Student?.student_id,
-        studentCode: Assessment?.Student?.studentCode,
-        name: Assessment?.Student.name
-      }
-      const action = {
-        totalScore: Assessment?.assessment.totalScore,
-        assessment_id: Assessment?.assessment.assessment_id,
-        rubric_id: Assessment?.rubric_id,
-        description: Assessment?.generalDescription,
-        studentCode: Assessment?.Student?.studentCode,
-        date: Assessment?.date,
-        place: Assessment?.place,
-        teacher_id: Assessment?.assessment.teacher_id,
-        course_id: Assessment?.course_id,
-      }
-      return {
-        id: Assessment?.assessment.assessment_id,
-        meta_assessment_id: Assessment?.meta_assessment_id,
-        generalDescription: Assessment?.generalDescription,
-        description: Assessment?.description,
+      // Kiểm tra null cho student_id và totalScore là number
+      const student_id = Assessment?.Student?.student_id !== null ? Assessment?.Student?.student_id : 0;
+      const totalScore = Assessment?.assessment?.totalScore !== null ? Assessment?.assessment?.totalScore : 0;
 
-        totalScore: Assessment?.assessment.totalScore,
+      // Kiểm tra null cho các trường là string
+      const studentCode = Assessment?.Student?.studentCode || '';
+      const name = Assessment?.Student?.name || '';
+      const generalDescription = Assessment?.generalDescription || '';
+      const date = Assessment?.date || '';
+      const place = Assessment?.place || '';
+
+      const student = {
+        student_id: student_id,
+        studentCode: studentCode,
+        name: name
+      }
+
+      const action = {
+        totalScore: totalScore,
+        assessment_id: Assessment?.assessment?.assessment_id || 0,
+        rubric_id: Assessment?.rubric_id || 0,
+        generalDescription: generalDescription,
+        studentCode: studentCode,
+        date: date,
+        place: place,
+        teacher_id: Assessment?.assessment?.teacher_id || 0,
+        course_id: Assessment?.course_id || 0,
+      }
+
+      return {
+        id: Assessment?.assessment?.assessment_id || 0,
+        meta_assessment_id: Assessment?.meta_assessment_id || 0,
+        generalDescription: generalDescription,
+        description: Assessment?.description || '',
+
+        totalScore: totalScore,
         student: student,
-        class: Assessment?.Student?.class?.classNameShort,
+        class: Assessment?.Student?.class?.classNameShort || '',
         action: action,
       };
     });
+
     const uniqueClasses = [...new Set(updatedPoData.map(item => item.class))];
     const classOptions = uniqueClasses.map(className => ({
       value: className,
       label: className
     }));
 
-
     const RubricArray = [
       {
-        rubric_id: response?.data[0]?.Rubric?.rubric_id,
-        rubricName: response?.data[0]?.Rubric?.rubricName
+        rubric_id: response?.data[0]?.Rubric?.rubric_id || 0,
+        rubricName: response?.data[0]?.Rubric?.rubricName || ''
       }
-    ]
+    ];
+
     const CourseArray = [{
-      course_id: response?.data[0]?.course?.course_id,
-      courseCode: response?.data[0]?.course?.courseCode,
-      courseName: response?.data[0]?.course?.courseName
-    }
-    ]
+      course_id: response?.data[0]?.course?.course_id || 0,
+      courseCode: response?.data[0]?.course?.courseCode || '',
+      courseName: response?.data[0]?.course?.courseName || ''
+    }];
+
     return {
       metaAssessment: updatedPoData,
-      Rubric_id: response?.data[0]?.rubric_id,
-      Course_id: response?.data[0]?.course_id,
+      Rubric_id: response?.data[0]?.rubric_id || 0,
+      Course_id: response?.data[0]?.course_id || 0,
       Classes: classOptions,
       RubricArray: RubricArray,
       CourseArray: CourseArray
@@ -65,6 +79,7 @@ export const fetchAssessmentDataGrading = async (teacher_id, descriptionURL, sea
     console.error("Error: " + error.message);
   }
 };
+
 
 export const fetchStudentDataByCourseId = async (id) => {
   try {

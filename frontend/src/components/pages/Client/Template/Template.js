@@ -15,36 +15,37 @@ import { axiosAdmin } from "../../../../service/AxiosAdmin";
 const DownloadDiv = () => {
 
     const handleDownload = async () => {
-        // const divContent = document.getElementById('downloadDiv').innerHTML;
-        // const htmlString = `
-        //     <!DOCTYPE html>
-        //     <html lang="en">
-        //     <head>
-        //         <meta charset="UTF-8">
-        //         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        //         <title>Downloaded Div Content</title>
-        //         <script src="https://cdn.tailwindcss.com"></script>
-        //         <style>
-        //         @media print {
-        //             table { page-break-inside:auto }
-        //             .test { page-break-inside:avoid; page-break-after:auto }
-        //             thead { display:table-header-group }
-        //             tfoot { display:table-footer-group }
-        //             .hung { background-color: black !important; }
-        //             thead { display: table-header-group; }
-        //             tfoot { display: table-footer-group; }
-        //         }
-        //         </style>
-        //     </head>
-        //     <body>
-        //         ${divContent}
-        //     </body>
-        //     </html>
-        // `;
+        const divContent = document.getElementById('downloadDiv').innerHTML;
+        const htmlString = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Downloaded Div Content</title>
+                <script src="https://cdn.tailwindcss.com"></script>
+                <style>
+                @media print {
+                    table { page-break-inside:auto }
+                    .test { page-break-inside:avoid; page-break-after:auto }
+                    thead { display:table-header-group }
+                    tfoot { display:table-footer-group }
+                    .hung { background-color: black !important; }
+                    thead { display: table-header-group; }
+                    tfoot { display: table-footer-group; }
+                }
+                </style>
+            </head>
+            <body>
+                ${divContent}
+            </body>
+            </html>
+        `;
         try {
-            const response = await axiosAdmin.get('pdf', {
-                id: 1
-            }, { responseType: 'blob', withCredentials: true });
+            const response = await axiosAdmin.post('/pdf',
+                { html: htmlString },
+                { responseType: 'blob', withCredentials: true }
+            );
 
             const blob = new Blob([response.data], { type: 'application/pdf' });
             const url = window.URL.createObjectURL(blob);
@@ -73,6 +74,9 @@ const Template = () => {
     const [RubicItemsData, setRubicItemsData] = useState([]);
 
 
+    const [Data, setData] = useState({});
+
+
     const GetRubricData = async () => {
         try {
             // const response = await axiosAdmin.get(`/rubric/${1}/items?isDelete=false`);
@@ -80,10 +84,10 @@ const Template = () => {
             // setRubicItemsData(response.data.rubric.rubricItems);
 
 
-            const response = await axiosAdmin.get(`/assessment/${1604}/items`);
+            const response = await axiosAdmin.get(`/assessment/${1683}/items`);
       console.log("response?.data");
       console.log(response?.data);
-      
+      setData(response?.data)
       setRubicData(response?.data?.MetaAssessment)
       setRubicItemsData(response?.data?.MetaAssessment?.Rubric?.RubricItems)
 
@@ -121,10 +125,10 @@ const Template = () => {
                     {/* <div className="text-center text-base">(Mã HP: {RubicData.subject.subjectCode })</div> */}
                     {/* Nhóm<span className="text-lg">: .........</span>  */}
                     <div className="w-full text-left text-xl font-bold">
-                    ĐỀ TÀI: {RubicData.description}<br />
+                    ĐỀ TÀI: {RubicData?.description}<br />
   {'......................................................'}
 </div>
-                    <div className="w-full text-left text-xl font-bold">+ SV1<span className="">: {RubicData.Student.name} ...................................</span> MSSV: {RubicData.Student.studentCode} <br />  </div>
+                    <div className="w-full text-left text-xl font-bold">+ SV1<span className="">: {RubicData?.Student?.name} ...................................</span> MSSV: {RubicData?.Student?.studentCode} <br />  </div>
                     
                 </div>
                 <table className='border-collapse border-[1px] border-[#020401] w-full h-full text-base mt-5 font-times'>
@@ -144,17 +148,17 @@ const Template = () => {
                     </thead>
                     <tbody>
                         {RubicItemsData.map((item) => (
-                            <tr key={item.rubricsItem_id} className="border-[1px] border-b-0 border-[#020401] p-5">
-                                <td className="border-[1px] border-[#020401] px-2 text-justify">{item.CLO.cloName + ': ' + item.CLO.description}</td>
+                            <tr key={item?.rubricsItem_id} className="border-[1px] border-b-0 border-[#020401] p-5">
+                                <td className="border-[1px] border-[#020401] px-2 text-justify">{item?.CLO?.cloName + ': ' + item?.CLO?.description}</td>
                                 <td className="border-[1px] border-[#020401] text-justify p-2">
-                                    <span dangerouslySetInnerHTML={{ __html: item.description }} />
+                                    <span dangerouslySetInnerHTML={{ __html: item?.description }} />
                                 </td>
                                 <td className="border-[1px] border-r-0 border-[#020401] text-center p-0 w-[10px]">
                                     <div className="w-full text-center text-base overflow-hidden text-overflow-ellipsis whitespace-nowrap">
-                                        {item.maxScore}
+                                        {item?.maxScore}
                                     </div>
                                 </td>
-                                <td className="border-[1px] border-[#020401]">{item.maxScore}</td>
+                                <td className="border-[1px] border-[#020401]">{item?.AssessmentItems[0]?.assessmentScore}</td>
                                 <td className="border-[1px] border-[#020401]"></td>
                                 <td className="border-[1px] border-[#020401] border-r-[2px]"></td>
                             </tr>
@@ -172,16 +176,26 @@ const Template = () => {
                         </tr>
                     </tfoot>
                 </table>
-                <div className="w-full pl-[2cm] pr-[1cm] text-base font-times" style={{ pageBreakInside: 'avoid' }}>
-                    <div className="w-full flex mt-[50px] justify-end pl-[2cm] pr-[1cm]">
-                        <div className="w-[50%] mr-[20px]">
+                <div className="w-full pl-[2cm] pr-[1cm] flex items-center justify-between text-base font-times" style={{ pageBreakInside: 'avoid' }}>
+                    <div className="flex-1 flex items-center justify-center">
+
+                        <div className="border-black border-1 flex items-center justify-center w-[400px] h-[60px] p-10">
+                            Tổng điểm: {Data?.totalScore}
+                        </div>
+                    </div>
+                    <div className=" flex-1 flex mt-[50px] justify-center pl-[2cm] pr-[1cm]">
+                        <div className="w-full mr-[20px]">
                             <div className="w-full text-center">
                                 Trà Vinh,<span className="italic"> ngày ... tháng ... năm ... </span>
                             </div>
-                            <div className="w-full text-center font-bold">
+                            <div className="w-full text-center font-bold mb-10">
                                 GV CHẤM BÁO CÁO
                             </div>
-                            <div className="w-full text-center">
+                            <div className="w-full text-center font-bold">
+
+
+{Data?.teacher?.name}
+
                             </div>
                         </div>
                     </div>

@@ -9,9 +9,9 @@ import {
 }
     from '@nextui-org/react';
 import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-import { PlusIcon } from '../ManagementAssessment/PlusIcon';
-import { SearchIcon } from '../ManagementAssessment/SearchIcon';
-import { ChevronDownIcon } from '../ManagementAssessment/ChevronDownIcon';
+import { PlusIcon } from "../../../../../public/PlusIcon";
+
+import { ChevronDownIcon } from "../../../../../public/ChevronDownIcon";
 import { capitalize } from '../../Utils/capitalize';
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import Cookies from "js-cookie";

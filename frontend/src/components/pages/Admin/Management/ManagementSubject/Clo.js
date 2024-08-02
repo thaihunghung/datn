@@ -9,11 +9,12 @@ import DownloadAndUpload from "../../Utils/DownloadAndUpload/DownloadAndUpload";
 import DropdownAndNavClo from "../../Utils/DropdownAndNav/DropdownAndNavClo";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import Tabs from "../../Utils/Tabs/Tabs";
-import { PlusIcon } from "../ManagementAssessment/PlusIcon";
+
 import Cookies from "js-cookie";
 import BackButton from "../../Utils/BackButton/BackButton";
 import ModalUpdateClo from "./ModalUpdateClo";
 import ModalAddClo from "./ModalAddClo";
+import { PlusIcon } from "../../../../../public/PlusIcon";
 
 const Clo = (nav) => {
     const { id } = useParams();

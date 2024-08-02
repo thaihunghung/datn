@@ -12,8 +12,9 @@ import Tabs from "../../Utils/Tabs/Tabs";
 import Cookies from "js-cookie";
 import ModalUpdatePo from "./ModalUpdatePo";
 import ModalAddPo from "./ModalAddPo";
-import { PlusIcon } from "../ManagementAssessment/PlusIcon";
+
 import BackButton from "../../Utils/BackButton/BackButton";
+import { PlusIcon } from "../../../../../public/PlusIcon";
 
 const ManagePo = (nav) => {
     const navigate = useNavigate();

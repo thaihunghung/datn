@@ -11,8 +11,9 @@ import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import ModalUpdatePlo from "./ModalUpdatePlo";
 import ModalAddPlo from "./ModalAddPlo";
-import { PlusIcon } from "../ManagementAssessment/PlusIcon";
+
 import BackButton from "../../Utils/BackButton/BackButton";
+import { PlusIcon } from "../../../../../public/PlusIcon";
 
 const ManagePlo = (nav) => {
     const navigate = useNavigate();

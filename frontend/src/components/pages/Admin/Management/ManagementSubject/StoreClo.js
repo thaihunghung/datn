@@ -8,7 +8,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure
 import { Table, Tooltip } from 'antd';
 import DropdownAndNavClo from "../../Utils/DropdownAndNav/DropdownAndNavClo";
 import BackButton from "../../Utils/BackButton/BackButton";
-import { PlusIcon } from "../ManagementAssessment/PlusIcon";
+
 
 
 const StoreClo = (nav) => {

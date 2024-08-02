@@ -10,8 +10,9 @@ import RubricSlider from "../../Utils/RubricSlider/RubricSlider";
 
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Modal, Button, Slider, Tooltip, Divider } from "@nextui-org/react";
 import { ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@nextui-org/react';
-import { ChevronDownIcon } from "./ChevronDownIcon";
+
 import BackButton from "../../Utils/BackButton/BackButton";
+import { ChevronDownIcon } from "../../../../../public/ChevronDownIcon";
 
 
 
@@ -166,7 +167,6 @@ const FormMultipleGrading = (nav) => {
     //console.log('value');
     setStudent(value);
   };
-
 
   const handleSliderChange1 = (index, value, rubricsItem_id, student_id) => {
     setSelectedValues1(prevValues => {

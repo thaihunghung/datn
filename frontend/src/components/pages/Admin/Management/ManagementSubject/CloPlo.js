@@ -4,7 +4,7 @@ import { Tooltip, message } from 'antd';
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import DropdownAndNavClo from "../../Utils/DropdownAndNav/DropdownAndNavClo";
 import BackButton from "../../Utils/BackButton/BackButton";
-import { PlusIcon } from "../ManagementAssessment/PlusIcon";
+
 import { Button } from "@nextui-org/react";
 const CloPlo = (nav) => {
     const { id } = useParams();

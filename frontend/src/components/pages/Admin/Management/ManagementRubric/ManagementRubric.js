@@ -6,10 +6,10 @@ import {
 }
     from '@nextui-org/react';
 import { Tooltip, message } from 'antd';
-import { PlusIcon } from '../ManagementAssessment/PlusIcon';
-import { VerticalDotsIcon } from '../ManagementAssessment/VerticalDotsIcon';
-import { SearchIcon } from '../ManagementAssessment/SearchIcon';
-import { ChevronDownIcon } from '../ManagementAssessment/ChevronDownIcon';
+
+
+import { SearchIcon } from '../../../../../public/SearchIcon';
+import { ChevronDownIcon } from '../../../../../public/ChevronDownIcon';
 import { columns, fetchRubricData, } from './DataRubric';
 import { capitalize } from '../../Utils/capitalize';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -19,6 +19,7 @@ import { axiosAdmin } from '../../../../../service/AxiosAdmin';
 import ModalUpdateRubric from './ModalUpdateRubric';
 import CreateRubic from './CreateRubic';
 import DropdownAndNavRubric from '../../Utils/DropdownAndNav/DropdownAndNavRubric';
+import { PlusIcon } from '../../../../../public/PlusIcon';
 
 const statusColorMap = {
     active: 'success',

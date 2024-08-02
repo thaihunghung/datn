@@ -17,12 +17,11 @@ import {
 } from '@nextui-org/react';
 import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
 import { Tooltip, message } from 'antd';
-import slugify from 'slugify';
 
-import { PlusIcon } from './PlusIcon';
-import { VerticalDotsIcon } from './VerticalDotsIcon';
-import { SearchIcon } from './SearchIcon';
-import { ChevronDownIcon } from './ChevronDownIcon';
+import { PlusIcon } from '../../../../../public/PlusIcon';
+
+import { SearchIcon } from '../../../../../public/SearchIcon';
+import { ChevronDownIcon } from '../../../../../public/ChevronDownIcon';
 import { columns, fetchAssessmentDataGrading, fetchDataCheckTeacherAllot, fetchStudentDataByCourseId, statusOptions } from './Data/DataAssessmentGrading';
 import { capitalize } from '../../Utils/capitalize';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -31,42 +30,33 @@ import BackButton from '../../Utils/BackButton/BackButton';
 import { axiosAdmin } from '../../../../../service/AxiosAdmin';
 import ModalCreateOneAssessment from './ModalCreateOneAssessment';
 import CustomUpload from '../../CustomUpload/CustomUpload';
+import { UseDescriptionFromURL, UseNavigate, UseTeacherAuth, UseTeacherId } from '../../../../../hooks';
+import { handleReplaceCharacters } from '../../Utils/handleReplaceCharacters';
 
 const statusColorMap = {
   active: 'success',
   paused: 'danger',
   vacation: 'warning',
 };
-
 const INITIAL_VISIBLE_COLUMNS = ['totalScore', 'action', 'class', 'student'];
 const COMPACT_VISIBLE_COLUMNS = ['student', 'action'];
 
-const ManagementAssessmentGrading = (nav) => {
-  const { setCollapsedNav } = nav;
-  const navigate = useNavigate();
-  const teacher_id = Cookies.get('teacher_id');
-  if (!teacher_id) {
-    navigate('/login');
-  }
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const descriptionString = searchParams.get('description');
-  let descriptionURL;
+const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
+  UseTeacherAuth();
+  const descriptionURL = UseDescriptionFromURL();
+  const teacher_id = UseTeacherId();
+  const handleNavigate = UseNavigate();
 
-  if (descriptionString) {
-    try {
-      const decodedDescription = decodeURIComponent(descriptionString);
-      descriptionURL = decodedDescription;
-      // console.log(descriptionURL); // Logging the result
-    } catch (error) {
-      console.error('Error processing description:', error);
-    }
-  }
-
+  
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [assessments, setAssessment] = useState([]);
   const [StudentAll, setStudentAll] = useState([]);
-  const [descriptionFilter, setDescriptionFilter] = useState('');
-  const [filteredStudents, setFilteredStudents] = useState([]);
+  const [classes, setClasses] = useState([]);
+  const [RubricArray, setRubricArray] = useState([]);
+  const [CourseArray, setCourseArray] = useState([]);
+  const [Couse_id, setCouse_id] = useState();
+  const [rubric_id, setRubric_id] = useState();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editRubric, setEditRubric] = useState({
     teacher_id: "",
     course_id: "",
@@ -76,120 +66,25 @@ const ManagementAssessmentGrading = (nav) => {
     place: "",
     date: "",
   });
+
+
+  const [filterDescription, setDescriptionFilter] = useState('');
+  const [filteredStudents, setFilteredStudents] = useState([]);
   const [filterValue, setFilterValue] = useState('');
-  const [classFilter, setClassFilter] = useState('all');
-  const [classes, setClasses] = useState([]);
+  const [filterClass, setClassFilter] = useState('all');
+  const [filterStatus, setStatusFilter] = useState('all');
+
+  const hasSearchFilter = Boolean(filterValue);
+
+
+  const [page, setPage] = useState(1);
+  const [fileList, setFileList] = useState([]);
+  const [deleteId, setDeleteId] = useState(null);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const pages = Math.ceil(assessments.length / rowsPerPage);
   const [selectedKeys, setSelectedKeys] = useState(new Set());
   const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
-  const [fileList, setFileList] = useState([]);
-  const handleFileChange = (e) => {
-    setFileList([...e.target.files]);
-  };
-
-  const handleRemoveFile = (indexToRemove) => {
-    setFileList((currentFiles) =>
-      currentFiles.filter((_, index) => index !== indexToRemove)
-    );
-  };
-
-
-
-  const params = new URLSearchParams(window.location.search);
-  const filterScore = params.get('FilterScore');
-
-
-  const [statusFilter, setStatusFilter] = useState(filterScore ? filterScore : 'all');
-
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [Couse_id, setCouse_id] = useState();
-  const [rubric_id, setRubric_id] = useState();
-  const [sortDescriptor, setSortDescriptor] = useState({
-    column: 'age',
-    direction: 'ascending',
-  });
-  const [page, setPage] = useState(1);
-
-  // const params = new URLSearchParams(window.location.search);
-  // const filterScore = params.get('FilterScore');
-
-  // // Cập nhật state nếu có giá trị 'FilterScore'
-  // if (filterScore) {
-  //   setStatusFilter(filterScore);
-  // //  setSelectedKeys(new Set([filterScore]));
-  // }
-
-  useEffect(() => {
-    //getAllAssessmentIsDeleteFalse()
-
-    const handleResize = () => {
-      if (window.innerWidth < 1024) {
-        setCollapsedNav(true);
-      } else {
-        setCollapsedNav(false);
-      }
-    };
-    handleResize();
-
-    const handleVisibilityChange = () => {
-      if (window.innerWidth < 500) {
-        setVisibleColumns(new Set(COMPACT_VISIBLE_COLUMNS)); // Thay đổi visibleColumns khi cửa sổ nhỏ
-      } else {
-        setVisibleColumns(new Set(INITIAL_VISIBLE_COLUMNS)); // Trả lại visibleColumns khi cửa sổ lớn
-      }
-    }
-    handleVisibilityChange();
-    console.log(window.innerWidth)
-
-
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-
-
-
-
-  const [RubricArray, setRubricArray] = useState([]);
-  const [CourseArray, setCourseArray] = useState([]);
-  const loadTeachers = async () => {
-    const { metaAssessment, Rubric_id, Course_id, Classes, RubricArray, CourseArray } = await fetchAssessmentDataGrading(teacher_id, descriptionURL, filterValue);
-    console.log("metaAssessment");
-    console.log(metaAssessment);
-    setAssessment(metaAssessment);
-    setRubric_id(Rubric_id);
-    setCouse_id(Course_id);
-    setClasses(Classes);
-
-    setRubricArray(RubricArray);
-    setCourseArray(CourseArray);
-  };
-
-  useEffect(() => {
-    loadTeachers();
-  }, [page, rowsPerPage, filterValue]);
-
-  useEffect(() => {
-    const checkTeacherExistence = async () => {
-      try {
-        const teacher_id = Cookies.get('teacher_id');
-        const meta_assessment_id = assessments[0]?.meta_assessment_id;
-        const exist = await fetchDataCheckTeacherAllot(teacher_id, meta_assessment_id);
-
-        if (exist.exists) {
-          message.success("Teacher exists in the assessment.");
-        } else {
-          message.error("Teacher does not exist in the assessment.");
-          handleNavigate('/admin/management-grading')
-        }
-      } catch (error) {
-        console.error("Error checking teacher existence:", error.message);
-      }
-    };
-    if (teacher_id && assessments[0]?.id)
-      checkTeacherExistence();
-  }, [assessments]);
+  const [sortDescriptor, setSortDescriptor] = useState({ column: 'age', direction: 'ascending', });
 
 
 
@@ -202,10 +97,66 @@ const ManagementAssessmentGrading = (nav) => {
       console.error("Error loading student data:", error);
     }
   };
+  const LoadData = async () => {
+    const { metaAssessment, Rubric_id, Course_id, Classes, RubricArray, CourseArray } = await fetchAssessmentDataGrading(teacher_id, descriptionURL, filterValue);
+    console.log("metaAssessment");
+    console.log(metaAssessment);
+    setAssessment(metaAssessment);
+    setRubric_id(Rubric_id);
+    setCouse_id(Course_id);
+    setClasses(Classes);
+    setRubricArray(RubricArray);
+    setCourseArray(CourseArray);
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setCollapsedNav(true);
+      } else {
+        setCollapsedNav(false);
+      }
+    };
+    handleResize();
+    const handleVisibilityChange = () => {
+      if (window.innerWidth < 500) {
+        setVisibleColumns(new Set(COMPACT_VISIBLE_COLUMNS)); // Thay đổi visibleColumns khi cửa sổ nhỏ
+      } else {
+        setVisibleColumns(new Set(INITIAL_VISIBLE_COLUMNS)); // Trả lại visibleColumns khi cửa sổ lớn
+      }
+    }
+    handleVisibilityChange();
+    console.log(window.innerWidth)
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+  useEffect(() => {
+    LoadData();
+  }, [page, rowsPerPage, filterValue, teacher_id]);
+  useEffect(() => {
+    const checkTeacherExistence = async () => {
+      try {
+        const meta_assessment_id = assessments[0]?.meta_assessment_id;
+        const exist = await fetchDataCheckTeacherAllot(teacher_id, meta_assessment_id);
+        if (exist.exists) {
+          message.success("Teacher exists in the assessment.");
+        } else {
+          message.error("Teacher does not exist in the assessment.");
+          handleNavigate('/admin/management-grading')
+        }
+      } catch (error) {
+        console.error("Error checking teacher existence:", error.message);
+      }
+    };
+    if (teacher_id && assessments[0]?.id)
+      checkTeacherExistence();
+
+  }, [assessments, teacher_id]);
   useEffect(() => {
     loadStudentAllCourse(Couse_id);
   }, [Couse_id]);
-
   useEffect(() => {
     if (Array.isArray(StudentAll) && Array.isArray(assessments)) {
       const filtered = StudentAll.filter(student =>
@@ -214,50 +165,6 @@ const ManagementAssessmentGrading = (nav) => {
       setFilteredStudents(filtered);
     }
   }, [StudentAll, assessments]);
-
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-  const handleFormSubmit = async () => {
-    console.log("description", editRubric);
-    if (!editRubric.student_id || editRubric.student_id.length === 0) {
-      message.error('Please select at least one student.');
-      return;
-    }
-
-    try {
-      for (const studentId of editRubric.student_id) {
-        const data = {
-          teacher_id: editRubric.teacher_id || "",
-          course_id: editRubric.course_id || "",
-          rubric_id: editRubric.rubric_id || "",
-          description: editRubric.description || "",
-          student_id: studentId,
-          place: editRubric.place,
-          date: editRubric.date,
-        };
-
-        const response = await axiosAdmin.post('/assessment', { data: data });
-        console.log('Assessment response:', response.data);
-      }
-      loadTeachers();
-      setEditRubric((prev) => ({
-        ...prev,
-        student_id: "",
-      }));
-      message.success('Assessment updated successfully');
-    } catch (error) {
-      console.error("Error updating assessment:", error);
-      message.error("Error updating assessment: " + (error.response?.data?.message || 'Internal server error'));
-    }
-  };
-
-
-  const handleAddClick = () => {
-
-    console.log(editRubric);
-    setIsEditModalOpen(true);
-  };
-
   useEffect(() => {
     if (assessments) {
       setEditRubric((prev) => ({
@@ -287,10 +194,12 @@ const ManagementAssessmentGrading = (nav) => {
     }
   }, [assessments]);
 
-  const [deleteId, setDeleteId] = useState(null);
 
-  const pages = Math.ceil(assessments.length / rowsPerPage);
-  const hasSearchFilter = Boolean(filterValue);
+
+
+
+
+
 
   const uniqueSortedDisription = useMemo(() => {
     const desriptionSet = new Set();
@@ -299,21 +208,16 @@ const ManagementAssessmentGrading = (nav) => {
 
     // Hàm so sánh tùy chỉnh để sắp xếp theo phần số cuối
     uniqueDesriptionsArray.sort((a, b) => {
-        const numA = parseInt(a.match(/\d+$/));
-        const numB = parseInt(b.match(/\d+$/));
-        return numA - numB;
+      const numA = parseInt(a.match(/\d+$/));
+      const numB = parseInt(b.match(/\d+$/));
+      return numA - numB;
     });
-    // console.log("uniqueDesriptionsArray")
-    // console.log(assessments)
     return uniqueDesriptionsArray;
-}, [assessments]);
-
-
+  }, [assessments]);
   const headerColumns = React.useMemo(() => {
     if (visibleColumns === 'all') return columns;
     return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
   }, [visibleColumns]);
-
   const filteredItems = React.useMemo(() => {
     let filteredAssessment = [...assessments];
 
@@ -323,67 +227,35 @@ const ManagementAssessmentGrading = (nav) => {
       );
     }
 
-    if (statusFilter !== 'all') {
-      // Chuyển đổi statusFilter thành số
-      const statusFilterNumber = parseInt(statusFilter, 10);
+    if (filterStatus !== 'all') {
+      // Chuyển đổi filterStatus thành số
+      const filterStatusNumber = parseInt(filterStatus, 10);
 
       // Lọc các đối tượng dựa trên totalScore
       filteredAssessment = filteredAssessment.filter((teacher) =>
-        teacher.totalScore === statusFilterNumber
+        teacher.totalScore === filterStatusNumber
       );
     }
 
-    if (classFilter !== 'all') {
+    if (filterClass !== 'all') {
       filteredAssessment = filteredAssessment.filter((teacher) =>
-        teacher.class === classFilter
+        teacher.class === filterClass
       );
     }
 
-    if (descriptionFilter && descriptionFilter !== '') {
+    if (filterDescription && filterDescription !== '') {
       filteredAssessment = filteredAssessment.filter(item =>
-          item.description === descriptionFilter
+        item.description === filterDescription
       );
-      }
+    }
 
     return filteredAssessment;
-  }, [assessments, filterValue, statusFilter, classFilter, descriptionFilter]);
-
-  const handleSelectionChange = (keys) => {
-    // console.log('Keys:', keys);
-    if (keys === 'all') {
-      const startIndex = (page - 1) * rowsPerPage;
-      const endIndex = startIndex + rowsPerPage;
-      const currentPageUsers = filteredItems.slice(startIndex, endIndex).map(user => user.id.toString());
-      setSelectedKeys(prevKeys => {
-        const newKeys = new Set(currentPageUsers);
-        // console.log('Setting new keys:', Array.from(newKeys));
-        return newKeys;
-      });
-      return;
-    }
-
-    const keysArray = Array.isArray(keys) ? keys : Array.from(keys);
-    const validKeys = keysArray.filter(key => typeof key === 'string' && !isNaN(key));
-    //console.log('Valid Keys:', validKeys);
-    setSelectedKeys(prevKeys => {
-      const newKeys = new Set(validKeys);
-      // console.log('Setting new keys:', Array.from(newKeys));
-      return newKeys;
-    });
-  };
-
-  const getSelectedItems = () => {
-    const selectedItems = assessments.filter((item) => selectedKeys.has(item.id.toString()));
-    //console.log('Get Selected Items', selectedItems);
-    return selectedItems;
-  };
-
+  }, [assessments, filterValue, filterStatus, filterClass, filterDescription]);
   const items = React.useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
     return filteredItems.slice(start, end);
   }, [page, filteredItems, rowsPerPage]);
-
   const sortedItems = React.useMemo(() => {
     return [...items].sort((a, b) => {
       const first = a[sortDescriptor.column];
@@ -392,246 +264,10 @@ const ManagementAssessmentGrading = (nav) => {
       return sortDescriptor.direction === 'descending' ? -cmp : cmp;
     });
   }, [sortDescriptor, items]);
-  const handleNavigate = (path) => {
-    navigate(path);
-  };
-  function replaceCharacters(description) {
-    let result = description.replace(/ /g, "_");
-    result = result.replace(/-/g, "_");
-    result = result.replace(/___/g, "_");
-    result = result.toLowerCase();
-    result = result.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    result = result.replace(/_+/g, "_");
-    result = result.replace(/^_+|_+$/g, "");
-    return result;
-  }
-
-  const renderCell = React.useCallback((assessment, columnKey) => {
-    const cellValue = assessment[columnKey];
-
-    switch (columnKey) {
-      case 'id':
-        return (
-          <div className="flex flex-col">
-            <p className="text-bold text-small capitalize">{cellValue}</p>
-            {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.id}</p> */}
-          </div>
-        );
-      case 'description':
-        return (
-          <div className="flex flex-col">
-            <p className="text-bold text-small capitalize">{cellValue}</p>
-            {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
-          </div>
-        );
-      case 'generalDescription':
-        return (
-          <div className="flex flex-col">
-            <p className="text-bold text-small capitalize">{cellValue}</p>
-            {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
-          </div>
-        );
-      case 'class':
-        return (
-          <div className="flex flex-col">
-            <p className="text-bold text-small capitalize">{cellValue}</p>
-            {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
-          </div>
-
-        );
-      case 'totalScore':
-        return (
-          <Chip
-            className="capitalize border-none gap-1 text-default-600"
-            color={statusColorMap[assessment.totalScore]}
-            size="sm"
-            variant="dot"
-          >
-            {cellValue}
-          </Chip>
-        );
-      case 'student':
-        return (
-          <div className="flex flex-col">
-            <p className="text-bold text-small capitalize">{assessment.student.studentCode}</p>
-            <p className="text-bold text-small capitalize">{assessment.student.name}</p>
-            {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
-          </div>
-        );
-
-      case 'action':
-        const disc = replaceCharacters(assessment.action.description);
-        const urlcreate = statusFilter === 0 ? `/admin/management-grading/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}?FilterScore=0`
-          :
-          `/admin/management-grading/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
-
-        return (
-          <div className="flex items-center justify-center w-full gap-2">
-            {assessment.action.totalScore === 0 ? (
-              <Tooltip title="Chấm điểm">
-                <Button
-                  isIconOnly
-                  variant="light"
-                  radius="full"
-                  size="sm"
-                  className='bg-[#AF84DD]'
-                  onClick={() => handleNavigate(
-                    urlcreate
-                  )}
-                >
-                  <i className="fa-solid fa-feather-pointed text-xl text-[#020401]"></i>
-                </Button>
-              </Tooltip>
-            ) : (
-              <Tooltip title="Chỉnh sửa">
-                <Button
-                  isIconOnly
-                  variant="light"
-                  radius="full"
-                  size="sm"
-                  className='bg-[#FF9908]'
-                  onClick={() => handleNavigate(
-                    statusFilter === 0 ?
-                      `/admin/management-grading/update/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}?FilterScore=0`
-                      :
-                      `/admin/management-grading/update/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
-
-                  )}
-                >
-                  <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
-                </Button>
-              </Tooltip>
-            )}
-            <Tooltip title="Xoá">
-              <Button
-                isIconOnly
-                variant="light"
-                radius="full"
-                size="sm"
-                className='bg-[#FF8077]'
-                onClick={() => { onOpen(); setDeleteId(assessment.action.assessment_id) }}
-              >
-                {/* ; */}
-                <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
-              </Button>
-            </Tooltip>
-
-          </div>
-        );
-      default:
-        return cellValue;
-    }
-  }, []);
-
-
-  const getStudentCode = (data, key) => {
-    for (let item of data) {
-      // && item.totalScore === 0
-      if (item.id === key) {
-        return {
-          Assessment: key,
-          studentCode: item.student.studentCode
-        }
-      }
-    }
-    return null;
-  };
-
-  const checkstotalscore = (data, key) => {
-    for (let item of data) {
-      if (item.id === key) {
-        return {
-          assessment_id: key,
-          totalScore: item.totalScore,
-          checktotalScore: item.totalScore === 0 ? true : false
-        };
-      }
-    }
-    return null;
-  };
-
-
-  const navigateGradingGroup = () => {
-    setTimeout(() => {
-      const selectedItems = getSelectedItems();
-      //console.log('Selected Items after timeout:', selectedItems);
-      if (selectedItems.length === 0) {
-        message.error('Please select at least one student');
-        return;
-      }
-      if (selectedItems.length > 4) {
-        message.error('Please select no more than 4 students');
-        return;
-      }
-
-      const ids = selectedItems.map(item => item.id);
-
-
-      const checkStotalScore = ids.map((key) => checkstotalscore(assessments, key));
-      const hasUncheckedAssessment = checkStotalScore.some((item, index) => {
-        if (item.checktotalScore === false) {
-          message.error(`Sinh viên đã chọn thứ ${index + 1} đã chấm điểm.`);
-          return true;
-        }
-        return false;
-      });
-
-      if (hasUncheckedAssessment) {
-        return;
-      }
-      const listStudentCodes = ids.map((key) => getStudentCode(assessments, key));
-      // console.log("checkStotalScore");
-      // console.log(checkStotalScore);
-      // console.log("listStudentCodes");
-      // console.log(listStudentCodes);
-      const studentCodesString = encodeURIComponent(JSON.stringify(listStudentCodes));
-      const disc = replaceCharacters(descriptionURL);
-      // console.log("studentCodesString");
-      // console.log(studentCodesString);
-      // console.log("disc");
-      // console.log(disc);
-      const url = statusFilter === 0 ? `/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}&&FilterScore=0` : `/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}`
-      navigate(url);
-    }, 100);
-  };
-
-  const handleDownloadTemplateExcel = async () => {
-
-    const assessmentMetaIds = assessments.map(item => item.meta_assessment_id);
-    if (assessmentMetaIds.length === 0) {
-      message.error(`Không tồn tại sinh viên`);
-    }
-
-    try {
-      const data = { id: assessmentMetaIds };
-      console.log("data");
-      console.log(data);
-      const response = await axiosAdmin.post('meta-assessment/templates/data', { data: data }, {
-        responseType: 'blob'
-      });
-
-
-      if (response && response.data) {
-        const url = window.URL.createObjectURL(response.data);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'UpdateDescription.xlsx';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-      }
-    } catch (error) {
-      console.error('Error downloading file:', error);
-    }
-  };
-
-
-
   const onRowsPerPageChange = React.useCallback((e) => {
     setRowsPerPage(Number(e.target.value));
     setPage(1);
   }, []);
-
   const onSearchChange = React.useCallback((value) => {
     if (value) {
       setFilterValue(value);
@@ -640,7 +276,6 @@ const ManagementAssessmentGrading = (nav) => {
       setFilterValue('');
     }
   }, []);
-
   const topContent = React.useMemo(() => {
     return (
       <div className="flex flex-col gap-4">
@@ -670,10 +305,10 @@ const ManagementAssessmentGrading = (nav) => {
               variant="light"
               radius="full"
               onClick={()=>{
-                //getSelectedItems
+                //handleTakeSelectedItems
                 //console.log('Option selected',());
                 
-                navigateGradingGroup(ValidKeys)
+                handleNavigateGradingGroup(ValidKeys)
               }
               
               }
@@ -702,8 +337,7 @@ const ManagementAssessmentGrading = (nav) => {
         </div>
       </div>
     );
-  }, [filterValue, assessments, rowsPerPage, statusFilter, visibleColumns, onSearchChange, onRowsPerPageChange]);
-
+  }, [filterValue, assessments, rowsPerPage, filterStatus, visibleColumns, onSearchChange, onRowsPerPageChange]);
   const bottomContent = React.useMemo(() => {
     return (
       <div className="py-2 px-2 flex justify-between items-center">
@@ -721,7 +355,293 @@ const ManagementAssessmentGrading = (nav) => {
     );
   }, [page, pages, selectedKeys, assessments]);
 
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const Columns = React.useCallback((assessment, columnKey) => {
+    // Đảm bảo rằng assessment và columnKey đều không phải là null hoặc undefined
+    if (!assessment || !columnKey) {
+      return null;
+    }
+
+    // Lấy giá trị ô
+    const cellValue = assessment[columnKey] ?? 'N/A'; // Sử dụng giá trị mặc định nếu cellValue là null hoặc undefined
+
+    switch (columnKey) {
+      case 'id':
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize">{cellValue}</p>
+          </div>
+        );
+      case 'description':
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize">{cellValue}</p>
+          </div>
+        );
+      case 'generalDescription':
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize">{cellValue}</p>
+          </div>
+        );
+      case 'class':
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize">{cellValue}</p>
+          </div>
+        );
+      case 'totalScore':
+        const totalScoreValue = assessment.totalScore ?? 0; // Giá trị mặc định là 0 nếu totalScore là null hoặc undefined
+        return (
+          <Chip
+            className="capitalize border-none gap-1 text-default-600"
+            color={statusColorMap[totalScoreValue]}
+            size="sm"
+            variant="dot"
+          >
+            {totalScoreValue}
+          </Chip>
+        );
+      case 'student':
+        const student = assessment.student || {};
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize">{student.studentCode ?? 'N/A'}</p>
+            <p className="text-bold text-small capitalize">{student.name ?? 'N/A'}</p>
+          </div>
+        );
+      case 'action':
+        const action = assessment.action || {};
+        const disc = handleReplaceCharacters(action.generalDescription ?? ''); // Giá trị mặc định là chuỗi rỗng nếu generalDescription là null hoặc undefined
+        const urlcreate = filterStatus === 0
+          ? `/admin/management-grading/${disc}/student-code/${action.studentCode ?? ''}/assessment/${action.assessment_id ?? ''}/rubric/${action.rubric_id ?? ''}?FilterScore=0`
+          : `/admin/management-grading/${disc}/student-code/${action.studentCode ?? ''}/assessment/${action.assessment_id ?? ''}/rubric/${action.rubric_id ?? ''}`;
+
+        return (
+          <div className="flex items-center justify-center w-full gap-2">
+            {action.totalScore === 0 ? (
+              <Tooltip title="Chấm điểm">
+                <Button
+                  isIconOnly
+                  variant="light"
+                  radius="full"
+                  size="sm"
+                  className='bg-[#AF84DD]'
+                  onClick={() => handleNavigate(urlcreate)}
+                >
+                  <i className="fa-solid fa-feather-pointed text-xl text-[#020401]"></i>
+                </Button>
+              </Tooltip>
+            ) : (
+              <Tooltip title="Chỉnh sửa">
+                <Button
+                  isIconOnly
+                  variant="light"
+                  radius="full"
+                  size="sm"
+                  className='bg-[#FF9908]'
+                  onClick={() => handleNavigate(
+                    filterStatus === 0
+                      ? `/admin/management-grading/update/${disc}/student-code/${action.studentCode ?? ''}/assessment/${action.assessment_id ?? ''}/rubric/${action.rubric_id ?? ''}?FilterScore=0`
+                      : `/admin/management-grading/update/${disc}/student-code/${action.studentCode ?? ''}/assessment/${action.assessment_id ?? ''}/rubric/${action.rubric_id ?? ''}`
+                  )}
+                >
+                  <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
+                </Button>
+              </Tooltip>
+            )}
+            <Tooltip title="Xoá">
+              <Button
+                isIconOnly
+                variant="light"
+                radius="full"
+                size="sm"
+                className='bg-[#FF8077]'
+                onClick={() => { onOpen(); setDeleteId(action.assessment_id ?? '') }}
+              >
+                <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
+              </Button>
+            </Tooltip>
+          </div>
+        );
+      default:
+        return cellValue;
+    }
+  }, []);
+
+
+
+//////////////////////////////////////////////////////////////////////////
+////   handle
+//////////////////////////////////////////////////////////////////////////
+  const handleTakeSelectedItems = () => {
+    const selectedItems = assessments.filter((item) => selectedKeys.has(item.id.toString()));
+    //console.log('Get Selected Items', selectedItems);
+    return selectedItems;
+  };
+  const handleTakeStudentCode = (data, key) => {
+    for (let item of data) {
+      // && item.totalScore === 0
+      if (item.id === key) {
+        return {
+          Assessment: key,
+          studentCode: item.student.studentCode
+        }
+      }
+    }
+    return null;
+  };
+  const handleFormSubmit = async () => {
+    console.log("description", editRubric);
+    if (!editRubric.student_id || editRubric.student_id.length === 0) {
+      message.error('Please select at least one student.');
+      return;
+    }
+
+    try {
+      for (const studentId of editRubric.student_id) {
+        const data = {
+          teacher_id: editRubric.teacher_id || "",
+          course_id: editRubric.course_id || "",
+          rubric_id: editRubric.rubric_id || "",
+          description: editRubric.description || "",
+          student_id: studentId,
+          place: editRubric.place,
+          date: editRubric.date,
+        };
+
+        const response = await axiosAdmin.post('/assessment', { data: data });
+        console.log('Assessment response:', response.data);
+      }
+      LoadData();
+      setEditRubric((prev) => ({
+        ...prev,
+        student_id: "",
+      }));
+      message.success('Assessment updated successfully');
+    } catch (error) {
+      console.error("Error updating assessment:", error);
+      message.error("Error updating assessment: " + (error.response?.data?.message || 'Internal server error'));
+    }
+  };
+  const handleAddClick = () => {
+    console.log(editRubric);
+    setIsEditModalOpen(true);
+  };
+  const handleFileChange = (e) => {
+    setFileList([...e.target.files]);
+  };
+  const handleRemoveFile = (indexToRemove) => {
+    setFileList((currentFiles) =>
+      currentFiles.filter((_, index) => index !== indexToRemove)
+    );
+  };
+  const handleSelectionChange = (keys) => {
+    // console.log('Keys:', keys);
+    if (keys === 'all') {
+      const startIndex = (page - 1) * rowsPerPage;
+      const endIndex = startIndex + rowsPerPage;
+      const currentPageUsers = filteredItems.slice(startIndex, endIndex).map(user => user.id.toString());
+      setSelectedKeys(prevKeys => {
+        const newKeys = new Set(currentPageUsers);
+        // console.log('Setting new keys:', Array.from(newKeys));
+        return newKeys;
+      });
+      return;
+    }
+
+    const keysArray = Array.isArray(keys) ? keys : Array.from(keys);
+    const validKeys = keysArray.filter(key => typeof key === 'string' && !isNaN(key));
+    //console.log('Valid Keys:', validKeys);
+    setSelectedKeys(prevKeys => {
+      const newKeys = new Set(validKeys);
+      // console.log('Setting new keys:', Array.from(newKeys));
+      return newKeys;
+    });
+  };
+  const handleCheckstotalscore = (data, key) => {
+    for (let item of data) {
+      if (item.id === key) {
+        return {
+          assessment_id: key,
+          totalScore: item.totalScore,
+          checktotalScore: item.totalScore === 0 ? true : false
+        };
+      }
+    }
+    return null;
+  };
+  const handleNavigateGradingGroup = () => {
+    setTimeout(() => {
+      const selectedItems = handleTakeSelectedItems();
+      //console.log('Selected Items after timeout:', selectedItems);
+      if (selectedItems.length === 0) {
+        message.error('Please select at least one student');
+        return;
+      }
+      if (selectedItems.length > 4) {
+        message.error('Please select no more than 4 students');
+        return;
+      }
+
+      const ids = selectedItems.map(item => item.id);
+
+
+      const checkStotalScore = ids.map((key) => handleCheckstotalscore(assessments, key));
+      const hasUncheckedAssessment = checkStotalScore.some((item, index) => {
+        if (item.checktotalScore === false) {
+          message.error(`Sinh viên đã chọn thứ ${index + 1} đã chấm điểm.`);
+          return true;
+        }
+        return false;
+      });
+
+      if (hasUncheckedAssessment) {
+        return;
+      }
+      const listStudentCodes = ids.map((key) => handleTakeStudentCode(assessments, key));
+      console.log("checkStotalScore");
+      console.log(checkStotalScore);
+      console.log("listStudentCodes");
+      console.log(listStudentCodes);
+      const studentCodesString = encodeURIComponent(JSON.stringify(listStudentCodes));
+      const disc = handleReplaceCharacters(descriptionURL);
+      console.log("studentCodesString");
+      console.log(studentCodesString);
+      console.log("disc");
+      console.log(disc);
+      const url = filterStatus === 0 ? `/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}&&FilterScore=0` : `/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}`
+      // navigate(url);
+    }, 100);
+  };
+  const handleDownloadTemplateExcel = async () => {
+
+    const assessmentMetaIds = assessments.map(item => item.meta_assessment_id);
+    if (assessmentMetaIds.length === 0) {
+      message.error(`Không tồn tại sinh viên`);
+    }
+
+    try {
+      const data = { id: assessmentMetaIds };
+      console.log("data");
+      console.log(data);
+      const response = await axiosAdmin.post('meta-assessment/templates/data', { data: data }, {
+        responseType: 'blob'
+      });
+
+
+      if (response && response.data) {
+        const url = window.URL.createObjectURL(response.data);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'UpdateDescription.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  };
   const handleSoftDelete = async () => {
     const data = {
       assessment_id: Array.from(selectedKeys),
@@ -730,7 +650,7 @@ const ManagementAssessmentGrading = (nav) => {
     try {
       const response = await axiosAdmin.delete('/assessments/multiple', { params: data });
 
-      await loadTeachers();
+      await LoadData();
 
       message.success(response.data.message);
     } catch (error) {
@@ -738,17 +658,17 @@ const ManagementAssessmentGrading = (nav) => {
       message.error('Error deleting');
     }
   };
-
   const handleSoftDeleteById = async (_id) => {
     try {
       const response = await axiosAdmin.delete(`/assessment/${_id}`);
-      await loadTeachers();
+      await LoadData();
       message.success(response.data.message);
     } catch (error) {
       console.error(`Error toggling delete for with ID ${_id}:`, error);
       message.error(`Error toggling delete for with ID ${_id}`);
     }
   };
+
 
   return (
     <>
@@ -761,10 +681,10 @@ const ManagementAssessmentGrading = (nav) => {
             <Button
               className='bg-[#FF9908] '
               onClick={() => {
-                //const selectedItems = getSelectedItems();
+                //const selectedItems = handleTakeSelectedItems();
                 //console.log('Selected Items:', selectedItems);
                 //console.log('Selected Keys:', Array.from(selectedKeys));
-                navigateGradingGroup();
+                handleNavigateGradingGroup();
               }}
               endContent={<PlusIcon />}
             >
@@ -800,7 +720,7 @@ const ManagementAssessmentGrading = (nav) => {
                 disallowEmptySelection
                 aria-label="Status Filter"
                 closeOnSelect={true}
-                selectedKeys={new Set([statusFilter === 'all' ? 'all' : statusFilter.toString()])} // Chuyển đổi thành Set
+                selectedKeys={new Set([filterStatus === 'all' ? 'all' : filterStatus.toString()])} // Chuyển đổi thành Set
                 selectionMode="single"
                 onSelectionChange={(keys) => {
                   const selectedKey = Array.from(keys)[0] || 'all';
@@ -845,7 +765,7 @@ const ManagementAssessmentGrading = (nav) => {
               <DropdownMenu
                 aria-label="Class Filter"
                 closeOnSelect={true}
-                selectedKeys={new Set([classFilter])} // Chuyển đổi classFilter thành Set
+                selectedKeys={new Set([filterClass])} // Chuyển đổi filterClass thành Set
                 selectionMode="single"
                 onSelectionChange={(keys) => {
                   const selectedKey = Array.from(keys)[0] || 'all';
@@ -861,31 +781,31 @@ const ManagementAssessmentGrading = (nav) => {
               </DropdownMenu>
             </Dropdown>
             <Dropdown>
-                            <DropdownTrigger className="sm:flex">
-                                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                                    Filter by PLO
-                                </Button>
-                            </DropdownTrigger>
-                            <DropdownMenu
-                                aria-label="Filter by PLO"
-                                closeOnSelect={true}
-                                selectedKeys={new Set([descriptionFilter])} // Chuyển đổi descriptionFilter thành Set
-                                selectionMode="single"
-                                onSelectionChange={(keys) => {
-                                    const selectedKey = Array.from(keys)[0] || ''; // Đảm bảo chọn giá trị rỗng nếu không có lựa chọn
-                                    setDescriptionFilter(selectedKey);
-                                }}
-                            >
-                                <DropdownItem key="" className="capitalize">
-                                    All PLOs
-                                </DropdownItem>
-                                {uniqueSortedDisription.map((ploName) => (
-                                    <DropdownItem key={ploName} className="capitalize">
-                                        {ploName}
-                                    </DropdownItem>
-                                ))}
-                            </DropdownMenu>
-                        </Dropdown>
+              <DropdownTrigger className="sm:flex">
+                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                  Filter by PLO
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label="Filter by PLO"
+                closeOnSelect={true}
+                selectedKeys={new Set([filterDescription])} // Chuyển đổi filterDescription thành Set
+                selectionMode="single"
+                onSelectionChange={(keys) => {
+                  const selectedKey = Array.from(keys)[0] || ''; // Đảm bảo chọn giá trị rỗng nếu không có lựa chọn
+                  setDescriptionFilter(selectedKey);
+                }}
+              >
+                <DropdownItem key="" className="capitalize">
+                  All PLOs
+                </DropdownItem>
+                {uniqueSortedDisription.map((ploName) => (
+                  <DropdownItem key={ploName} className="capitalize">
+                    {ploName}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
           </div>
 
         </div>
@@ -934,7 +854,7 @@ const ManagementAssessmentGrading = (nav) => {
         <TableBody items={sortedItems}>
           {(item) => (
             <TableRow key={item.id}>
-              {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+              {(columnKey) => <TableCell>{Columns(item, columnKey)}</TableCell>}
             </TableRow>
           )}
         </TableBody>
@@ -1002,7 +922,7 @@ const ManagementAssessmentGrading = (nav) => {
             endpoint={'/meta-assessment/updateDescription'}
             fileList={fileList}
             setFileList={setFileList}
-            LoadData={loadTeachers}
+            LoadData={LoadData}
           />
         </div>
       </div>

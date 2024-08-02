@@ -15,7 +15,7 @@ import {
 } from "@nextui-org/react";
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import CustomUpload from "../../CustomUpload/CustomUpload";
-import { capitalize } from "../../Utils/capitalize";
+
 
 function ModalAddPlo({
   isOpen,
