@@ -827,17 +827,37 @@ const assessmentsController = require('../controllers/AssessmentsController');
  */
 
 
+
+//cập nhật mới 
+router.get('/assessment/checkTeacher', assessmentsController.checkTeacherInAssessment);
 router.get('/assessment', assessmentsController.getAssessments);
+
+router.put('/assessment/:id/totalScore', assessmentsController.updateStotalScore);
+router.get('/assessment/:id', assessmentsController.getByID);
+
+
+
+
+
 router.get('/assessment/:id/items', assessmentsController.GetitemsByID);
 
+
+
+
+
+
+
+
+
+
 router.post('/assessment', assessmentsController.create);
-router.get('/assessment/:id', assessmentsController.getByID);
+
 router.put('/assessment/:id', assessmentsController.update);
 router.delete('/assessment/:id', assessmentsController.delete);
 router.delete('/assessments/multiple', assessmentsController.deleteMultiple);
 
 
-router.put('/assessment/:id/totalScore', assessmentsController.updateStotalScore);
+
 router.get('/assessment/isDelete/true', assessmentsController.isDeleteTotrue);
 router.get('/assessment/isDelete/false', assessmentsController.isDeleteTofalse);
 

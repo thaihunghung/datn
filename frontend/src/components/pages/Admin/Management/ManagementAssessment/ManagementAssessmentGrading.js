@@ -23,7 +23,7 @@ import { PlusIcon } from './PlusIcon';
 import { VerticalDotsIcon } from './VerticalDotsIcon';
 import { SearchIcon } from './SearchIcon';
 import { ChevronDownIcon } from './ChevronDownIcon';
-import { columns, fetchAssessmentDataGrading, fetchStudentDataByCourseId, statusOptions } from './Data/DataAssessmentGrading';
+import { columns, fetchAssessmentDataGrading, fetchDataCheckTeacherAllot, fetchStudentDataByCourseId, statusOptions } from './Data/DataAssessmentGrading';
 import { capitalize } from '../../Utils/capitalize';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
@@ -134,11 +134,18 @@ const ManagementAssessmentGrading = (nav) => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+
+
+
+
   const [RubricArray, setRubricArray] = useState([]);
   const [CourseArray, setCourseArray] = useState([]);
   const loadTeachers = async () => {
-    const { Assessment, Rubric_id, Course_id, Classes, RubricArray, CourseArray } = await fetchAssessmentDataGrading(teacher_id, descriptionURL, filterValue);
-    setAssessment(Assessment);
+    const { metaAssessment, Rubric_id, Course_id, Classes, RubricArray, CourseArray } = await fetchAssessmentDataGrading(teacher_id, descriptionURL, filterValue);
+    console.log("metaAssessment");
+    console.log(metaAssessment);
+    setAssessment(metaAssessment);
     setRubric_id(Rubric_id);
     setCouse_id(Course_id);
     setClasses(Classes);
@@ -150,11 +157,35 @@ const ManagementAssessmentGrading = (nav) => {
   useEffect(() => {
     loadTeachers();
   }, [page, rowsPerPage, filterValue]);
+
+  useEffect(() => {
+    const checkTeacherExistence = async () => {
+      try {
+        const teacher_id = Cookies.get('teacher_id');
+        const meta_assessment_id = assessments[0]?.meta_assessment_id;
+        const exist = await fetchDataCheckTeacherAllot(teacher_id, meta_assessment_id);
+
+        if (exist.exists) {
+          message.success("Teacher exists in the assessment.");
+        } else {
+          message.error("Teacher does not exist in the assessment.");
+          handleNavigate('/admin/management-grading')
+        }
+      } catch (error) {
+        console.error("Error checking teacher existence:", error.message);
+      }
+    };
+    if (teacher_id && assessments[0]?.id)
+      checkTeacherExistence();
+  }, [assessments]);
+
+
+  
   const loadStudentAllCourse = async (Couse_id) => {
     try {
       const response = await fetchStudentDataByCourseId(Couse_id);
       setStudentAll(response);
-
+      
     } catch (error) {
       console.error("Error loading student data:", error);
     }
@@ -162,6 +193,7 @@ const ManagementAssessmentGrading = (nav) => {
   useEffect(() => {
     loadStudentAllCourse(Couse_id);
   }, [Couse_id]);
+
   useEffect(() => {
     if (Array.isArray(StudentAll) && Array.isArray(assessments)) {
       const filtered = StudentAll.filter(student =>
@@ -357,6 +389,13 @@ const ManagementAssessmentGrading = (nav) => {
             {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
           </div>
         );
+        case 'generalDescription':
+          return (
+            <div className="flex flex-col">
+              <p className="text-bold text-small capitalize">{cellValue}</p>
+              {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
+            </div>
+          );
       case 'class':
         return (
           <div className="flex flex-col">
@@ -387,9 +426,9 @@ const ManagementAssessmentGrading = (nav) => {
 
       case 'action':
         const disc = replaceCharacters(assessment.action.description);
-        const urlcreate = statusFilter === 0 ?`/admin/management-grading/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}?FilterScore=0`
+        const urlcreate = statusFilter === 0 ?`/admin/management-grading/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id }/rubric/${assessment.action.rubric_id}?FilterScore=0`
         :
-        `/admin/management-grading/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
+        `/admin/management-grading/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id }/rubric/${assessment.action.rubric_id}`
 
         return (
           <div className="flex items-center justify-center w-full gap-2">
@@ -418,9 +457,9 @@ const ManagementAssessmentGrading = (nav) => {
                   className='bg-[#FF9908]'
                   onClick={() => handleNavigate(
                     statusFilter === 0? 
-                    `/admin/management-grading/update/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}?FilterScore=0`
+                    `/admin/management-grading/update/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id }/rubric/${assessment.action.rubric_id}?FilterScore=0`
                     : 
-                    `/admin/management-grading/update/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
+                    `/admin/management-grading/update/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id }/rubric/${assessment.action.rubric_id}`
 
                   )}
                 >
@@ -435,7 +474,7 @@ const ManagementAssessmentGrading = (nav) => {
                 radius="full"
                 size="sm"
                 className='bg-[#FF8077]'
-                onClick={() => { onOpen(); setDeleteId(assessment.action.assessment_id) }}
+                onClick={() => { onOpen(); setDeleteId(assessment.action.assessment_id ) }}
               >
                 {/* ; */}
                 <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
@@ -467,7 +506,7 @@ const ManagementAssessmentGrading = (nav) => {
     for (let item of data) {
       if (item.id === key) {
         return {
-          assessment_id: key,
+          assessment_id : key,
           totalScore: item.totalScore,
           checktotalScore: item.totalScore === 0 ? true : false
         };
@@ -620,7 +659,7 @@ const ManagementAssessmentGrading = (nav) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const handleSoftDelete = async () => {
     const data = {
-      assessment_id: Array.from(selectedKeys),
+      assessment_id : Array.from(selectedKeys),
     };
     console.log(data)
     try {

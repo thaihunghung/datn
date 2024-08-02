@@ -277,6 +277,7 @@ const ManagementAssessment = (nav) => {
                 variant="light"
                 radius="full"
                 size="sm"
+                disabled={!assessment.statusAllot}
                 className='bg-[#FF9908]'
                 onClick={() => handleNavigate(
                   `/admin/management-grading/${disc}/?description=${cellValue}`
@@ -306,7 +307,7 @@ const ManagementAssessment = (nav) => {
                 radius="full"
                 size="sm"
                 className="bg-[#AF84DD]"
-                onClick={() => { handleEditClick(assessment?.Assessment, assessment?.generalDescription) }}
+                onClick={() => { handleEditClick(assessment?.metaAssessment, assessment?.generalDescription) }}
               >
                 <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
               </Button>
@@ -323,6 +324,7 @@ const ManagementAssessment = (nav) => {
                 <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
               </Button>
             </Tooltip>
+           
           </div>
         );
       default:
@@ -610,6 +612,21 @@ const ManagementAssessment = (nav) => {
             >
               Store
             </Button>
+            <Tooltip title="phân công">
+              <Button
+                isIconOnly
+                variant="light"
+                radius="full"
+                size="sm"
+                className="bg-[#AF84DD]"
+                onClick={() => { 
+                 handleNavigate('/admin/management-grading/100000_it31_khai_pha_du_lieu_da20ttb_bbb_2024_1_1/?description=100000%20-%20IT31_Khái%20phá%20dữ%20liệu%20DA20TTB_bbb_2024-1-1')
+
+                 }}
+              >
+                phân công
+              </Button>
+            </Tooltip>
           </div>
 
           <div className='flex gap-2 h-fit justify-center sm:justify-start flex-wrap items-center'>

@@ -16,6 +16,7 @@ const ChapterModel = require('../models/ChapterModel');
 const PloModel = require('../models/PloModel');
 const RubricsItemModel = require('../models/RubricItemModel');
 const SubjectModel = require('../models/SubjectModel');
+const MetaAssessmentModel = require('../models/MetaAssessmentModel');
 
 const AssessmentsController = {
   // index: async (req, res) => {
@@ -150,20 +151,53 @@ const AssessmentsController = {
   //     res.status(500).json({ message: 'Server error' });
   //   }
   // },
+  checkTeacherInAssessment: async (req, res) => {
+    const { teacher_id, meta_assessment_id } = req.query;
+    console.log(teacher_id + ':', meta_assessment_id);
+    try {
+      const assessment = await AssessmentModel.findOne({
+        where: {
+          teacher_id: teacher_id,
+          meta_assessment_id: meta_assessment_id,
+          isDelete: false
+        }
+      });
+      console.log("assessment" + ':', assessment);
+
+      if (assessment) {
+        return res.status(200).json({ exists: true });
+      } else {
+        return res.status(200).json({ exists: false });
+      }
+    } catch (error) {
+      console.error("Error checking teacher in assessment:", error.message);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+  },
+
+
 
   getAssessments: async (req, res) => {
     try {
-      const { isDelete, teacher_id, description } = req.query;
+      const { isDelete, teacher_id, generalDescription } = req.query;
 
-      if (teacher_id && description) {
-        console.log("description");
-
-        console.log(description);
-        // Logic for GetByDescriptionByUser
+      if (teacher_id && generalDescription) {
+  
         const assessments = await AssessmentModel.findAll({
           where: {
             teacher_id: parseInt(teacher_id),
-            description: description,
+            isDelete: isDelete === 'true'
+          }
+        });
+
+        const AssessmentIdMetas = assessments.map(assessment => assessment.meta_assessment_id);
+        console.log('AssessmentIdMetas')
+        console.log(AssessmentIdMetas)
+
+        // Tìm tất cả các MetaAssessments dựa trên generalDescription và isDelete
+        const metaAssessments = await MetaAssessmentModel.findAll({
+          where: {
+            generalDescription: generalDescription,
             isDelete: isDelete === 'true'
           },
           include: [
@@ -187,9 +221,27 @@ const AssessmentsController = {
             }
           ]
         });
-        
 
-        return res.status(200).json(assessments);
+        const metaAssessmentIds = assessments.map(assessment => assessment.meta_assessment_id);
+
+
+        // Lọc các MetaAssessments dựa trên metaAssessmentIds
+        const filteredMetaAssessments = metaAssessments.filter(metaAssessment => 
+          metaAssessmentIds.includes(metaAssessment.meta_assessment_id)
+        );
+        const result = filteredMetaAssessments.map(metaAssessment => {
+          // Tìm Assessment tương ứng với metaAssessment
+          const associatedAssessment = assessments.find(assessment => 
+            assessment.dataValues.meta_assessment_id === metaAssessment.dataValues.meta_assessment_id
+          );
+  
+          return {
+            ...metaAssessment.dataValues,
+            assessment: associatedAssessment ? associatedAssessment.dataValues : null
+          };
+        });
+  
+        return res.status(200).json(result);
 
       } else if (teacher_id) {
         const teacherId = parseInt(teacher_id);
@@ -197,110 +249,15 @@ const AssessmentsController = {
           where: {
             teacher_id: teacherId,
             isDelete: isDelete === 'true'
-          },
-          attributes: [
-            'course_id',
-            'description',
-            [Sequelize.fn('COUNT', Sequelize.col('assessment_id')), 'assessmentCount'],
-            [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('student_id'))), 'studentCount'],
-            [Sequelize.fn('SUM', Sequelize.literal('CASE WHEN totalScore = 0 THEN 1 ELSE 0 END')), 'zeroScoreCount']
-          ],
-          group: ['course_id', 'description'],
-          include: [{
-            model: CourseModel,
-            attributes: ['courseCode', 'courseName']
-          }]
+          }
         });
 
         if (assessments.length === 0) {
           return res.status(404).json({ message: 'No assessments found for this user' });
         }
-
-        const result = await Promise.all(assessments.map(async assessment => {
-          let status;
-          const assessmentCount = parseInt(assessment.dataValues.assessmentCount);
-          const zeroScoreCount = parseInt(assessment.dataValues.zeroScoreCount);
-
-          if (assessmentCount === 0) {
-            status = 100;
-          } else {
-            status = ((assessmentCount - zeroScoreCount) / assessmentCount) * 100;
-          }
-          status = Math.round(status);
-
-          const foundAssessment = await AssessmentModel.findOne({
-            where: {
-              description: assessment.description,
-              isDelete: isDelete === 'true'
-            },
-            attributes: ["rubric_id", "course_id", "description", "date", "place", "isDelete", "createdAt"],
-            include: [{
-              model: RubricModel,
-              where: {
-                isDelete: isDelete === 'true'
-              },
-              include: [{
-                model: SubjectModel,
-                where: {
-                    isDelete: isDelete === 'true'
-                }
-              }]
-            }, {
-              model: CourseModel,
-              where: {
-                isDelete: isDelete === 'true'
-              }
-            }]
-          });
-
-          if (foundAssessment && foundAssessment.Rubric) {
-            const rubricItems = await RubricsItemModel.findAll({
-              where: {
-                rubric_id: foundAssessment.Rubric.rubric_id,
-                isDelete: isDelete === 'true'
-              },
-              include: [{
-                model: CloModel,
-                attributes: ['clo_id', 'cloName', 'description'],
-                where: {
-                  isDelete: isDelete === 'true'
-                }
-              }, {
-                model: ChapterModel,
-                attributes: ['chapter_id', 'chapterName', 'description'],
-                where: {
-                  isDelete: isDelete === 'true'
-                }
-              }, {
-                model: PloModel,
-                attributes: ['plo_id', 'ploName', 'description'],
-                where: {
-                  isDelete: isDelete === 'true'
-                }
-              }]
-            });
-            foundAssessment.Rubric.dataValues.rubricItems = rubricItems;
-          }
-
-          return {
-            course_id: assessment.course_id,
-            description: assessment.description,
-            course: `${assessment.course.courseCode} - ${assessment.course.courseName}`,
-            courseCode: assessment.course.courseCode,
-            courseName: assessment.course.courseName,
-            assessmentCount: parseInt(assessment.dataValues.assessmentCount),
-            studentCount: parseInt(assessment.dataValues.studentCount),
-            zeroScoreCount: parseInt(assessment.dataValues.zeroScoreCount),
-            status: status,
-            Assessment: foundAssessment,
-            createdAt: foundAssessment ? foundAssessment.createdAt : null,
-            isDelete: foundAssessment ? foundAssessment.isDelete : null
-          };
-        }));
-
-        return res.status(200).json(result);
+        return res.status(200).json(assessments);
       }
-     else {
+      else {
         // Logic for index
         const assessments = await AssessmentModel.findAll();
         return res.status(200).json(assessments);
@@ -321,33 +278,38 @@ const AssessmentsController = {
           assessment_id: id,
           isDelete: false
         },
-        include: [
-          { model: CourseModel, attributes: ['courseCode', 'courseName'] },
-          {
-            model: StudentModel,
-            attributes: ['studentCode', 'name', 'class_id'],
-            include: [{
-              model: ClassModel,
-              attributes: ['classNameShort']
-            }]
-          },
-          {
-            model: RubricModel,
-            where: {
-              isDelete: false
+        include: [{
+          model: MetaAssessmentModel,
+          where: {isDelete: false},
+          include: [
+            { model: CourseModel, attributes: ['courseCode', 'courseName'] },
+            {
+              model: StudentModel,
+              attributes: ['studentCode', 'name', 'class_id'],
+              include: [{
+                model: ClassModel,
+                attributes: ['classNameShort']
+              }]
+            },
+            {
+              model: RubricModel,
+              where: {
+                isDelete: false
+              }
             }
-          }
-        ]
+          ]
+        }]
+        
       });
-
-      if (!assessments || !assessments.Rubric) {
+      
+      if (!assessments || !assessments.MetaAssessment.Rubric) {
         return res.status(404).json({ message: 'Assessment or Rubric not found' });
       }
 
       // Step 2: Fetch related rubric items
       const rubricItems = await RubricItemModel.findAll({
         where: {
-          rubric_id: assessments.Rubric.rubric_id,
+          rubric_id: assessments.MetaAssessment.Rubric.rubric_id,
           isDelete: false
         },
         include: [
@@ -382,7 +344,7 @@ const AssessmentsController = {
       });
 
       // Step 6: Manually merge the fetched rubric items into the assessment object
-      assessments.dataValues.Rubric.dataValues.RubricItems = rubricItems;
+      assessments.dataValues.MetaAssessment.Rubric.dataValues.RubricItems = rubricItems;
       // assessments.dataValues.Rubric.dataValues.RubricItems.dataValues.AssessmentItems = assessmentItems;
 
       // Step 4: Send the combined result in the response
@@ -405,32 +367,37 @@ const AssessmentsController = {
     }
   },
 
-  getByID:async (req, res) => {
+  getByID: async (req, res) => {
     try {
       const { id } = req.params;
       const assessment = await AssessmentModel.findOne({
         where: { assessment_id: id },
-        include: [
-          {
-            model: RubricModel,
-            where: { isDelete: false },
-            include: [
-              {
-                model: SubjectModel,
-                where: { isDelete: false },
-              },
-            ],
-          },
-          {
-            model: CourseModel,
-            where: { isDelete: false },
-          },
-          {
-            model: StudentModel,
-            where: { isDelete: false },
-          },
-        ],
+        include: [{
+          model: MetaAssessmentModel,
+          where: { isDelete: false },
+          include: [
+            {
+              model: RubricModel,
+              where: { isDelete: false },
+              include: [
+                {
+                  model: SubjectModel,
+                  where: { isDelete: false },
+                },
+              ],
+            },
+            {
+              model: CourseModel,
+              where: { isDelete: false },
+            },
+            {
+              model: StudentModel,
+              where: { isDelete: false },
+            },
+          ],
+        }]
       });
+      
       if (!assessment) {
         return res.status(404).json({ message: 'Assessment not found' });
       }
@@ -440,7 +407,7 @@ const AssessmentsController = {
       res.status(500).json({ message: 'Server error' });
     }
   },
-  
+
   update: async (req, res) => {
     try {
       const { id } = req.params;
@@ -456,7 +423,7 @@ const AssessmentsController = {
     }
   },
 
-  
+
   updateStotalScore: async (req, res) => {
     try {
       const { id } = req.params;
@@ -536,14 +503,14 @@ const AssessmentsController = {
       }
       const updatedIsDeleted = !assessment.isDelete;
       await AssessmentModel.update({ isDelete: updatedIsDeleted }, { where: { assessment_id: id } });
-  
+
       res.status(200).json({ message: `Đã thay đổi trạng thái xóa mềm thành ${updatedIsDeleted}` });
     } catch (error) {
       console.error('Lỗi khi thay đổi trạng thái xóa mềm:', error);
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
-  
+
 
   softDeleteMultiple: async (req, res) => {
     try {
@@ -551,25 +518,25 @@ const AssessmentsController = {
       if (!Array.isArray(rubric_id) || rubric_id.length === 0) {
         return res.status(400).json({ message: 'Không cung cấp id nào' });
       }
-  
+
       const assessments = await AssessmentModel.findAll({ where: { assessment_id: rubric_id } });
       if (assessments.length !== rubric_id.length) {
         return res.status(404).json({ message: 'Một hoặc nhiều Assessment không tìm thấy' });
       }
-  
+
       const updated = await Promise.all(assessments.map(async (assessment) => {
         const updatedIsDeleted = !assessment.isDelete;
         await assessment.update({ isDelete: updatedIsDeleted });
         return { assessment_id: assessment.assessment_id, isDelete: updatedIsDeleted };
       }));
-  
+
       res.json({ message: 'Trạng thái xóa mềm đã được thay đổi', updated });
     } catch (error) {
       console.error('Lỗi khi thay đổi trạng thái xóa mềm:', error);
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
-  
+
 
   toggleSoftDeleteByDescription: async (req, res) => {
     try {
@@ -577,19 +544,19 @@ const AssessmentsController = {
       if (!Array.isArray(descriptions) || descriptions.length === 0) {
         return res.status(400).json({ message: 'Descriptions array is required and cannot be empty' });
       }
-  
+
       // Tìm tất cả assessments dựa vào các description
-      const assessments = await AssessmentModel.findAll({ 
-        where: { 
-          description: descriptions 
-        } 
+      const assessments = await AssessmentModel.findAll({
+        where: {
+          description: descriptions
+        }
       });
       console.log('Found assessments:', assessments);
-  
+
       if (assessments.length === 0) {
         return res.status(404).json({ message: 'No assessments found for the provided descriptions' });
       }
-  
+
       // Toggling trạng thái isDelete cho tất cả assessments tìm thấy
       const updated = await Promise.all(assessments.map(async (assessment) => {
         if (isDelete === null) {
@@ -600,9 +567,9 @@ const AssessmentsController = {
           return { assessment_id: assessment.assessment_id, isDelete: updatedIsDeleted };
         }
       }));
-  
+
       res.status(200).json({ message: 'Processed isDelete status', updated });
-  
+
     } catch (error) {
       console.error('Error toggling assessment delete statuses:', error);
       res.status(500).json({ message: 'Server error' });
@@ -619,7 +586,7 @@ const AssessmentsController = {
       }
       if (updateData.description) {
         const existingAssessment = await AssessmentModel.findOne({ where: { description: updateData.description } });
-  
+
         if (existingAssessment) {
           return res.status(400).json({ message: "An assessment with the new description already exists" });
         }
@@ -644,7 +611,7 @@ const AssessmentsController = {
         await assessment.save();
         return assessment;
       }));
-  
+
       res.status(200).json(updatedAssessments);
     } catch (error) {
       console.error("Error updating assessments:", error);

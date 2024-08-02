@@ -185,16 +185,18 @@ const UpdateFormGrading = (nav) => {
       // /assessments/:assessment_id/items
 
       const response = await axiosAdmin.get(`/assessment/${assessment_id}/items`);
-      //console.log(response?.data);
-      setRubicData(response?.data?.Rubric)
-      setRubicItemsData(response?.data?.Rubric?.RubricItems)
+      console.log("response?.data");
+      console.log(response?.data);
+      setRubicData(response?.data?.MetaAssessment?.Rubric)
+      setRubicItemsData(response?.data?.MetaAssessment?.Rubric?.RubricItems)
       // console.log("assessment")
-      // console.log(response?.data?.Rubric?.RubricItems[0].AssessmentItems[0].assessmentScore)
+      // console.log(response?.data?.MetaAssessment?.Rubric?.RubricItems[0].AssessmentItems[0].assessmentScore)
       // console.log("RubricItems")
-      // console.log(response?.data?.Rubric?.RubricItems[0]?.rubricsItem_id)
+      // console.log(response?.data?.MetaAssessment?.Rubric?.RubricItems[0]?.rubricsItem_id)
 
-      handleSliderChange(0, response?.data?.Rubric?.RubricItems[0].AssessmentItems[0]?.assessmentScore, response?.data?.Rubric?.RubricItems[0]?.rubricsItem_id)
-      const data = response?.data?.Rubric?.RubricItems
+      handleSliderChange(0, response?.data?.MetaAssessment?.Rubric?.RubricItems[0].AssessmentItems[0]?.assessmentScore, response?.data?.MetaAssessment?.Rubric?.RubricItems[0]?.rubricsItem_id)
+      
+      const data = response?.data?.MetaAssessment?.Rubric?.RubricItems
       setValue(data)
 
     } catch (error) {
@@ -210,8 +212,8 @@ const UpdateFormGrading = (nav) => {
     try {
 
       const response = await axiosAdmin.get(`/assessment/${assessment_id}`);
-      console.log("response.data");
-      console.log(response.data);
+      // console.log("response.data");
+      // console.log(response.data);
       setAssessment(response.data)
 
     } catch (error) {
@@ -257,9 +259,9 @@ const UpdateFormGrading = (nav) => {
   return (
     <div className="w-full p-2 pb-[100px] py-0 flex flex-col leading-6 mt-10">
       <div className="w-full min-h-[200px] bg-[#FEFEFE] border border-slate-300 shadow-lg rounded-md mb-2 p-4">
-        <h1 className="text-xl font-bold mb-2 text-[#6366F1]">{Assessment?.description}</h1>
+      <h1 className="text-xl font-bold mb-2 text-[#6366F1]">{Assessment?.MetaAssessment?.generalDescription}</h1>
         <div className="flex items-center text-lg flex-col font-bold justify-center">
-          <span className="text-[#020401]">{Assessment?.Student?.name}</span>   <span className="text-[#020401]">{Assessment?.Student?.studentCode}</span>
+          <span className="text-[#020401]">{Assessment?.MetaAssessment?.Student?.name}</span>   <span className="text-[#020401]">{Assessment?.MetaAssessment?.Student?.studentCode}</span>
         </div>
         <div className="hidden sm:block"><BackButton /></div>
       </div>

@@ -4,8 +4,12 @@ const router = express.Router();
 
 
 router.get('/meta-assessments', MetaAssessmentController.index);
+
 router.post('/meta-assessment', MetaAssessmentController.create);
 router.get('/meta-assessment/:id', MetaAssessmentController.show);
+
+
+router.patch('/meta-assessment/:id', MetaAssessmentController.updateDescription);
 router.put('/meta-assessment/:id', MetaAssessmentController.update);
 router.delete('/meta-assessment/:id', MetaAssessmentController.delete);
 

@@ -13,15 +13,16 @@ export const fetchAssessmentData = async (teacher_id) => {
         courseName: items?.courseName ?? '',
         status: items?.status ?? '',
         action: items?.generalDescription ?? '',
-        Assessment: {
-          rubric_id: items?.Assessment?.rubric_id ?? null,
-          course_id: items?.Assessment?.course_id ?? null,
-          generalDescription: items?.Assessment?.generalDescription ?? '',
-          date: items?.Assessment?.date ?? '',
-          place: items?.Assessment?.place ?? '',
+        metaAssessment: {
+          rubric_id: items?.metaAssessment?.rubric_id ?? null,
+          course_id: items?.metaAssessment?.course_id ?? null,
+          generalDescription: items?.metaAssessment?.generalDescription ?? '',
+          date: items?.metaAssessment?.date ?? '',
+          place: items?.metaAssessment?.place ?? '',
         },
-        RubicItemsData: items?.Assessment?.Rubric?.rubricItems ?? [],
-        RubicData: items?.Assessment?.Rubric ?? null,
+        statusAllot: items?.statusAllot,
+        RubicItemsData: items?.metaAssessment?.Rubric?.rubricItems ?? [],
+        RubicData: items?.metaAssessment?.Rubric ?? null,
         createdAt: items?.createdAt ?? ''
     }));
     return Data;

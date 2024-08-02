@@ -4,30 +4,33 @@ import { axiosAdmin } from "../../../../../../service/AxiosAdmin";
 
 export const fetchAssessmentDataGrading = async (teacher_id, descriptionURL, searchTerm = "") => {
   try {
-    const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}&description=${descriptionURL}&isDelete=false`);
-    const updatedPoData = response?.data?.map((assessment) => {
+    const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}&generalDescription=${descriptionURL}&isDelete=false`);
+    const updatedPoData = response?.data?.map((Assessment) => {
       const student = {
-        student_id: assessment?.Student?.student_id,
-        studentCode: assessment?.Student?.studentCode,
-        name: assessment?.Student.name
+        student_id: Assessment?.Student?.student_id,
+        studentCode: Assessment?.Student?.studentCode,
+        name: Assessment?.Student.name
       }
       const action = {
-        totalScore: assessment?.totalScore,
-        assessment_id: assessment?.assessment_id,
-        rubric_id: assessment?.rubric_id,
-        description: assessment?.description,
-        studentCode: assessment?.Student?.studentCode,
-        date: assessment?.date,
-        place: assessment?.place,
-        teacher_id: assessment?.teacher_id,
-        course_id: assessment?.course_id,
+        totalScore: Assessment?.assessment.totalScore,
+        assessment_id: Assessment?.assessment.assessment_id,
+        rubric_id: Assessment?.rubric_id,
+        description: Assessment?.generalDescription,
+        studentCode: Assessment?.Student?.studentCode,
+        date: Assessment?.date,
+        place: Assessment?.place,
+        teacher_id: Assessment?.assessment.teacher_id,
+        course_id: Assessment?.course_id,
       }
       return {
-        id: assessment?.assessment_id,
-        description: assessment?.description,
-        totalScore: assessment?.totalScore,
+        id: Assessment?.assessment.assessment_id,
+        meta_assessment_id: Assessment?.meta_assessment_id,
+        generalDescription: Assessment?.generalDescription,
+        description: Assessment?.description,
+
+        totalScore: Assessment?.assessment.totalScore,
         student: student,
-        class: assessment?.Student?.class?.classNameShort,
+        class: Assessment?.Student?.class?.classNameShort,
         action: action,
       };
     });
@@ -51,7 +54,7 @@ export const fetchAssessmentDataGrading = async (teacher_id, descriptionURL, sea
     }
     ]
     return {
-      Assessment: updatedPoData,
+      metaAssessment: updatedPoData,
       Rubric_id: response?.data[0]?.rubric_id,
       Course_id: response?.data[0]?.course_id,
       Classes: classOptions,
@@ -77,17 +80,38 @@ export const fetchStudentDataByCourseId = async (id) => {
     //         "classCode": "100000"
     //     }
     // }]
-    return response.data.data;
+    return response?.data?.data;
 
   } catch (error) {
     console.error("Error: " + error.message);
   }
 };
 
+export const fetchDataCheckTeacherAllot = async (teacher_id, meta_assessment_id) => {
+  try {
+    const response = await axiosAdmin.get(`/assessment/checkTeacher`, {
+      params: {
+        teacher_id,
+        meta_assessment_id
+      }
+    });
+
+    // Kiểm tra phản hồi từ API
+    if (response?.data?.exists) {
+      return { exists: true };
+    } else {
+      return { exists: false };
+    }
+  } catch (error) {
+    console.error("Error: " + error.message);
+    return { error: error.message };
+  }
+};
 
 
 const columns = [
   { name: "id", uid: "id", sortable: true },
+  { name: "generalDescription", uid: "generalDescription", sortable: true },
   { name: "description", uid: "description", sortable: true },
   { name: "class", uid: "class", sortable: true },
   { name: "student", uid: "student", sortable: true },

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Collapse, message } from 'antd';
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Modal, Button, Text, Slider, Tooltip } from "@nextui-org/react";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Modal, Button, Text, Slider, Tooltip, Textarea } from "@nextui-org/react";
 import { ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@nextui-org/react';
 
 import "./FormGrading.css"
@@ -126,11 +126,6 @@ const FormGrading = (nav) => {
   };
 
 
-
-
-
-
-
   const handleSave = async () => {
     console.log('Updated values', selectedValues);
     console.log('totalScore', totalScore);
@@ -180,34 +175,37 @@ const FormGrading = (nav) => {
 
   const GetRubricData = async () => {
     try {
-
       const response = await axiosAdmin.get(`/rubric/${rubric_id}/items?isDelete=false`);
-
       setRubicData(response.data.rubric)
       setRubicItemsData(response.data.rubric.rubricItems)
       const data = response.data.rubric.rubricItems
       setValue(data)
-      console.log("response.data");
-      console.log(response.data);
+      // console.log("response.data");
+      // console.log(response.data);
     } catch (error) {
       console.error('Error fetching rubric data:', error);
       throw error;
     }
   };
   const [Assessment, setAssessment] = useState({});
+  const [CurrentTeacher, setCurrentTeacher] = useState(false);
 
   const getAssessments = async () => {
     try {
 
       const response = await axiosAdmin.get(`/assessment/${assessment_id}`);
-
-      setAssessment(response.data)
-
+      console.log(response?.data);
+      setAssessment(response?.data)
     } catch (error) {
       console.error('Error fetching rubric data:', error);
       throw error;
     }
   };
+  useEffect(() => {
+    if(Assessment?.MetaAssessment?.teacher_id === teacher_id){
+      setCurrentTeacher(true)
+    }
+  }, [teacher_id, Assessment]);
 
   useEffect(() => {
     if (setCheck === 0) {
@@ -240,15 +238,46 @@ const FormGrading = (nav) => {
       window.removeEventListener("resize", handleResize); // Cleanup
     };
   }, []);
+  const handleUpdateTopic = async () => {
+    try {
+      const response = await axiosAdmin.patch(`/meta-assessment/${Assessment?.MetaAssessment?.meta_assessment_id}`, { description: Assessment?.MetaAssessment?.description });
+      if (response.status === 200) {
+        message.success('Topic updated successfully');
+        getAssessments();  // Refresh the assessment data after update
+      } else {
+        message.error('Error updating topic');
+      }
+    } catch (error) {
+      console.error('Error updating topic:', error);
+      message.error('Error updating topic');
+    }
+  };
+
 
   const [isModalWhenSaveOpen, setIsModalWhenSaveOpen] = useState(false);
 
   return (
     <div className="w-full p-2 pb-[100px] py-0 flex flex-col leading-6">
       <div className="w-full min-h-[200px] bg-[#FEFEFE] border border-slate-300 shadow-lg rounded-md mb-2 p-4">
-        <h1 className="text-xl font-bold mb-2 text-[#6366F1]">{Assessment?.description}</h1>
+        <h1 className="text-xl font-bold mb-2 text-[#6366F1]">{Assessment?.MetaAssessment?.generalDescription}</h1>
         <div className="flex items-center text-lg flex-col font-bold justify-center">
-          <span className="text-[#020401]">{Assessment?.Student?.name}</span>   <span className="text-[#020401]">{Assessment?.Student?.studentCode}</span>
+          <span className="text-[#020401]">{Assessment?.MetaAssessment?.Student?.name}</span>   <span className="text-[#020401]">{Assessment?.MetaAssessment?.Student?.studentCode}</span>
+        </div>
+        <div className="flex items-center text-lg flex-col font-bold justify-center">
+        <Textarea
+              className="max-w-[700px]"
+              label="Description"
+              value={Assessment?.MetaAssessment?.description}
+              onChange={(e) => setAssessment(prev => ({ ...prev, MetaAssessment: { ...prev.MetaAssessment, description: e.target.value } }))}
+            />
+            <Button 
+              color="primary" 
+              className="w-fit p-5 mt-3"
+              isDisabled={CurrentTeacher? false :true }
+              onPress={handleUpdateTopic}
+            >
+              Update Topic
+            </Button>
         </div>
         <div className="hidden sm:block"><BackButton /></div>
       </div>
@@ -812,13 +841,13 @@ function ModalWhenSave({
               <div className="flex flex-col items-center h-full">
                 {/* Assessment Description */}
                 <h1 className="text-2xl text-center font-bold mb-4 text-[#6366F1]">
-                  {assessment?.description}
+                  {assessment?.MetaAssessment?.generalDescription}
                 </h1>
 
                 {/* Student Information */}
                 <div className="flex flex-col items-center text-lg font-semibold mb-4">
-                  <span className="text-[#020401]">{assessment?.Student?.name}</span>
-                  <span className="text-[#020401]">{assessment?.Student?.studentCode}</span>
+                  <span className="text-[#020401]">{assessment?.MetaAssessment?.Student?.name}</span>
+                  <span className="text-[#020401]">{assessment?.MetaAssessment?.Student?.studentCode}</span>
                 </div>
 
                 {/* Total Score */}
@@ -834,9 +863,9 @@ function ModalWhenSave({
                   onClose();
                   handleBack(
                     filterScore === 0 ?
-                      `/admin/management-grading/${disc}/?description=${assessment?.description}?FilterScore=0`
+                      `/admin/management-grading/${disc}/?description=${assessment?.MetaAssessment?.generalDescription}?FilterScore=0`
                       :
-                      `/admin/management-grading/${disc}/?description=${assessment?.description}`
+                      `/admin/management-grading/${disc}/?description=${assessment?.MetaAssessment?.generalDescription}`
                   );
                 }}
               >
@@ -850,9 +879,9 @@ function ModalWhenSave({
                   onClose();
                   handleBack(
                     filterScore === 0 ?
-                      `/admin/management-grading/update/${disc}/student-code/${assessment?.Student?.studentCode}/assessment/${assessment?.assessment_id}/rubric/${assessment?.rubric_id}?FilterScore=0`
+                      `/admin/management-grading/update/${disc}/student-code/${assessment?.MetaAssessment?.Student?.studentCode}/assessment/${assessment?.assessment_id}/rubric/${assessment?.MetaAssessment?.rubric_id}?FilterScore=0`
                       :
-                      `/admin/management-grading/update/${disc}/student-code/${assessment?.Student?.studentCode}/assessment/${assessment?.assessment_id}/rubric/${assessment?.rubric_id}`
+                      `/admin/management-grading/update/${disc}/student-code/${assessment?.MetaAssessment?.Student?.studentCode}/assessment/${assessment?.assessment_id}/rubric/${assessment?.MetaAssessment?.rubric_id}`
                   );
                 }}
               >

@@ -15,6 +15,7 @@ const ChapterModel = require('../models/ChapterModel');
 const PloModel = require('../models/PloModel');
 const RubricsItemModel = require('../models/RubricItemModel');
 const AssessmentModel = require('../models/AssessmentModel');
+const TeacherModel = require('../models/TeacherModel');
 
 const MetaAssessmentController = {
   // Lấy tất cả các meta assessments
@@ -51,7 +52,6 @@ const MetaAssessmentController = {
             }
           ]
         });
-
 
         return res.status(200).json(assessments);
 
@@ -98,7 +98,7 @@ const MetaAssessmentController = {
               generalDescription: assessment.generalDescription,
               isDelete: isDelete === 'true'
             },
-            attributes: ["rubric_id", "course_id", "generalDescription", "date", "place", "isDelete", "createdAt"],
+            attributes: ["meta_assessment_id","rubric_id", "course_id", "generalDescription", "date", "place", "isDelete", "createdAt"],
             include: [{
               model: RubricModel,
               where: {
@@ -117,7 +117,23 @@ const MetaAssessmentController = {
               }
             }]
           });
-
+          const Assessment = await AssessmentModel.findAll({
+            where: {
+              meta_assessment_id: foundAssessment.meta_assessment_id,
+              isDelete: isDelete === 'true'
+            },
+            include: [{
+              model: TeacherModel,
+              where: {
+                isDelete: isDelete === 'true'
+              },
+            }]
+            }
+          )
+          let statusAllot = true;
+          if (Assessment.length === 0) {
+              statusAllot = false;
+          }
           if (foundAssessment && foundAssessment.Rubric) {
             const rubricItems = await RubricsItemModel.findAll({
               where: {
@@ -157,7 +173,9 @@ const MetaAssessmentController = {
             studentCount: parseInt(assessment.dataValues.studentCount),
             zeroScoreCount: parseInt(assessment.dataValues.zeroScoreCount),
             status: status,
-            Assessment: foundAssessment,
+            Assessment: Assessment || [],
+            statusAllot: statusAllot,
+            metaAssessment: foundAssessment,
             createdAt: foundAssessment ? foundAssessment.createdAt : null,
             isDelete: foundAssessment ? foundAssessment.isDelete : null
           };
@@ -229,7 +247,23 @@ const MetaAssessmentController = {
       res.status(400).json({ message: 'Yêu cầu không hợp lệ' });
     }
   },
-
+updateDescription: async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { description } = req.body;
+    
+    // Cập nhật description trong MetaAssessmentModel
+    await MetaAssessmentModel.update(
+      { description: description },
+      { where: { meta_assessment_id: id } }
+    );
+    
+    res.status(200).json({ message: 'MetaAssessment updated successfully' });
+  } catch (error) {
+    console.error('Error updating MetaAssessment:', error);
+    res.status(500).json({ message: 'Error updating MetaAssessment', error });
+  }
+},
   // Xóa meta assessment
   delete: async (req, res) => {
     try {
