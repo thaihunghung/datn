@@ -344,6 +344,102 @@ updateDescription: async (req, res) => {
       res.status(500).json({ message: 'Error saving data to the database' });
     }
   },
+
+  getFormUpdateDescriptionExcel: async (req, res) => {
+    try {
+      const { data } = req.body;
+      const { id } = data;
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Tên đề tài');
+
+      // Lấy danh sách student_id từ MetaAssessmentModel dựa trên meta_assessment_id
+      const enrollments = await MetaAssessmentModel.findAll({
+        attributes: ['meta_assessment_id', 'description'],
+        where: {
+          meta_assessment_id: id,
+          isDelete: false
+        },
+        include: [{
+          model: StudentModel,
+          attributes: ['name'],
+        }]
+      });
+
+      worksheet.columns = [
+        { header: 'Tên SV', key: 'name', width: 32 },
+        { header: 'Tên đề tài', key: 'description', width: 100 },
+        { header: 'MetaId', key: 'MetaId', width: 15 }
+      ];
+      console.log("enrollments")
+      console.log(enrollments[0])
+
+      enrollments.forEach(enrollment => {
+        if (enrollment.Student) {
+          worksheet.addRow({
+            name: enrollment.Student.name,
+            description: enrollment.description,
+            MetaId: enrollment.meta_assessment_id
+          });
+        }
+      });
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename="StudentsForm.xlsx"');
+      await workbook.xlsx.write(res);
+      res.end();
+    } catch (error) {
+      console.error('Error generating Excel file:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  },
+
+  updateDescriptionFromExcel: async (req, res) => {
+    if (!req.files || !req.files.length) {
+      return res.status(400).json({ message: 'No file uploaded.' });
+    }
+
+    try {
+      const uploadDirectory = path.join(__dirname, '../uploads');
+      const filename = req.files[0].filename;
+      const filePath = path.join(uploadDirectory, filename);
+
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.readFile(filePath);
+      const worksheet = workbook.getWorksheet('Tên đề tài');
+
+      const Updates = [];
+
+      worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber > 1) { 
+          const Data = {
+            description: row.getCell(2).value, 
+            meta_assessment_id: row.getCell(3).value 
+          };
+          Updates.push(Data);
+        }
+      });
+        
+      fs.unlinkSync(filePath); 
+
+      await Promise.all(Updates.map(async (data) => {
+        const [affectedRows] = await MetaAssessmentModel.update(
+          { description: data.description },
+          { where: { meta_assessment_id: data.meta_assessment_id } }
+        );
+  
+        if (affectedRows === 0) {
+          console.warn(`No MetaAssessment found with ID ${data.meta_assessment_id} for update`);
+        }
+      }));
+
+
+
+      res.status(200).json({ message: 'description   updated successfully' });
+    } catch (error) {
+      console.error('Error updating description from Excel file:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  },
 };
 
 module.exports = MetaAssessmentController;

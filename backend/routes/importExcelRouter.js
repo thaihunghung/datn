@@ -40,12 +40,11 @@ router.post('/clo', upload.any(), CloController.processSaveTemplateClo);
 router.post('/chapter', upload.any(), ChapterController.processSaveTemplateChapter);
 router.post('/subject', ensureAuthenticated, upload.any(), SubjectController.processSaveTemplateSubject);
 router.post('/meta-assessment', upload.any(), MetaAssessmentController.processSaveTemplateMetaAssessment);
-
-
-
-
-
 router.post('/course-enrollment', upload.any(), CourseEnrollmentController.saveExcel);
+
+
+
+router.put('/meta-assessment/updateDescription', upload.any(), MetaAssessmentController.updateDescriptionFromExcel);
 
 router.put('/student/update', upload.any(), StudentController.updateStudentsFromExcel);
 router.put('/po/update', upload.any(), PoController.processUpdateTemplatePo);

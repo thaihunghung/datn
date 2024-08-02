@@ -178,6 +178,8 @@ const router = express.Router();
 router.get('/course-enrollment/:id',ensureAuthenticated,  CourseEnrollmentController.getByID);
 router.post('/course-enrollment/student', CourseEnrollmentController.getByIDStudent);
 router.post('/course-enrollment/templates/data',ensureAuthenticated,  CourseEnrollmentController.getExcelCourseEnrollmentWithData);
+
+
 router.get('/course-enrollment/getAllStudentByCourseId/:id',  CourseEnrollmentController.getAllStudentByCourseId);
 
 router.get('/course-enrollment/course/:id/student',ensureAuthenticated,  CourseEnrollmentController.getFormStudentWithDataByCourse);

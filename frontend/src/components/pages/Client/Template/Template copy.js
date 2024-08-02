@@ -80,11 +80,10 @@ const Template = () => {
             // setRubicItemsData(response.data.rubric.rubricItems);
 
 
-            const response = await axiosAdmin.get(`/assessment/${1604}/items`);
+            const response = await axiosAdmin.get(`/assessment/${1563}/items`);
       console.log("response?.data");
       console.log(response?.data);
-      
-      setRubicData(response?.data?.MetaAssessment)
+      setRubicData(response?.data?.MetaAssessment?.Rubric)
       setRubicItemsData(response?.data?.MetaAssessment?.Rubric?.RubricItems)
 
         } catch (error) {
@@ -114,18 +113,15 @@ const Template = () => {
                             <div className="w-[30%] border-1 border-black"></div>
                         </div>
                     </div>
-                    <div className="text-xl font-bold w-full text-center my-5 flex flex-col">
+                    <div className="text-xl font-bold w-full text-center mt-5 flex flex-col">
                         <span>PHIẾU CHẤM ĐÁNH GIÁ BÁO CÁO</span>
                         {/* <span>HỌC PHẦN {RubicData.subject.subjectName.toUpperCase() }</span> */}
                     </div>
                     {/* <div className="text-center text-base">(Mã HP: {RubicData.subject.subjectCode })</div> */}
-                    {/* Nhóm<span className="text-lg">: .........</span>  */}
-                    <div className="w-full text-left text-xl font-bold">
-                    ĐỀ TÀI: {RubicData.description}<br />
-  {'......................................................'}
-</div>
-                    <div className="w-full text-left text-xl font-bold">+ SV1<span className="">: {RubicData.Student.name} ...................................</span> MSSV: {RubicData.Student.studentCode} <br />  </div>
-                    
+                    <div className="w-full text-left text-base">Nhóm<span className="text-lg">: .........</span> Chủ đề: ...........................................................................................................................................................................................</div>
+                    <div className="w-full text-left text-base">+ Họ và tên SV1<span className="text-lg">: ....................................................................................</span> MSSV: ....................................................................................</div>
+                    <div className="w-full text-left text-base">+ Họ và tên SV2<span className="text-lg">: ....................................................................................</span> MSSV: ....................................................................................</div>
+                    <div className="w-full text-left text-base">+ Họ và tên SV3<span className="text-lg">: ....................................................................................</span> MSSV: ....................................................................................</div>
                 </div>
                 <table className='border-collapse border-[1px] border-[#020401] w-full h-full text-base mt-5 font-times'>
                     <thead>
@@ -154,7 +150,7 @@ const Template = () => {
                                         {item.maxScore}
                                     </div>
                                 </td>
-                                <td className="border-[1px] border-[#020401]">{item.maxScore}</td>
+                                <td className="border-[1px] border-[#020401]"></td>
                                 <td className="border-[1px] border-[#020401]"></td>
                                 <td className="border-[1px] border-[#020401] border-r-[2px]"></td>
                             </tr>
@@ -165,7 +161,6 @@ const Template = () => {
                             <td className="border-[1px] border-[#020401]"></td>
                             <td className="border-[1px] border-[#020401]"></td>
                             <td className="border-[1px] border-[#020401] w-[10px]"></td>
-
                             <td className="border-[1px] border-[#020401]"></td>
                             <td className="border-[1px] border-[#020401]"></td>
                             <td className="border-[1px] border-[#020401] border-r-[2px]"></td>

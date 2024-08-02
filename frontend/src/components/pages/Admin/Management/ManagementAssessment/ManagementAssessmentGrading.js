@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Table,
   TableHeader,
@@ -30,6 +30,7 @@ import Cookies from "js-cookie";
 import BackButton from '../../Utils/BackButton/BackButton';
 import { axiosAdmin } from '../../../../../service/AxiosAdmin';
 import ModalCreateOneAssessment from './ModalCreateOneAssessment';
+import CustomUpload from '../../CustomUpload/CustomUpload';
 
 const statusColorMap = {
   active: 'success',
@@ -64,7 +65,7 @@ const ManagementAssessmentGrading = (nav) => {
 
   const [assessments, setAssessment] = useState([]);
   const [StudentAll, setStudentAll] = useState([]);
-
+  const [descriptionFilter, setDescriptionFilter] = useState('');
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [editRubric, setEditRubric] = useState({
     teacher_id: "",
@@ -80,13 +81,24 @@ const ManagementAssessmentGrading = (nav) => {
   const [classes, setClasses] = useState([]);
   const [selectedKeys, setSelectedKeys] = useState(new Set());
   const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
+  const [fileList, setFileList] = useState([]);
+  const handleFileChange = (e) => {
+    setFileList([...e.target.files]);
+  };
 
- 
+  const handleRemoveFile = (indexToRemove) => {
+    setFileList((currentFiles) =>
+      currentFiles.filter((_, index) => index !== indexToRemove)
+    );
+  };
+
+
+
   const params = new URLSearchParams(window.location.search);
   const filterScore = params.get('FilterScore');
 
 
-  const [statusFilter, setStatusFilter] = useState(filterScore? filterScore : 'all');
+  const [statusFilter, setStatusFilter] = useState(filterScore ? filterScore : 'all');
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [Couse_id, setCouse_id] = useState();
@@ -108,7 +120,7 @@ const ManagementAssessmentGrading = (nav) => {
 
   useEffect(() => {
     //getAllAssessmentIsDeleteFalse()
-   
+
     const handleResize = () => {
       if (window.innerWidth < 1024) {
         setCollapsedNav(true);
@@ -180,12 +192,12 @@ const ManagementAssessmentGrading = (nav) => {
   }, [assessments]);
 
 
-  
+
   const loadStudentAllCourse = async (Couse_id) => {
     try {
       const response = await fetchStudentDataByCourseId(Couse_id);
       setStudentAll(response);
-      
+
     } catch (error) {
       console.error("Error loading student data:", error);
     }
@@ -280,6 +292,23 @@ const ManagementAssessmentGrading = (nav) => {
   const pages = Math.ceil(assessments.length / rowsPerPage);
   const hasSearchFilter = Boolean(filterValue);
 
+  const uniqueSortedDisription = useMemo(() => {
+    const desriptionSet = new Set();
+    assessments.forEach(item => desriptionSet.add(item.description));
+    const uniqueDesriptionsArray = Array.from(desriptionSet);
+
+    // Hàm so sánh tùy chỉnh để sắp xếp theo phần số cuối
+    uniqueDesriptionsArray.sort((a, b) => {
+        const numA = parseInt(a.match(/\d+$/));
+        const numB = parseInt(b.match(/\d+$/));
+        return numA - numB;
+    });
+    // console.log("uniqueDesriptionsArray")
+    // console.log(assessments)
+    return uniqueDesriptionsArray;
+}, [assessments]);
+
+
   const headerColumns = React.useMemo(() => {
     if (visibleColumns === 'all') return columns;
     return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
@@ -297,7 +326,7 @@ const ManagementAssessmentGrading = (nav) => {
     if (statusFilter !== 'all') {
       // Chuyển đổi statusFilter thành số
       const statusFilterNumber = parseInt(statusFilter, 10);
-      
+
       // Lọc các đối tượng dựa trên totalScore
       filteredAssessment = filteredAssessment.filter((teacher) =>
         teacher.totalScore === statusFilterNumber
@@ -310,8 +339,14 @@ const ManagementAssessmentGrading = (nav) => {
       );
     }
 
+    if (descriptionFilter && descriptionFilter !== '') {
+      filteredAssessment = filteredAssessment.filter(item =>
+          item.description === descriptionFilter
+      );
+      }
+
     return filteredAssessment;
-  }, [assessments, filterValue, statusFilter, classFilter]);
+  }, [assessments, filterValue, statusFilter, classFilter, descriptionFilter]);
 
   const handleSelectionChange = (keys) => {
     // console.log('Keys:', keys);
@@ -370,7 +405,7 @@ const ManagementAssessmentGrading = (nav) => {
     result = result.replace(/^_+|_+$/g, "");
     return result;
   }
-  
+
   const renderCell = React.useCallback((assessment, columnKey) => {
     const cellValue = assessment[columnKey];
 
@@ -389,13 +424,13 @@ const ManagementAssessmentGrading = (nav) => {
             {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
           </div>
         );
-        case 'generalDescription':
-          return (
-            <div className="flex flex-col">
-              <p className="text-bold text-small capitalize">{cellValue}</p>
-              {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
-            </div>
-          );
+      case 'generalDescription':
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize">{cellValue}</p>
+            {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
+          </div>
+        );
       case 'class':
         return (
           <div className="flex flex-col">
@@ -426,9 +461,9 @@ const ManagementAssessmentGrading = (nav) => {
 
       case 'action':
         const disc = replaceCharacters(assessment.action.description);
-        const urlcreate = statusFilter === 0 ?`/admin/management-grading/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id }/rubric/${assessment.action.rubric_id}?FilterScore=0`
-        :
-        `/admin/management-grading/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id }/rubric/${assessment.action.rubric_id}`
+        const urlcreate = statusFilter === 0 ? `/admin/management-grading/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}?FilterScore=0`
+          :
+          `/admin/management-grading/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
 
         return (
           <div className="flex items-center justify-center w-full gap-2">
@@ -456,10 +491,10 @@ const ManagementAssessmentGrading = (nav) => {
                   size="sm"
                   className='bg-[#FF9908]'
                   onClick={() => handleNavigate(
-                    statusFilter === 0? 
-                    `/admin/management-grading/update/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id }/rubric/${assessment.action.rubric_id}?FilterScore=0`
-                    : 
-                    `/admin/management-grading/update/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id }/rubric/${assessment.action.rubric_id}`
+                    statusFilter === 0 ?
+                      `/admin/management-grading/update/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}?FilterScore=0`
+                      :
+                      `/admin/management-grading/update/${disc}/student-code/${assessment.action.studentCode}/assessment/${assessment.action.assessment_id}/rubric/${assessment.action.rubric_id}`
 
                   )}
                 >
@@ -474,7 +509,7 @@ const ManagementAssessmentGrading = (nav) => {
                 radius="full"
                 size="sm"
                 className='bg-[#FF8077]'
-                onClick={() => { onOpen(); setDeleteId(assessment.action.assessment_id ) }}
+                onClick={() => { onOpen(); setDeleteId(assessment.action.assessment_id) }}
               >
                 {/* ; */}
                 <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
@@ -487,8 +522,8 @@ const ManagementAssessmentGrading = (nav) => {
         return cellValue;
     }
   }, []);
- 
-  
+
+
   const getStudentCode = (data, key) => {
     for (let item of data) {
       // && item.totalScore === 0
@@ -506,7 +541,7 @@ const ManagementAssessmentGrading = (nav) => {
     for (let item of data) {
       if (item.id === key) {
         return {
-          assessment_id : key,
+          assessment_id: key,
           totalScore: item.totalScore,
           checktotalScore: item.totalScore === 0 ? true : false
         };
@@ -555,12 +590,42 @@ const ManagementAssessmentGrading = (nav) => {
       // console.log(studentCodesString);
       // console.log("disc");
       // console.log(disc);
-      const url = statusFilter === 0? `/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}&&FilterScore=0` : `/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}`
+      const url = statusFilter === 0 ? `/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}&&FilterScore=0` : `/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}`
       navigate(url);
     }, 100);
   };
 
- 
+  const handleDownloadTemplateExcel = async () => {
+
+    const assessmentMetaIds = assessments.map(item => item.meta_assessment_id);
+    if (assessmentMetaIds.length === 0) {
+      message.error(`Không tồn tại sinh viên`);
+    }
+
+    try {
+      const data = { id: assessmentMetaIds };
+      console.log("data");
+      console.log(data);
+      const response = await axiosAdmin.post('meta-assessment/templates/data', { data: data }, {
+        responseType: 'blob'
+      });
+
+
+      if (response && response.data) {
+        const url = window.URL.createObjectURL(response.data);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'UpdateDescription.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  };
+
+
 
   const onRowsPerPageChange = React.useCallback((e) => {
     setRowsPerPage(Number(e.target.value));
@@ -659,7 +724,7 @@ const ManagementAssessmentGrading = (nav) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const handleSoftDelete = async () => {
     const data = {
-      assessment_id : Array.from(selectedKeys),
+      assessment_id: Array.from(selectedKeys),
     };
     console.log(data)
     try {
@@ -720,6 +785,7 @@ const ManagementAssessmentGrading = (nav) => {
             >
               Deletes
             </Button>
+
           </div>
 
 
@@ -794,6 +860,32 @@ const ManagementAssessmentGrading = (nav) => {
                 ))}
               </DropdownMenu>
             </Dropdown>
+            <Dropdown>
+                            <DropdownTrigger className="sm:flex">
+                                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                                    Filter by PLO
+                                </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu
+                                aria-label="Filter by PLO"
+                                closeOnSelect={true}
+                                selectedKeys={new Set([descriptionFilter])} // Chuyển đổi descriptionFilter thành Set
+                                selectionMode="single"
+                                onSelectionChange={(keys) => {
+                                    const selectedKey = Array.from(keys)[0] || ''; // Đảm bảo chọn giá trị rỗng nếu không có lựa chọn
+                                    setDescriptionFilter(selectedKey);
+                                }}
+                            >
+                                <DropdownItem key="" className="capitalize">
+                                    All PLOs
+                                </DropdownItem>
+                                {uniqueSortedDisription.map((ploName) => (
+                                    <DropdownItem key={ploName} className="capitalize">
+                                        {ploName}
+                                    </DropdownItem>
+                                ))}
+                            </DropdownMenu>
+                        </Dropdown>
           </div>
 
         </div>
@@ -847,6 +939,73 @@ const ManagementAssessmentGrading = (nav) => {
           )}
         </TableBody>
       </Table>
+      <div className="flex flex-wrap gap-6 justify-center items-start">
+
+
+        <div className="flex flex-col bg-white shadow-md rounded-lg p-4 justify-center items-center w-full md:w-auto">
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">Tải Mẫu CSV</h3>
+          <Button
+            className="bg-sky-500 text-white w-[125px] disabled:opacity-50"
+            onClick={handleDownloadTemplateExcel}
+          //disabled={!newRubric.rubric_id}
+          >
+            Tải Sinh viên
+          </Button>
+        </div>
+
+
+
+
+        <div className="flex flex-col bg-white shadow-md rounded-lg p-4 justify-center items-center w-full md:w-auto">
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">Upload File</h3>
+          <label htmlFor="file-upload" className="cursor-pointer w-[125px]">
+            <Button className="w-full bg-blue-500 text-white" auto flat as="span" color="primary">
+              Chọn file
+            </Button>
+          </label>
+          <input
+            id="file-upload"
+            type="file"
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+            multiple
+          />
+          {fileList.length > 0 && (
+            <div className="mt-2 w-full">
+              <ul className="space-y-2">
+                {fileList.map((file, index) => (
+                  <li
+                    key={index}
+                    className="flex justify-between items-center bg-gray-100 p-2 rounded-md"
+                  >
+                    <p className="text-gray-700">{file.name}</p>
+                    <Button
+                      auto
+                      flat
+                      color="error"
+                      size="xs"
+                      className="bg-red-500 text-white px-2 py-1 rounded-md"
+                      onClick={() => handleRemoveFile(index)}
+                    >
+                      X
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col bg-white shadow-md rounded-lg p-4 justify-center items-center w-full md:w-auto">
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">Lưu file</h3>
+          <CustomUpload
+            endpoint={'/meta-assessment/updateDescription'}
+            fileList={fileList}
+            setFileList={setFileList}
+            LoadData={loadTeachers}
+          />
+        </div>
+      </div>
       <ModalCreateOneAssessment
         isOpen={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}

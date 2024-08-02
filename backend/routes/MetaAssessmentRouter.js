@@ -13,6 +13,8 @@ router.patch('/meta-assessment/:id', MetaAssessmentController.updateDescription)
 router.put('/meta-assessment/:id', MetaAssessmentController.update);
 router.delete('/meta-assessment/:id', MetaAssessmentController.delete);
 
+router.post('/meta-assessment/templates/data', MetaAssessmentController.getFormUpdateDescriptionExcel);
+
 // Các route khác có thể thêm vào ở đây nếu cần
 // Ví dụ, các route để thay đổi trạng thái isDelete, nếu cần
 // router.get('/meta-assessments/isDelete/true', MetaAssessmentController.isDeleteToTrue);
