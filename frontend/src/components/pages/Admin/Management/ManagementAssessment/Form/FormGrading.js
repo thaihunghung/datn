@@ -191,7 +191,7 @@ const FormGrading = (nav) => {
   //   }
   // };
   useEffect(() => {
-    if(Assessment?.MetaAssessment?.teacher_id === teacher_id){
+    if(parseInt(Assessment?.MetaAssessment?.teacher_id)===parseInt(teacher_id)){
       setCurrentTeacher(true)
     }
   }, [teacher_id, Assessment]);
@@ -296,7 +296,7 @@ const FormGrading = (nav) => {
             <Button 
               color="primary" 
               className="w-fit p-5 mt-3"
-              isDisabled={CurrentTeacher}
+              isDisabled={!CurrentTeacher}
               onPress={handleUpdateTopic}
             >
               Update Topic

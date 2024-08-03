@@ -268,11 +268,6 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
     }
   }, [handleNavigate, onOpen, setDeleteId]);
   
-  
-
-
-
-
   const getAllRubricIsDeleteFalse = useCallback(async () => {
     try {
       const response = await axiosAdmin.get(`/rubrics/checkScore?teacher_id=${teacher_id}&isDelete=false`);
@@ -339,16 +334,6 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
   useEffect(() => {
     loadAssessment();
   }, [loadAssessment, page, rowsPerPage, filterValue, teacher_id]);
-
-
-
-
-
-
-
-
-
-
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -490,7 +475,6 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
         onOpenChange={setIsAddModalOpen}
         load={loadAssessment}
       />
-
       <ModalOpenPdf
         isOpen={isAddModalOpenPDF}
         onOpenChange={setIsAddModalOpenPDF}
@@ -498,7 +482,6 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
         DataRubric={DataRubricPDF}
         DataRubricItems={DataRubricItems}
       />
-
       <ModalUpdateAssessment
         isOpen={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
@@ -508,7 +491,6 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
         DataCourse={DataCourse}
         filterRubicData={filterRubicData}
       />
-
       <ModalConfirmAction
         onOpenChange={onOpenChange}
         isOpen={isOpen}
@@ -520,7 +502,6 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
           }
         }}
       />
-
       <ModalAllot
         isOpen={isModalallot}
         onOpenChange={setIsModalallot}
@@ -533,7 +514,7 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
           <div>
             <h1 className="text-2xl pb-2 font-bold text-[#6366F1]">Danh sách Assessments</h1>
           </div>
-          <BackButton />
+          <BackButton path={'/admin'}/>
         </div>
         <div className='w-full sm:w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-start items-center flex gap-4 flex-col mb-4'>
           <div className='flex justify-center w-full flex-wrap items-center gap-1'>
@@ -561,7 +542,7 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
                 size="sm"
                 className="bg-[#AF84DD]"
                 onClick={() => { 
-                 handleNavigate('/admin/management-grading/100000_it31_khai_pha_du_lieu_da20ttb_bbb_2024_1_1/?description=100000%20-%20IT31_Khái%20phá%20dữ%20liệu%20DA20TTB_bbb_2024-1-1')
+                 handleNavigate('/admin/management-grading/100004_it31_khai_pha_du_lieu_da21tta_dd_2024_1_1/?description=100004%20-%20IT31_Khai%20phá%20dữ%20liệu%20DA21TTA_dd_2024-1-1')
 
                  }}
               >

@@ -36,8 +36,8 @@ const statusColorMap = {
   paused: 'danger',
   vacation: 'warning',
 };
-const INITIAL_VISIBLE_COLUMNS = ['totalScore', 'action', 'class', 'student'];
-const COMPACT_VISIBLE_COLUMNS = ['student', 'action'];
+const INITIAL_VISIBLE_COLUMNS = ['totalScore', 'action', 'class', 'student', 'description'];
+const COMPACT_VISIBLE_COLUMNS = ['student', 'action', 'description'];
 
 const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
   UseTeacherAuth();
@@ -676,7 +676,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
     <>
       <div className='w-full flex justify-between'>
         <div className='h-full my-auto p-5 hidden sm:block'>
-          <BackButton />
+        <BackButton path={'/admin/management-grading/list'}/>
         </div>
         <div className='w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-start items-center flex gap-4 flex-col mb-4'>
           <div className='flex justify-center w-full flex-wrap items-center gap-1'>
@@ -709,7 +709,6 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
             </Button>
 
           </div>
-
 
           <div className='flex gap-1 justify-start'>
             <Dropdown>

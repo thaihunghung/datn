@@ -18,11 +18,12 @@ import { ChevronDownIcon } from "../../../../../../public/ChevronDownIcon";
 
 const FormMultipleGrading = ({ setCollapsedNav }) => {
 
+  const { Option } = Select;
   const [selectedValues1, setSelectedValues1] = useState([]);
   const [selectedValues2, setSelectedValues2] = useState([]);
   const [selectedValues3, setSelectedValues3] = useState([]);
   const [selectedValues4, setSelectedValues4] = useState([]);
-  // const [RubicData, setRubicData] = useState([]);
+  const [RubicData, setRubicData] = useState([]);
   const [RubicItemsData, setRubicItemsData] = useState([]);
   const [totalScore1, setTotalScore1] = useState(0);
   const [totalScore2, setTotalScore2] = useState(0);
@@ -384,6 +385,8 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
       return { valid: true, studentIds };
     };
 
+    let allStudentIds = [];
+
     switch (Student.length) {
       case 1:
         {
@@ -658,7 +661,7 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
     try {
       const response = await axiosAdmin.get(`/rubric/${rubric_id}/items?isDelete=false`);
       //console.log(response.data);
-     // setRubicData(response.data.rubric)
+      setRubicData(response.data.rubric)
       setRubicItemsData(response.data.rubric.rubricItems)
       const data = response.data.rubric.rubricItems
       setValue1(data)
@@ -728,8 +731,11 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
       setTotalScore4(0)
       //console.log("List of Student IDs:", listStudentIds);
     }
-  }, [Student, Assessment, GetRubricData]);
+  }, [Student, Assessment]);
 
+  function replaceUnderscoresWithSpaces(description) {
+    return description.replace(/_/g, " ");
+  }
   const [isModalWhenSaveOpen, setIsModalWhenSaveOpen] = useState(false);
   useEffect(() => {
 
@@ -765,7 +771,7 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
   return (
     <div className="w-full p-2 pb-[100px] py-0 flex flex-col leading-6">
       <div className="w-full min-h-[200px] bg-[#FEFEFE] border border-slate-300 shadow-lg rounded-md mb-2 p-4">
-        <h1 className="text-xl font-bold mb-2 text-[#6366F1]">{Assessment[0]?.description}</h1>
+        <h1 className="text-xl font-bold mb-2 text-[#6366F1] uppercase">{Assessment[0]?.description}</h1>
         <div className='text-left w-full font-bold'>Chọn sinh viên</div>
         <div className="w-full flex items-center justify-start">
           <Select
@@ -1296,7 +1302,7 @@ function ModalWhenSave({
             <ModalBody>
               <div className="flex flex-col items-center h-full text-base w-full">
                 {/* Assessment Description */}
-                <h1 className="text-2xl text-center font-bold mb-4 text-[#6366F1]">
+                <h1 className="text-2xl text-center font-bold mb-4 text-[#6366F1] uppercase">
                   {assessment[0]?.description}
                 </h1>
                 <Divider className="my-4" />
