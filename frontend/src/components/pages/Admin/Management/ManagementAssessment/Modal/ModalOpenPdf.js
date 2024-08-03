@@ -17,7 +17,7 @@ import {
     ModalFooter,
     Spinner,
 } from "@nextui-org/react";
-import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import { axiosAdmin } from "../../../../../../service/AxiosAdmin";
 
 import { FaPortrait, FaArrowsAltH, FaArrowsAltV } from 'react-icons/fa';
 

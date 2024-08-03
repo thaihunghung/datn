@@ -1,27 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Select, SelectItem, Button, Textarea, } from "@nextui-org/react";
 
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Select,
-  SelectItem,
-  Button,
-  Textarea,
-} from "@nextui-org/react";
-import { axiosAdmin } from '../../../../../service/AxiosAdmin';
 import Cookies from "js-cookie";
-import { Await, Navigate } from 'react-router-dom';
-import { fetchDataGetMetaIdByGeneralDescription } from './Data/DataAssessment';
-import { message } from 'antd';
 
-function ModalAllot({
-  isOpen,
-  onOpenChange,
-  generalDescription
-}) {
+import { fetchDataGetMetaIdByGeneralDescription } from '../Data/DataAssessment';
+import { message } from 'antd';
+import { axiosAdmin } from '../../../../../../service/AxiosAdmin';
+
+function ModalAllot({ isOpen, onOpenChange, generalDescription, loadData}) {
   const [selectedTodoIds, setSelectedTodoIds] = useState([]);
   const [todoDescriptions, setTodoDescriptions] = useState('');
   const [currentList, setCurrentList] = useState('');
@@ -118,50 +105,53 @@ function ModalAllot({
   };
 
 
-  const functionSave = async (teacher_id) => {
+  const functionSave = async (teacherId, metaAssessments) => {
     try {
-      for (const assessment of MetaAssessment) {
+      const requests = metaAssessments.map(assessment => {
         const data = {
           meta_assessment_id: assessment.meta_assessment_id,
-          teacher_id: teacher_id
+          teacher_id: teacherId
         };
-        console.log("data");
-        console.log(data);
-        await axiosAdmin.post('/assessment', {data:data});
-      }
+        console.log("data", data);
+        return axiosAdmin.post('/assessment', { data });
+      });
+  
+      // Wait for all requests to complete
+      await Promise.all(requests);
     } catch (e) {
       console.error("Error saving assessment:", e);
       message.error("Lỗi khi lưu phân công");
     }
   };
-
+  
   const handleAssign = async () => {
-    const namesArray = currentList.split('\n').filter(name => name.trim() !== '');
-
-    // Hiển thị mảng tên ra console
-    console.log("Assigned to current list:");
-    console.log(namesArray);
-
+    const namesArray = currentList.split('\n').map(name => name.trim()).filter(name => name !== '');
     const assignedIds = TeacherData
       .filter(teacher => namesArray.includes(teacher.name))
       .map(teacher => teacher.id);
-
+  
     if (assignedIds.length === 0) {
       message.error("Chưa chọn thêm giáo viên");
       return;
     }
-
-    // Thêm teacher_id vào danh sách assignedIds
+  
+    // Add teacher_id to the list if not already included
     if (teacher_id && !assignedIds.includes(parseInt(teacher_id))) {
       assignedIds.push(parseInt(teacher_id));
     }
-    console.log("assignedIds: " + assignedIds);
-    // Gọi functionSave cho từng teacher_id trong assignedIds
-    for (const id of assignedIds) {
-      await functionSave(id);
+  
+    // Create a list of promises for saving assessments
+    const savePromises = assignedIds.map(id => functionSave(id, MetaAssessment));
+  
+    // Execute all save promises concurrently
+    try {
+      await Promise.all(savePromises);
+      message.success("Phân công thành công");
+      loadData();
+    } catch (error) {
+      console.error("Error in handleAssign:", error);
+      message.error("Lỗi khi phân công");
     }
-
-    message.success("Phân công thành công");
   };
 
 

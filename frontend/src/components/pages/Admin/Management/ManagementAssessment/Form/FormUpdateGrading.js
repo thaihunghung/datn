@@ -1,25 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { message } from 'antd';
 
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Modal, Button, Text, Slider, Tooltip } from "@nextui-org/react";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Modal, Button, Slider, Tooltip } from "@nextui-org/react";
 import { ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@nextui-org/react';
 
 import { Collapse } from 'antd';
 
-import "./FormGrading.css"
-import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import "../css/FormGrading.css"
+import { axiosAdmin } from "../../../../../../service/AxiosAdmin";
 import { useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
-import { ChevronDownIcon } from "../../../../../public/ChevronDownIcon";
-import BackButton from "../../Utils/BackButton/BackButton";
+import { ChevronDownIcon } from "../../../../../../public/ChevronDownIcon";
 
-const UpdateFormGrading = (nav) => {
+import BackButton from "../../../Utils/BackButton/BackButton";
+
+const FormUpdateGrading = (nav) => {
 
   const { setCollapsedNav } = nav;
 
   const [selectedValues, setSelectedValues] = useState([]); // Initialize as array
-
   const [RubicData, setRubicData] = useState([]);
   const [RubicItemsData, setRubicItemsData] = useState([]);
   const [totalScore, setTotalScore] = useState(0);
@@ -83,12 +83,9 @@ const UpdateFormGrading = (nav) => {
   const isContainerHidden = !showAny;
 
 
-
-
-
-
-
-
+  const handleNavigate = (path) => {
+    navigate(path);
+  };
   const { description } = useParams();
 
   const navigate = useNavigate();
@@ -97,6 +94,47 @@ const UpdateFormGrading = (nav) => {
   if (!teacher_id) {
     navigate('/login');
   }
+  
+  const [Assessment, setAssessment] = useState({});
+
+
+
+
+
+
+
+  const handleSave = async () => {
+    // console.log('Updated values', selectedValues);
+    // console.log('totalScore', totalScore);
+
+    try {
+      const data = { totalScore: totalScore }
+
+      await axiosAdmin.put(`/assessment/${assessment_id}/totalScore`, { data: data })
+      const dataAssessmentItem = selectedValues.map(item => {
+        const { maxScore, CheckGrading, ...rest } = item;
+        return {
+          ...rest,
+          assessmentScore: maxScore
+        };
+      });
+
+      for (const item of dataAssessmentItem) {
+        const { assessmentItem_id, ...dataToUpdate } = item;
+        try {
+          await axiosAdmin.put(`/assessment-item/${assessmentItem_id}`, { data: dataToUpdate });
+        } catch (error) {
+          console.error(`Error updating assessment item with id ${assessmentItem_id}:`, error);
+          // Handle error as needed
+        }
+      }
+      message.success("update success")
+      setIsModalWhenSaveOpen(true);
+    } catch (e) {
+      console.error(e);
+      message.error('Error saving data');
+    }
+  };
 
   const handleSliderChange = (index, value, rubricsItem_id, assessmentItem_id) => {
     console.log('index: ', index)
@@ -134,81 +172,67 @@ const UpdateFormGrading = (nav) => {
     });
   };
 
-  const handleSave = async () => {
-    // console.log('Updated values', selectedValues);
-    // console.log('totalScore', totalScore);
+  
 
-    try {
-      const data = { totalScore: totalScore }
-
-      await axiosAdmin.put(`/assessment/${assessment_id}/totalScore`, { data: data })
-      const dataAssessmentItem = selectedValues.map(item => {
-        const { maxScore, CheckGrading, ...rest } = item;
-        return {
-          ...rest,
-          assessmentScore: maxScore
-        };
-      });
-
-      for (const item of dataAssessmentItem) {
-        const { assessmentItem_id, ...dataToUpdate } = item;
-        try {
-          await axiosAdmin.put(`/assessment-item/${assessmentItem_id}`, { data: dataToUpdate });
-        } catch (error) {
-          console.error(`Error updating assessment item with id ${assessmentItem_id}:`, error);
-          // Handle error as needed
-        }
-      }
-      message.success("update success")
-      setIsModalWhenSaveOpen(true);
-    } catch (e) {
-      console.error(e);
-      message.error('Error saving data');
+  const setValue = useCallback((data) => {
+    if (!data || data.length === 0) {
+      console.warn('No data available to process.');
+      return;
     }
-  };
-
-  const setValue = (data) => {
+  
     const updatedPoData = data.map((subject) => {
+      const assessmentItem = subject?.AssessmentItems?.[0] || {};
       return {
-        assessmentItem_id: subject?.AssessmentItems[0]?.assessmentItem_id,
-        assessment_id: assessment_id,
-        rubricsItem_id: subject?.rubricsItem_id,
-        maxScore: subject?.AssessmentItems[0]?.assessmentScore,
+        assessmentItem_id: assessmentItem?.assessmentItem_id || null,
+        assessment_id: assessment_id || null,
+        rubricsItem_id: subject?.rubricsItem_id || null,
+        maxScore: assessmentItem?.assessmentScore || 0.0,
         CheckGrading: true,
       };
     });
+  
     console.log(updatedPoData);
     setSelectedValues(updatedPoData);
-  }
-  const GetRubricData = async () => {
+  }, [assessment_id, setSelectedValues]);
+  
+  const GetRubricData = useCallback(async () => {
     try {
-      // /assessments/:assessment_id/items
-
+      // Gọi API để lấy dữ liệu rubric
       const response = await axiosAdmin.get(`/assessment/${assessment_id}/items`);
-      console.log("response?.data");
-      console.log(response?.data);
-      setRubicData(response?.data?.MetaAssessment?.Rubric)
-      setRubicItemsData(response?.data?.MetaAssessment?.Rubric?.RubricItems)
-      // console.log("assessment")
-      // console.log(response?.data?.MetaAssessment?.Rubric?.RubricItems[0].AssessmentItems[0].assessmentScore)
-      // console.log("RubricItems")
-      // console.log(response?.data?.MetaAssessment?.Rubric?.RubricItems[0]?.rubricsItem_id)
-
-      handleSliderChange(0, response?.data?.MetaAssessment?.Rubric?.RubricItems[0].AssessmentItems[0]?.assessmentScore, response?.data?.MetaAssessment?.Rubric?.RubricItems[0]?.rubricsItem_id)
+      console.log("response?.data", response?.data);
       
-      const data = response?.data?.MetaAssessment?.Rubric?.RubricItems
-      setValue(data)
-
+      const rubric = response?.data?.MetaAssessment?.Rubric;
+      const rubricItems = rubric?.RubricItems;
+  
+      if (rubric && rubricItems) {
+        // Cập nhật state với dữ liệu rubric
+        setRubicData(rubric);
+        setRubicItemsData(rubricItems);
+  
+        // Xử lý dữ liệu nếu có
+        if (rubricItems.length > 0) {
+          const firstItem = rubricItems[0];
+          const firstAssessmentItem = firstItem.AssessmentItems[0];
+          handleSliderChange(
+            0,
+            firstAssessmentItem?.assessmentScore,
+            firstItem?.rubricsItem_id
+          );
+  
+          // Cập nhật giá trị
+          setValue(rubricItems);
+        }
+      } else {
+        console.error("Rubric data is missing from the response");
+      }
     } catch (error) {
       console.error('Error fetching rubric data:', error);
-      throw error;
     }
-  };
-  const handleNavigate = (path) => {
-    navigate(path);
-  };
-  const [Assessment, setAssessment] = useState({});
-  const getAssessments = async () => {
+  }, [assessment_id, handleSliderChange, setValue, setRubicData, setRubicItemsData]);
+  
+
+
+  const getAssessments = useCallback(async () => {
     try {
 
       const response = await axiosAdmin.get(`/assessment/${assessment_id}`);
@@ -220,40 +244,41 @@ const UpdateFormGrading = (nav) => {
       console.error('Error fetching rubric data:', error);
       throw error;
     }
-  };
-
+  }, [assessment_id]);
+  const handleResize = useCallback(() => {
+    if (window.innerWidth < 768) {
+      setShowCLO(true);
+      setShowPLO(false);
+      setShowChapter(false);
+      setVisibleColumns(new Set(['clo']));
+    } else {
+      setShowCLO(true);
+      setShowPLO(true);
+      setShowChapter(true);
+      setVisibleColumns(new Set(['clo', 'plo', 'chapter']));
+    }
+  }, []);
+  
   useEffect(() => {
     if (setCheck === 0) {
       setTotalScore(0);
       setdefaultValue(0);
     }
-    GetRubricData()
-    getAssessments()
-
+    GetRubricData();
+    getAssessments();
+  
     setCollapsedNav(true);
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-
-        setShowCLO(true);
-        setShowPLO(false);
-        setShowChapter(false);
-        setVisibleColumns(new Set(['clo']));
-      } else {
-
-        setShowCLO(true);
-        setShowPLO(true);
-        setShowChapter(true);
-        setVisibleColumns(new Set(['clo', 'plo', 'chapter']));
-      }
-    };
-
-    handleResize();
+    handleResize(); // Ensure it runs on component mount
+  
     window.addEventListener("resize", handleResize);
-
+  
     return () => {
       window.removeEventListener("resize", handleResize); // Cleanup
     };
-  }, []);
+  }, [GetRubricData, getAssessments, handleResize, setCheck, setCollapsedNav]);
+
+
+
   const [isModalWhenSaveOpen, setIsModalWhenSaveOpen] = useState(false);
 
   return (
@@ -454,7 +479,7 @@ const UpdateFormGrading = (nav) => {
                 </div>
 
                 <div className={`w-full ${isContainerHidden ? 'lg:w-full' : ''} ${showAtLeastTwo ? 'lg:w-[60%]' : ''} ${showAllThree ? 'lg:w-[20%]' : ''}`}>
-                  <div className="flex flex-col hidden sm:hidden lg:block xl:block text-justify leading-8 p-4" dangerouslySetInnerHTML={{ __html: item.description }} />
+                  <div className="hidden sm:hidden lg:block xl:block text-justify leading-8 p-4" dangerouslySetInnerHTML={{ __html: item.description }} />
                   <div className="block sm:block lg:hidden xl:hidden">
                     <Collapse
                       items={[
@@ -768,7 +793,7 @@ const UpdateFormGrading = (nav) => {
     </div>
   )
 }
-export default UpdateFormGrading
+export default FormUpdateGrading
 
 function ModalWhenSave({
   isOpen,

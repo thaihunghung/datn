@@ -6,15 +6,14 @@ import { Tooltip, message } from 'antd';
 import {
     Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input,
     Button, DropdownTrigger, Dropdown, DropdownMenu, DropdownItem, Pagination,
-}
-    from '@nextui-org/react';
+} from '@nextui-org/react';
 import { Modal, Chip, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-import { PlusIcon } from "../../../../../public/PlusIcon";
+import { PlusIcon, ChevronDownIcon } from "../../../../../public/Icon/Icon";
 
-import { ChevronDownIcon } from "../../../../../public/ChevronDownIcon";
 import { capitalize } from '../../Utils/capitalize';
 import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import Cookies from "js-cookie";
+
 import { columns, fetchRubricItemsData } from "./DataRubricItems";
 import CreateRubicItems from "./CreateRubicItems";
 import BackButton from "../../Utils/BackButton/BackButton";

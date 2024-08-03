@@ -46,22 +46,22 @@ import View from '../components/pages/Admin/Management/ManagementRubric/View';
 import ManagementAssessment from '../components/pages/Admin/Management/ManagementAssessment/ManagementAssessment';
 import StoreRubicItems from '../components/pages/Admin/Management/ManagementRubric/StoreRubicItems';
 import DetailCourse from '../components/pages/Admin/Management/ManagementCourse/DetailCourse/DetailCourse';
-import CreateAssessment from '../components/pages/Admin/Management/ManagementAssessment/CreateAssessment';
 import Login from '../components/pages/Admin/Login/Login';
 import UpdateRubricById from '../components/pages/Admin/Management/ManagementRubric/UpdateRubricById';
 import ManagementAssessmentGrading from '../components/pages/Admin/Management/ManagementAssessment/ManagementAssessmentGrading';
-import FormGrading from '../components/pages/Admin/Management/ManagementAssessment/FormGrading';
 import Teacher from '../components/pages/Admin/Management/ManagementTeacher/Teacher';
 import StoreTeacher from '../components/pages/Admin/Management/ManagementTeacher/StoreTeacher/StoreTeacher';
 import TeacherProfile from '../components/pages/Admin/Management/ManagementTeacher/DetailTeacher/TeacherProfile';
 import Dashboard from '../components/pages/Admin/DashBoard/Dashboard';
-import UpdateFormGrading from '../components/pages/Admin/Management/ManagementAssessment/UpdateFormGrading';
-import FormMultipleGrading from '../components/pages/Admin/Management/ManagementAssessment/FormMultipleGrading';
 import StoreClass from '../components/pages/Admin/Management/ManagementClass/StoreClass/StoreClass';
 import ProfileStudent from '../components/pages/Admin/Management/ManagementStudent/Profile/ProfileStudent';
 import StoreCourse from '../components/pages/Admin/Management/ManagementCourse/StoreCourse/StoreCourse';
 import NotFound from '../components/pages/Admin/Utils/NotFoundPage/NotFound';
 import ManagementAssessmentStore from '../components/pages/Admin/Management/ManagementAssessment/ManagementAssessmentStore';
+import FormUpdateGrading from '../components/pages/Admin/Management/ManagementAssessment/Form/FormUpdateGrading';
+import FormMultipleGrading from '../components/pages/Admin/Management/ManagementAssessment/Form/FormMultipleGrading';
+import FormGrading from '../components/pages/Admin/Management/ManagementAssessment/Form/FormGrading';
+
 
 function Admin({ user }) {
   const [collapsedNav, setCollapsedNav] = useState(false);
@@ -145,9 +145,8 @@ function Admin({ user }) {
           <Route path="/management-grading/:description" element={<ManagementAssessmentGrading collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />          
           <Route path="/management-grading/:description/student-code/:studentCode/assessment/:assessment_id/rubric/:rubric_id" element={<FormGrading collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
 
-          <Route path="/management-grading/create" element={<CreateAssessment collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
           <Route path="/management-grading" element={<ManagementAssessment collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
-          <Route path="/management-grading/update/:description/student-code/:studentCode/assessment/:assessment_id/rubric/:rubric_id" element={<UpdateFormGrading collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
+          <Route path="/management-grading/update/:description/student-code/:studentCode/assessment/:assessment_id/rubric/:rubric_id" element={<FormUpdateGrading collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
           {/* lưu ý */}
           <Route path="/management-grading/:description/couse/:couse_id/rubric/:rubric_id" element={<FormMultipleGrading collapsedNav={collapsedNav} setCollapsedNav={setCollapsedNav} successNoti={successNoti} errorNoti={errorNoti} setSpinning={setSpinning} />} />
 

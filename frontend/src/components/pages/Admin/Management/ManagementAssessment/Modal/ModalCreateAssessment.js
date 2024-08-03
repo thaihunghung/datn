@@ -17,10 +17,10 @@ import {
     DateInput,
     Divider,
 } from "@nextui-org/react";
-import { axiosAdmin } from "../../../../../service/AxiosAdmin";
-import CustomUpload from "../../CustomUpload/CustomUpload";
-import CustomDatePicker from "../../Utils/CustomDatePicker/CustomDatePicker";
+
+import CustomUpload from "../../../CustomUpload/CustomUpload";
 import { CalendarDate } from "@internationalized/date";
+import { axiosAdmin } from "../../../../../../service/AxiosAdmin";
 
 const ModalCreateAssessment = ({
     isOpen,

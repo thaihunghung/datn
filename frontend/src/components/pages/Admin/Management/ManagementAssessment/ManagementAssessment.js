@@ -1,73 +1,302 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Input,
-  Button,
-  DropdownTrigger,
-  Dropdown,
-  DropdownMenu,
-  DropdownItem,
-  Chip,
-  Pagination,
+  Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
+  Input, Button, DropdownTrigger, Dropdown, DropdownMenu, DropdownItem,
+  Pagination, useDisclosure
 } from '@nextui-org/react';
-import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
-import { Tooltip, message } from 'antd';
-import slugify from 'slugify';
-import { Flex, Progress } from 'antd';
-
-import { PlusIcon } from '../../../../../public/PlusIcon';
-import { SearchIcon } from '../../../../../public/SearchIcon';
-
-import { columns, fetchAssessmentData, fetchDataGetMetaIdByGeneralDescription } from './Data/DataAssessment';
+import { Tooltip, message, Flex, Progress } from 'antd';
+import { PlusIcon, SearchIcon, ChevronDownIcon } from '../../../../../public/Icon/Icon';
+import { columns, fetchAssessmentData } from './Data/DataAssessment';
 import { capitalize } from '../../Utils/capitalize';
 
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import Cookies from "js-cookie";
 import BackButton from '../../Utils/BackButton/BackButton';
 import { axiosAdmin } from '../../../../../service/AxiosAdmin';
-import ModalCreateAssessment from './ModalCreateAssessment';
-import ModalUpdateAssessment from './ModalUpdateAssessment';
-import ModalOpenPdf from './ModalOpenPdf';
-import { Select, Container } from '@nextui-org/react';
-import ModalAllot from './ModalAllot';
-import { ChevronDownIcon } from '../../../../../public/ChevronDownIcon';
-
-const statusColorMap = {
-  active: 'success',
-  paused: 'danger',
-  vacation: 'warning',
-};
+import ModalCreateAssessment from './Modal/ModalCreateAssessment';
+import ModalUpdateAssessment from './Modal/ModalUpdateAssessment';
+import ModalOpenPdf from './Modal/ModalOpenPdf';
+import ModalAllot from './Modal/ModalAllot';
+import { UseNavigate, UseTeacherAuth, UseTeacherId } from '../../../../../hooks';
+import { ModalConfirmAction } from './Modal/ModalConfirmAction';
+import { handleReplaceCharacters } from '../../Utils/Utils';
 
 const INITIAL_VISIBLE_COLUMNS = ['generalDescription', 'status', 'courseName', 'Phân công', 'action'];
 const COMPACT_VISIBLE_COLUMNS = ['generalDescription', 'status', 'Phân công', 'action'];
+const TextConfirm = 'Assessment sẽ được chuyển vào Kho lưu trữ và có thể khôi phục lại, tiếp tục thao tác?'
 
-const ManagementAssessment = (nav) => {
-  const { setCollapsedNav } = nav;
-  const location = useLocation();
-  const navigate = useNavigate();
-  const searchParams = new URLSearchParams(location.search);
-  const descriptionString = searchParams.get('description');
-  let descriptionURL;
+const ManagementAssessment = ({ setCollapsedNav }) => {
+  UseTeacherAuth();
+  const teacher_id = UseTeacherId();
+  const handleNavigate = UseNavigate();
 
-  if (descriptionString) {
-    try {
-      const decodedDescription = decodeURIComponent(descriptionString);
-      descriptionURL = decodedDescription;
-      // console.log(descriptionURL); // Logging the result
-    } catch (error) {
-      console.error('Error processing description:', error);
+  const [assessments, setAssessment] = useState([]);
+  const [filterValue, setFilterValue] = useState('');
+  const [GeneralDescription, setGeneralDescription] = useState('');
+
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isAddModalOpenPDF, setIsAddModalOpenPDF] = useState(false);
+  const [isModalallot, setIsModalallot] = useState(false);
+
+  const [editPDF, setEditPDF] = useState({});
+  const [DataRubricPDF, setRubicDataPDF] = useState({});
+  const [DataRubricItems, setDataRubricItems] = useState([]);
+  const [DataCourse, setCourseByTeacher] = useState([]);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editRubric, setEditRubric] = useState({
+    course_id: '',
+    rubric_id: '',
+    description: '',
+    place: '',
+    date: ''
+  });
+  const [oldDescription, setOldDescription] = useState('')
+  const [filterRubicData, setfilterRubicData] = useState([]);
+  const [selectedKeys, setSelectedKeys] = useState(new Set());
+  const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [sortDescriptor, setSortDescriptor] = useState({column: 'age', direction: 'ascending',});
+  const [dateFilter, setDateFilter] = useState('newest');
+  const [page, setPage] = useState(1);
+  const pages = Math.ceil(assessments.length / rowsPerPage);
+  const hasSearchFilter = Boolean(filterValue);
+  const headerColumns = React.useMemo(() => {
+    if (visibleColumns === 'all') return columns;
+    return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
+  }, [visibleColumns]);
+  const filteredItems = React.useMemo(() => {
+    let filteredAssessment = [...assessments];
+
+    if (hasSearchFilter) {
+      filteredAssessment = filteredAssessment.filter((teacher) =>
+        teacher.courseName.toLowerCase().includes(filterValue.toLowerCase())
+      );
     }
-  }
 
-  const teacher_id = Cookies.get('teacher_id');
-  if (!teacher_id) {
-    navigate('/login');
-  }
+    if (dateFilter === 'newest') {
+      filteredAssessment.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } else if (dateFilter === 'oldest') {
+      filteredAssessment.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    }
+    return filteredAssessment;
+  }, [assessments, filterValue, dateFilter, hasSearchFilter]);
+  const handleSelectionChange = (keys) => {
+    // console.log('Keys:', keys);
+    if (keys === 'all') {
+      const startIndex = (page - 1) * rowsPerPage;
+      const endIndex = startIndex + rowsPerPage;
+      const currentPageUsers = filteredItems.slice(startIndex, endIndex).map(user => user.id.toString());
+      setSelectedKeys(prevKeys => {
+        const newKeys = new Set(currentPageUsers);
+        // console.log('Setting new keys:', Array.from(newKeys));
+        return newKeys;
+      });
+      return;
+    }
+
+    const keysArray = Array.isArray(keys) ? keys : Array.from(keys);
+    const validKeys = keysArray.filter(key => typeof key === 'string' && !isNaN(key));
+    //console.log('Valid Keys:', validKeys);
+    setSelectedKeys(prevKeys => {
+      const newKeys = new Set(validKeys);
+      // console.log('Setting new keys:', Array.from(newKeys));
+      return newKeys;
+    });
+  };
+  const items = React.useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    return filteredItems.slice(start, end);
+  }, [page, filteredItems, rowsPerPage]);
+  const sortedItems = React.useMemo(() => {
+    return [...items].sort((a, b) => {
+      const first = a[sortDescriptor.column];
+      const second = b[sortDescriptor.column];
+      const cmp = first < second ? -1 : first > second ? 1 : 0;
+      return sortDescriptor.direction === 'descending' ? -cmp : cmp;
+    });
+  }, [sortDescriptor, items]);
+  const onRowsPerPageChange = React.useCallback((e) => {
+    setRowsPerPage(Number(e.target.value));
+    setPage(1);
+  }, []);
+  const onSearchChange = React.useCallback((value) => {
+    if (value) {
+      setFilterValue(value);
+      setPage(1);
+    } else {
+      setFilterValue('');
+    }
+  }, []);
+  const bottomContent = React.useMemo(() => {
+    return (
+      <div className="py-2 px-2 flex justify-between items-center">
+        <p className="text-small">
+          {selectedKeys === 'all' ? 'All items selected' : `${selectedKeys.size} of ${assessments.length} selected`}
+        </p>
+        <Pagination
+          showControls
+          isCompact
+          page={page}
+          total={pages}
+          onChange={(newPage) => setPage(newPage)}
+        />
+      </div>
+    );
+  }, [page, pages, selectedKeys, assessments]);
+  const [deleteId, setDeleteId] = useState(null);
+  const renderCell = React.useCallback((assessment, columnKey) => {
+    const cellValue = assessment[columnKey];
+  
+    switch (columnKey) {
+      case 'generalDescription':
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize">{cellValue}</p>
+            {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
+          </div>
+        );
+      case 'courseName':
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize">{assessment.courseName}</p>
+          </div>
+        );
+      case 'Phân công':
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize">
+              <Button color="primary" variant="ghost"
+                onClick={() =>
+                  handleAllotClick(assessment.generalDescription)
+                }
+              >
+                <p>Phân công</p>
+              </Button>
+            </p>
+          </div>
+        );
+      case 'assessmentCount':
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize">{cellValue}</p>
+            {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
+          </div>
+        );
+      case 'studentCount':
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-small capitalize">{cellValue}</p>
+            {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
+          </div>
+        );
+      case 'status':
+        return (
+          <div className="flex flex-col">
+            <div className="text-sm min-w-[100px]">
+              <Flex vertical gap="middle">
+                <Progress
+                  percent={cellValue}
+                  status="active"
+                  strokeColor={{
+                    from: '#108ee9',
+                    to: '#87d068',
+                  }}
+                />
+              </Flex>
+            </div>
+          </div>
+        );
+      case 'action':
+        const disc = handleReplaceCharacters(cellValue);
+        return (
+          <div className="flex items-center justify-center w-full gap-2">
+            <Tooltip title="Chấm điểm">
+              <Button
+                isIconOnly
+                variant="light"
+                radius="full"
+                size="sm"
+                disabled={!assessment.statusAllot}
+                className='bg-[#FF9908]'
+                onClick={() => handleNavigate(
+                  `/admin/management-grading/${disc}/?description=${cellValue}`
+                )}
+              >
+                <i className="fa-solid fa-feather-pointed text-xl text-[#020401]"></i>
+              </Button>
+            </Tooltip>
+            <Tooltip title="In phiếu chấm">
+              <Button
+                isIconOnly
+                variant="light"
+                radius="full"
+                size="sm"
+                className='bg-[#FEFEFE]'
+                onClick={() => { handleAddClickPDF(assessment?.RubicData, assessment?.RubicItemsData) }}
+              >
+                <i className="fa-regular fa-file-pdf text-xl text-[#020401]"></i>
+              </Button>
+            </Tooltip>
+            <Tooltip title="Chỉnh sửa">
+              <Button
+                isIconOnly
+                variant="light"
+                radius="full"
+                size="sm"
+                className="bg-[#AF84DD]"
+                onClick={() => { handleEditClick(assessment?.metaAssessment, assessment?.generalDescription) }}
+              >
+                <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
+              </Button>
+            </Tooltip>
+            <Tooltip title="Xoá">
+              <Button
+                className="bg-[#FF8077]"
+                isIconOnly
+                variant="light"
+                radius="full"
+                size="sm"
+                onClick={() => { onOpen(); setDeleteId(assessment?.action); }}
+              >
+                <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
+              </Button>
+            </Tooltip>
+          </div>
+        );
+      default:
+        return cellValue;
+    }
+  }, [handleNavigate, onOpen, setDeleteId]);
+  
+  
+
+
+
+
+  const getAllRubricIsDeleteFalse = useCallback(async () => {
+    try {
+      const response = await axiosAdmin.get(`/rubrics/checkScore?teacher_id=${teacher_id}&isDelete=false`);
+      const updatedRubricData = response?.data?.rubric?.map((rubric) => {
+        const status = {
+          status: rubric?.RubricItem?.length === 0 ? false : true,
+          _id: rubric?.rubric_id
+        };
+        return {
+          rubric_id: rubric?.rubric_id,
+          rubricName: rubric?.rubricName,
+          status: status,
+          point: rubric?.RubricItem[0]?.total_score ? rubric?.RubricItem[0]?.total_score : 0.0,
+          action: rubric?.rubric_id
+        };
+      });
+      setfilterRubicData(updatedRubricData);
+      console.log(updatedRubricData);
+    } catch (error) {
+      console.error("Error fetching Rubric data:", error.message);
+      // message.error('Error fetching Rubric data');
+    }
+  }, [teacher_id]); 
+
   useEffect(() => {
     getAllRubricIsDeleteFalse()
     //getCourseByTeacher()
@@ -94,259 +323,92 @@ const ManagementAssessment = (nav) => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
-  const [courseFilter, setCourseFilter] = useState('');
+  }, [getAllRubricIsDeleteFalse, setCollapsedNav]);
 
-  const [assessments, setAssessment] = useState([]);
-  const [filterValue, setFilterValue] = useState('');
-  const [GeneralDescription, setGeneralDescription] = useState('');
 
+  const loadAssessment = useCallback(async () => {
+    try {
+      const response = await fetchAssessmentData(teacher_id);
+      console.log(response);
+      setAssessment(response);
+    } catch (error) {
+      console.error("Error loading assessments:", error);
+    }
+  }, [teacher_id]); 
   
-  const [selectedKeys, setSelectedKeys] = useState(new Set());
-  const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [sortDescriptor, setSortDescriptor] = useState({
-    column: 'age',
-    direction: 'ascending',
-  });
-  const [dateFilter, setDateFilter] = useState('newest');
-  const [page, setPage] = useState(1);
-  const loadAssessment = async () => {
-    const response = await fetchAssessmentData(teacher_id);
-    console.log(response);
-    setAssessment(response);
-  };
-
   useEffect(() => {
     loadAssessment();
-    console.log("assessments loaded", assessments);
-  }, [page, rowsPerPage, filterValue]);
+  }, [loadAssessment, page, rowsPerPage, filterValue, teacher_id]);
 
-  const pages = Math.ceil(assessments.length / rowsPerPage);
-  const hasSearchFilter = Boolean(filterValue);
 
-  const headerColumns = React.useMemo(() => {
-    if (visibleColumns === 'all') return columns;
-    return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
-  }, [visibleColumns]);
 
-  const filteredItems = React.useMemo(() => {
-    let filteredAssessment = [...assessments];
 
-    if (hasSearchFilter) {
-      filteredAssessment = filteredAssessment.filter((teacher) =>
-        teacher.courseName.toLowerCase().includes(filterValue.toLowerCase())
-      );
-    }
 
-    if (dateFilter === 'newest') {
-      filteredAssessment.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    } else if (dateFilter === 'oldest') {
-      filteredAssessment.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-    }
-    return filteredAssessment;
-  }, [assessments, filterValue, dateFilter]);
 
-  const handleSelectionChange = (keys) => {
-    // console.log('Keys:', keys);
-    if (keys === 'all') {
-      const startIndex = (page - 1) * rowsPerPage;
-      const endIndex = startIndex + rowsPerPage;
-      const currentPageUsers = filteredItems.slice(startIndex, endIndex).map(user => user.id.toString());
-      setSelectedKeys(prevKeys => {
-        const newKeys = new Set(currentPageUsers);
-        // console.log('Setting new keys:', Array.from(newKeys));
-        return newKeys;
-      });
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////
+////   handle
+//////////////////////////////////////////////////////////////////////////
+  const handleAddClick = () => {
+    setIsAddModalOpen(true);
+  };
+  const handleAddClickPDF = (DataRubricPDF, DataRubricItems) => {
+    setRubicDataPDF(DataRubricPDF)
+    setDataRubricItems(DataRubricItems)
+    setIsAddModalOpenPDF(true);
+  };
+  const handleEditFormSubmit = async () => {
+    console.log("description:", oldDescription)
+
+    console.log("description", editRubric)
+    if (editRubric.description.includes('/')) {
+      message.error("Description cannot contain '/' character.");
       return;
     }
 
-    const keysArray = Array.isArray(keys) ? keys : Array.from(keys);
-    const validKeys = keysArray.filter(key => typeof key === 'string' && !isNaN(key));
-    //console.log('Valid Keys:', validKeys);
-    setSelectedKeys(prevKeys => {
-      const newKeys = new Set(validKeys);
-      // console.log('Setting new keys:', Array.from(newKeys));
-      return newKeys;
-    });
-  };
 
-  const items = React.useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-    return filteredItems.slice(start, end);
-  }, [page, filteredItems, rowsPerPage]);
-
-  const sortedItems = React.useMemo(() => {
-    return [...items].sort((a, b) => {
-      const first = a[sortDescriptor.column];
-      const second = b[sortDescriptor.column];
-      const cmp = first < second ? -1 : first > second ? 1 : 0;
-      return sortDescriptor.direction === 'descending' ? -cmp : cmp;
-    });
-  }, [sortDescriptor, items]);
-  const handleNavigate = (path) => {
-    navigate(path);
-  };
-
-  const [isModalallot, setIsModalallot] = useState(false);
-
-  function replaceCharacters(description) {
-    let result = description.replace(/ /g, "_");
-    result = result.replace(/-/g, "_");
-    result = result.replace(/___/g, "_");
-    result = result.toLowerCase();
-    result = result.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    result = result.replace(/_+/g, "_");
-    result = result.replace(/^_+|_+$/g, "");
-    return result;
-  }
-
-  const renderCell = React.useCallback((assessment, columnKey) => {
-    const cellValue = assessment[columnKey];
-
-    switch (columnKey) {
-      case 'generalDescription':
-        return (
-          <div className="flex flex-col">
-            <p className="text-bold text-small capitalize">{cellValue}</p>
-            {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
-          </div>
-        );
-      case 'courseName':
-        return (
-          <div className="flex flex-col">
-            <p className="text-bold text-small capitalize">{assessment.courseName}</p>
-          </div>
-        );
-      case 'Phân công':
-        return (
-          <div className="flex flex-col">
-            <p className="text-bold text-small capitalize"> <Button color="primary" variant="ghost"
-              onClick={() =>
-                handleAllotClick(assessment.generalDescription)
-              }
-            >
-              <p>Phân công</p>
-            </Button></p>
-          </div>
-        );
-
-
-      case 'assessmentCount':
-        return (
-          <div className="flex flex-col">
-            <p className="text-bold text-small capitalize">{cellValue}</p>
-            {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
-          </div>
-
-        );
-      case 'studentCount':
-        return (
-          <div className="flex flex-col">
-            <p className="text-bold text-small capitalize">{cellValue}</p>
-            {/* <p className="text-bold text-tiny capitalize text-default-500">{assessment.description}</p> */}
-          </div>
-        );
-      case 'status':
-        return (
-          <div className="flex flex-col">
-            <div className="text-sm min-w-[100px]">
-
-              <Flex vertical gap="middle">
-                <Progress
-
-                  percent={cellValue}
-                  status="active"
-                  strokeColor={{
-                    from: '#108ee9',
-                    to: '#87d068',
-                  }}
-                />
-              </Flex>
-            </div>
-          </div>
-        );
-      case 'action':
-        const disc = replaceCharacters(cellValue);
-        return (
-          <div className="flex items-center justify-center w-full gap-2">
-
-            <Tooltip title="Chấm điểm">
-              <Button
-                isIconOnly
-                variant="light"
-                radius="full"
-                size="sm"
-                disabled={!assessment.statusAllot}
-                className='bg-[#FF9908]'
-                onClick={() => handleNavigate(
-                  `/admin/management-grading/${disc}/?description=${cellValue}`
-                )}
-              >
-                <i className="fa-solid fa-feather-pointed text-xl text-[#020401]"></i>
-              </Button>
-            </Tooltip>
-            <Tooltip title="PDF">
-              <Tooltip title="In phiếu chấm">
-                <Button
-                  isIconOnly
-                  variant="light"
-                  radius="full"
-                  size="sm"
-                  className='bg-[#FEFEFE]'
-                  onClick={() => { handleAddClickPDF(assessment?.RubicData, assessment?.RubicItemsData) }}
-                >
-                  <i className="fa-regular fa-file-pdf text-xl text-[#020401]"></i>
-                </Button>
-              </Tooltip>
-            </Tooltip>
-            <Tooltip title="Chỉnh sửa">
-              <Button
-                isIconOnly
-                variant="light"
-                radius="full"
-                size="sm"
-                className="bg-[#AF84DD]"
-                onClick={() => { handleEditClick(assessment?.metaAssessment, assessment?.generalDescription) }}
-              >
-                <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
-              </Button>
-            </Tooltip>
-            <Tooltip title="Xoá">
-              <Button
-                className="bg-[#FF8077]"
-                isIconOnly
-                variant="light"
-                radius="full"
-                size="sm"
-                onClick={() => { onOpen(); setDeleteId(assessment?.action); }}
-              >
-                <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
-              </Button>
-            </Tooltip>
-           
-          </div>
-        );
-      default:
-        return cellValue;
+    try {
+      await axiosAdmin.patch('/assessments/updateByDescription', {
+        description: oldDescription,
+        updateData: editRubric
+      });
+      loadAssessment();
+      message.success('Assessment updated successfully');
+    } catch (error) {
+      console.error("Error updating assessment:", error);
+      message.error("Error updating assessment: " + (error.response?.data?.message || 'Internal server error'));
     }
-  }, []);
-
-  const onRowsPerPageChange = React.useCallback((e) => {
-    setRowsPerPage(Number(e.target.value));
-    setPage(1);
-  }, []);
-
-  const onSearchChange = React.useCallback((value) => {
-    if (value) {
-      setFilterValue(value);
-      setPage(1);
-    } else {
-      setFilterValue('');
+  };
+  const handleEditClick = (Assessment, generalDescription) => {
+    console.log("assessment", Assessment);
+    console.log("generalDescription", generalDescription);
+    setEditRubric(Assessment);
+    setOldDescription(generalDescription)
+    setIsEditModalOpen(true);
+  };
+  const handleAllotClick = (generalDescription) => {
+    setGeneralDescription(generalDescription)
+    setIsModalallot(true);
+  };
+  const handleSoftDeleteByDescription = async (description) => {
+    const data = {
+      descriptions: [description],
+      isDelete: true
     }
-  }, []);
-
+    try {
+      await axiosAdmin.put('/assessments/softDeleteByDescription', data);
+      message.success(`Successfully toggled soft delete for assessments`);
+      loadAssessment();
+    } catch (error) {
+      console.error(`Error toggling soft delete for assessments`, error);
+      message.error(`Error toggling soft delete for assessments: ${error.response?.data?.message || 'Internal server error'}`);
+    }
+  };
 
   const topContent = React.useMemo(() => {
     return (
@@ -420,133 +482,7 @@ const ManagementAssessment = (nav) => {
         </div>
       </div>
     );
-  }, [filterValue, assessments, rowsPerPage, visibleColumns, onSearchChange, onRowsPerPageChange]);
-
-  const bottomContent = React.useMemo(() => {
-    return (
-      <div className="py-2 px-2 flex justify-between items-center">
-        <p className="text-small">
-          {selectedKeys === 'all' ? 'All items selected' : `${selectedKeys.size} of ${assessments.length} selected`}
-        </p>
-        <Pagination
-          showControls
-          isCompact
-          page={page}
-          total={pages}
-          onChange={(newPage) => setPage(newPage)}
-        />
-      </div>
-    );
-  }, [page, pages, selectedKeys, assessments]);
-  const [deleteId, setDeleteId] = useState(null);
-
-  const handleSoftDeleteByDescription = async (description) => {
-    const data = {
-      descriptions: [description],
-      isDelete: true
-    }
-    try {
-      await axiosAdmin.put('/assessments/softDeleteByDescription', data);
-      message.success(`Successfully toggled soft delete for assessments`);
-      loadAssessment();
-    } catch (error) {
-      console.error(`Error toggling soft delete for assessments`, error);
-      message.error(`Error toggling soft delete for assessments: ${error.response?.data?.message || 'Internal server error'}`);
-    }
-  };
-
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const handleAddClick = () => {
-    setIsAddModalOpen(true);
-  };
-  const [editPDF, setEditPDF] = useState({});
-  const [isAddModalOpenPDF, setIsAddModalOpenPDF] = useState(false);
-  const handleAddClickPDF = (DataRubricPDF, DataRubricItems) => {
-    setRubicDataPDF(DataRubricPDF)
-    setDataRubricItems(DataRubricItems)
-    setIsAddModalOpenPDF(true);
-  };
-  const [DataRubricPDF, setRubicDataPDF] = useState({});
-  const [DataRubricItems, setDataRubricItems] = useState([]);
-
-
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-  const [editRubric, setEditRubric] = useState({
-    course_id: '',
-    rubric_id: '',
-    description: '',
-    place: '',
-    date: ''
-  });
-
-  const handleEditFormSubmit = async () => {
-    console.log("description:", oldDescription)
-
-    console.log("description", editRubric)
-    if (editRubric.description.includes('/')) {
-      message.error("Description cannot contain '/' character.");
-      return;
-    }
-
-
-    try {
-      const response = await axiosAdmin.patch('/assessments/updateByDescription', {
-        description: oldDescription,
-        updateData: editRubric
-      });
-      loadAssessment();
-      message.success('Assessment updated successfully');
-    } catch (error) {
-      console.error("Error updating assessment:", error);
-      message.error("Error updating assessment: " + (error.response?.data?.message || 'Internal server error'));
-    }
-  };
-
-  const [oldDescription, setOldDescription] = useState('')
-  const handleEditClick = (Assessment, generalDescription) => {
-    console.log("assessment", Assessment);
-    console.log("generalDescription", generalDescription);
-    setEditRubric(Assessment);
-    setOldDescription(generalDescription)
-    setIsEditModalOpen(true);
-  };
-
-  const handleAllotClick = (generalDescription) => {
-    setGeneralDescription(generalDescription)
-    setIsModalallot(true);
-  };
-
-
-  const [DataCourse, setCourseByTeacher] = useState([]);
-  const [filterRubicData, setfilterRubicData] = useState([]);
-
-  const getAllRubricIsDeleteFalse = async () => {
-    try {
-      const response = await axiosAdmin.get(`/rubrics/checkScore?teacher_id=${teacher_id}&isDelete=false`);
-      const updatedRubricData = response?.data?.rubric?.map((rubric) => {
-        const status = {
-          status: rubric?.RubricItem?.length === 0 ? false : true,
-          _id: rubric?.rubric_id
-        };
-        return {
-          rubric_id: rubric?.rubric_id,
-          rubricName: rubric?.rubricName,
-          status: status,
-          point: rubric?.RubricItem[0]?.total_score ? rubric?.RubricItem[0]?.total_score : 0.0,
-          action: rubric?.rubric_id
-        };
-      });
-      setfilterRubicData(updatedRubricData);
-      console.log(updatedRubricData);
-    } catch (error) {
-      console.error("Error: " + error.message);
-      // message.error('Error fetching Rubric data');
-    }
-  };
-
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
+  }, [filterValue, assessments, rowsPerPage, onSearchChange, onRowsPerPageChange]);
   return (
     <>
       <ModalCreateAssessment
@@ -554,7 +490,6 @@ const ManagementAssessment = (nav) => {
         onOpenChange={setIsAddModalOpen}
         load={loadAssessment}
       />
-
 
       <ModalOpenPdf
         isOpen={isAddModalOpenPDF}
@@ -573,9 +508,11 @@ const ManagementAssessment = (nav) => {
         DataCourse={DataCourse}
         filterRubicData={filterRubicData}
       />
-      <ConfirmAction
+
+      <ModalConfirmAction
         onOpenChange={onOpenChange}
         isOpen={isOpen}
+        text = {TextConfirm}
         onConfirm={() => {
           if (deleteId) {
             handleSoftDeleteByDescription(deleteId);
@@ -583,11 +520,14 @@ const ManagementAssessment = (nav) => {
           }
         }}
       />
+
       <ModalAllot
         isOpen={isModalallot}
         onOpenChange={setIsModalallot}
         generalDescription={GeneralDescription}
+        loadData={loadAssessment}
       />
+
       <div className='w-full flex justify-between'>
         <div className='h-full my-auto p-5 hidden sm:block'>
           <div>
@@ -722,62 +662,7 @@ const ManagementAssessment = (nav) => {
 };
 export default ManagementAssessment;
 
-function ConfirmAction(props) {
-  const { isOpen, onOpenChange, onConfirm } = props;
-  const handleOnOKClick = (onpose) => {
-    onpose();
-    if (typeof onConfirm === 'function') {
-      onConfirm();
-    }
-  }
-  return (
-    <Modal
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      motionProps={{
-        variants: {
-          enter: {
-            y: 0,
-            opacity: 1,
-            transition: {
-              duration: 0.2,
-              ease: "easeOut",
-            },
-          },
-          exit: {
-            y: -20,
-            opacity: 0,
-            transition: {
-              duration: 0.1,
-              ease: "easeIn",
-            },
-          },
-        }
-      }}
-    >
-      <ModalContent>
-        {(onpose) => (
-          <>
-            <ModalHeader>Cảnh báo</ModalHeader>
-            <ModalBody>
-              <p className="text-[16px]">
-                Assessment sẽ được chuyển vào <Chip radius="sm" className="bg-zinc-200"><i class="fa-solid fa-trash-can-arrow-up mr-2"></i>Kho lưu trữ</Chip> và có thể khôi phục lại, tiếp tục thao tác?
-              </p>
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="light" onClick={onpose}>
-                Huỷ
-              </Button>
-              <Button color="danger" className="font-medium" onClick={() => handleOnOKClick(onpose)}>
-                Xoá
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
-    </Modal>
-  )
-}
+
 
 
 

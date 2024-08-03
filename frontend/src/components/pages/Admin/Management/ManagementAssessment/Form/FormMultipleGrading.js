@@ -1,29 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { Table, message } from 'antd';
+import { message } from 'antd';
 import { Select } from "antd";
 import { Collapse } from 'antd';
-import "./FormGrading.css"
-import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import "../css/FormGrading.css"
+import { axiosAdmin } from "../../../../../../service/AxiosAdmin";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
-import RubricSlider from "../../Utils/RubricSlider/RubricSlider";
+import RubricSlider from "../../../Utils/RubricSlider/RubricSlider";
 
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Modal, Button, Slider, Tooltip, Divider } from "@nextui-org/react";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Modal, Button, Tooltip, Divider } from "@nextui-org/react";
 import { ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@nextui-org/react';
 
-import BackButton from "../../Utils/BackButton/BackButton";
-import { ChevronDownIcon } from "../../../../../public/ChevronDownIcon";
+import BackButton from "../../../Utils/BackButton/BackButton";
+import { ChevronDownIcon } from "../../../../../../public/ChevronDownIcon";
 
 
 
-const FormMultipleGrading = (nav) => {
-  const { setCollapsedNav } = nav;
-  const { Option } = Select;
+const FormMultipleGrading = ({ setCollapsedNav }) => {
+
   const [selectedValues1, setSelectedValues1] = useState([]);
   const [selectedValues2, setSelectedValues2] = useState([]);
   const [selectedValues3, setSelectedValues3] = useState([]);
   const [selectedValues4, setSelectedValues4] = useState([]);
-  const [RubicData, setRubicData] = useState([]);
+  // const [RubicData, setRubicData] = useState([]);
   const [RubicItemsData, setRubicItemsData] = useState([]);
   const [totalScore1, setTotalScore1] = useState(0);
   const [totalScore2, setTotalScore2] = useState(0);
@@ -385,8 +384,6 @@ const FormMultipleGrading = (nav) => {
       return { valid: true, studentIds };
     };
 
-    let allStudentIds = [];
-
     switch (Student.length) {
       case 1:
         {
@@ -661,7 +658,7 @@ const FormMultipleGrading = (nav) => {
     try {
       const response = await axiosAdmin.get(`/rubric/${rubric_id}/items?isDelete=false`);
       //console.log(response.data);
-      setRubicData(response.data.rubric)
+     // setRubicData(response.data.rubric)
       setRubicItemsData(response.data.rubric.rubricItems)
       const data = response.data.rubric.rubricItems
       setValue1(data)
@@ -731,11 +728,8 @@ const FormMultipleGrading = (nav) => {
       setTotalScore4(0)
       //console.log("List of Student IDs:", listStudentIds);
     }
-  }, [Student, Assessment]);
+  }, [Student, Assessment, GetRubricData]);
 
-  function replaceUnderscoresWithSpaces(description) {
-    return description.replace(/_/g, " ");
-  }
   const [isModalWhenSaveOpen, setIsModalWhenSaveOpen] = useState(false);
   useEffect(() => {
 
@@ -1073,7 +1067,7 @@ const FormMultipleGrading = (nav) => {
                 </div>
 
                 <div className={`w-full ${isContainerHidden ? 'lg:w-full' : ''} ${showAtLeastTwo ? 'lg:w-[60%]' : ''} ${showAllThree ? 'lg:w-[20%]' : ''}`}>
-                  <div className="flex flex-col hidden sm:hidden lg:block xl:block text-justify leading-8 p-4" dangerouslySetInnerHTML={{ __html: item.description }} />
+                  <div className="hidden sm:hidden lg:block xl:block text-justify leading-8 p-4" dangerouslySetInnerHTML={{ __html: item.description }} />
                   <div className="block sm:block lg:hidden xl:hidden">
                     <Collapse
                       items={[

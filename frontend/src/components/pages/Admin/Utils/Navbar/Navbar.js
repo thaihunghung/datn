@@ -177,31 +177,12 @@ function Nav(props) {
             </div>
           </div>
           <div>
-          <Tooltip title={'logout'} placement="left">
-            <div onClick={handleLogout} className="group">
-              <i className="fa-solid fa-right-from-bracket text-xl cursor-pointer group-hover:text-red-500 transition-colors duration-300"></i>
-            </div>
-          </Tooltip>
+            <Tooltip content="logout" placement="left">
+              <div onClick={handleLogout} className="group">
+                <i className="fa-solid fa-right-from-bracket text-xl cursor-pointer group-hover:text-red-500 transition-colors duration-300"></i>
+              </div>
+            </Tooltip>
           </div>
-
-         
-
-
-
-
-
-          {/* <DropdownItem
-  key="logout"
-  color="danger"
-  startContent={
-    <i className="fa-solid fa-right-from-bracket"></i>
-  }
-  onClick={() => {
-    handleLogout();
-  }}
->
-  
-</DropdownItem>  */}
           <div>
 
           </div>
@@ -276,7 +257,10 @@ function Nav(props) {
                   </>
                 )}
               </motion.div>
-              <Tooltip title={collapsedNav ? 'Mở rộng' : 'Thu gọn'} placement="right">
+              <Tooltip
+                content={collapsedNav ? 'Mở rộng' : 'Thu gọn'}
+                placement="right"
+              >
                 <Button isIconOnly variant="light" radius="full" onClick={handleToggleNav}>
                   {collapsedNav ? <i className="fa-solid fa-chevron-right text-[#475569]"></i> : <i className="fa-solid fa-chevron-left text-[#475569]"></i>}
                 </Button>
@@ -287,7 +271,12 @@ function Nav(props) {
                 <hr className="opacity-10 m-auto w-[30px] px-2 mb-2 border-[1.5px]" />
                 {navTab.map((tab) => (
                   <div key={tab.text}>
-                    <Tooltip color={"#FF9908"} title={collapsedNav ? <span className="text-[#FEFEFE]">{tab.text}</span> : ""} placement="right">
+                   <Tooltip
+                      content={collapsedNav ? <span>{tab.text}</span> : ''}
+                      placement="right"
+                      color="#FF9908"
+                      isDisabled={!collapsedNav}  // Vô hiệu hóa Tooltip nếu collapsedNav là false
+                    >
                       <div>
                         {tab.link ? (
                           <Link
@@ -350,7 +339,7 @@ function Nav(props) {
                                   key={index}
                                   to={submenuItem.link}
                                   className={`cursor-pointer text-sm text-[#475569] font-bold w-full p-2 pl-5 rounded-lg flex justify-start items-center 
-                                                                    ${submenuIsActive ? 'Admin_tab-active' : ''}`}
+                                      ${submenuIsActive ? 'Admin_tab-active' : ''}`}
                                 >
                                   {submenuItem.text}
                                 </Link>

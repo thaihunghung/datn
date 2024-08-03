@@ -16,21 +16,24 @@ import {
     Divider,
     ModalFooter,
 } from "@nextui-org/react";
-import { axiosAdmin } from "../../../../../service/AxiosAdmin";
+import { axiosAdmin } from "../../../../../../service/AxiosAdmin";
 import { CalendarDate } from "@internationalized/date";
 
-const ModalUpdateAssessment = ({
+const ModalCreateOneAssessment = ({
     isOpen,
     onOpenChange,
     onSubmit,
     editRubric,
     setEditRubric,
     DataCourse,
-    filterRubicData
+    RubicData,
+    StudentData
 }) => {
-    const [selectedDate, setSelectedDate] = useState(new CalendarDate(2001, 1, 1));
     const navigate = useNavigate();
     const teacher_id = Cookies.get('teacher_id');
+
+    const [RubricArray, setRubricArray] = useState([]);
+    const [CourseArray, setCourseArray] = useState([]);
 
     useEffect(() => {
         if (!teacher_id) {
@@ -38,15 +41,6 @@ const ModalUpdateAssessment = ({
         }
     }, [teacher_id, navigate]);
 
-    useEffect(() => {
-        if (editRubric.date) {
-            const dateParts = editRubric.date.split('-');
-            const year = parseInt(dateParts[0], 10);
-            const month = parseInt(dateParts[1], 10);
-            const day = parseInt(dateParts[2], 10);
-            setSelectedDate(new CalendarDate(year, month, day));
-        }
-    }, [editRubric]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -71,15 +65,24 @@ const ModalUpdateAssessment = ({
             rubric_id: Value,
         }));
     };
-
-    const handleDateChange = (newDate) => {
-        const formattedDate = `${newDate.year}-${newDate.month}-${newDate.day}`;
+    const handleStudentSelectChange = (e) => {
+        const Value =new Set(e.target.value.split(","))
+        const valuesArray = Array.from(Value)
         setEditRubric((prev) => ({
             ...prev,
-            date: formattedDate,
+            student_id: valuesArray,
         }));
-        setSelectedDate(newDate);
     };
+
+
+    useEffect(() => {
+        // Assuming DataCourse and RubicData contain arrays of course and rubric objects
+        setCourseArray(DataCourse);
+        setRubricArray(RubicData);
+
+        console.log("RubricArray", RubricArray);
+        console.log("CourseArray", CourseArray);
+    }, [DataCourse, RubicData]);
 
     return (
         <Modal
@@ -147,7 +150,7 @@ const ModalUpdateAssessment = ({
                                         fullWidth
                                         isDisabled
                                     >
-                                        {filterRubicData.map((Rubric) => (
+                                        {RubicData.map((Rubric) => (
                                             <SelectItem key={Rubric.rubric_id} value={Rubric.rubric_id}>
                                                 {Rubric.rubricName}
                                             </SelectItem>
@@ -163,23 +166,23 @@ const ModalUpdateAssessment = ({
                                         rows={4}
                                         minRows={4}
                                         maxRows={6}
+                                        isDisabled
                                     />
-
-                                    <Input
+                                     <Select
+                                        label="Student"
+                                        name="student_id"
+                                        value={editRubric.student_id || []}
+                                        onChange={handleStudentSelectChange}
                                         fullWidth
-                                        label="place"
-                                        name="place"
-                                        value={editRubric.place || ''}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                    <div className="flex w-full flex-wrap md:flex-nowrap gap-4">
-                                        <DateInput
-                                            label="Date"
-                                            value={selectedDate}
-                                            onChange={handleDateChange}
-                                        />
-                                    </div>
+                                        selectionMode="multiple"
+                                    >
+                                        {StudentData.map((student) => (
+                                            <SelectItem key={student.student_id} value={student.student_id}>
+                                                {student.name}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+
                                     <Divider className="mt-4" />
                                 </form>
                             </div>
@@ -207,4 +210,4 @@ const ModalUpdateAssessment = ({
     );
 };
 
-export default ModalUpdateAssessment;
+export default ModalCreateOneAssessment;

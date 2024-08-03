@@ -23,12 +23,10 @@ import { PlusIcon } from '../../../../../public/PlusIcon';
 import { SearchIcon } from '../../../../../public/SearchIcon';
 import { ChevronDownIcon } from '../../../../../public/ChevronDownIcon';
 import { columns, fetchAssessmentDataGrading, fetchDataCheckTeacherAllot, fetchStudentDataByCourseId, statusOptions } from './Data/DataAssessmentGrading';
-import { capitalize } from '../../Utils/capitalize';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import Cookies from "js-cookie";
+import { capitalize } from '../../Utils/Utils';
 import BackButton from '../../Utils/BackButton/BackButton';
 import { axiosAdmin } from '../../../../../service/AxiosAdmin';
-import ModalCreateOneAssessment from './ModalCreateOneAssessment';
+import ModalCreateOneAssessment from './Modal/ModalCreateOneAssessment';
 import CustomUpload from '../../CustomUpload/CustomUpload';
 import { UseDescriptionFromURL, UseNavigate, UseTeacherAuth, UseTeacherId } from '../../../../../hooks';
 import { handleReplaceCharacters } from '../../Utils/handleReplaceCharacters';
@@ -97,18 +95,21 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
       console.error("Error loading student data:", error);
     }
   };
-  const LoadData = async () => {
-    const { metaAssessment, Rubric_id, Course_id, Classes, RubricArray, CourseArray } = await fetchAssessmentDataGrading(teacher_id, descriptionURL, filterValue);
-    console.log("metaAssessment");
-    console.log(metaAssessment);
-    setAssessment(metaAssessment);
-    setRubric_id(Rubric_id);
-    setCouse_id(Course_id);
-    setClasses(Classes);
-    setRubricArray(RubricArray);
-    setCourseArray(CourseArray);
-  };
-
+  const LoadData = React.useCallback(async () => {
+    try {
+      const { metaAssessment, Rubric_id, Course_id, Classes, RubricArray, CourseArray } = await fetchAssessmentDataGrading(teacher_id, descriptionURL, filterValue);
+      console.log("metaAssessment");
+      console.log(metaAssessment);
+      setAssessment(metaAssessment);
+      setRubric_id(Rubric_id);
+      setCouse_id(Course_id);
+      setClasses(Classes);
+      setRubricArray(RubricArray);
+      setCourseArray(CourseArray);
+    } catch (error) {
+      console.error("Error loading assessment data:", error);
+    }
+  }, [teacher_id, descriptionURL, filterValue]); 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1024) {
@@ -131,17 +132,17 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [setCollapsedNav]);
   useEffect(() => {
     LoadData();
-  }, [page, rowsPerPage, filterValue, teacher_id]);
+  }, [LoadData, page, rowsPerPage, filterValue, teacher_id]);
   useEffect(() => {
     const checkTeacherExistence = async () => {
       try {
         const meta_assessment_id = assessments[0]?.meta_assessment_id;
         const exist = await fetchDataCheckTeacherAllot(teacher_id, meta_assessment_id);
         if (exist.exists) {
-          message.success("Teacher exists in the assessment.");
+          //message.success("Teacher exists in the assessment.");
         } else {
           message.error("Teacher does not exist in the assessment.");
           handleNavigate('/admin/management-grading')
@@ -153,7 +154,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
     if (teacher_id && assessments[0]?.id)
       checkTeacherExistence();
 
-  }, [assessments, teacher_id]);
+  }, [assessments, teacher_id, handleNavigate]);
   useEffect(() => {
     loadStudentAllCourse(Couse_id);
   }, [Couse_id]);
@@ -250,7 +251,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
     }
 
     return filteredAssessment;
-  }, [assessments, filterValue, filterStatus, filterClass, filterDescription]);
+  }, [assessments, filterValue, filterStatus, filterClass, filterDescription, hasSearchFilter]);
   const items = React.useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
@@ -292,7 +293,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
             onValueChange={onSearchChange}
           />
           <div className="flex gap-3">
-
+  
             {/* <Tooltip
             title=""
             getPopupContainer={() =>
@@ -318,7 +319,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
           </Tooltip> */}
           </div>
         </div>
-        <div className="w-full flex  sm:items-center sm:justify-between">
+        <div className="w-full flex sm:items-center sm:justify-between">
           <p className="text-small text-default-400 min-w-[100px]">
             <span className="text-default-500">{assessments.length}</span> teacher(s)
           </p>
@@ -337,7 +338,8 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
         </div>
       </div>
     );
-  }, [filterValue, assessments, rowsPerPage, filterStatus, visibleColumns, onSearchChange, onRowsPerPageChange]);
+  }, [filterValue, assessments, rowsPerPage, onSearchChange, onRowsPerPageChange]);
+  
   const bottomContent = React.useMemo(() => {
     return (
       <div className="py-2 px-2 flex justify-between items-center">
@@ -360,10 +362,10 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
     if (!assessment || !columnKey) {
       return null;
     }
-
+  
     // Lấy giá trị ô
     const cellValue = assessment[columnKey] ?? 'N/A'; // Sử dụng giá trị mặc định nếu cellValue là null hoặc undefined
-
+  
     switch (columnKey) {
       case 'id':
         return (
@@ -415,7 +417,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
         const urlcreate = filterStatus === 0
           ? `/admin/management-grading/${disc}/student-code/${action.studentCode ?? ''}/assessment/${action.assessment_id ?? ''}/rubric/${action.rubric_id ?? ''}?FilterScore=0`
           : `/admin/management-grading/${disc}/student-code/${action.studentCode ?? ''}/assessment/${action.assessment_id ?? ''}/rubric/${action.rubric_id ?? ''}`;
-
+  
         return (
           <div className="flex items-center justify-center w-full gap-2">
             {action.totalScore === 0 ? (
@@ -466,8 +468,8 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
       default:
         return cellValue;
     }
-  }, []);
-
+  }, [filterStatus, handleNavigate, onOpen]);
+  
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -610,7 +612,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
       console.log("disc");
       console.log(disc);
       const url = filterStatus === 0 ? `/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}&&FilterScore=0` : `/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}`
-      // navigate(url);
+      handleNavigate(url);
     }, 100);
   };
   const handleDownloadTemplateExcel = async () => {
