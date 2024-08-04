@@ -83,13 +83,6 @@ const FormUpdateGrading = (nav) => {
   const showAllThree = showCLO && showPLO && showChapter;
   const isContainerHidden = !showAny;
 
-
-
-
-
-
-
-
   const { description } = useParams();
   console.log(description)
   const navigate = useNavigate();
