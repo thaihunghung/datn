@@ -45,7 +45,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
   const teacher_id = UseTeacherId();
   const handleNavigate = UseNavigate();
 
-  
+
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [assessments, setAssessment] = useState([]);
   const [StudentAll, setStudentAll] = useState([]);
@@ -109,7 +109,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
     } catch (error) {
       console.error("Error loading assessment data:", error);
     }
-  }, [teacher_id, descriptionURL, filterValue]); 
+  }, [teacher_id, descriptionURL, filterValue]);
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1024) {
@@ -293,7 +293,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
             onValueChange={onSearchChange}
           />
           <div className="flex gap-3">
-  
+
             {/* <Tooltip
             title=""
             getPopupContainer={() =>
@@ -339,7 +339,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
       </div>
     );
   }, [filterValue, assessments, rowsPerPage, onSearchChange, onRowsPerPageChange]);
-  
+
   const bottomContent = React.useMemo(() => {
     return (
       <div className="py-2 px-2 flex justify-between items-center">
@@ -362,10 +362,10 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
     if (!assessment || !columnKey) {
       return null;
     }
-  
+
     // Lấy giá trị ô
     const cellValue = assessment[columnKey] ?? 'N/A'; // Sử dụng giá trị mặc định nếu cellValue là null hoặc undefined
-  
+
     switch (columnKey) {
       case 'id':
         return (
@@ -417,7 +417,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
         const urlcreate = filterStatus === 0
           ? `/admin/management-grading/${disc}/student-code/${action.studentCode ?? ''}/assessment/${action.assessment_id ?? ''}/rubric/${action.rubric_id ?? ''}?FilterScore=0`
           : `/admin/management-grading/${disc}/student-code/${action.studentCode ?? ''}/assessment/${action.assessment_id ?? ''}/rubric/${action.rubric_id ?? ''}`;
-  
+
         return (
           <div className="flex items-center justify-center w-full gap-2">
             {action.totalScore === 0 ? (
@@ -469,12 +469,12 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
         return cellValue;
     }
   }, [filterStatus, handleNavigate, onOpen]);
-  
 
 
-//////////////////////////////////////////////////////////////////////////
-////   handle
-//////////////////////////////////////////////////////////////////////////
+
+  //////////////////////////////////////////////////////////////////////////
+  ////   handle
+  //////////////////////////////////////////////////////////////////////////
   const handleTakeSelectedItems = () => {
     const selectedItems = assessments.filter((item) => selectedKeys.has(item.id.toString()));
     //console.log('Get Selected Items', selectedItems);
@@ -676,7 +676,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
     <>
       <div className='w-full flex justify-between'>
         <div className='h-full my-auto p-5 hidden sm:block'>
-        <BackButton path={'/admin/management-grading/list'}/>
+          <BackButton path={'/admin/management-grading/list'} />
         </div>
         <div className='w-fit bg-[white] border-slate-300 rounded-xl border-2 p-2 justify-start items-center flex gap-4 flex-col mb-4'>
           <div className='flex justify-center w-full flex-wrap items-center gap-1'>
@@ -861,8 +861,6 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
         </TableBody>
       </Table>
       <div className="flex flex-wrap gap-6 justify-center items-start">
-
-
         <div className="flex flex-col bg-white shadow-md rounded-lg p-4 justify-center items-center w-full md:w-auto">
           <h3 className="text-lg font-semibold text-gray-700 mb-2">Tải Mẫu CSV</h3>
           <Button
@@ -873,9 +871,6 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
             Tải Sinh viên
           </Button>
         </div>
-
-
-
 
         <div className="flex flex-col bg-white shadow-md rounded-lg p-4 justify-center items-center w-full md:w-auto">
           <h3 className="text-lg font-semibold text-gray-700 mb-2">Upload File</h3>

@@ -16,6 +16,7 @@ const PloModel = require('../models/PloModel');
 const RubricsItemModel = require('../models/RubricItemModel');
 const AssessmentModel = require('../models/AssessmentModel');
 const TeacherModel = require('../models/TeacherModel');
+const AssessmentItemModel = require('../models/AssessmentItemModel');
 
 const MetaAssessmentController = {
   // Lấy tất cả các meta assessments
@@ -101,22 +102,28 @@ const MetaAssessmentController = {
             attributes: ["meta_assessment_id","rubric_id", "course_id", "generalDescription", "date", "place", "isDelete", "createdAt"],
             include: [{
               model: RubricModel,
-              where: {
-                isDelete: isDelete === 'true'
-              },
+              // where: {
+              //   isDelete: isDelete === 'true'
+              // },
               include: [{
                 model: SubjectModel,
-                where: {
-                  isDelete: isDelete === 'true'
-                }
+                // where: {
+                //   isDelete: isDelete === 'true'
+                // }
               }]
             }, {
               model: CourseModel,
-              where: {
-                isDelete: isDelete === 'true'
-              }
+              // where: {
+              //   isDelete: isDelete === 'true'
+              // }
             }]
           });
+          console.log("foundAssessment")
+          console.log("foundAssessment")
+          console.log("foundAssessment")
+          console.log("foundAssessment")
+          console.log("foundAssessment")
+          console.log(foundAssessment)
           const Assessment = await AssessmentModel.findAll({
             where: {
               meta_assessment_id: foundAssessment.meta_assessment_id,
@@ -440,6 +447,147 @@ updateDescription: async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   },
+
+  toggleSoftDeleteByGeneralDescription: async (req, res) => {
+    try {
+      const { GeneralDescriptions, isDelete } = req.body; 
+      if (!Array.isArray(GeneralDescriptions) || GeneralDescriptions.length === 0) {
+        return res.status(400).json({ message: 'GeneralDescription array is required and cannot be empty' });
+      }
+
+      const metaAssessments = await MetaAssessmentModel.findAll({
+        where: {
+          generalDescription: GeneralDescriptions
+        }
+      });
+      console.log('Found metaAssessments:', metaAssessments);
+
+      if (metaAssessments.length === 0) {
+        return res.status(404).json({ message: 'No metaAssessments found for the provided GeneralDescriptions' });
+      }
+
+      const updated = await Promise.all(metaAssessments.map(async (meta_assessment) => {
+        if (isDelete === null) {
+          return { meta_assessment_id: meta_assessment.meta_assessment_id, isDelete: meta_assessment.isDelete };
+        } else {
+          const updatedIsDeleted = isDelete !== undefined ? isDelete : !meta_assessment.isDelete;
+          await meta_assessment.update({ isDelete: updatedIsDeleted });
+          return { meta_assessment_id: meta_assessment.meta_assessment_id, isDelete: updatedIsDeleted };
+        }
+      }));
+
+      res.status(200).json({ message: 'Processed isDelete status', updated });
+
+    } catch (error) {
+      console.error('Error toggling assessment delete statuses:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
+  updateByGeneralDescription: async (req, res) => {
+    try {
+      const { GeneralDescription, updateData } = req.body;
+
+      console.log(updateData);
+      let metaAssessments = await MetaAssessmentModel.findAll({ where: { generalDescription: GeneralDescription } });
+      if (metaAssessments.length === 0) {
+        return res.status(404).json({ message: "No metaAssessments found" });
+      }
+      if (updateData.generalDescription) {
+        const existingAssessment = await MetaAssessmentModel.findOne({ where: { generalDescription: updateData.generalDescription } });
+
+        if (existingAssessment) {
+          return res.status(400).json({ message: "An assessment with the new generalDescription already exists" });
+        }
+      }
+
+      const updatedAssessments = await Promise.all(metaAssessments.map(async (meta_assessment) => {
+        if (updateData.rubric_id !== undefined) {
+          meta_assessment.rubric_id = updateData.rubric_id;
+        }
+        if (updateData.course_id !== undefined) {
+          meta_assessment.course_id = updateData.course_id;
+        }
+        if (updateData.generalDescription !== undefined) {
+          meta_assessment.generalDescription = updateData.generalDescription;
+        }
+        if (updateData.place !== undefined) {
+          meta_assessment.place = updateData.place;
+        }
+        if (updateData.date !== undefined) {
+          meta_assessment.date = updateData.date;
+        }
+       
+        await meta_assessment.save();
+        return meta_assessment;
+      }));
+
+      res.status(200).json(updatedAssessments);
+    } catch (error) {
+      console.error("Error updating metaAssessments:", error);
+      res.status(500).json({ message: "Error updating metaAssessments", error });
+    }
+  },
+  deleteByGeneralDescription: async (req, res) => {
+    try {
+      const { GeneralDescriptions } = req.body;
+      console.log(GeneralDescriptions);
+      if (!Array.isArray(GeneralDescriptions) || GeneralDescriptions.length === 0) {
+        return res.status(400).json({ message: 'Descriptions array is required and cannot be empty' });
+      }
+  
+      // Tìm tất cả meta_assessments dựa vào các description
+      const metaAssessments = await MetaAssessmentModel.findAll({
+        where: {
+          generalDescription: GeneralDescriptions
+        }
+      });
+  
+      if (metaAssessments.length === 0) {
+        return res.status(404).json({ message: 'No assessments found for the provided GeneralDescriptions' });
+      }
+  
+      // Lấy ra tất cả meta_assessment_ids
+      const metaAssessmentIds = metaAssessments.map(meta => meta.meta_assessment_id);
+  
+      // Lấy ra tất cả assessment_ids dựa vào meta_assessment_ids
+      const assessments = await AssessmentModel.findAll({
+        where: {
+          meta_assessment_id: metaAssessmentIds
+        }
+      });
+  
+      const assessmentIds = assessments.map(assessment => assessment.assessment_id);
+  
+      // Xóa tất cả các assessment items trong AssessmentItemModel dựa vào assessment_ids
+      await AssessmentItemModel.destroy({
+        where: {
+          assessment_id: assessmentIds
+        }
+      });
+  
+      // Xóa tất cả các assessments trong AssessmentModel dựa vào meta_assessment_ids
+      await AssessmentModel.destroy({
+        where: {
+          meta_assessment_id: metaAssessmentIds
+        }
+      });
+  
+      // Xóa tất cả các meta_assessments trong MetaAssessmentModel
+      const deletedCount = await MetaAssessmentModel.destroy({
+        where: {
+          meta_assessment_id: metaAssessmentIds
+        }
+      });
+  
+      res.status(200).json({ message: 'Successfully deleted assessments, assessment items, and meta assessments', deletedCount });
+  
+    } catch (error) {
+      console.error('Error deleting assessments:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  }
+  
+  
 };
 
 module.exports = MetaAssessmentController;

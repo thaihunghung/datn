@@ -7,11 +7,26 @@ router.get('/meta-assessments', MetaAssessmentController.index);
 
 router.post('/meta-assessment', MetaAssessmentController.create);
 router.get('/meta-assessment/:id', MetaAssessmentController.show);
-
-
 router.patch('/meta-assessment/:id', MetaAssessmentController.updateDescription);
 router.put('/meta-assessment/:id', MetaAssessmentController.update);
 router.delete('/meta-assessment/:id', MetaAssessmentController.delete);
+
+
+
+
+
+
+router.patch('/meta-assessments/softDeleteByGeneralDescription', MetaAssessmentController.toggleSoftDeleteByGeneralDescription);
+
+router.patch('/meta-assessments/updateByGeneralDescription', MetaAssessmentController.updateByGeneralDescription);
+
+
+
+router.delete('/meta-assessments/deleteByGeneralDescription', MetaAssessmentController.deleteByGeneralDescription);
+
+
+
+
 
 router.post('/meta-assessment/templates/data', MetaAssessmentController.getFormUpdateDescriptionExcel);
 

@@ -138,7 +138,7 @@ const FormGrading = (nav) => {
     try {
       const data = { totalScore: totalScore }
 
-      await axiosAdmin.put(`/assessment/${assessment_id}/totalScore`, { data: data })
+      await axiosAdmin.patch(`/assessment/${assessment_id}/totalScore`, { data: data })
       const dataAssessmentItem = selectedValues.map(item => {
         const { maxScore, CheckGrading, ...rest } = item;
         return {
@@ -191,7 +191,7 @@ const FormGrading = (nav) => {
   //   }
   // };
   useEffect(() => {
-    if(parseInt(Assessment?.MetaAssessment?.teacher_id)===parseInt(teacher_id)){
+    if (parseInt(Assessment?.MetaAssessment?.teacher_id) === parseInt(teacher_id)) {
       setCurrentTeacher(true)
     }
   }, [teacher_id, Assessment]);
@@ -203,7 +203,7 @@ const FormGrading = (nav) => {
       maxScore: 0.0,
       CheckGrading: false,
     }));
-  
+
     setSelectedValues(updatedPoData);
   }, [assessment_id]);
 
@@ -287,38 +287,40 @@ const FormGrading = (nav) => {
           <span className="text-[#020401]">{Assessment?.MetaAssessment?.Student?.name}</span>   <span className="text-[#020401]">{Assessment?.MetaAssessment?.Student?.studentCode}</span>
         </div>
         <div className="flex items-center text-lg flex-col font-bold justify-center">
-        <Textarea
-              className="max-w-[700px]"
-              label="Description"
-              value={Assessment?.MetaAssessment?.description}
-              onChange={(e) => setAssessment(prev => ({ ...prev, MetaAssessment: { ...prev.MetaAssessment, description: e.target.value } }))}
-            />
-            <Button 
-              color="primary" 
-              className="w-fit p-5 mt-3"
-              isDisabled={!CurrentTeacher}
-              onPress={handleUpdateTopic}
-            >
-              Update Topic
-            </Button>
+          <Textarea
+            className="max-w-[700px]"
+            label="Đề tài"
+            value={Assessment?.MetaAssessment?.description}
+            onChange={(e) => setAssessment(prev => ({ ...prev, MetaAssessment: { ...prev.MetaAssessment, description: e.target.value } }))}
+          />
+          <Button
+            color="primary"
+            className="w-fit p-5 mt-3"
+            isDisabled={!CurrentTeacher}
+            onPress={handleUpdateTopic}
+          >
+            Cập nhật tên đề tài
+          </Button>
         </div>
-        <div className="hidden sm:block"><BackButton /></div>
+        <div className="hidden sm:block">
+          <BackButton path={`/admin/management-grading/${description}/?description=${Assessment?.MetaAssessment?.generalDescription}`} />
+        </div>
       </div>
 
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Confirm Save</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">Xác nhận lưu</ModalHeader>
               <ModalBody>
-                <p>Are you sure you want to save the changes?</p>
+                <p>Bạn muốn lưu không?</p>
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
-                  Cancel
+                  Hủy
                 </Button>
                 <Button color="primary" onPress={() => { handleSave(); onClose(); }}>
-                  Save
+                  lưu
                 </Button>
               </ModalFooter>
             </>
@@ -342,7 +344,7 @@ const FormGrading = (nav) => {
 
           <div className="flex gap-1 justify-center items-center">
             <div className="flex items-center gap-2 mx-2 mr-2">
-              <Tooltip content="Save">
+              <Tooltip content="Lưu">
                 <Button
                   isIconOnly
                   variant="light"
@@ -859,7 +861,7 @@ function ModalWhenSave({
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className="text-[#FF9908]">Score for Student</ModalHeader>
+            <ModalHeader className="text-[#FF9908]">Tổng kết</ModalHeader>
             <ModalBody>
               <div className="flex flex-col items-center h-full">
                 {/* Assessment Description */}
@@ -875,7 +877,7 @@ function ModalWhenSave({
 
                 {/* Total Score */}
                 <div className="flex flex-col items-center text-lg font-semibold">
-                  <span className="text-[#020401]">Total Score: {totalScore}</span>
+                  <span className="text-[#020401]">Tổng điểm: {totalScore}</span>
                 </div>
               </div>
             </ModalBody>
@@ -892,7 +894,7 @@ function ModalWhenSave({
                   );
                 }}
               >
-                Back
+                Quay lại
               </Button>
               <Button
                 type="submit"
@@ -908,7 +910,7 @@ function ModalWhenSave({
                   );
                 }}
               >
-                Update
+                Cập nhật
               </Button>
             </ModalFooter>
           </>

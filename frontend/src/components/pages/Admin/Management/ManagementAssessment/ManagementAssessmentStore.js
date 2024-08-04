@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Table, Tooltip, Button, message } from 'antd';
 import { Flex, Progress } from 'antd';
 
@@ -9,16 +9,14 @@ import { axiosAdmin } from "../../../../../service/AxiosAdmin";
 import Cookies from "js-cookie";
 import { fetchAssessmentDataTrue } from "./Data/DataAssessment";
 import BackButton from "../../Utils/BackButton/BackButton";
+import { UseTeacherAuth, UseTeacherId } from "../../../../../hooks";
 
 const ManagementAssessmentStore = (nav) => {
   const { setCollapsedNav } = nav;
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  const navigate = useNavigate();
-  const teacher_id = Cookies.get('teacher_id');
-  if (!teacher_id) {
-    navigate('/login');
-  }
+  UseTeacherAuth();
+  const teacher_id = UseTeacherId();
 
   const [selectedRow, setSelectedRow] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -29,8 +27,8 @@ const ManagementAssessmentStore = (nav) => {
 
   const columns = [
     {
-      title: "description",
-      dataIndex: "description",
+      title: "generalDescription",
+      dataIndex: "generalDescription",
       render: (record) => (
         <div className="text-sm min-w-[100px]">
           <p className="font-medium">{record}</p>
@@ -119,10 +117,10 @@ const ManagementAssessmentStore = (nav) => {
 
   const handleSoftDelete = async () => {
     const data = {
-      descriptions: selectedRowKeys
+      GeneralDescriptions: selectedRowKeys,
     };
     try {
-      await axiosAdmin.delete('/assessments/deleteByDescription', { data });
+      await axiosAdmin.delete('/meta-assessments/deleteByGeneralDescription', { data });
       message.success("Successfully deleted assessment");
       loadAssessment();
       handleUnSelect();
@@ -132,14 +130,12 @@ const ManagementAssessmentStore = (nav) => {
     }
   };
 
-
-
   const handleSoftDeleteById = async (description) => {
     const data = {
-      descriptions: [description]
-    };
+      GeneralDescriptions: [description],
+    }
     try {
-      await axiosAdmin.delete('/assessments/deleteByDescription', { data });
+      await axiosAdmin.delete('/meta-assessments/deleteByGeneralDescription', { data });
       message.success("Successfully deleted assessment");
       loadAssessment();
       handleUnSelect();
@@ -152,11 +148,11 @@ const ManagementAssessmentStore = (nav) => {
 
   const handleRestoreById = async (description) => {
     const data = {
-      descriptions: [description],
+      GeneralDescriptions: [description],
       isDelete: false
     }
     try {
-      await axiosAdmin.put('/assessments/softDeleteByDescription', data);
+      await axiosAdmin.patch('/meta-assessments/softDeleteByGeneralDescription', data);
       message.success("Successfully toggled soft delete for assessments")
       loadAssessment();
       handleUnSelect();
@@ -168,12 +164,12 @@ const ManagementAssessmentStore = (nav) => {
 
   const handleRestore = async () => {
     const data = {
-      descriptions: selectedRowKeys,
+      GeneralDescriptions: selectedRowKeys,
       isDelete: false
     }
     console.log(data);
     try {
-      const response = await axiosAdmin.put('/assessments/softDeleteByDescription', data);
+      const response = await axiosAdmin.patch('/meta-assessments/softDeleteByGeneralDescription', data);
       loadAssessment();
       message.success("Successfully toggled soft delete for assessments")
       handleUnSelect()
@@ -184,13 +180,14 @@ const ManagementAssessmentStore = (nav) => {
   };
 
 
-  const loadAssessment = async () => {
+  const loadAssessment = useCallback(async () => {
     const response = await fetchAssessmentDataTrue(teacher_id);
     console.log(response);
     setAssessment(response);
-  };
+  }, [teacher_id]); 
 
   useEffect(() => {
+
     loadAssessment()
     const handleResize = () => {
       if (window.innerWidth < 1024) {
@@ -204,7 +201,7 @@ const ManagementAssessmentStore = (nav) => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [teacher_id, setCollapsedNav, loadAssessment]);
 
   return (
     <div className="flex w-full flex-col justify-center leading-8 pt-5 px-4 sm:px-4 lg:px-7 xl:px-7">
@@ -224,7 +221,7 @@ const ManagementAssessmentStore = (nav) => {
 
       <div className='w-full flex justify-between'>
         <div className='h-full my-auto p-5 pl-0 hidden sm:block'>
-          <BackButton />
+          <BackButton path={'/admin/management-grading/list'}/>
         </div>
 
       </div>

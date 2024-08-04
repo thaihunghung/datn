@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import { message } from 'antd';
 
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Modal, Button, Slider, Tooltip } from "@nextui-org/react";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Modal, Button, Slider, Tooltip, Textarea } from "@nextui-org/react";
 import { ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@nextui-org/react';
 
 import { Collapse } from 'antd';
@@ -91,14 +91,27 @@ const FormUpdateGrading = (nav) => {
 
 
   const { description } = useParams();
-
+  console.log(description)
   const navigate = useNavigate();
   const teacher_id = Cookies.get('teacher_id');
 
   if (!teacher_id) {
     navigate('/login');
   }
-
+  const handleUpdateTopic = async () => {
+    try {
+      const response = await axiosAdmin.patch(`/meta-assessment/${Assessment?.MetaAssessment?.meta_assessment_id}`, { description: Assessment?.MetaAssessment?.description });
+      if (response.status === 200) {
+        message.success('Topic updated successfully');
+        getAssessments();  // Refresh the assessment data after update
+      } else {
+        message.error('Error updating topic');
+      }
+    } catch (error) {
+      console.error('Error updating topic:', error);
+      message.error('Error updating topic');
+    }
+  };
   const handleSliderChange = (index, value, rubricsItem_id, assessmentItem_id) => {
     console.log('index: ', index)
     setSelectedValues(prevValues => {
@@ -142,7 +155,7 @@ const FormUpdateGrading = (nav) => {
     try {
       const data = { totalScore: totalScore }
 
-      await axiosAdmin.put(`/assessment/${assessment_id}/totalScore`, { data: data })
+      await axiosAdmin.patch(`/assessment/${assessment_id}/totalScore`, { data: data })
       const dataAssessmentItem = selectedValues.map(item => {
         const { maxScore, CheckGrading, ...rest } = item;
         return {
@@ -222,6 +235,13 @@ const FormUpdateGrading = (nav) => {
       throw error;
     }
   };
+  const [CurrentTeacher, setCurrentTeacher] = useState(false);
+
+  useEffect(() => {
+    if(parseInt(Assessment?.MetaAssessment?.teacher_id)===parseInt(teacher_id)){
+      setCurrentTeacher(true)
+    }
+  }, [teacher_id, Assessment]);
 
   useEffect(() => {
     if (setCheck === 0) {
@@ -264,7 +284,25 @@ const FormUpdateGrading = (nav) => {
         <div className="flex items-center text-lg flex-col font-bold justify-center">
           <span className="text-[#020401]">{Assessment?.MetaAssessment?.Student?.name}</span>   <span className="text-[#020401]">{Assessment?.MetaAssessment?.Student?.studentCode}</span>
         </div>
-        <div className="hidden sm:block"><BackButton /></div>
+        <div className="flex items-center text-lg flex-col font-bold justify-center">
+        <Textarea
+              className="max-w-[700px]"
+              label="Đề tài"
+              value={Assessment?.MetaAssessment?.description}
+              onChange={(e) => setAssessment(prev => ({ ...prev, MetaAssessment: { ...prev.MetaAssessment, description: e.target.value } }))}
+            />
+            <Button 
+              color="primary" 
+              className="w-fit p-5 mt-3"
+              isDisabled={!CurrentTeacher}
+              onPress={handleUpdateTopic}
+            >
+              Cập nhật tên đề tài
+            </Button>
+        </div>
+        <div className="hidden sm:block">
+          <BackButton path={`/admin/management-grading/${description}/?description=${Assessment?.MetaAssessment?.generalDescription}`}/>
+          </div>
       </div>
       <div className="Quick__Option  flex justify-between items-center sticky top-0 bg-white z-50 w-fit p-4 py-3 shadow-lg rounded-md border border-slate-300">
         <div
@@ -274,7 +312,7 @@ const FormUpdateGrading = (nav) => {
 
           <div className="flex gap-1 justify-center items-center">
             <div className="flex items-center gap-2 mx-2 mr-2">
-              <Tooltip content="Save">
+              <Tooltip content="Cập nhật">
                 <Button
                   isIconOnly
                   variant="light"
@@ -351,16 +389,16 @@ const FormUpdateGrading = (nav) => {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Confirm Update</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">Xác nhận cập nhật</ModalHeader>
               <ModalBody>
-                <p>Are you sure you want to update?</p>
+                <p>Bạn muốn cập nhật không?</p>
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
-                  Cancel
+                  Hủy
                 </Button>
                 <Button color="primary" onPress={() => { handleSave(); onClose(); }}>
-                  Update
+                  Cập nhật
                 </Button>
               </ModalFooter>
             </>
@@ -810,23 +848,23 @@ function ModalWhenSave({
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className="text-[#FF9908]">Score for Student</ModalHeader>
+            <ModalHeader className="text-[#FF9908]">Tổng kết</ModalHeader>
             <ModalBody>
               <div className="flex flex-col items-center h-full">
                 {/* Assessment Description */}
-                <h1 className="text-2xl text-center font-bold mb-4 text-[#6366F1]">
-                  {assessment?.description}
+                <h1 className="text-xl text-center font-bold mb-4 text-[#6366F1] uppercase">
+                  {assessment?.MetaAssessment?.generalDescription}
                 </h1>
 
                 {/* Student Information */}
                 <div className="flex flex-col items-center text-lg font-semibold mb-4">
-                  <span className="text-[#020401]">{assessment?.Student?.name}</span>
-                  <span className="text-[#020401]">{assessment?.Student?.studentCode}</span>
+                  <span className="text-[#020401]">{assessment?.MetaAssessment?.Student?.name}</span>
+                  <span className="text-[#020401]">{assessment?.MetaAssessment?.Student?.studentCode}</span>
                 </div>
 
                 {/* Total Score */}
                 <div className="flex flex-col items-center text-lg font-semibold">
-                  <span className="text-[#020401]">Total Score: {totalScore}</span>
+                  <span className="text-[#020401]">Tổng điểm: {totalScore}</span>
                 </div>
               </div>
             </ModalBody>
@@ -835,10 +873,10 @@ function ModalWhenSave({
                 variant="light"
                 onClick={() => {
                   onClose();
-                  handleBack(`/admin/management-grading/${disc}/?description=${assessment?.description}`);
+                  handleBack(`/admin/management-grading/${disc}/?description=${assessment?.MetaAssessment?.generalDescription}`);
                 }}
               >
-                Back
+                Quay lại
               </Button>
             </ModalFooter>
           </>

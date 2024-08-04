@@ -831,14 +831,8 @@ const assessmentsController = require('../controllers/AssessmentsController');
 //cập nhật mới 
 router.get('/assessment/checkTeacher', assessmentsController.checkTeacherInAssessment);
 router.get('/assessment', assessmentsController.getAssessments);
-
-router.put('/assessment/:id/totalScore', assessmentsController.updateStotalScore);
+router.patch('/assessment/:id/totalScore', assessmentsController.updateStotalScore);
 router.get('/assessment/:id', assessmentsController.getByID);
-
-
-
-
-
 router.get('/assessment/:id/items', assessmentsController.GetitemsByID);
 
 
@@ -851,7 +845,6 @@ router.get('/assessment/:id/items', assessmentsController.GetitemsByID);
 
 
 router.post('/assessment', assessmentsController.create);
-
 router.put('/assessment/:id', assessmentsController.update);
 router.delete('/assessment/:id', assessmentsController.delete);
 router.delete('/assessments/multiple', assessmentsController.deleteMultiple);
@@ -863,8 +856,10 @@ router.get('/assessment/isDelete/false', assessmentsController.isDeleteTofalse);
 
 
 
-router.put('/assessments/softDeleteByDescription', assessmentsController.toggleSoftDeleteByDescription);
+router.put('/assessments/softDeleteByDescription', assessmentsController.toggleSoftDeleteByGeneralDescription);
 router.patch('/assessments/updateByDescription', assessmentsController.updateByDescription);
+
+
 router.delete('/assessments/deleteByDescription', assessmentsController.deleteByDescription);
 
 

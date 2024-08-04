@@ -434,18 +434,22 @@ const AssessmentsController = {
 
   updateStotalScore: async (req, res) => {
     try {
-      const { id } = req.params;
-      const { data } = req.body;
-      const updatedProgram = await AssessmentModel.update(data, { where: { assessment_id: id } });
-      if (updatedProgram[0] === 0) {
-        return res.status(404).json({ message: 'assessments not found' });
-      }
-      res.json(updatedProgram);
+        const { id } = req.params;
+        const { data } = req.body;
+        
+        const updatedProgram = await AssessmentModel.update(data, { where: { assessment_id: id } });
+        
+        if (updatedProgram[0] === 0) {
+            return res.status(404).json({ message: 'Assessment not found' });
+        }
+        
+        res.json(updatedProgram);
     } catch (error) {
-      console.error('Lỗi cập nhật assessments:', error);
-      res.status(500).json({ message: 'Lỗi server' });
+        console.error('Lỗi cập nhật assessments:', error);
+        res.status(500).json({ message: 'Lỗi server' });
     }
-  },
+},
+
   delete: async (req, res) => {
     try {
       const { id } = req.params;
@@ -546,45 +550,45 @@ const AssessmentsController = {
   },
 
 
-  toggleSoftDeleteByDescription: async (req, res) => {
+  toggleSoftDeleteByGeneralDescription: async (req, res) => {
     try {
-      const { descriptions, isDelete } = req.body; // Nhận mảng descriptions và giá trị isDelete từ req.body
-      if (!Array.isArray(descriptions) || descriptions.length === 0) {
-        return res.status(400).json({ message: 'Descriptions array is required and cannot be empty' });
+      const { GeneralDescriptions, isDelete } = req.body; 
+      if (!Array.isArray(GeneralDescriptions) || GeneralDescriptions.length === 0) {
+        return res.status(400).json({ message: 'GeneralDescription array is required and cannot be empty' });
       }
-
+  
       // Tìm tất cả assessments dựa vào các description
-      const assessments = await AssessmentModel.findAll({
+      const metaAssessments = await MetaAssessmentModel.findAll({
         where: {
-          description: descriptions
+          generalDescription: GeneralDescriptions
         }
       });
-      console.log('Found assessments:', assessments);
-
-      if (assessments.length === 0) {
-        return res.status(404).json({ message: 'No assessments found for the provided descriptions' });
+      console.log('Found metaAssessments:', metaAssessments);
+  
+      if (metaAssessments.length === 0) {
+        return res.status(404).json({ message: 'No metaAssessments found for the provided GeneralDescriptions' });
       }
-
-      // Toggling trạng thái isDelete cho tất cả assessments tìm thấy
-      const updated = await Promise.all(assessments.map(async (assessment) => {
+  
+      // Toggling trạng thái isDelete cho tất cả metaAssessments tìm thấy
+      const updated = await Promise.all(metaAssessments.map(async (meta_assessment) => {
         if (isDelete === null) {
-          return { assessment_id: assessment.assessment_id, isDelete: assessment.isDelete }; // Không thay đổi isDelete nếu isDelete là null
+          return { meta_assessment_id: meta_assessment.meta_assessment_id, isDelete: meta_assessment.isDelete }; // Không thay đổi isDelete nếu isDelete là null
         } else {
-          const updatedIsDeleted = isDelete !== undefined ? isDelete : !assessment.isDelete;
-          await assessment.update({ isDelete: updatedIsDeleted });
-          return { assessment_id: assessment.assessment_id, isDelete: updatedIsDeleted };
+          const updatedIsDeleted = isDelete !== undefined ? isDelete : !meta_assessment.isDelete;
+          await meta_assessment.update({ isDelete: updatedIsDeleted });
+          return { meta_assessment_id: meta_assessment.meta_assessment_id, isDelete: updatedIsDeleted };
         }
       }));
-
+  
       res.status(200).json({ message: 'Processed isDelete status', updated });
-
+  
     } catch (error) {
       console.error('Error toggling assessment delete statuses:', error);
       res.status(500).json({ message: 'Server error' });
     }
   }
+  
   ,
-
   updateByDescription: async (req, res) => {
     try {
       const { description, updateData } = req.body;

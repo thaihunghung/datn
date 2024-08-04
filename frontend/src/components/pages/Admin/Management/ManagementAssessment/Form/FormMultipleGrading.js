@@ -8,7 +8,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import RubricSlider from "../../../Utils/RubricSlider/RubricSlider";
 
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Modal, Button, Tooltip, Divider } from "@nextui-org/react";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Modal, Button, Tooltip, Divider, Textarea } from "@nextui-org/react";
 import { ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@nextui-org/react';
 
 import BackButton from "../../../Utils/BackButton/BackButton";
@@ -70,7 +70,7 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
     try {
       const studentCodes = JSON.parse(decodeURIComponent(studentCodesString));
       listStudentCodes = studentCodes.map((key) => key.studentCode);
-      //console.log(listStudentCodes)
+      console.log(listStudentCodes)
     } catch (error) {
       console.error('Error parsing student codes:', error);
     }
@@ -95,13 +95,65 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
   const [visibleColumns, setVisibleColumns] = useState(new Set());
   const [showAll, setShowAll] = useState(false);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [showFirst, setShowFirst] = useState(true);
+  const [isModalWhenSaveOpen, setIsModalWhenSaveOpen] = useState(false);
+  const showAny = showCLO || showPLO || showChapter;
+  const showAtLeastTwo = [showCLO, showPLO, showChapter].filter(Boolean).length >= 2;
+  const showAllThree = showCLO && showPLO && showChapter;
+  const isContainerHidden = !showAny;
 
+  
+  const [Student, setStudent] = useState(listStudentCodes);
   const { description } = useParams();
   const columns = [
     { uid: 'clo', name: 'CLO' },
     { uid: 'plo', name: 'PLO' },
     { uid: 'chapter', name: 'Chapter' },
   ];
+  const GetRubricData = async () => {
+    try {
+      const response = await axiosAdmin.get(`/rubric/${rubric_id}/items?isDelete=false`);
+      //console.log(response.data);
+      setRubicData(response.data.rubric)
+      setRubicItemsData(response.data.rubric.rubricItems)
+      const data = response.data.rubric.rubricItems
+      setValue1(data)
+      setValue2(data)
+      setValue3(data)
+      setValue4(data)
+    } catch (error) {
+      console.error('Error fetching rubric data:', error);
+      throw error;
+    }
+  };
+
+  const GetAssesmentByDicriptions = async () => {
+    try {
+      const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}&generalDescription=${descriptionURL}&isDelete=false`);
+      if (response.data) {
+        setAssessment(response?.data);
+      }
+      console.log("assessments");
+      console.log(response.data);
+    } catch (error) {
+      console.error('Error fetching rubric data:', error);
+      throw error;
+    }
+  };
+
+  const getStudentBySelect = (data, studentCode) => {
+    for (let item of data) {
+      if (item.Student && item.Student.studentCode === studentCode) {
+        return item.Student;
+      }
+    }
+    return null;
+  };
+
+  
+
+
+  
 
   const handleSelectionChange = (keys) => {
     // Update state variables based on visible columns
@@ -137,27 +189,6 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
   };
 
 
-  const [showFirst, setShowFirst] = useState(true);
-
-  const showAny = showCLO || showPLO || showChapter;
-  const showAtLeastTwo = [showCLO, showPLO, showChapter].filter(Boolean).length >= 2;
-  const showAllThree = showCLO && showPLO && showChapter;
-  const isContainerHidden = !showAny;
-  // Assessment: key,
-  // studentCode: item.student.studentCode  
-  // console.log(studentCodes);
-  // const DataScore = [
-  //   { key: '1', Score: 0.25 },
-  //   { key: '2', Score: 0.5 },
-  //   { key: '3', Score: 0.75 },
-  //   { key: '4', Score: 1 },
-  //   { key: '4', Score: 1.25 },
-  //   { key: '4', Score: 1.5 },
-  //   { key: '4', Score: 1.75 },
-  //   { key: '4', Score: 2 },
-  // ];
-
-  const [Student, setStudent] = useState(listStudentCodes);
 
   const handleStudentChange = (value, option) => {
     if (value.length > 4) {
@@ -167,7 +198,6 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
     //console.log('value');
     setStudent(value);
   };
-
   const handleSliderChange1 = (index, value, rubricsItem_id, student_id) => {
     setSelectedValues1(prevValues => {
       if (!Array.isArray(prevValues)) {
@@ -181,14 +211,14 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
         maxScore: value,
         CheckGrading: true,
       };
-
+     
       const newTotalScore = updatedValues.reduce((acc, curr) => {
         if (curr && typeof curr.maxScore === 'number') {
           return acc + curr.maxScore;
         }
         return acc;
       }, 0);
-
+      console.log("check1:",updatedValues);
       const Check = updatedValues.reduce((acc, curr) => {
         // Check if curr is an object and CheckGrading is true
         if (curr && curr.CheckGrading === true) {
@@ -196,6 +226,7 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
         }
         return acc; // Otherwise, return the accumulated count
       }, 0);
+      
       setCheck1(Check)
       setTotalScore1(newTotalScore);
       return updatedValues;
@@ -303,9 +334,9 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
   const updateSelectedValues = (studentIds, selectedValues, assessments) => {
     return selectedValues.map(item => {
       const matchingAssessment = assessments.find(assessment => assessment.student_id === studentIds);
-
+      //console.log("matchingAssessment", matchingAssessment)
       if (matchingAssessment) {
-        const { assessment_id, totalScore } = matchingAssessment;
+        const { assessment_id, totalScore } = matchingAssessment.assessment;
         const { maxScore, student_id, CheckGrading, ...rest } = item;
         return {
           ...rest,
@@ -318,11 +349,9 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
     });
   };
   const findStudentById = (studentId) => {
-
     const assessment = Assessment.find(a => a.Student.student_id === studentId);
     return assessment ? assessment.Student : {};
   };
-
   const CheckSave = (items) => {
     for (const [itemIndex, item] of items.entries()) {
       for (const [entryIndex, entry] of item.entries()) {
@@ -336,9 +365,10 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
   }
   const Save = async (dataSaveAssessment, Score) => {
     try {
+      message.success('di')
       const data = { totalScore: Score }
 
-      await axiosAdmin.put(`/assessment/${dataSaveAssessment[0].assessment_id}/totalScore`, { data: data })
+      await axiosAdmin.patch(`/assessment/${dataSaveAssessment[0].assessment_id}/totalScore`, { data: data })
 
       const dataAssessmentItem = dataSaveAssessment.map(item => {
         const { CheckSave, ...rest } = item;
@@ -360,7 +390,6 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
       message.error('Error saving data');
     }
   }
-
   const handleLogicSave = async () => {
     const checkStudent = (selectedValues, studentIndex) => {
       let count = 0;
@@ -396,12 +425,13 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
           const findAssessment1 = updateSelectedValues(result.studentIds[0], selectedValues1, Assessment)
 
           const items = [findAssessment1]
+          console.log('items',findAssessment1)
           const check = CheckSave(items)
-          console.log(items)
 
 
           const studentCode1 = findStudentById(result.studentIds[0])
 
+          
 
           setStudent1(studentCode1)
 
@@ -453,7 +483,7 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
           setStudent2(studentCode2)
 
           setStudent1(studentCode1)
-
+          console.log('studentCode1',studentCode1)
           const Score1 = totalScore1
           const Score2 = totalScore2
 
@@ -498,6 +528,8 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
           const findAssessment3 = updateSelectedValues(result3.studentIds[0], selectedValues3, Assessment)
 
           const items = [findAssessment1, findAssessment2, findAssessment3]
+          console.log('items',items)
+  
           const check = CheckSave(items)
 
           const studentCode1 = findStudentById(result1.studentIds[0])
@@ -506,11 +538,11 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
           setStudent1(studentCode1)
           setStudent2(studentCode2)
           setStudent3(studentCode3)
-
+          console.log('studentCode1',studentCode1)
           const Score1 = totalScore1
           const Score2 = totalScore2
           const Score3 = totalScore3
-
+          console.log('Score1',Score1)
           setOpenTotalScore1(Score1)
           setOpenTotalScore2(Score2)
           setOpenTotalScore3(Score3)
@@ -574,7 +606,8 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
           const Score2 = totalScore2
           const Score3 = totalScore3
           const Score4 = totalScore4
-
+          console.log('studentCode1',studentCode1)
+          console.log('Score1',Score1)
           setOpenTotalScore1(Score1)
           setOpenTotalScore2(Score2)
           setOpenTotalScore3(Score3)
@@ -610,8 +643,6 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
         return;
     }
   };
-
-
   const setValue1 = (data) => {
     const updatedPoData = data.map((subject) => {
       return {
@@ -657,88 +688,7 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
     setSelectedValues4(updatedPoData);
   }
 
-  const GetRubricData = async () => {
-    try {
-      const response = await axiosAdmin.get(`/rubric/${rubric_id}/items?isDelete=false`);
-      //console.log(response.data);
-      setRubicData(response.data.rubric)
-      setRubicItemsData(response.data.rubric.rubricItems)
-      const data = response.data.rubric.rubricItems
-      setValue1(data)
-      setValue2(data)
-      setValue3(data)
-      setValue4(data)
-    } catch (error) {
-      console.error('Error fetching rubric data:', error);
-      throw error;
-    }
-  };
-
-  const GetAssesmentByDicriptions = async () => {
-    // try {
-    //   const response = await axiosAdmin.get(`/course-enrollment/${couse_id}`);
-    //   console.log("response?.data");
-    //   console.log(response?.data);
-    //   if (response?.data) {
-    //     setStudentData(response?.data);
-    //   }
-
-    // } catch (error) {
-    //   console.error('Error fetching student data:', error);
-    //   throw error;
-    // }
-    try {
-      //const response = await axiosAdmin.get(`/assessments/${descriptionURL}/teacher/${teacher_id}`);
-      const response = await axiosAdmin.get(`/assessment?teacher_id=${teacher_id}&description=${descriptionURL}`);
-
-      if (response.data) {
-        setAssessment(response?.data);
-      }
-      console.log("assessments");
-      console.log(response.data);
-    } catch (error) {
-      console.error('Error fetching rubric data:', error);
-      throw error;
-    }
-  };
-
-  const getStudentBySelect = (data, studentCode) => {
-    for (let item of data) {
-      if (item.Student && item.Student.studentCode === studentCode) {
-        // Trả về đối tượng Student của item này nếu trùng khớp
-        return item.Student;
-      }
-    }
-    return null;
-  };
-
   useEffect(() => {
-    if (Student) {
-      //console.log("Student:", Student); // Array of student codes
-
-      // Map student codes to student IDs from StudentData
-      const listStudentIds = Student.map(code => getStudentBySelect(Assessment, code));
-      setListStudentOJ(listStudentIds)
-      //console.log("Student:", listStudentIds)
-      GetRubricData()
-      setCheck1(0)
-      setCheck2(0)
-      setCheck3(0)
-      setCheck4(0)
-      setTotalScore1(0)
-      setTotalScore2(0)
-      setTotalScore3(0)
-      setTotalScore4(0)
-      //console.log("List of Student IDs:", listStudentIds);
-    }
-  }, [Student, Assessment]);
-
-  function replaceUnderscoresWithSpaces(description) {
-    return description.replace(/_/g, " ");
-  }
-  const [isModalWhenSaveOpen, setIsModalWhenSaveOpen] = useState(false);
-  useEffect(() => {
-
     GetAssesmentByDicriptions()
     GetRubricData();
     setCheck1(0);
@@ -768,10 +718,34 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (Student) {
+      const listStudentIds = Student.map(code => getStudentBySelect(Assessment, code));
+      setListStudentOJ(listStudentIds)
+      console.log("Student:", listStudentIds)
+      GetRubricData()
+      setCheck1(0)
+      setCheck2(0)
+      setCheck3(0)
+      setCheck4(0)
+      setTotalScore1(0)
+      setTotalScore2(0)
+      setTotalScore3(0)
+      setTotalScore4(0)
+    }
+  }, [Student, Assessment]);
   return (
     <div className="w-full p-2 pb-[100px] py-0 flex flex-col leading-6">
       <div className="w-full min-h-[200px] bg-[#FEFEFE] border border-slate-300 shadow-lg rounded-md mb-2 p-4">
-        <h1 className="text-xl font-bold mb-2 text-[#6366F1] uppercase">{Assessment[0]?.description}</h1>
+        <h1 className="text-xl font-bold mb-2 text-[#6366F1] uppercase">{Assessment[0]?.generalDescription}</h1>
+        <div className="flex items-center text-lg flex-col font-bold justify-center">
+          <Textarea
+            className="max-w-[700px]"
+            label="Đề tài"
+            value={Assessment[0]?.description}
+            onChange={(e) => setAssessment(prev => ({ ...prev, MetaAssessment: { ...prev.MetaAssessment, description: e.target.value } }))}
+          />
+        </div>
         <div className='text-left w-full font-bold'>Chọn sinh viên</div>
         <div className="w-full flex items-center justify-start">
           <Select
@@ -795,7 +769,9 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
 
         </div>
 
-        <div className="hidden sm:block"><BackButton /></div>
+        <div className="hidden sm:block">
+          <BackButton path={`/admin/management-grading/${description}/?description=${Assessment[0]?.generalDescription}`} />
+        </div>
       </div>
       <ModalWhenSave
         isOpen={isModalWhenSaveOpen}
@@ -820,16 +796,16 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Confirm Save</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">Xác nhận lưu</ModalHeader>
               <ModalBody>
-                <p>Are you sure you want to save the changes?</p>
+                <p>Bạn có muốn lưu không?</p>
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
-                  Cancel
+                  Hủy
                 </Button>
                 <Button color="primary" onPress={() => { handleLogicSave(); onClose(); }}>
-                  Save
+                  Lưu
                 </Button>
               </ModalFooter>
             </>
@@ -845,7 +821,7 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
 
           <div className="flex gap-1 justify-center items-center">
             <div className="flex items-center gap-2 mx-2 mr-2">
-              <Tooltip content="Save">
+              <Tooltip content="Lưu">
                 <Button
                   isIconOnly
                   variant="light"
@@ -1257,17 +1233,21 @@ function ModalWhenSave({
   student2,
   student3,
   student4,
-
   Score1,
   Score2,
   Score3,
   Score4,
-
   assessment,
   handleBack,
   disc,
   handleUpdate
 }) {
+  const Assessment1 = assessment.find(assessment => assessment.student_id === student1.student_id);
+  const Assessment2 = assessment.find(assessment => assessment.student_id === student2.student_id);
+  const Assessment3 = assessment.find(assessment => assessment.student_id === student3.student_id);
+  const Assessment4 = assessment.find(assessment => assessment.student_id === student4.student_id);
+
+
   return (
     <Modal
       size="xl"
@@ -1298,12 +1278,12 @@ function ModalWhenSave({
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className="text-[#FF9908]">Score for Student</ModalHeader>
+            <ModalHeader className="text-[#FF9908]">Tổng kết</ModalHeader>
             <ModalBody>
               <div className="flex flex-col items-center h-full text-base w-full">
                 {/* Assessment Description */}
                 <h1 className="text-2xl text-center font-bold mb-4 text-[#6366F1] uppercase">
-                  {assessment[0]?.description}
+                  {assessment[0]?.generalDescription}
                 </h1>
                 <Divider className="my-4" />
                 {/* Display students and scores in a grid */}
@@ -1311,29 +1291,29 @@ function ModalWhenSave({
                   {student1 && Object.keys(student1).length > 0 && student1.name && (
                     <div className="flex justify-center flex-col items-center">
                       <p className="text-center text-wrap">{student1.name}</p>
-                      <p>Total Score: {Score1}</p>
-                      <Button onClick={() => handleBack(`/admin/management-grading/update/${disc}/student-code/${student1.studentCode}/assessment/${assessment[0].assessment_id}/rubric/${assessment[0].rubric_id}`)}>Update</Button>
+                      <p>Tổng điểm: {Score1}</p>
+                      <Button onClick={() => handleBack(`/admin/management-grading/update/${disc}/student-code/${student1.studentCode}/assessment/${Assessment1.assessment.assessment_id}/rubric/${assessment[0].rubric_id}`)}>Cập nhật</Button>
                     </div>
                   )}
                   {student2 && Object.keys(student2).length > 0 && student2.name && (
                     <div className="flex justify-center flex-col items-center">
                       <p className="text-center text-wrap">{student2.name}</p>
-                      <p>Total Score: {Score2}</p>
-                      <Button onClick={() => handleBack(`/admin/management-grading/update/${disc}/student-code/${student2.studentCode}/assessment/${assessment[0].assessment_id}/rubric/${assessment[0].rubric_id}`)}>Update</Button>
+                      <p>Tổng điểm: {Score2}</p>
+                      <Button onClick={() => handleBack(`/admin/management-grading/update/${disc}/student-code/${student2.studentCode}/assessment/${Assessment2.assessment.assessment_id}/rubric/${assessment[0].rubric_id}`)}>Cập nhật</Button>
                     </div>
                   )}
                   {student3 && Object.keys(student3).length > 0 && student3.name && (
                     <div className="flex justify-center flex-col items-center">
                       <p className="text-center text-wrap">{student3.name}</p>
-                      <p>Total Score: {Score3}</p>
-                      <Button onClick={() => handleBack(`/admin/management-grading/update/${disc}/student-code/${student3.studentCode}/assessment/${assessment[0].assessment_id}/rubric/${assessment[0].rubric_id}`)}>Update</Button>
+                      <p>Tổng điểm: {Score3}</p>
+                      <Button onClick={() => handleBack(`/admin/management-grading/update/${disc}/student-code/${student3.studentCode}/assessment/${Assessment3.assessment.assessment_id}/rubric/${assessment[0].rubric_id}`)}>Cập nhật</Button>
                     </div>
                   )}
                   {student4 && Object.keys(student4).length > 0 && student4.name && ( // Kiểm tra thêm thuộc tính name
                     <div className="flex justify-center flex-col items-center">
                       <p className="text-center text-wrap">{student4.name}</p>
-                      <p>Total Score: {Score4}</p>
-                      <Button onClick={() => handleBack(`/admin/management-grading/update/${disc}/student-code/${student4.studentCode}/assessment/${assessment[0].assessment_id}/rubric/${assessment[0].rubric_id}`)}>Update</Button>
+                      <p>Tổng điểm: {Score4}</p>
+                      <Button onClick={() => handleBack(`/admin/management-grading/update/${disc}/student-code/${student4.studentCode}/assessment/${Assessment4.assessment_id}/rubric/${assessment[0].rubric_id}`)}>Cập nhật</Button>
                     </div>
                   )}
 
@@ -1346,21 +1326,10 @@ function ModalWhenSave({
                 variant="light"
                 onClick={() => {
                   onClose();
-                  handleBack(`/admin/management-grading/${disc}/?description=${assessment[0]?.description}`);
+                  handleBack(`/admin/management-grading/${disc}/?description=${assessment[0]?.generalDescription}`);
                 }}
               >
-                Back
-              </Button>
-              <Button
-                type="submit"
-                color="primary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onClose();
-                  // Xử lý logic khi nhấn nút Next nếu cần
-                }}
-              >
-                Next
+                Quay lại
               </Button>
             </ModalFooter>
           </>

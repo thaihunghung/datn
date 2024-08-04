@@ -155,10 +155,10 @@ const ModalUpdateAssessment = ({
                                     </Select>
                                     <Textarea
                                         fullWidth
-                                        label="description"
-                                        name="description"
+                                        label="generalDescription"
+                                        name="generalDescription"
                                         placeholder="Enter your description"
-                                        value={editRubric.description || ''}
+                                        value={editRubric.generalDescription || ''}
                                         onChange={handleChange}
                                         rows={4}
                                         minRows={4}

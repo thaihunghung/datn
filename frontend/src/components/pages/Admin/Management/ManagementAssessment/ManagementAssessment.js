@@ -45,7 +45,7 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
   const [editRubric, setEditRubric] = useState({
     course_id: '',
     rubric_id: '',
-    description: '',
+    generalDescription: '',
     place: '',
     date: ''
   });
@@ -320,7 +320,6 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
     };
   }, [getAllRubricIsDeleteFalse, setCollapsedNav]);
 
-
   const loadAssessment = useCallback(async () => {
     try {
       const response = await fetchAssessmentData(teacher_id);
@@ -348,25 +347,25 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
     setIsAddModalOpenPDF(true);
   };
   const handleEditFormSubmit = async () => {
-    console.log("description:", oldDescription)
+    console.log("GeneralDescription:", oldDescription)
 
-    console.log("description", editRubric)
-    if (editRubric.description.includes('/')) {
-      message.error("Description cannot contain '/' character.");
+    console.log("GeneralDescription", editRubric)
+    if (editRubric.generalDescription.includes('/')) {
+      message.error("GeneralDescription cannot contain '/' character.");
       return;
     }
 
 
     try {
-      await axiosAdmin.patch('/assessments/updateByDescription', {
-        description: oldDescription,
+      await axiosAdmin.patch('/meta-assessments/updateByGeneralDescription', {
+        GeneralDescription: oldDescription,
         updateData: editRubric
       });
       loadAssessment();
       message.success('Assessment updated successfully');
     } catch (error) {
-      console.error("Error updating assessment:", error);
-      message.error("Error updating assessment: " + (error.response?.data?.message || 'Internal server error'));
+      console.error("Error updating GeneralDescription:", error);
+      message.error("Error updating GeneralDescription: " + (error.response?.data?.message || 'Internal server error'));
     }
   };
   const handleEditClick = (Assessment, generalDescription) => {
@@ -382,16 +381,16 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
   };
   const handleSoftDeleteByDescription = async (description) => {
     const data = {
-      descriptions: [description],
+      GeneralDescriptions: [description],
       isDelete: true
     }
     try {
-      await axiosAdmin.put('/assessments/softDeleteByDescription', data);
-      message.success(`Successfully toggled soft delete for assessments`);
+      await axiosAdmin.patch('/meta-assessments/softDeleteByGeneralDescription', data);
+      message.success(`Successfully toggled soft delete for MetaAssessments`);
       loadAssessment();
     } catch (error) {
-      console.error(`Error toggling soft delete for assessments`, error);
-      message.error(`Error toggling soft delete for assessments: ${error.response?.data?.message || 'Internal server error'}`);
+      console.error(`Error toggling soft delete for MetaAssessments`, error);
+      message.error(`Error toggling soft delete for MetaAssessments: ${error.response?.data?.message || 'Internal server error'}`);
     }
   };
 
