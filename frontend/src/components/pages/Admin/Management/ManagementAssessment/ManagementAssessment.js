@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
   Input, Button, DropdownTrigger, Dropdown, DropdownMenu, DropdownItem,
-  Pagination, useDisclosure
+  Pagination, useDisclosure, Tooltip
 } from '@nextui-org/react';
-import { Tooltip, message, Flex, Progress } from 'antd';
+import { message, Flex, Progress } from 'antd';
 import { PlusIcon, SearchIcon, ChevronDownIcon } from '../../../../../public/Icon/Icon';
 import { columns, fetchAssessmentData } from './Data/DataAssessment';
 import { capitalize } from '../../Utils/capitalize';
@@ -213,7 +213,7 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
         const disc = handleReplaceCharacters(cellValue);
         return (
           <div className="flex items-center justify-center w-full gap-2">
-            <Tooltip title="Chấm điểm">
+            <Tooltip content="Chấm điểm">
               <Button
                 isIconOnly
                 variant="light"
@@ -228,7 +228,7 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
                 <i className="fa-solid fa-feather-pointed text-xl text-[#020401]"></i>
               </Button>
             </Tooltip>
-            <Tooltip title="In phiếu chấm">
+            <Tooltip content="In phiếu chấm">
               <Button
                 isIconOnly
                 variant="light"
@@ -240,7 +240,7 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
                 <i className="fa-regular fa-file-pdf text-xl text-[#020401]"></i>
               </Button>
             </Tooltip>
-            <Tooltip title="Chỉnh sửa">
+            <Tooltip content="Chỉnh sửa">
               <Button
                 isIconOnly
                 variant="light"
@@ -252,7 +252,7 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
                 <i className="fa-solid fa-pen text-xl text-[#020401]"></i>
               </Button>
             </Tooltip>
-            <Tooltip title="Xoá">
+            <Tooltip content="Xoá">
               <Button
                 className="bg-[#FF8077]"
                 isIconOnly
@@ -544,7 +544,7 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
             >
               Store
             </Button>
-            <Tooltip title="phân công">
+            <Tooltip content="phân công">
               <Button
                 endContent={<PlusIcon />}
                 className="bg-[#AF84DD]"

@@ -469,7 +469,7 @@ const MetaAssessmentController = {
       worksheet.columns = [
         { header: 'Tên SV', key: 'name', width: 32 },
         { header: 'Tên đề tài', key: 'description', width: 100 },
-        { header: 'MetaId', key: 'MetaId', width: 15 }
+        { header: 'ID', key: 'MetaId', width: 15 }
       ];
       console.log("enrollments")
       console.log(enrollments[0])
@@ -483,6 +483,22 @@ const MetaAssessmentController = {
           });
         }
       });
+      await worksheet.protect('yourpassword', {
+        selectLockedCells: true,
+        selectUnlockedCells: true
+      });
+
+      worksheet.eachRow((row, rowNumber) => {
+        row.eachCell((cell, colNumber) => {
+          if (colNumber === 3) {
+            cell.protection = { locked: true };
+          } else {
+            cell.protection = { locked: false };
+          }
+        });
+      });
+
+
 
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', 'attachment; filename="StudentsForm.xlsx"');

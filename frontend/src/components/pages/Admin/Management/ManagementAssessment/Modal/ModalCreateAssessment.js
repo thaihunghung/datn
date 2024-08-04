@@ -305,8 +305,6 @@ const ModalCreateAssessment = ({
                                         <h1 className="text-xl pb-2 font-bold text-[#6366F1]">Nhập thông tin sinh viên</h1>
                                     </div>
                                     <div className="flex flex-wrap gap-6 justify-center items-start">
-
-
                                         <div className="flex flex-col bg-white shadow-md rounded-lg p-4 justify-center items-center w-full md:w-auto">
                                             <h3 className="text-lg font-semibold text-gray-700 mb-2">Tải Mẫu CSV</h3>
                                             <Button

@@ -40,7 +40,7 @@ export const fetchAssessmentDataGrading = async (teacher_id, descriptionURL, sea
         meta_assessment_id: Assessment?.meta_assessment_id || 0,
         generalDescription: generalDescription,
         description: Assessment?.description || '',
-
+        teacher_id: Assessment?.teacher_id,
         totalScore: totalScore,
         student: student,
         class: Assessment?.Student?.class?.classNameShort || '',

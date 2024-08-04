@@ -309,7 +309,6 @@ const FormUpdateGrading = (nav) => {
           className={`flex items-center transition-opacity duration-500 ${showFirst ? 'opacity-100' : 'opacity-0'
             } ${showFirst ? 'block' : 'hidden'}`}
         >
-
           <div className="flex gap-1 justify-center items-center">
             <div className="flex items-center gap-2 mx-2 mr-2">
               <Tooltip content="Cập nhật">

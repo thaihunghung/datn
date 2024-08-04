@@ -51,6 +51,7 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
   const [defaultValue, setdefaultValue] = useState(0);
   const [ListStudentOJ, setListStudentOJ] = useState([]);
   const [Assessment, setAssessment] = useState([]);
+  const [AssessmentByStudent, setAssessmentByStudent] = useState([]);
   const { rubric_id } = useParams();
   const navigate = useNavigate();
   const teacher_id = Cookies.get('teacher_id');
@@ -145,6 +146,17 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
     for (let item of data) {
       if (item.Student && item.Student.studentCode === studentCode) {
         return item.Student;
+      }
+    }
+    return null;
+  };
+
+
+  const getAssesmentByStudent = (data, studentCode) => {
+    for (let item of data) {
+      if (item.Student && item.Student.studentCode === studentCode) {
+
+        return item;
       }
     }
     return null;
@@ -721,6 +733,10 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
   useEffect(() => {
     if (Student) {
       const listStudentIds = Student.map(code => getStudentBySelect(Assessment, code));
+      const assessment = Student.map(code => getAssesmentByStudent(Assessment, code));
+
+      setAssessmentByStudent(assessment)
+      
       setListStudentOJ(listStudentIds)
       console.log("Student:", listStudentIds)
       GetRubricData()
@@ -734,6 +750,7 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
       setTotalScore4(0)
     }
   }, [Student, Assessment]);
+
   return (
     <div className="w-full p-2 pb-[100px] py-0 flex flex-col leading-6">
       <div className="w-full min-h-[200px] bg-[#FEFEFE] border border-slate-300 shadow-lg rounded-md mb-2 p-4">
@@ -742,7 +759,7 @@ const FormMultipleGrading = ({ setCollapsedNav }) => {
           <Textarea
             className="max-w-[700px]"
             label="Đề tài"
-            value={Assessment[0]?.description}
+            value={AssessmentByStudent[0]?.description}
             onChange={(e) => setAssessment(prev => ({ ...prev, MetaAssessment: { ...prev.MetaAssessment, description: e.target.value } }))}
           />
         </div>

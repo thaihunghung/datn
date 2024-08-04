@@ -14,9 +14,10 @@ import {
   DropdownItem,
   Chip,
   Pagination,
+  Tooltip
 } from '@nextui-org/react';
 import { useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
-import { Tooltip, message } from 'antd';
+import { message } from 'antd';
 
 import { PlusIcon } from '../../../../../public/PlusIcon';
 
@@ -30,6 +31,7 @@ import ModalCreateOneAssessment from './Modal/ModalCreateOneAssessment';
 import CustomUpload from '../../CustomUpload/CustomUpload';
 import { UseDescriptionFromURL, UseNavigate, UseTeacherAuth, UseTeacherId } from '../../../../../hooks';
 import { handleReplaceCharacters } from '../../Utils/handleReplaceCharacters';
+import ModalUpdateDisc from './Modal/ModalUpdateDisc';
 
 const statusColorMap = {
   active: 'success',
@@ -45,6 +47,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
   const teacher_id = UseTeacherId();
   const handleNavigate = UseNavigate();
 
+  const [CurrentTeacher, setCurrentTeacher] = useState(false);
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [assessments, setAssessment] = useState([]);
@@ -54,6 +57,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
   const [CourseArray, setCourseArray] = useState([]);
   const [Couse_id, setCouse_id] = useState();
   const [rubric_id, setRubric_id] = useState();
+  const [isUpdateDiscModalOpen, setIsUpdateDiscModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editRubric, setEditRubric] = useState({
     teacher_id: "",
@@ -103,8 +107,6 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
       setAssessment(metaAssessment);
       setRubric_id(Rubric_id);
       setCouse_id(Course_id);
-      console.log("Course_id");
-      console.log(Course_id);
       setClasses(Classes);
       setRubricArray(RubricArray);
       setCourseArray(CourseArray);
@@ -199,10 +201,28 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
     }
   }, [assessments]);
 
+  useEffect(() => {
+    // Logging the values for debugging
+    console.log('teacher_id:', teacher_id);
+    console.log('First assessment teacher_id:', assessments[0]?.teacher_id);
 
+    if (assessments.length > 0) {
+      // Convert to integers for comparison
+      const actionTeacherId = parseInt(assessments[0]?.teacher_id);
+      const currentTeacherId = parseInt(teacher_id);
 
+      console.log('Parsed teacher_id:', currentTeacherId);
+      console.log('Parsed action teacher_id:', actionTeacherId);
 
-
+      if (actionTeacherId === currentTeacherId) {
+        setCurrentTeacher(true);
+      } else {
+        setCurrentTeacher(false); // Optionally handle the case where it does not match
+      }
+    } else {
+      console.log('No assessments available');
+    }
+  }, [teacher_id, assessments]);
 
 
 
@@ -283,8 +303,8 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
   }, []);
   const topContent = React.useMemo(() => {
     return (
-      <div className="flex flex-col gap-4">
-        <div className="flex justify-between gap-3 items-end">
+      <div className="flex flex-col justify-center gap-4">
+        <div className="flex justify-between gap-3 items-center">
           <Input
             isClearable
             classNames={{ base: 'w-full sm:max-w-[44%]', inputWrapper: 'border-1' }}
@@ -297,30 +317,11 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
             onValueChange={onSearchChange}
           />
           <div className="flex gap-3">
-
-            {/* <Tooltip
-            title=""
-            getPopupContainer={() =>
-              document.querySelector(".Quick__Option")
-            }
-          >
-            <Button
-              className="flex justify-center items-center p-4"
-              isIconOnly
-              variant="light"
-              radius="full"
-              onClick={()=>{
-                //handleTakeSelectedItems
-                //console.log('Option selected',());
-                
-                handleNavigateGradingGroup(ValidKeys)
-              }
-              
-              }
-            >
-              <span className="text-[#475569] text-lg font-bold">Chấm theo nhóm</span>
+            <Button className='' onClick={() => {
+              handleOpenModalUpdateDiscClick()
+            }}>
+              Cập nhật đề tài
             </Button>
-          </Tooltip> */}
           </div>
         </div>
         <div className="w-full flex sm:items-center sm:justify-between">
@@ -425,7 +426,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
         return (
           <div className="flex items-center justify-center w-full gap-2">
             {action.totalScore === 0 ? (
-              <Tooltip title="Chấm điểm">
+              <Tooltip content="Chấm điểm">
                 <Button
                   isIconOnly
                   variant="light"
@@ -438,7 +439,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
                 </Button>
               </Tooltip>
             ) : (
-              <Tooltip title="Chỉnh sửa">
+              <Tooltip content="Chỉnh sửa">
                 <Button
                   isIconOnly
                   variant="light"
@@ -455,12 +456,13 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
                 </Button>
               </Tooltip>
             )}
-            <Tooltip title="Xoá">
+            <Tooltip content="Xoá">
               <Button
                 isIconOnly
                 variant="light"
                 radius="full"
                 size="sm"
+                disabled={!CurrentTeacher}
                 className='bg-[#FF8077]'
                 onClick={() => { onOpen(); setDeleteId(assessment.meta_assessment_id ?? null) }}
               >
@@ -498,17 +500,17 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
   };
   const handleFormSubmit = async () => {
     console.log("description", editRubric);
-  
+
     if (!editRubric.student_id || editRubric.student_id.length === 0) {
       message.error('Vui lòng chọn sinh viên tạo mới');
       return;
     }
-  
+
     if (editRubric.generalDescription === '') {
       message.error('Lỗi mô tả chung');
       return;
     }
-  
+
     try {
       // Tạo và gửi tất cả các yêu cầu POST đến '/meta-assessment'
       const promises = editRubric.student_id.map(studentId => {
@@ -529,7 +531,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
       console.log("metaAssessmentIds", metaAssessmentIds)
       // Gửi yêu cầu GET đến '/assessments' để lấy danh sách teacher_id
       const getTeacherIDAssessment = axiosAdmin.get(`/assessment?generalDescription=${editRubric.generalDescription}&isDelete=false`);
-      
+
       // Chờ kết quả từ GET yêu cầu
       const teacherData = await getTeacherIDAssessment;
       const teacherIds = teacherData.data.teacherIds;
@@ -543,9 +545,9 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
       );
       const postPromises = postData.map(data => axiosAdmin.post('/assessment', { data: data }));
       const postResponses = await Promise.all(postPromises);
-  
+
       const allSuccess = postResponses.every(response => response.status === 200 || response.status === 201);
-  
+
       if (allSuccess) {
         message.success('Lưu thành công tất cả các yêu cầu');
       } else {
@@ -557,10 +559,14 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
       message.error('Lỗi server nội bộ khi lưu các yêu cầu');
     }
   };
-  
+
   const handleAddClick = () => {
     console.log(editRubric);
     setIsEditModalOpen(true);
+  };
+
+  const handleOpenModalUpdateDiscClick = () => {
+    setIsUpdateDiscModalOpen(true);
   };
   const handleFileChange = (e) => {
     setFileList([...e.target.files]);
@@ -605,6 +611,17 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
     }
     return null;
   };
+
+  const getDescriptionsByIds = (assessments, ids) => {
+    return assessments
+      .filter(assessment => ids.includes(assessment.id)) 
+      .map(assessment => assessment?.description || 'N/A'); 
+  };
+
+  const allDescriptionsMatch = (descriptions) => {
+    return descriptions.every(description => description === descriptions[0]);
+  };
+  
   const handleNavigateGradingGroup = () => {
     setTimeout(() => {
       const selectedItems = handleTakeSelectedItems();
@@ -634,23 +651,33 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
       if (hasUncheckedAssessment) {
         return;
       }
+
+     
+
+      const descriptions = getDescriptionsByIds(assessments, ids);
+
+      // Kiểm tra nếu tất cả các mô tả đều giống nhau
+      if (!allDescriptionsMatch(descriptions)) {
+        message.error('Các mô tả không khớp với nhau.');
+        return;
+      }
+
       const listStudentCodes = ids.map((key) => handleTakeStudentCode(assessments, key));
-      console.log("checkStotalScore");
-      console.log(checkStotalScore);
-      console.log("listStudentCodes");
-      console.log(listStudentCodes);
+      // console.log("checkStotalScore");
+      // console.log(checkStotalScore);
+      // console.log("listStudentCodes");
+      // console.log(listStudentCodes);
       const studentCodesString = encodeURIComponent(JSON.stringify(listStudentCodes));
       const disc = handleReplaceCharacters(descriptionURL);
-      console.log("studentCodesString");
-      console.log(studentCodesString);
-      console.log("disc");
-      console.log(disc);
+      // console.log("studentCodesString");
+      // console.log(studentCodesString);
+      // console.log("disc");
+      // console.log(disc);
       const url = filterStatus === 0 ? `/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}&&FilterScore=0` : `/admin/management-grading/${disc}/couse/${Couse_id}/rubric/${rubric_id}?student-code=${studentCodesString}&&disc=${descriptionURL}`
       handleNavigate(url);
     }, 100);
   };
   const handleDownloadTemplateExcel = async () => {
-
     const assessmentMetaIds = assessments.map(item => item.meta_assessment_id);
     if (assessmentMetaIds.length === 0) {
       message.error(`Không tồn tại sinh viên`);
@@ -669,7 +696,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
         const url = window.URL.createObjectURL(response.data);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'UpdateDescription.xlsx';
+        a.download = 'CapNhatDeTai.xlsx';
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -819,6 +846,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
 
         </div>
       </div>
+
       <ConfirmAction
         onOpenChange={onOpenChange}
         isOpen={isOpen}
@@ -829,6 +857,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
           }
         }}
       />
+
       <Table
         aria-label="Example table with dynamic content"
         bottomContent={bottomContent}
@@ -865,68 +894,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
           )}
         </TableBody>
       </Table>
-      <div className="flex flex-wrap gap-6 justify-center items-start">
-        <div className="flex flex-col bg-white shadow-md rounded-lg p-4 justify-center items-center w-full md:w-auto">
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">Tải Mẫu CSV</h3>
-          <Button
-            className="bg-sky-500 text-white w-[125px] disabled:opacity-50"
-            onClick={handleDownloadTemplateExcel}
-          //disabled={!newRubric.rubric_id}
-          >
-            Tải Sinh viên
-          </Button>
-        </div>
 
-        <div className="flex flex-col bg-white shadow-md rounded-lg p-4 justify-center items-center w-full md:w-auto">
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">Upload File</h3>
-          <label htmlFor="file-upload" className="cursor-pointer w-[125px]">
-            <Button className="w-full bg-blue-500 text-white" auto flat as="span" color="primary">
-              Chọn file
-            </Button>
-          </label>
-          <input
-            id="file-upload"
-            type="file"
-            style={{ display: "none" }}
-            onChange={handleFileChange}
-            multiple
-          />
-          {fileList.length > 0 && (
-            <div className="mt-2 w-full">
-              <ul className="space-y-2">
-                {fileList.map((file, index) => (
-                  <li
-                    key={index}
-                    className="flex justify-between items-center bg-gray-100 p-2 rounded-md"
-                  >
-                    <p className="text-gray-700">{file.name}</p>
-                    <Button
-                      auto
-                      flat
-                      color="error"
-                      size="xs"
-                      className="bg-red-500 text-white px-2 py-1 rounded-md"
-                      onClick={() => handleRemoveFile(index)}
-                    >
-                      X
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-col bg-white shadow-md rounded-lg p-4 justify-center items-center w-full md:w-auto">
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">Lưu file</h3>
-          <CustomUpload
-            endpoint={'/meta-assessment/updateDescription'}
-            fileList={fileList}
-            setFileList={setFileList}
-            LoadData={LoadData}
-          />
-        </div>
-      </div>
       <ModalCreateOneAssessment
         isOpen={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
@@ -936,6 +904,13 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
         DataCourse={CourseArray}
         RubicData={RubricArray}
         StudentData={filteredStudents}
+      />
+
+      <ModalUpdateDisc
+        isOpen={isUpdateDiscModalOpen}
+        onOpenChange={setIsUpdateDiscModalOpen}
+        download={handleDownloadTemplateExcel}
+        LoadData={LoadData}
       />
     </>
   );
