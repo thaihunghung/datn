@@ -250,7 +250,20 @@ const AssessmentsController = {
           where: {
             teacher_id: teacherId,
             isDelete: isDelete === 'true'
-          }
+          },
+          include: [ 
+            {
+              model: TeacherModel
+            },
+            {
+              model: MetaAssessmentModel,
+              include: [
+                {
+                  model: TeacherModel
+                }
+              ]
+            }
+          ]
         });
 
         if (assessments.length === 0) {

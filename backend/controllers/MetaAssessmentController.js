@@ -99,7 +99,7 @@ const MetaAssessmentController = {
               generalDescription: assessment.generalDescription,
               isDelete: isDelete === 'true'
             },
-            attributes: ["meta_assessment_id", "rubric_id", "course_id", "generalDescription", "date", "place", "isDelete", "createdAt"],
+            attributes: ["meta_assessment_id", "teacher_id", "rubric_id", "course_id", "generalDescription", "date", "place", "isDelete", "createdAt"],
             include: [{
               model: RubricModel,
               // where: {
@@ -118,12 +118,6 @@ const MetaAssessmentController = {
               // }
             }]
           });
-          console.log("foundAssessment")
-          console.log("foundAssessment")
-          console.log("foundAssessment")
-          console.log("foundAssessment")
-          console.log("foundAssessment")
-          console.log(foundAssessment)
           const Assessment = await AssessmentModel.findAll({
             where: {
               meta_assessment_id: foundAssessment.meta_assessment_id,
@@ -171,6 +165,7 @@ const MetaAssessmentController = {
           }
 
           return {
+            teacher_id: foundAssessment.teacher_id,
             course_id: assessment.course_id,
             generalDescription: assessment.generalDescription,
             course: `${assessment.course.courseCode} - ${assessment.course.courseName}`,

@@ -7,6 +7,7 @@ export const fetchAssessmentData = async (teacher_id) => {
     const response = await axiosAdmin.get(`/meta-assessments?teacher_id=${teacher_id}&isDelete=false`);
     const Data = response?.data?.map((items) => ({
         id: items?.course_id ?? null,
+        teacher_id: items.teacher_id,
         generalDescription: items?.generalDescription ?? '',
         assessmentCount: items?.assessmentCount ?? 0,
         studentCount: items?.studentCount ?? 0,

@@ -122,6 +122,16 @@ export const fetchDataCheckTeacherAllot = async (teacher_id, meta_assessment_id)
     return { error: error.message };
   }
 };
+export const fetchAssessmentsByidTeacher = async (teacher_id) => {
+  try {
+    const response = await axiosAdmin.get(`assessment?isDelete=false&teacher_id=${teacher_id}`);
+    const data = response.data;
+    return data;
+  } catch (error) {
+    console.error('Error fetching assessments:', error);
+    return null;
+  }
+};
 
 
 const columns = [

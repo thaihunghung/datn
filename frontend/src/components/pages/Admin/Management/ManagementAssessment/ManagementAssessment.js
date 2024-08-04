@@ -18,6 +18,7 @@ import ModalAllot from './Modal/ModalAllot';
 import { UseNavigate, UseTeacherAuth, UseTeacherId } from '../../../../../hooks';
 import { ModalConfirmAction } from './Modal/ModalConfirmAction';
 import { handleReplaceCharacters } from '../../Utils/Utils';
+import ModalManamentAllot from './Modal/ModalManamentAllot';
 
 const INITIAL_VISIBLE_COLUMNS = ['generalDescription', 'status', 'courseName', 'Phân công', 'action'];
 const COMPACT_VISIBLE_COLUMNS = ['generalDescription', 'status', 'Phân công', 'action'];
@@ -42,6 +43,8 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
   const [DataRubricItems, setDataRubricItems] = useState([]);
   const [DataCourse, setCourseByTeacher] = useState([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAllotManageMentModalOpen, setIsAllotManageMentModalOpen] = useState(false);
+
   const [editRubric, setEditRubric] = useState({
     course_id: '',
     rubric_id: '',
@@ -341,6 +344,9 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
   const handleAddClick = () => {
     setIsAddModalOpen(true);
   };
+  const handleOpenManagementAllotClick = () => {
+    setIsAllotManageMentModalOpen(true);
+  };
   const handleAddClickPDF = (DataRubricPDF, DataRubricItems) => {
     setRubicDataPDF(DataRubricPDF)
     setDataRubricItems(DataRubricItems)
@@ -501,6 +507,11 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
           }
         }}
       />
+      <ModalManamentAllot
+        isOpen={isAllotManageMentModalOpen}
+        onOpenChange={setIsAllotManageMentModalOpen}
+        metaAssessment={assessments}
+      />
       <ModalAllot
         isOpen={isModalallot}
         onOpenChange={setIsModalallot}
@@ -538,8 +549,7 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
                 endContent={<PlusIcon />}
                 className="bg-[#AF84DD]"
                 onClick={() => { 
-                 handleNavigate('/admin/management-grading/100004_it31_khai_pha_du_lieu_da21tta_dd_2024_1_1/?description=100004%20-%20IT31_Khai%20phá%20dữ%20liệu%20DA21TTA_dd_2024-1-1')
-
+                  handleOpenManagementAllotClick()
                  }}
               >
                 Phân công

@@ -15,9 +15,7 @@ function ModalAllot({ isOpen, onOpenChange, generalDescription, loadData}) {
   const [TeacherData, setTeacherData] = useState([]);
   const [MetaAssessment, setMetaAssessment] = useState([]);
   const [currentTeacher, setCurrentTeacher] = useState({});
-
   const teacher_id = Cookies.get('teacher_id');
-
   if (!teacher_id) {
     Navigate('/login');
   }
@@ -42,8 +40,6 @@ function ModalAllot({ isOpen, onOpenChange, generalDescription, loadData}) {
 
     fetchTeacherData();
   }, [teacher_id]);
-
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -58,8 +54,6 @@ function ModalAllot({ isOpen, onOpenChange, generalDescription, loadData}) {
       fetchData();
     }
   }, [generalDescription]);
-  
-
   useEffect(() => {
     if (currentTeacher)
       setCurrentList(currentTeacher.name)
@@ -93,7 +87,6 @@ function ModalAllot({ isOpen, onOpenChange, generalDescription, loadData}) {
     setSelectedTodoIds([]);
     setTodoDescriptions('');
   };
-
   const handleCopy = () => {
     if (currentTeacher.name) {
       setCurrentList(prevCurrentList => {
@@ -103,9 +96,7 @@ function ModalAllot({ isOpen, onOpenChange, generalDescription, loadData}) {
       });
     }
   };
-
-
-  const functionSave = async (teacherId, metaAssessments) => {
+  const handleSave = async (teacherId, metaAssessments) => {
     try {
       const requests = metaAssessments.map(assessment => {
         const data = {
@@ -123,7 +114,6 @@ function ModalAllot({ isOpen, onOpenChange, generalDescription, loadData}) {
       message.error("Lỗi khi lưu phân công");
     }
   };
-  
   const handleAssign = async () => {
     const namesArray = currentList.split('\n').map(name => name.trim()).filter(name => name !== '');
     const assignedIds = TeacherData
@@ -141,7 +131,7 @@ function ModalAllot({ isOpen, onOpenChange, generalDescription, loadData}) {
     }
   
     // Create a list of promises for saving assessments
-    const savePromises = assignedIds.map(id => functionSave(id, MetaAssessment));
+    const savePromises = assignedIds.map(id => handleSave(id, MetaAssessment));
   
     // Execute all save promises concurrently
     try {
@@ -153,8 +143,6 @@ function ModalAllot({ isOpen, onOpenChange, generalDescription, loadData}) {
       message.error("Lỗi khi phân công");
     }
   };
-
-
   const handleDelete = () => {
     if (currentTeacher.name) {
       setCurrentList(prevCurrentList => {
@@ -166,6 +154,9 @@ function ModalAllot({ isOpen, onOpenChange, generalDescription, loadData}) {
     }
   };
 
+
+
+  
   return (
     <Modal
       size="4xl"

@@ -833,33 +833,26 @@ router.get('/assessment/checkTeacher', assessmentsController.checkTeacherInAsses
 
 
 router.get('/assessment', assessmentsController.getAssessments);
+
+
 router.patch('/assessment/:id/totalScore', assessmentsController.updateStotalScore);
 router.get('/assessment/:id', assessmentsController.getByID);
 router.get('/assessment/:id/items', assessmentsController.GetitemsByID);
 router.post('/assessment', assessmentsController.create);
-
-
-
-
-
-
-
-
-
-
-
 
 router.put('/assessment/:id', assessmentsController.update);
 router.delete('/assessment/:id', assessmentsController.delete);
 router.delete('/assessments/multiple', assessmentsController.deleteMultiple);
 
 
+
+
+
+
+
+
 router.get('/assessment/isDelete/true', assessmentsController.isDeleteTotrue);
 router.get('/assessment/isDelete/false', assessmentsController.isDeleteTofalse);
-
-
-
-
 
 
 router.put('/assessments/softDeleteByDescription', assessmentsController.toggleSoftDeleteByGeneralDescription);
