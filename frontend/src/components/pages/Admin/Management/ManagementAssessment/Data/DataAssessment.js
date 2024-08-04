@@ -14,6 +14,7 @@ export const fetchAssessmentData = async (teacher_id) => {
         courseName: items?.courseName ?? '',
         status: items?.status ?? '',
         action: items?.generalDescription ?? '',
+        Assessment: items?.Assessment ?? [],
         metaAssessment: {
           rubric_id: items?.metaAssessment?.rubric_id ?? null,
           course_id: items?.metaAssessment?.course_id ?? null,

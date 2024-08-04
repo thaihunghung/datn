@@ -7,18 +7,22 @@ import Cookies from "js-cookie";
 import { fetchDataGetMetaIdByGeneralDescription } from '../Data/DataAssessment';
 import { message } from 'antd';
 import { axiosAdmin } from '../../../../../../service/AxiosAdmin';
+import { UseTeacherAuth, UseTeacherId } from '../../../../../../hooks';
 
-function ModalAllot({ isOpen, onOpenChange, generalDescription, loadData}) {
+function ModalAllot({ isOpen, onOpenChange, generalDescription, loadData, assessments, updateAllot}) {
+  UseTeacherAuth()
+  const teacher_id = UseTeacherId()
+
   const [selectedTodoIds, setSelectedTodoIds] = useState([]);
   const [todoDescriptions, setTodoDescriptions] = useState('');
   const [currentList, setCurrentList] = useState('');
   const [TeacherData, setTeacherData] = useState([]);
   const [MetaAssessment, setMetaAssessment] = useState([]);
   const [currentTeacher, setCurrentTeacher] = useState({});
-  const teacher_id = Cookies.get('teacher_id');
-  if (!teacher_id) {
-    Navigate('/login');
-  }
+
+  const [FilteredAssessments, setFilteredAssessments] = useState([]);
+
+
   useEffect(() => {
     const fetchTeacherData = async () => {
       try {
@@ -37,9 +41,15 @@ function ModalAllot({ isOpen, onOpenChange, generalDescription, loadData}) {
         console.error("Error fetching teacher data:", error);
       }
     };
-
     fetchTeacherData();
-  }, [teacher_id]);
+    const filteredAssessments = assessments.filter(
+      assessment => assessment.teacher_id !== parseInt(teacher_id)
+    );
+    setFilteredAssessments(filteredAssessments);
+  }, [teacher_id, assessments]);
+
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -54,6 +64,15 @@ function ModalAllot({ isOpen, onOpenChange, generalDescription, loadData}) {
       fetchData();
     }
   }, [generalDescription]);
+
+
+  useEffect(() => {
+    
+  }, [updateAllot]);
+
+
+
+
   useEffect(() => {
     if (currentTeacher)
       setCurrentList(currentTeacher.name)

@@ -202,25 +202,11 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
   }, [assessments]);
 
   useEffect(() => {
-    // Logging the values for debugging
-    console.log('teacher_id:', teacher_id);
-    console.log('First assessment teacher_id:', assessments[0]?.teacher_id);
-
-    if (assessments.length > 0) {
-      // Convert to integers for comparison
-      const actionTeacherId = parseInt(assessments[0]?.teacher_id);
-      const currentTeacherId = parseInt(teacher_id);
-
-      console.log('Parsed teacher_id:', currentTeacherId);
-      console.log('Parsed action teacher_id:', actionTeacherId);
-
-      if (actionTeacherId === currentTeacherId) {
-        setCurrentTeacher(true);
-      } else {
-        setCurrentTeacher(false); // Optionally handle the case where it does not match
-      }
-    } else {
-      console.log('No assessments available');
+    console.log("assessments?.teacher_id")
+    console.log(assessments[0]?.teacher_id)
+    console.log(teacher_id)
+    if(parseInt(assessments[0]?.teacher_id)===parseInt(teacher_id)){
+      setCurrentTeacher(true)
     }
   }, [teacher_id, assessments]);
 
@@ -317,7 +303,10 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
             onValueChange={onSearchChange}
           />
           <div className="flex gap-3">
-            <Button className='' onClick={() => {
+            <Button className=''
+            disabled={!CurrentTeacher}
+            
+            onClick={() => {
               handleOpenModalUpdateDiscClick()
             }}>
               Cập nhật đề tài
@@ -567,14 +556,6 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
 
   const handleOpenModalUpdateDiscClick = () => {
     setIsUpdateDiscModalOpen(true);
-  };
-  const handleFileChange = (e) => {
-    setFileList([...e.target.files]);
-  };
-  const handleRemoveFile = (indexToRemove) => {
-    setFileList((currentFiles) =>
-      currentFiles.filter((_, index) => index !== indexToRemove)
-    );
   };
   const handleSelectionChange = (keys) => {
     // console.log('Keys:', keys);

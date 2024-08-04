@@ -38,6 +38,8 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
   const [isAddModalOpenPDF, setIsAddModalOpenPDF] = useState(false);
   const [isModalallot, setIsModalallot] = useState(false);
 
+  const [UpdateAllot, setUpdateAllot] = useState(null);
+
   const [editPDF, setEditPDF] = useState({});
   const [DataRubricPDF, setRubicDataPDF] = useState({});
   const [DataRubricItems, setDataRubricItems] = useState([]);
@@ -168,13 +170,21 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
         return (
           <div className="flex flex-col">
             <p className="text-bold text-small capitalize">
-              <Button color="primary" variant="ghost"
-                onClick={() =>
-                  handleAllotClick(assessment.generalDescription)
+            <Button
+              color="primary"
+              variant="ghost"
+              onClick={() => {
+                if (!assessment.statusAllot) {
+                  handleAllotClick(assessment.generalDescription);
+                } else {
+                  handleAllotClick(assessment.generalDescription);
+                  setUpdateAllot(assessment.generalDescription);
                 }
-              >
-                <p>Phân công</p>
-              </Button>
+              }}
+            >
+              <p>Phân công</p>
+            </Button>
+
             </p>
           </div>
         );
@@ -213,7 +223,7 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
         const disc = handleReplaceCharacters(cellValue);
         return (
           <div className="flex items-center justify-center w-full gap-2">
-            <Tooltip content="Chấm điểm">
+            <Tooltip content={!assessment.statusAllot?'Phân công trước tiên': 'Chấm điểm'}>
               <Button
                 isIconOnly
                 variant="light"
@@ -326,7 +336,7 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
   const loadAssessment = useCallback(async () => {
     try {
       const response = await fetchAssessmentData(teacher_id);
-      console.log(response);
+      console.log("response",response);
       setAssessment(response);
     } catch (error) {
       console.error("Error loading assessments:", error);
@@ -382,6 +392,10 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
     setIsEditModalOpen(true);
   };
   const handleAllotClick = (generalDescription) => {
+    setGeneralDescription(generalDescription)
+    setIsModalallot(true);
+  };
+  const handleAllotClick2 = (generalDescription) => {
     setGeneralDescription(generalDescription)
     setIsModalallot(true);
   };
@@ -517,6 +531,8 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
         onOpenChange={setIsModalallot}
         generalDescription={GeneralDescription}
         loadData={loadAssessment}
+        assessments={assessments}
+        updateAllot = {UpdateAllot}
       />
 
       <div className='w-full flex justify-between'>
@@ -533,7 +549,7 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
               endContent={<PlusIcon />}
               onClick={handleAddClick}
             >
-              New
+              Tạo mới
             </Button>
 
             <Button
@@ -542,7 +558,7 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
                 `/admin/management-grading/store`
               )}
             >
-              Store
+              Kho lưu trữ
             </Button>
             <Tooltip content="phân công">
               <Button
