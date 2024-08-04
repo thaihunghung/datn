@@ -114,7 +114,7 @@ const ModalCreateOneAssessment = ({
             <ModalContent>
                 {(onClose) => (
                     <>
-                        <ModalHeader className="text-[#FF9908]">Update Assessment</ModalHeader>
+                        <ModalHeader className="text-[#FF9908]">Tạo mới lần chấm cho sinh viên</ModalHeader>
                         <ModalBody>
                             <div className="flex flex-col h-full">
                                 <form
@@ -161,7 +161,7 @@ const ModalCreateOneAssessment = ({
                                         label="description"
                                         name="description"
                                         placeholder="Enter your description"
-                                        value={editRubric.description || ''}
+                                        value={editRubric.generalDescription || ''}
                                         onChange={handleChange}
                                         rows={4}
                                         minRows={4}
@@ -189,7 +189,7 @@ const ModalCreateOneAssessment = ({
                         </ModalBody>
                         <ModalFooter>
                             <Button variant="light" onClick={onClose}>
-                                Cancel
+                                Hủy
                             </Button>
                             <Button
                                 type="submit"
@@ -200,7 +200,7 @@ const ModalCreateOneAssessment = ({
                                     onClose();
                                 }}
                             >
-                                Update
+                                Tạo mới
                             </Button>
                         </ModalFooter>
                     </>

@@ -183,7 +183,7 @@ const AssessmentsController = {
       const { isDelete, teacher_id, generalDescription } = req.query;
 
       if (teacher_id && generalDescription) {
-  
+
         const assessments = await AssessmentModel.findAll({
           where: {
             teacher_id: parseInt(teacher_id),
@@ -227,21 +227,21 @@ const AssessmentsController = {
 
 
         // Lọc các MetaAssessments dựa trên metaAssessmentIds
-        const filteredMetaAssessments = metaAssessments.filter(metaAssessment => 
+        const filteredMetaAssessments = metaAssessments.filter(metaAssessment =>
           metaAssessmentIds.includes(metaAssessment.meta_assessment_id)
         );
         const result = filteredMetaAssessments.map(metaAssessment => {
           // Tìm Assessment tương ứng với metaAssessment
-          const associatedAssessment = assessments.find(assessment => 
+          const associatedAssessment = assessments.find(assessment =>
             assessment.dataValues.meta_assessment_id === metaAssessment.dataValues.meta_assessment_id
           );
-  
+
           return {
             ...metaAssessment.dataValues,
             assessment: associatedAssessment ? associatedAssessment.dataValues : null
           };
         });
-  
+
         return res.status(200).json(result);
 
       } else if (teacher_id) {
@@ -257,8 +257,31 @@ const AssessmentsController = {
           return res.status(404).json({ message: 'No assessments found for this user' });
         }
         return res.status(200).json(assessments);
-      }
-      else {
+      } else if (generalDescription) {
+        const metaAssessment = await MetaAssessmentModel.findOne({
+          where: {
+            generalDescription: generalDescription,
+            isDelete: isDelete === 'true'
+          }
+        });
+
+        if (metaAssessment) {
+          const assessments = await AssessmentModel.findAll({
+            where: {
+              meta_assessment_id: metaAssessment.meta_assessment_id
+            }
+          });
+
+          const teacherIds = assessments.map(assessment => assessment.teacher_id);
+
+          res.json({
+            assessments,
+            teacherIds
+          });
+        } else {
+          res.status(404).json({ message: 'assessment không tìm thấy' });
+        }
+      } else {
         // Logic for index
         const assessments = await AssessmentModel.findAll();
         return res.status(200).json(assessments);
@@ -281,7 +304,7 @@ const AssessmentsController = {
         },
         include: [{
           model: MetaAssessmentModel,
-          where: {isDelete: false},
+          where: { isDelete: false },
           include: [
             { model: CourseModel, attributes: ['courseCode', 'courseName'] },
             {
@@ -299,7 +322,7 @@ const AssessmentsController = {
               }
             }
           ],
-          
+
         },
         {
           model: TeacherModel,
@@ -307,9 +330,9 @@ const AssessmentsController = {
             isDelete: false
           },
         }]
-        
+
       });
-      
+
       if (!assessments || !assessments.MetaAssessment.Rubric) {
         return res.status(404).json({ message: 'Assessment or Rubric not found' });
       }
@@ -368,6 +391,8 @@ const AssessmentsController = {
       const { data } = req.body;
       console.log(data);
       const Assessment = await AssessmentModel.create(data);
+
+
       res.json(Assessment);
     } catch (error) {
       console.error('Lỗi tạo Assessment:', error);
@@ -405,7 +430,7 @@ const AssessmentsController = {
           ],
         }]
       });
-      
+
       if (!assessment) {
         return res.status(404).json({ message: 'Assessment not found' });
       }
@@ -434,21 +459,21 @@ const AssessmentsController = {
 
   updateStotalScore: async (req, res) => {
     try {
-        const { id } = req.params;
-        const { data } = req.body;
-        
-        const updatedProgram = await AssessmentModel.update(data, { where: { assessment_id: id } });
-        
-        if (updatedProgram[0] === 0) {
-            return res.status(404).json({ message: 'Assessment not found' });
-        }
-        
-        res.json(updatedProgram);
+      const { id } = req.params;
+      const { data } = req.body;
+
+      const updatedProgram = await AssessmentModel.update(data, { where: { assessment_id: id } });
+
+      if (updatedProgram[0] === 0) {
+        return res.status(404).json({ message: 'Assessment not found' });
+      }
+
+      res.json(updatedProgram);
     } catch (error) {
-        console.error('Lỗi cập nhật assessments:', error);
-        res.status(500).json({ message: 'Lỗi server' });
+      console.error('Lỗi cập nhật assessments:', error);
+      res.status(500).json({ message: 'Lỗi server' });
     }
-},
+  },
 
   delete: async (req, res) => {
     try {
@@ -552,11 +577,11 @@ const AssessmentsController = {
 
   toggleSoftDeleteByGeneralDescription: async (req, res) => {
     try {
-      const { GeneralDescriptions, isDelete } = req.body; 
+      const { GeneralDescriptions, isDelete } = req.body;
       if (!Array.isArray(GeneralDescriptions) || GeneralDescriptions.length === 0) {
         return res.status(400).json({ message: 'GeneralDescription array is required and cannot be empty' });
       }
-  
+
       // Tìm tất cả assessments dựa vào các description
       const metaAssessments = await MetaAssessmentModel.findAll({
         where: {
@@ -564,11 +589,11 @@ const AssessmentsController = {
         }
       });
       console.log('Found metaAssessments:', metaAssessments);
-  
+
       if (metaAssessments.length === 0) {
         return res.status(404).json({ message: 'No metaAssessments found for the provided GeneralDescriptions' });
       }
-  
+
       // Toggling trạng thái isDelete cho tất cả metaAssessments tìm thấy
       const updated = await Promise.all(metaAssessments.map(async (meta_assessment) => {
         if (isDelete === null) {
@@ -579,15 +604,15 @@ const AssessmentsController = {
           return { meta_assessment_id: meta_assessment.meta_assessment_id, isDelete: updatedIsDeleted };
         }
       }));
-  
+
       res.status(200).json({ message: 'Processed isDelete status', updated });
-  
+
     } catch (error) {
       console.error('Error toggling assessment delete statuses:', error);
       res.status(500).json({ message: 'Server error' });
     }
   }
-  
+
   ,
   updateByDescription: async (req, res) => {
     try {

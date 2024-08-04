@@ -59,6 +59,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
     teacher_id: "",
     course_id: "",
     rubric_id: "",
+    generalDescription: "",
     description: "",
     student_id: "",
     place: "",
@@ -89,6 +90,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
   const loadStudentAllCourse = async (Couse_id) => {
     try {
       const response = await fetchStudentDataByCourseId(Couse_id);
+      console.log("loadStudentAllCourse", response);
       setStudentAll(response);
 
     } catch (error) {
@@ -98,11 +100,11 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
   const LoadData = React.useCallback(async () => {
     try {
       const { metaAssessment, Rubric_id, Course_id, Classes, RubricArray, CourseArray } = await fetchAssessmentDataGrading(teacher_id, descriptionURL, filterValue);
-      console.log("metaAssessment");
-      console.log(metaAssessment);
       setAssessment(metaAssessment);
       setRubric_id(Rubric_id);
       setCouse_id(Course_id);
+      console.log("Course_id");
+      console.log(Course_id);
       setClasses(Classes);
       setRubricArray(RubricArray);
       setCourseArray(CourseArray);
@@ -163,6 +165,8 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
       const filtered = StudentAll.filter(student =>
         !assessments.some(assessment => assessment.student.student_id === student.student_id)
       );
+      console.log("filtered")
+      console.log(filtered)
       setFilteredStudents(filtered);
     }
   }, [StudentAll, assessments]);
@@ -170,7 +174,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
     if (assessments) {
       setEditRubric((prev) => ({
         ...prev,
-        description: assessments[0]?.action?.description,
+        generalDescription: assessments[0]?.action?.generalDescription,
       }));
       setEditRubric((prev) => ({
         ...prev,
@@ -458,7 +462,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
                 radius="full"
                 size="sm"
                 className='bg-[#FF8077]'
-                onClick={() => { onOpen(); setDeleteId(action.assessment_id ?? '') }}
+                onClick={() => { onOpen(); setDeleteId(assessment.meta_assessment_id ?? null) }}
               >
                 <i className="fa-solid fa-trash-can text-xl text-[#020401]"></i>
               </Button>
@@ -494,37 +498,66 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
   };
   const handleFormSubmit = async () => {
     console.log("description", editRubric);
+  
     if (!editRubric.student_id || editRubric.student_id.length === 0) {
-      message.error('Please select at least one student.');
+      message.error('Vui lòng chọn sinh viên tạo mới');
       return;
     }
-
+  
+    if (editRubric.generalDescription === '') {
+      message.error('Lỗi mô tả chung');
+      return;
+    }
+  
     try {
-      for (const studentId of editRubric.student_id) {
+      // Tạo và gửi tất cả các yêu cầu POST đến '/meta-assessment'
+      const promises = editRubric.student_id.map(studentId => {
         const data = {
-          teacher_id: editRubric.teacher_id || "",
+          teacher_id: teacher_id,
           course_id: editRubric.course_id || "",
           rubric_id: editRubric.rubric_id || "",
-          description: editRubric.description || "",
+          description: "",
+          generalDescription: editRubric.generalDescription || "",
           student_id: studentId,
           place: editRubric.place,
           date: editRubric.date,
         };
-
-        const response = await axiosAdmin.post('/assessment', { data: data });
-        console.log('Assessment response:', response.data);
+        return axiosAdmin.post('/meta-assessment', { data: data });
+      });
+      const responses = await Promise.all(promises);
+      const metaAssessmentIds = responses.map(response => response.data.meta_assessment_id);
+      console.log("metaAssessmentIds", metaAssessmentIds)
+      // Gửi yêu cầu GET đến '/assessments' để lấy danh sách teacher_id
+      const getTeacherIDAssessment = axiosAdmin.get(`/assessment?generalDescription=${editRubric.generalDescription}&isDelete=false`);
+      
+      // Chờ kết quả từ GET yêu cầu
+      const teacherData = await getTeacherIDAssessment;
+      const teacherIds = teacherData.data.teacherIds;
+      console.log("teacherIds", teacherIds)
+      // Tạo và gửi tất cả các yêu cầu POST đến '/assessment'
+      const postData = metaAssessmentIds.flatMap(meta_assessment_id =>
+        teacherIds.map(teacher_id => ({
+          meta_assessment_id,
+          teacher_id
+        }))
+      );
+      const postPromises = postData.map(data => axiosAdmin.post('/assessment', { data: data }));
+      const postResponses = await Promise.all(postPromises);
+  
+      const allSuccess = postResponses.every(response => response.status === 200 || response.status === 201);
+  
+      if (allSuccess) {
+        message.success('Lưu thành công tất cả các yêu cầu');
+      } else {
+        message.error('Có lỗi xảy ra khi lưu một số yêu cầu');
       }
-      LoadData();
-      setEditRubric((prev) => ({
-        ...prev,
-        student_id: "",
-      }));
-      message.success('Assessment updated successfully');
+      LoadData()
     } catch (error) {
-      console.error("Error updating assessment:", error);
-      message.error("Error updating assessment: " + (error.response?.data?.message || 'Internal server error'));
+      console.error('Error creating meta assessments:', error);
+      message.error('Lỗi server nội bộ khi lưu các yêu cầu');
     }
   };
+  
   const handleAddClick = () => {
     console.log(editRubric);
     setIsEditModalOpen(true);
@@ -582,6 +615,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
       }
       if (selectedItems.length > 4) {
         message.error('Please select no more than 4 students');
+        setSelectedKeys(new Set())
         return;
       }
 
@@ -644,27 +678,11 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
       console.error('Error downloading file:', error);
     }
   };
-  const handleSoftDelete = async () => {
-    const data = {
-      assessment_id: Array.from(selectedKeys),
-    };
-    console.log(data)
-    try {
-      const response = await axiosAdmin.delete('/assessments/multiple', { params: data });
-
-      await LoadData();
-
-      message.success(response.data.message);
-    } catch (error) {
-      console.error("Error deleting:", error);
-      message.error('Error deleting');
-    }
-  };
   const handleSoftDeleteById = async (_id) => {
     try {
-      const response = await axiosAdmin.delete(`/assessment/${_id}`);
+      await axiosAdmin.delete(`/meta-assessment/${_id}`);
       await LoadData();
-      message.success(response.data.message);
+      message.success("xóa thành công");
     } catch (error) {
       console.error(`Error toggling delete for with ID ${_id}:`, error);
       message.error(`Error toggling delete for with ID ${_id}`);
@@ -690,31 +708,21 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
               }}
               endContent={<PlusIcon />}
             >
-              Group
+              Chấm theo nhóm
             </Button>
             <Button
               className='bg-[#AF84DD] '
               endContent={<PlusIcon />}
               onClick={handleAddClick}
             >
-              New
+              Tạo mới
             </Button>
-            <Button
-              className='bg-[#FF8077] '
-              endContent={<PlusIcon />}
-              onClick={onOpen}
-              disabled={selectedKeys.size === 0}
-            >
-              Deletes
-            </Button>
-
           </div>
-
           <div className='flex gap-1 justify-start'>
             <Dropdown>
               <DropdownTrigger className="sm:flex">
                 <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                  Filter score
+                  Lọc theo điểm
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
@@ -728,7 +736,7 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
                   setStatusFilter(selectedKey === 'all' ? 'all' : parseInt(selectedKey, 10));
                 }}
               >
-                <DropdownItem key="all" className="capitalize">All Statuses</DropdownItem>
+                <DropdownItem key="all" className="capitalize">Tất cả</DropdownItem>
                 {statusOptions.map((option) => (
                   <DropdownItem key={option.totalScore} className="capitalize">
                     {option.name}
@@ -739,7 +747,57 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
             <Dropdown>
               <DropdownTrigger className="sm:flex">
                 <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                  Columns
+                  Lọc theo lớp
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label="Class Filter"
+                closeOnSelect={true}
+                selectedKeys={new Set([filterClass])} // Chuyển đổi filterClass thành Set
+                selectionMode="single"
+                onSelectionChange={(keys) => {
+                  const selectedKey = Array.from(keys)[0] || 'all';
+                  setClassFilter(selectedKey);
+                }}
+              >
+                <DropdownItem key="all" className="capitalize">Tất cả lớp</DropdownItem>
+                {classes.map((classOption) => (
+                  <DropdownItem key={classOption.value} className="capitalize">
+                    {classOption.label}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+            <Dropdown>
+              <DropdownTrigger className="sm:flex">
+                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                  Lọc theo nhóm
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label="Lọc nhóm"
+                closeOnSelect={true}
+                selectedKeys={new Set([filterDescription])} // Chuyển đổi filterDescription thành Set
+                selectionMode="single"
+                onSelectionChange={(keys) => {
+                  const selectedKey = Array.from(keys)[0] || ''; // Đảm bảo chọn giá trị rỗng nếu không có lựa chọn
+                  setDescriptionFilter(selectedKey);
+                }}
+              >
+                <DropdownItem key="" className="capitalize">
+                  Tất cả nhóm
+                </DropdownItem>
+                {uniqueSortedDisription.map((ploName) => (
+                  <DropdownItem key={ploName} className="capitalize">
+                    {ploName}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+            <Dropdown>
+              <DropdownTrigger className="sm:flex">
+                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
+                  Cột
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
@@ -757,56 +815,6 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
                 ))}
               </DropdownMenu>
             </Dropdown>
-            <Dropdown>
-              <DropdownTrigger className="sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                  Filter class
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                aria-label="Class Filter"
-                closeOnSelect={true}
-                selectedKeys={new Set([filterClass])} // Chuyển đổi filterClass thành Set
-                selectionMode="single"
-                onSelectionChange={(keys) => {
-                  const selectedKey = Array.from(keys)[0] || 'all';
-                  setClassFilter(selectedKey);
-                }}
-              >
-                <DropdownItem key="all" className="capitalize">All Classes</DropdownItem>
-                {classes.map((classOption) => (
-                  <DropdownItem key={classOption.value} className="capitalize">
-                    {classOption.label}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-            <Dropdown>
-              <DropdownTrigger className="sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} size="sm" variant="flat">
-                  Filter by PLO
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                aria-label="Filter by PLO"
-                closeOnSelect={true}
-                selectedKeys={new Set([filterDescription])} // Chuyển đổi filterDescription thành Set
-                selectionMode="single"
-                onSelectionChange={(keys) => {
-                  const selectedKey = Array.from(keys)[0] || ''; // Đảm bảo chọn giá trị rỗng nếu không có lựa chọn
-                  setDescriptionFilter(selectedKey);
-                }}
-              >
-                <DropdownItem key="" className="capitalize">
-                  All PLOs
-                </DropdownItem>
-                {uniqueSortedDisription.map((ploName) => (
-                  <DropdownItem key={ploName} className="capitalize">
-                    {ploName}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
           </div>
 
         </div>
@@ -818,9 +826,6 @@ const ManagementAssessmentGrading = ({ setCollapsedNav }) => {
           if (deleteId) {
             handleSoftDeleteById(deleteId);
             setDeleteId(null);
-          } else if (selectedKeys.size > 0) {
-            handleSoftDelete();
-            setSelectedKeys(new Set());
           }
         }}
       />
@@ -978,7 +983,7 @@ function ConfirmAction(props) {
             <ModalHeader>Cảnh báo</ModalHeader>
             <ModalBody>
               <p className="text-[16px]">
-                Assessment sẽ được xóa và không thể khôi phục lại, tiếp tục thao tác?
+                Lần đánh giá của sinh viên sẽ được xóa và không thể khôi phục lại, tiếp tục thao tác?
               </p>
             </ModalBody>
             <ModalFooter>

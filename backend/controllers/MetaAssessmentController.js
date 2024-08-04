@@ -75,7 +75,7 @@ const MetaAssessmentController = {
             model: CourseModel,
             attributes: ['courseCode', 'courseName']
           }
-        ]
+          ]
         });
 
         if (assessments.length === 0) {
@@ -99,7 +99,7 @@ const MetaAssessmentController = {
               generalDescription: assessment.generalDescription,
               isDelete: isDelete === 'true'
             },
-            attributes: ["meta_assessment_id","rubric_id", "course_id", "generalDescription", "date", "place", "isDelete", "createdAt"],
+            attributes: ["meta_assessment_id", "rubric_id", "course_id", "generalDescription", "date", "place", "isDelete", "createdAt"],
             include: [{
               model: RubricModel,
               // where: {
@@ -135,11 +135,11 @@ const MetaAssessmentController = {
                 isDelete: isDelete === 'true'
               },
             }]
-            }
+          }
           )
           let statusAllot = true;
           if (Assessment.length === 0) {
-              statusAllot = false;
+            statusAllot = false;
           }
           if (foundAssessment && foundAssessment.Rubric) {
             const rubricItems = await RubricsItemModel.findAll({
@@ -189,7 +189,7 @@ const MetaAssessmentController = {
         }));
 
         return res.status(200).json(result);
-      } else if (generalDescription) { 
+      } else if (generalDescription) {
         const assessments = await MetaAssessmentModel.findAll({
           where: {
             generalDescription: generalDescription,
@@ -227,21 +227,42 @@ const MetaAssessmentController = {
 
   // Tạo meta assessment mới
   create: async (req, res) => {
+    const { data } = req.body;
     try {
-      const newMetaAssessment = await MetaAssessmentModel.create(req.body);
-      res.status(201).json(newMetaAssessment);
+      const newMetaAssessment = await MetaAssessmentModel.create(data);
+      res.status(201).json({ 
+        message: 'Tạo MetaAssessment thành công',
+        meta_assessment_id: newMetaAssessment.meta_assessment_id,
+        data: newMetaAssessment 
+    });
     } catch (error) {
       console.error('Lỗi khi tạo meta assessment mới:', error);
       res.status(400).json({ message: 'Yêu cầu không hợp lệ' });
     }
   },
+  createlistStudent: async (req, res) => {
+    try {
 
+
+
+
+
+      MetaAssessmentModel
+
+
+
+
+    } catch (error) {
+      console.error('Lỗi khi tạo meta assessment mới:', error);
+      res.status(400).json({ message: 'Yêu cầu không hợp lệ' });
+    }
+  },
   // Cập nhật meta assessment
   update: async (req, res) => {
     try {
       const { id } = req.params;
       const [updated] = await MetaAssessmentModel.update(req.body, {
-        where: { meta_meta_assessment_id: id }
+        where: { meta_assessment_id: id }
       });
       if (updated) {
         const updatedMetaAssessment = await MetaAssessmentModel.findByPk(id);
@@ -254,30 +275,53 @@ const MetaAssessmentController = {
       res.status(400).json({ message: 'Yêu cầu không hợp lệ' });
     }
   },
-updateDescription: async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { description } = req.body;
-    
-    // Cập nhật description trong MetaAssessmentModel
-    await MetaAssessmentModel.update(
-      { description: description },
-      { where: { meta_assessment_id: id } }
-    );
-    
-    res.status(200).json({ message: 'MetaAssessment updated successfully' });
-  } catch (error) {
-    console.error('Error updating MetaAssessment:', error);
-    res.status(500).json({ message: 'Error updating MetaAssessment', error });
-  }
-},
+  updateDescription: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { description } = req.body;
+
+      // Cập nhật description trong MetaAssessmentModel
+      await MetaAssessmentModel.update(
+        { description: description },
+        { where: { meta_assessment_id: id } }
+      );
+
+      res.status(200).json({ message: 'MetaAssessment updated successfully' });
+    } catch (error) {
+      console.error('Error updating MetaAssessment:', error);
+      res.status(500).json({ message: 'Error updating MetaAssessment', error });
+    }
+  },
   // Xóa meta assessment
   delete: async (req, res) => {
     try {
       const { id } = req.params;
-      const deleted = await MetaAssessmentModel.destroy({
-        where: { meta_meta_assessment_id: id }
+
+      // Tìm tất cả assessments liên quan đến meta_assessment_id
+      const assessments = await AssessmentModel.findAll({
+        where: {
+          meta_assessment_id: id
+        }
       });
+      if (assessments.length > 0) {
+        const assessmentIds = assessments.map(assessment => assessment.assessment_id);
+
+        await AssessmentItemModel.destroy({
+          where: {
+            assessment_id: assessmentIds
+          }
+        });
+        await AssessmentModel.destroy({
+          where: {
+            meta_assessment_id: id
+          }
+        });
+      }
+
+      const deleted = await MetaAssessmentModel.destroy({
+        where: { meta_assessment_id: id }
+      });
+
       if (deleted) {
         res.json({ message: 'Meta assessment đã được xóa' });
       } else {
@@ -288,6 +332,61 @@ updateDescription: async (req, res) => {
       res.status(500).json({ message: 'Lỗi server' });
     }
   },
+
+  deleteMultiple: async (req, res) => {
+    const { meta_assessment_id } = req.query;
+
+    try {
+      if (!Array.isArray(meta_assessment_id) || meta_assessment_id.length === 0) {
+        return res.status(400).json({ message: 'meta_assessment_id array is required and cannot be empty' });
+      }
+
+      const MetaAssessmentIds = meta_assessment_id.map(id => parseInt(id));
+
+      console.log("MetaAssessmentIds:", MetaAssessmentIds); // Debugging
+
+      const assessments = await AssessmentModel.findAll({
+        where: {
+          meta_assessment_id: MetaAssessmentIds
+        }
+      });
+
+      console.log("Assessments found:", assessments.length); // Debugging
+
+      if (assessments.length > 0) {
+        const assessmentIds = assessments.map(assessment => assessment.assessment_id);
+
+        console.log("Assessment IDs:", assessmentIds); // Debugging
+
+        await AssessmentItemModel.destroy({
+          where: {
+            assessment_id: assessmentIds
+          }
+        });
+        console.log("Deleted AssessmentItems"); // Debugging
+
+        await AssessmentModel.destroy({
+          where: {
+            meta_assessment_id: MetaAssessmentIds
+          }
+        });
+        console.log("Deleted Assessments"); // Debugging
+      }
+
+      const deletedMetaAssessments = await MetaAssessmentModel.destroy({
+        where: { meta_assessment_id: MetaAssessmentIds }
+      });
+
+      console.log("Deleted MetaAssessments count:", deletedMetaAssessments); // Debugging
+
+      res.status(200).json({ message: 'Xóa nhiều MetaAssessmentModel thành công' });
+    } catch (error) {
+      console.error('Lỗi khi xóa nhiều MetaAssessmentModel:', error);
+      res.status(500).json({ message: 'Lỗi server nội bộ' });
+    }
+  },
+
+
   processSaveTemplateMetaAssessment: async (req, res) => {
     if (!req.files) {
       return res.status(400).send('No file uploaded.');
@@ -417,23 +516,23 @@ updateDescription: async (req, res) => {
       const Updates = [];
 
       worksheet.eachRow((row, rowNumber) => {
-        if (rowNumber > 1) { 
+        if (rowNumber > 1) {
           const Data = {
-            description: row.getCell(2).value, 
-            meta_assessment_id: row.getCell(3).value 
+            description: row.getCell(2).value,
+            meta_assessment_id: row.getCell(3).value
           };
           Updates.push(Data);
         }
       });
-        
-      fs.unlinkSync(filePath); 
+
+      fs.unlinkSync(filePath);
 
       await Promise.all(Updates.map(async (data) => {
         const [affectedRows] = await MetaAssessmentModel.update(
           { description: data.description },
           { where: { meta_assessment_id: data.meta_assessment_id } }
         );
-  
+
         if (affectedRows === 0) {
           console.warn(`No MetaAssessment found with ID ${data.meta_assessment_id} for update`);
         }
@@ -450,7 +549,7 @@ updateDescription: async (req, res) => {
 
   toggleSoftDeleteByGeneralDescription: async (req, res) => {
     try {
-      const { GeneralDescriptions, isDelete } = req.body; 
+      const { GeneralDescriptions, isDelete } = req.body;
       if (!Array.isArray(GeneralDescriptions) || GeneralDescriptions.length === 0) {
         return res.status(400).json({ message: 'GeneralDescription array is required and cannot be empty' });
       }
@@ -516,7 +615,7 @@ updateDescription: async (req, res) => {
         if (updateData.date !== undefined) {
           meta_assessment.date = updateData.date;
         }
-       
+
         await meta_assessment.save();
         return meta_assessment;
       }));
@@ -534,60 +633,60 @@ updateDescription: async (req, res) => {
       if (!Array.isArray(GeneralDescriptions) || GeneralDescriptions.length === 0) {
         return res.status(400).json({ message: 'Descriptions array is required and cannot be empty' });
       }
-  
+
       // Tìm tất cả meta_assessments dựa vào các description
       const metaAssessments = await MetaAssessmentModel.findAll({
         where: {
           generalDescription: GeneralDescriptions
         }
       });
-  
+
       if (metaAssessments.length === 0) {
         return res.status(404).json({ message: 'No assessments found for the provided GeneralDescriptions' });
       }
-  
+
       // Lấy ra tất cả meta_assessment_ids
       const metaAssessmentIds = metaAssessments.map(meta => meta.meta_assessment_id);
-  
+
       // Lấy ra tất cả assessment_ids dựa vào meta_assessment_ids
       const assessments = await AssessmentModel.findAll({
         where: {
           meta_assessment_id: metaAssessmentIds
         }
       });
-  
+
       const assessmentIds = assessments.map(assessment => assessment.assessment_id);
-  
+
       // Xóa tất cả các assessment items trong AssessmentItemModel dựa vào assessment_ids
       await AssessmentItemModel.destroy({
         where: {
           assessment_id: assessmentIds
         }
       });
-  
+
       // Xóa tất cả các assessments trong AssessmentModel dựa vào meta_assessment_ids
       await AssessmentModel.destroy({
         where: {
           meta_assessment_id: metaAssessmentIds
         }
       });
-  
+
       // Xóa tất cả các meta_assessments trong MetaAssessmentModel
       const deletedCount = await MetaAssessmentModel.destroy({
         where: {
           meta_assessment_id: metaAssessmentIds
         }
       });
-  
+
       res.status(200).json({ message: 'Successfully deleted assessments, assessment items, and meta assessments', deletedCount });
-  
+
     } catch (error) {
       console.error('Error deleting assessments:', error);
       res.status(500).json({ message: 'Server error' });
     }
   }
-  
-  
+
+
 };
 
 module.exports = MetaAssessmentController;

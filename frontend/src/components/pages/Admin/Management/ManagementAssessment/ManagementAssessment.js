@@ -535,17 +535,14 @@ const ManagementAssessment = ({ setCollapsedNav }) => {
             </Button>
             <Tooltip title="phân công">
               <Button
-                isIconOnly
-                variant="light"
-                radius="full"
-                size="sm"
+                endContent={<PlusIcon />}
                 className="bg-[#AF84DD]"
                 onClick={() => { 
                  handleNavigate('/admin/management-grading/100004_it31_khai_pha_du_lieu_da21tta_dd_2024_1_1/?description=100004%20-%20IT31_Khai%20phá%20dữ%20liệu%20DA21TTA_dd_2024-1-1')
 
                  }}
               >
-                phân công
+                Phân công
               </Button>
             </Tooltip>
           </div>
